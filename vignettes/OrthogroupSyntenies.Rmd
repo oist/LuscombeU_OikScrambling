@@ -44,21 +44,30 @@ install.packages("BSgenome.Odioica.local.OKI2018.I69", repos="https://oist.githu
 library("BSgenome.Odioica.local.OKI2018.I69")
 library("BSgenome.Odioica.local.OSKA2016v1.9")
 library("BSgenome.Odioica.local.Bar2.p4")
-library("BSgenome.Odioica.local.Odioica.reference.v3.0")
 library("BSgenome.Odioica.local.KUM.M3")
+library("BSgenome.Odioica.local.AOM.5")
+library("BSgenome.Odioica.local.Odioica.reference.v3.0")
 
 genomes <- SimpleList(
   # Chromosome assemblies
   Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
   # Less contiguous assemblies
-  Kum = KUM_M3, Nor = OdB3)
+  Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
+
+## Genome lengths
+sapply(genomes, \(g) sum(seqlengths(seqinfo(g))))
 ```
 
 Annotations
 -----------
 
-This assumes that `/bucket/LuscombeU/common/Breakpoints/Annotations` was copied
-in the package's root directory.
+The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
+distributed in the same drat repository as the alignment data.
+
+```
+install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgenomes_drat/")
+```
+
 
 ```{r load_annotations}
 annots <- SimpleList()
