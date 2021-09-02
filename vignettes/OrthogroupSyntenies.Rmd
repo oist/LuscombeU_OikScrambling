@@ -1,11 +1,10 @@
 ---
 title: "Orthogroup syntenies"
-output: 
-  html_document: 
-    toc: yes
-    number_sections: yes
-    keep_md: yes
-    df_print: kable
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{GenomicBreaks}
+  %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
@@ -16,12 +15,18 @@ Load packages and data
 R packages
 ----------
 
+Install the _GenomicBreaks_ package with:
+
+```
+devtools::install_github("oist/GenomicBreaks")
+```
+
 ```{r load_packages}
-library('GenomicBreaks')
 suppressPackageStartupMessages({
+  library('BreakpointsData')
+  library('GenomicBreaks')
   library('BSgenome')
   library('GenomicFeatures')
-  library('GenomicRanges')
 })
 ```
 
