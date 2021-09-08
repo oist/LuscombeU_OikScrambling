@@ -19,19 +19,19 @@ knitr::opts_knit$set(verbose = TRUE)
 
 # Introduction
 
-Search for motifs in regions near genomic breaks.  Note that some computations
-take a bit of time.
+Search for motifs in regions near genomic breaks.  By default the computations
+that take time are loaded from R objects.  The source code to generate them
+needs to be executed by hand when needed.
 
 ## Load pacakges
 
 Core packages that provide functions we use a lot.
 
 ```{r loadlib, echo=T, results='hide'}
-library('GenomicBreaks')
 suppressPackageStartupMessages({
+  library('GenomicBreaks')
   library('BSgenome')
   library('GenomicFeatures')
-  library('GenomicRanges')
   library('ggplot2')
 })
 ```
@@ -117,7 +117,7 @@ load("BreakPoints.Rdata")
 
 ## Inversions
 
-I wanted to sesarch search for motifs near inversions to see if they can
+I wanted to search search for motifs near inversions to see if they can
 lead to an explanation.
 
 ### Number of inversions
