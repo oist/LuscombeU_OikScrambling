@@ -1,14 +1,13 @@
 ---
-title: "GenomicBreaks Vignette"
+title: "Introduction to the OikScrambling package"
 author: 
  - "Charlotte West"
  - "Charles Plessy"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteEncoding[utf8]{inputenc}
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{GenomicBreaks}
+  %\VignetteIndexEntry{Introduction to the OikScrambling package}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
@@ -21,24 +20,29 @@ knitr::opts_knit$set(verbose = TRUE)
 
 # Introduction
 
-The _GenomicBreaks_ R package contains tools for visualising and analysing
-characteristics associated with _breakpoints_ between pairs of _genomes_.
+This package contains a collection of vignettes to perform the analysis of
+pairwise genome alignments between _Oikopleura_ genomes.
+
+The core functions used here are maintained in our _GenomicBreaks_ R package,
+which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 
 ## Load pacakges
 
-Core packages that provide functions we use a lot.
+### Core packages that provide functions we use a lot.
 
 ```{r loadlib, echo=T, results='hide'}
-library('GenomicBreaks')
 suppressPackageStartupMessages({
+  library('GenomicBreaks')
   library('BSgenome')
   library('GenomicFeatures')
-  library('GenomicRanges')
   library('ggplot2')
 })
 ```
 
 ### BSgenome packages
+
+We need the sequences of the studied genomes.  They are provided in a _drat_
+repository: <https://oist.github.io/plessy_oikgenomes_drat/>.
 
 Example command to install one _Oikopleura_ BSgenome package if you do not yet
 have it:
@@ -55,7 +59,11 @@ library("BSgenome.Odioica.local.Bar2.p4")
 library("BSgenome.Odioica.local.KUM.M3")
 library("BSgenome.Odioica.local.AOM.5")
 library("BSgenome.Odioica.local.Odioica.reference.v3.0")
+```
 
+For convenience, we provide a `genomes` object containing all the genomes.
+
+```{r genomes_object}
 genomes <- SimpleList(
   # Chromosome assemblies
   Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
@@ -108,53 +116,24 @@ annots$Nor <- gff2txdb_Norway("../Annotations/OdB3/Oikopleura_annot_v1.0.gff", O
 ### Long and short arms.
 
 ```{r long_and_short_arms}
-OKI_longShort <- rtracklayer::import.gff3(system.file("extdata/OKI2018_I69.arms.gff3", package = "GenomicBreaks"))
+OKI_longShort <- rtracklayer::import.gff3("../OKI2018_I69.arms.gff3")
 OKI_longShort <- GRanges(OKI_longShort, seqinfo = seqinfo(OKI2018_I69), strand = "*")
 ```
 
 ### GenomicBreaks object
 
-Let's load data from genome alignments, copied in the `Oidioi_pairwise_v3`
-directory.
+The core data is a list of `GenomicBreaks::GBreak()` objects that is built
+by a separate vignette (`vignette("Load genomic break data")`).
 
-Pairwise genome alignments are loaded in `GBreaks` objects that wrap the
-`GRanges` class.  By convention, we write that the _query_ genome (the one that
-was provided as a FASTA file) is aligned to the _target_ genome (the one that
-was indexed by the aligner).  The _target_ genome (on the left) is the main part
-of the object, and the _query_ genome information (right) is contained in the
-metadata columns (`mcols`) of the structure.  Information on contig or scaffold
-length is loaded from `BSgenome` objects, from which `seqinfo` data
-is extracted and passed to the `GRanges`.  By convention, strand information
-of the alignment is held by the _target_ `GRanges`, and the _query_ `GRanges`
-are strandless.  The objects are sorted by `seqname` first.
+The _query_ genome is the one that was provided as a FASTA file and aligned to
+the _target_ genome (the one that was indexed by the aligner).  The _target_
+genome is the main part of the object, and the _query_ genome information is
+contained in the metadata columns (`mcols`) of the structure.
 
-```{r GRanges object}
-gbs <- SimpleList()
-load_genomic_breaks_ <- function(file, genomeT, genomeQ, longShort) {
-  gb <- load_genomic_breaks(file, genomeT,  genomeQ)
-  gb$Type <- mcols(longShort)[findOverlaps(gb, longShort) |> subjectHits(), "Type"]
-  gb
-}
-gbs$Oki_Osa <- load_genomic_breaks_("Oidioi_pairwise_v3/OKI2018_I69_1.0__OSKA2016v1.9.gff.gz", OKI2018_I69,  OSKA2016v1.9, OKI_longShort)
-gbs$Oki_Bar <- load_genomic_breaks_("Oidioi_pairwise_v3/OKI2018_I69_1.0__Bar2_p4.gff.gz",      OKI2018_I69,  Bar2_p4,      OKI_longShort)
-gbs$Oki_Kum <- load_genomic_breaks_("Oidioi_pairwise_v3/OKI2018_I69_1.0__KUM-M3-7f.gff.gz",    OKI2018_I69,  KUM_M3,       OKI_longShort)
-gbs$Oki_Aom <- load_genomic_breaks_("Oidioi_pairwise_v3/OKI2018_I69_1.0__AOM-5-5f.gff.gz",     OKI2018_I69,  AOM_5,        OKI_longShort)
-gbs$Oki_Nor <- load_genomic_breaks_("Oidioi_pairwise_v3/OKI2018_I69_1.0__OdB3.gff.gz",         OKI2018_I69,  OdB3,         OKI_longShort)
-
-gbs$Osa_Oki <- load_genomic_breaks("Oidioi_pairwise_v3/OSKA2016v1.9__OKI2018_I69_1.0.gff.gz", OSKA2016v1.9, OKI2018_I69)
-gbs$Osa_Bar <- load_genomic_breaks("Oidioi_pairwise_v3/OSKA2016v1.9__Bar2_p4.gff.gz",         OSKA2016v1.9, Bar2_p4)
-gbs$Osa_Kum <- load_genomic_breaks("Oidioi_pairwise_v3/OSKA2016v1.9__KUM-M3-7f.gff.gz",       OSKA2016v1.9, KUM_M3)
-gbs$Osa_Aom <- load_genomic_breaks("Oidioi_pairwise_v3/OSKA2016v1.9__AOM-5-5f.gff.gz",        OSKA2016v1.9, AOM_5)
-gbs$Osa_Nor <- load_genomic_breaks("Oidioi_pairwise_v3/OSKA2016v1.9__OdB3.gff.gz",            OSKA2016v1.9, OdB3)
-
-gbs$Bar_Oki <- load_genomic_breaks("Oidioi_pairwise_v3/Bar2_p4__OKI2018_I69_1.0.gff.gz",      Bar2_p4,     OKI2018_I69)
-gbs$Bar_Osa <- load_genomic_breaks("Oidioi_pairwise_v3/Bar2_p4__OSKA2016v1.9.gff.gz",         Bar2_p4,     OSKA2016v1.9)
-gbs$Bar_Kum <- load_genomic_breaks("Oidioi_pairwise_v3/Bar2_p4__KUM-M3-7f.gff.gz",            Bar2_p4,     KUM_M3)
-gbs$Bar_Aom <- load_genomic_breaks("Oidioi_pairwise_v3/Bar2_p4__AOM-5-5f.gff.gz",             Bar2_p4,     AOM_5)
-gbs$Bar_Nor <- load_genomic_breaks("Oidioi_pairwise_v3/Bar2_p4__OdB3.gff.gz",                 Bar2_p4,     OdB3)
-
-gbs$Osa_Oki
-gbs$Osa_Oki$query
+```{r GBreaks_object}
+load("BreakPoints.Rdata")
+gbs$Oki_Osa
+gbs$Oki_Osa$query
 ```
 
 In the example displayed above, the object contains the pairwise alignment
@@ -164,33 +143,12 @@ assembly `OSKA2016` (_target_) and one from the Okinawa assembly `OKI2018_I69`
 
 ## Breakpoints and alignment stops
 
-Let us define an **alignment stop** to be a position defined in either the
-_target_ or _query_ genome, where an alignment begins or ends.  Looking at the
-first line in the `Osa_Oki` object above, `Chr1` positions 1535 and 1751 of the
-_target_ would be defined as alignment stops.  Correspondingly, we have
-positions 955913 and 956109 in `chr1` of the _query_ genome as alignment stops. 
-
-The function `get_bps` takes in a `GBreaks` pairwise alignment, and produces a
-`GRanges` object of it's associated alignment stops. 
-
-```{r get bps}
-get_bps(gbs$Osa_Oki)
-get_bps(gbs$Osa_Oki, direction = "left")
-get_bps(gbs$Osa_Oki,                      stranded = TRUE)
-get_bps(gbs$Osa_Oki,                      stranded = TRUE, sorted = FALSE)
-get_bps(gbs$Osa_Oki, direction = "right", stranded = TRUE)
-get_bps(gbs$Osa_Oki$query, sorted = FALSE)
-get_bps(gbs$Osa_Oki$query)
-```
-
-Now, let us define a **genomic breakpoint** (or simply breakpoint) to be a
-genomic structural mutation, arising from breakage and repair of the chromosome.
-Such structural events include insertion, deletion, inversion and translocation,
-and often arise during recombination. 
-
-This package seeks to determine, of the group of alignment stops, which are
-likely genomic breakpoints and analyse them.  Thus, filtering out alignment
-stops that are a result of bioinformatic errors.
+We define an **alignment stop** to be a position defined in either the
+_target_ or _query_ genome, where an alignment begins or ends, and a
+**genomic breakpoint** (or simply breakpoint) to be a genomic structural
+mutation, arising from breakage and repair of the chromosome.  Such structural
+events include insertion, deletion, inversion and translocation, and often arise
+during recombination. 
 
 ## Measures of distance
 
@@ -211,13 +169,22 @@ sapply(gbs, \(g) swap(g) |> synteny_index())
 
 Ad-hoc index measuring the correlation of the coordinates of the syntenic
 alignments in scaffolds of a _target_ genome and their best match in the
-_query_ genome.  See `?GenomicBreaks::correlation_index` for details.  This
-index is more robust to the presence of uncollapsed haplotypes in the _query_
-genome.
+_query_ genome.  See `?GenomicBreaks::correlation_index` for details.  It is
+intended to be more robust to the presence of uncollapsed haplotypes in the
+_query_ genome but probably needs further testing.
 
 ```{r}
 sapply(gbs, correlation_index)
 sapply(gbs, \(g) swap(g) |> correlation_index())
+```
+
+### Gene Order Conservation
+
+See `?GOC` for details.
+
+```{r goc}
+sapply(gbs, GOC)
+sapply(gbs, \(g) swap(g) |> GOC())
 ```
 
 ## Phylogenetic cladogram
