@@ -113,13 +113,6 @@ annots$Aom <- gff2txdb("../Annotations/AOM-5-5f/AOM-5-5f.gm.gff", AOM_5)
 annots$Nor <- gff2txdb_Norway("../Annotations/OdB3/Oikopleura_annot_v1.0.gff", OdB3)
 ```
 
-### Long and short arms.
-
-```{r long_and_short_arms}
-OKI_longShort <- rtracklayer::import.gff3("../OKI2018_I69.arms.gff3")
-OKI_longShort <- GRanges(OKI_longShort, seqinfo = seqinfo(OKI2018_I69), strand = "*")
-```
-
 ### GenomicBreaks object
 
 The core data is a list of `GenomicBreaks::GBreak()` objects that is built
@@ -140,6 +133,18 @@ In the example displayed above, the object contains the pairwise alignment
 between genomes of two dioceous _Oikopleura_ individuals; one from the Osaka
 assembly `OSKA2016` (_target_) and one from the Okinawa assembly `OKI2018_I69`
 (_query_).
+
+### Long and short arms
+
+The long and short arms are annotated in the `GBreak` objects that are built
+by the vignette (`vignette("Load genomic break data")`), using the function
+`GenomicBreaks::flagLongShort()`.  A copy of the arms annotations is provided
+in the `longShort` list.
+
+```{r long_and_short_arms}
+longShort
+longShort$Oki
+```
 
 ## Breakpoints and alignment stops
 
