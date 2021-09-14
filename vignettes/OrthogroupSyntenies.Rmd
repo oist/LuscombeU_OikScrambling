@@ -103,11 +103,11 @@ annots$Nor <- gff2txdb_Norway("OdB3/Oikopleura_annot_v1.0.gff.gz", OdB3)
 Orthogroups
 -----------
 
-This assumes that `/bucket/LuscombeU/common/Breakpoints/Orthologues/OKI+BAR+OSA+Ciona+Bla_lp_msa_raxml_ng/OrthoFinder/Results_Jun28/Phylogenetic_Hierarchical_Orthogroups/N1.tsv`
-was copied in the package's root directory.
+Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package.  Original
+file is in `/bucket/LuscombeU/common/Breakpoints/Orthologues/selectedTunicates+Amph+vertebrates_lp_100clstr_blast/OrthoFinder/Results_Sep07/Phylogenetic_Hierarchical_Orthogroups/N6.tsv`.
 
 ```{r load_orthogroups}
-hogs <- load_one_to_ones("../N1.tsv")
+hogs <- load_one_to_ones(system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"))
 hogs
 ```
 
