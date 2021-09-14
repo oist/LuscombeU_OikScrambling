@@ -209,3 +209,22 @@ gbl <- split(gb, paste(seqnames(gb), gb$Arm))
 sapply(gbl, GOC)
 t.test(c(0.9165414, 0.9278024, 0.9370166), c(0.5928854, 0.7259159, 0.7618384))
 ```
+
+Agreement with nucleotide alignments
+------------------------------------
+
+```{r DNA_prot_comparison}
+(gb_P <- coal)
+sum(width(gb_P))
+(gb_N <- coa$Bar_Osa)
+sum(width(gb_N))
+(ov <- subsetByOverlaps(gb_P, gb_N, type = "within"))
+(jaccard <- sum(width(ov)) / sum(width(reduce(c(gb_P, gb_N)))))
+
+gb_P <- gb_P[gb_P$geneNumber > 1]
+gb_P
+sum(gb_P$geneNumber)
+(valid <- subsetByOverlaps(gb_P, gb_N, type = "within"))
+sum(valid$geneNumber)
+sum(width(valid))
+```
