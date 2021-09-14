@@ -264,32 +264,32 @@ As you can see, scaffold 2 of the query genome aligns to the majority of both ta
 
 ## Coalescing alignments
 
-Large syntenic regions can often appear cluttered with alignment breaks,
-spanning just a few basepairs.  They are either an artefact (for instance in
-case of incomplete purge of haplotypes) and or true breakpoint.  The algorithm
-in `coalesce_contigs` is used to produce a new GRanges object with fewer
-alignment breaks by coalescing alignments separated by short (user specified)
-distances.  This distance need be agreeable in both the target and query genome
-in order for the coalscion to happen. 
+Large syntenic regions can often appear cluttered with alignment breaks.  They
+are either an artefact (for instance in case of incomplete purge of haplotypes)
+or true breakpoint.  Even in that case, it may be needed to coalese them in
+order to facilitate other computations such as the detection of inversions.
 
-For example, coalescing gaps of less than 500 basepairs in the `gbs$Osa_Oki` alignment:
+The algorithm in  `GenomicBreaks::coalesce_contigs()` is used to produce a new
+`GBreaks` object with fewer alignment breaks by coalescing alignments separated
+by short (user specified) distances.
 
-```{r coalescing algorithm}
-coa <- sapply(gbs, coalesce_contigs) |> SimpleList()
-sapply(gbs, length)
-sapply(coa, length)
-```
+The computation is done in `vignette("Load genomic break data")`
 
 The resulting GRanges object has far fewer alignments and therefore far fewer
 alignment stops. The algorithm is an initial step in alignment stop filtering,
 with the goal of a reduced number of alignment stops that have a high
 probability of being breakpoints.
 
+```{r coalescing algorithm}
+sapply(gbs, length)
+sapply(coa, length)
+```
+
 ### Width summary plots
 
-The distribution of widths is not the same on long and short arms.  For this
-reason, it would be unwise to filter by width on some operations such as
-coalescing.
+The distribution of alignment widths takes a bimodal appearance after
+collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
+answer is _no_.
 
 ```{r width_after_coalescing}
 width2df <- function(where, what, gbl) {
@@ -304,12 +304,6 @@ df <- rbind(
   do.call(rbind, lapply(names(coa), width2df, "collapsed", coa))
 )
 
-ggplot(df) +
-  aes(width, col = what) +
-  geom_freqpoly() +
-  scale_x_log10() +
-  facet_wrap(~where, scales = "free_y")
-
 gg_freq_poly <- function(DF) {
     ggplot(DF |> as("data.frame")) +
     aes(width) +
@@ -317,45 +311,64 @@ gg_freq_poly <- function(DF) {
     scale_x_log10()
 }
 
-DF <- DataFrame(width = width(gbs$Oki_Osa), Type = gbs$Oki_Osa$Type, chr = seqnames(gbs$Oki_Osa))
-
-gg_freq_poly(DF) +
-  aes(col=Type) +
-  facet_wrap(~chr, scales = "free_y")
+gg_freq_poly(df) +
+  aes(col = what) +
+  geom_freqpoly() +
+  scale_x_log10() +
+  facet_wrap(~where, scales = "free_y") +
+  ggtitle("Distribution of alignment width before and after collapsing")
 ```
 
-After coalescing, width distribution becomes more clearly bimodal, with a small
-peak under 500 bp, found on all arms except YSR.  The second peak shows two
-different distributions for long and short arms.
+First, the distribution of widths is not the same on long and short arms.
+For this reason, it would be unwise to filter by width on some operations such
+as coalescing.
+
+```{r}
+DF <- DataFrame(width = width(gbs$Oki_Osa), Arm = gbs$Oki_Osa$Arm, chr = seqnames(gbs$Oki_Osa))
+
+gg_freq_poly(DF) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment width before collapsing, split by arm.")
+```
+
+After coalescing, width distribution becomes clearly bimodal, when faceted by
+chromosome and arm type.  There is a small peak under 500 bp, found on all arms
+except YSR.  The second peak shows two different distributions for long and
+short arms.
+
+```{r width_of_coalesced_regions}
+DF <- DataFrame(width = width(coa$Oki_Osa), Arm = coa$Oki_Osa$Arm, chr = seqnames(coa$Oki_Osa))
+
+gg_freq_poly(DF) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment width after collapsing, split by arm.") +
+  geom_vline(xintercept = 500)
+```
 
 Therefore, if the first peak represents events that we do not want to consider
 breaking synteny (either alignment artefacts or insertion/transpositions of
 short mobile elements), we can re-coalesce once after removing the shortest
 intervals.
 
-```{r width_of_coalesced_regions}
-DF <- DataFrame(
-  width = width(coa$Oki_Osa),
-  Type = mcols(OKI_longShort)[findOverlaps(coa$Oki_Osa, OKI_longShort) |> subjectHits(), "Type"],
-  chr = seqnames(coa$Oki_Osa))
+The computation is done in `vignette("Load genomic break data")`
 
-gg_freq_poly(DF) +
-  aes(col=Type) +
-  facet_wrap(~chr, scales = "free_y")
+```{r double_coalescing_algorithm}
+sapply(gbs, length)
+sapply(coa, length)
+sapply(coa2, length)
 ```
 
-```{r re_coalesce}
-coa2 <- sapply(coa, coalesce_contigs, minwidth = 500) |> SimpleList()
-sapply(coa2, length)
 
-DF <- DataFrame(
-  width = width(coa2$Oki_Osa),
-  Type = mcols(OKI_longShort)[findOverlaps(coa2$Oki_Osa, OKI_longShort) |> subjectHits(), "Type"],
-  chr = seqnames(coa2$Oki_Osa))
+```{r re_coalesce}
+DF <- DataFrame(width = width(coa2$Oki_Osa), Arm = coa2$Oki_Osa$Arm, chr = seqnames(coa2$Oki_Osa))
 
 gg_freq_poly(DF) +
-  aes(col=Type) +
-  facet_wrap(~chr, scales = "free_y")
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment width after double-collapsing, split by arm.") +
+  geom_vline(xintercept = 500)
 ```
 
 ## Genome plots with genoPlotR
