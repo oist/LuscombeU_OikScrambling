@@ -192,3 +192,14 @@ stem(coal$geneNumber)
 table(coal$geneNumber)
 coal[order(coal$geneNumber)] |> tail(11)
 ```
+
+Gene Order Conservation is smaller in short arms
+------------------------------------------------
+
+```{r GOC}
+gb <- flagLongShort(gb, longShort$Bar)
+gb <- gb[!is.na(gb$Arm)]
+gbl <- split(gb, paste(seqnames(gb), gb$Arm))
+sapply(gbl, GOC)
+t.test(c(0.9165414, 0.9278024, 0.9370166), c(0.5928854, 0.7259159, 0.7618384))
+```
