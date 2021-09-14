@@ -114,11 +114,13 @@ hogs
 Test on Bar - OSKA
 ==================
 
-Preapre a GBreaks object
+Prepare a GBreaks object
 ------------------------
 
 ```{r Bar_Osk}
-Bar_Osk <- load_one_to_ones("../N1.tsv", c("Bar2_p4.Flye.prot.lp","OSKA2016v1.9.prot.lp"))
+Bar_Osk <- load_one_to_ones(
+  system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"),
+  c("Bar2_p4.Flye.prot.longest.fa_1","OSKA2016v1.9.prot.longest.fa_1"))
 Bar_Osk
 
 IDs2GRanges <- function (IDs, annot, prefix = "") {
@@ -129,8 +131,8 @@ IDs2GRanges <- function (IDs, annot, prefix = "") {
   gr
 }
 
-gb <- IDs2GRanges(Bar_Osk$Bar2_p4.Flye.prot.lp, transcripts(annots$Bar), prefix = "Bar2_p4.Flye.")
-gb$query <- IDs2GRanges(Bar_Osk$OSKA2016v1.9.prot.lp, transcripts(annots$Osa), prefix = "OSKA2016v1.9.")
+gb       <- IDs2GRanges(Bar_Osk$Bar2_p4.Flye.prot.longest.fa_1, transcripts(annots$Bar), prefix = "Bar2_p4.Flye.")
+gb$query <- IDs2GRanges(Bar_Osk$OSKA2016v1.9.prot.longest.fa_1, transcripts(annots$Osa), prefix = "OSKA2016v1.9.")
 gb <- GenomicBreaks:::GBreaks(gb)
 gb <- sort(gb)
 ```
