@@ -236,19 +236,24 @@ plot_gene_map(dsList, compList, dna_seg_scale=TRUE)
 ```
 
 ```{r plot_intersect_GBs_with_tree}
+doubleSubset <- function(gb, a, b) {
+  gb <- gb[seqnames(gb) == a]
+  gb <- gb[seqnames(gb$query) == b]
+  gb
+}
+
 dsList <-   list(
-    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbRef2dna_seq(),
-    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gbQuery2dna_seq(),
-    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbQuery2dna_seq()
-    )
-names(dsList) <- c(roiNameOki, roiNameO, roiNameN)
+    OKI = doubleSubset(coa$Oki_Osa, "chr1", "Chr1") |> gr2dna_seg(),
+    OSA = doubleSubset(coa$Osa_Bar, "Chr1", "Chr1") |> gr2dna_seg(),
+    BAR = doubleSubset(coa$Bar_Osa, "Chr1", "Chr1") |> gr2dna_seg()
+)
 
 compList <- list(
-    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gb2comp(),
-    roi_O_N[seqnames(roi_O_N$query) == roiNameN] |> gb2comp()
+    doubleSubset(coa$Oki_Osa, "chr1", "Chr1") |> gb2comp(),
+    Osa_Bar = doubleSubset(coa$Osa_Bar, "Chr1", "Chr1") |> gb2comp()
   )
 
-plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick2phylog(addRoot(treeNode(roiNameOki, treeNode(roiNameO, roiNameN)))))
+genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick2phylog(addRoot(treeNode("OKI", treeNode("OSA", "BAR")))))
 ```
 
 # Session information
