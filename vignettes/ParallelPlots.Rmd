@@ -1,0 +1,323 @@
+---
+title: "Whole-chromosome parallel plots"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Whole-chromosome parallel plots}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+In this vignette I plot whole chromosomes in parallel to reflect synteny and
+the differences between short and long arms.
+
+The core functions used here are maintained in our _GenomicBreaks_ R package,
+which is fully documented at: <https://oist.github.io/GenomicBreaks>.
+
+## Load pacakges
+
+### Core packages that provide functions we use a lot.
+
+```{r loadlib, echo=T, results='hide'}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  library('BSgenome')
+  library('GenomicFeatures')
+  library('ggplot2')
+})
+```
+
+### BSgenome packages
+
+BSgenome packages will be automatically attached together when the `GBreaks`
+objects will be loaded.
+
+## Load and prepare data
+
+### Genome annotations.
+
+The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
+distributed in the same drat repository as the alignment data.
+
+```
+install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgenomes_drat/")
+```
+
+```{r load_annotations}
+# annots <- SimpleList()
+# 
+# gff2txdb <- function(file, genome) {
+#   file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
+#   tx <- rtracklayer::import.gff(file)
+#   tx <- tx[seqnames(tx) %in% seqnames(genome)]
+#   tx <- GRanges(tx, seqinfo = seqinfo(genome))
+#   tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
+# }
+# 
+# gff2txdb_Norway <- function(file, genome) {
+#   file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
+#   tx <- rtracklayer::import.gff(file)
+#   # Remove "scaffoldA" objects in the OdB3 annotation
+#   tx <- tx[seqnames(tx) %in% seqnames(genome)]
+#   tx$ID <- NA_character_
+#   mcols(tx)[tx$type == "mRNA","ID"] <- paste0(tx[tx$type == "mRNA"]$mRNA, ".mRNA")
+#   mcols(tx)[tx$type == "CDS","ID"] <- paste0(tx[tx$type == "CDS"]$CDS, ".CDS")
+#   mcols(tx)[tx$type == "UTR","ID"] <- paste0(tx[tx$type == "UTR"]$UTR, ".UTR")
+#   tx <- GRanges(tx, seqinfo = seqinfo(genome))
+#   tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
+# }
+# 
+# annots$Oki <- gff2txdb("OKI2018_I69.v2/OKI2018_I69.v2.gm.gff.gz",  OKI2018_I69)
+# annots$Osa <- gff2txdb("OSKA2016v1.9/OSKA2016v1.9.gm.gff.gz",      OSKA2016v1.9)
+# annots$Bar <- gff2txdb("Bar2_p4.Flye/Bar2_p4.Flye.gm.gff.gz",      Bar2_p4)
+# annots$Kum <- gff2txdb("KUM-M3-7f/KUM-M3-7f.gm.gff.gz",            KUM_M3)
+# annots$Aom <- gff2txdb("AOM-5-5f/AOM-5-5f.gm.gff.gz",              AOM_5)
+# annots$Nor <- gff2txdb_Norway("OdB3/Oikopleura_annot_v1.0.gff.gz", OdB3)
+```
+
+### GenomicBreaks objects
+
+The core data is a list of `GenomicBreaks::GBreak()` objects that is built
+by a separate vignette (`vignette("Load genomic break data")`).
+
+```{r GBreaks_object}
+load("BreakPoints.Rdata")
+```
+
+### Long and short arms
+
+The long and short arms are annotated in the `GBreak` objects that are built
+by the vignette (`vignette("Load genomic break data")`), using the function
+`GenomicBreaks::flagLongShort()`.  A copy of the arms annotations is provided
+in the `longShort` list.  The loaded `GBreaks` objects are already annotated.
+
+```{r long_and_short_arms}
+longShort
+longShort$Oki
+gbs$Oki_Osa
+```
+
+### Phylogenetic cladogram
+
+We assume that the _North Pacific_ and the _Atlantic_ species are more related
+to each other than to the _Okinawan_ species.
+
+```{r phylogenetic_tree, fig.height=4, fig.width=6, dev="svg"}
+requireNamespace("ade4")
+treeLeaf <- function(name, length=NULL) {
+  if(!is.null(length)) length <- paste0(':', length)
+  paste0(name, length)
+}
+
+treeNode <- function(branch1, branch2, length = NULL) {
+  if(!is.null(length)) length <- paste0(':', length)
+  paste0('(', branch1, ',', branch2, ')', length)
+}
+
+addRoot <- function(branch)  paste0(branch, ";")
+
+tree <-
+  addRoot(
+    treeNode(
+      treeNode( length = 2,
+        treeLeaf("Okinawa", 1),
+        treeLeaf("Kume", 1)
+      ),
+      treeNode( length = 1,
+        treeNode( length = 1,
+          treeLeaf("Osaka", 1),
+          treeLeaf("Aomori", 1)
+        ),
+        treeNode( length =1,
+          treeLeaf("Norway", 1),
+          treeLeaf("Barcelona", 1)
+        )
+      )
+    )
+  )
+
+plot(ade4::newick2phylog(tree))
+```
+
+## Genome plots with genoPlotR
+
+```{r test_genoPlotR}
+library("genoPlotR")
+
+#example("dna_seg")
+
+gr2dna_seg <- function (gr) {
+  if (is.null(names(gr))) names(gr) <- as.character(gr)
+  strand(gr[strand(gr) == "*"]) <- "+"
+  df <- data.frame(
+    name   = names(gr),
+    start  = start(gr),
+    end    = end(gr),
+    strand = strand(gr),
+    col    = "grey"
+  )
+  dna_seg(df)
+}
+
+gbRef2dna_seq <- function (gb) {
+  if (is.null(names(gb))) names(gb) <- as.character(gb)
+  strand(gb) <- "+"
+  gr2dna_seg(gb)
+}
+
+gbQuery2dna_seq <- function (gb) {
+  if (is.null(names(gb$query))) names(gb$query) <- as.character(gb)
+  strand(gb$query) <- strand(gb)
+  gr2dna_seg(gb$query)
+}
+```
+
+```{r Oki_Osa_single_chr1, fig.width=18}
+# Plot whole chromosome 1
+ds <- gr2dna_seg(coa$Oki_Osa[seqnames(coa$Oki_Osa) == "chr1"])
+head(ds) ; tail(ds)
+plot_gene_map(list(ds))
+```
+
+```{r more functions}
+gb2comp <- function(gb) {
+  ref <- gr2dna_seg(gb)
+  strand(gb$query) <- "+"
+  que <- gr2dna_seg(gb$query)
+  df <- data.frame(
+    start1 = ref$start,
+    end1   = ref$end,
+    start2 = que$start,
+    end2   = que$end
+  )
+  as.comparison(df)
+}
+
+plotApairOfChrs <- function(gb, chr) {
+  gb <- gb[seqnames(gb) == chr]
+    keepMainMatch <- function(gb) {
+    bestMatch <- tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
+    gb[seqnames(gb$query) == bestMatch]
+  }
+  roi <- keepMainMatch(gb)
+  dsList <-   list(
+      roi |> gbQuery2dna_seq(),
+      roi |> gbRef2dna_seq()
+      )
+  
+  compList <- list(
+      roi |> swap() |> gb2comp()
+    )
+  plot_gene_map(dsList, compList)
+}
+```
+
+```{r Oki_Bar_chr1, cache=TRUE, fig.width=18}
+plotApairOfChrs(coa$Oki_Bar, "chr1")
+```
+```{r Oki_Osa_chr1, cache=TRUE, fig.width=18}
+plotApairOfChrs(coa$Oki_Osa, "chr1")
+```
+```{r Osa_Oki_chr1, cache=TRUE, fig.width=18}
+plotApairOfChrs(coa$Osa_Oki, "Chr1")
+```
+```{r Osa_Bar_chr1, cache=TRUE, fig.width=18}
+plotApairOfChrs(coa$Osa_Bar, "Chr1")
+```
+```{r Oki_Bar_chr1_coa2, cache=TRUE, fig.width=18}
+plotApairOfChrs(coa2$Osa_Bar, "Chr1")
+```
+
+
+## Combine alignments to the same outgroup
+
+Since Okinawa is the outgroup, let's look for regions of it that are aligned
+on both the Osaka and the Norway genomes.
+
+```{r combine_GBs}
+x <- subsetByOverlaps(coa2$Oki_Osa, coa2$Oki_Bar)
+y <- subsetByOverlaps(coa2$Oki_Bar, coa2$Oki_Osa)
+findOverlapPairs(x,y)
+subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar))
+```
+
+## Extract ranges from the same target region in two GenomicBreaks objects
+
+```{r intersect_GBs}
+#roi <- GRanges("chr1:1222000-1240000")
+#roi <- GRanges("chr1:1023578-1032430")
+#roi <- GRanges("chr1:2668866-2692347")
+roi <- GRanges("chr1:6379932-6505436")
+#roi <- GRanges("chr1:6683567-6744168")
+roi <- GRanges("chr1:7711018-7734330")
+#roi <- GRanges("chr1:7711018-7734330") + 10000
+
+roi_Oki_O <- subsetByOverlaps(coa2$Oki_Osa, roi)
+roi_Oki_N <- subsetByOverlaps(coa2$Oki_Nor, roi)
+roi2 <- range(subsetByOverlaps(coa2$Oki_Osa, roi)$query)
+roi_O_N <- subsetByOverlaps(coa2$Osa_Nor, roi2)
+```
+
+### Plot a simple region.
+
+This region can be plotted because there is a one-to-one correspondence
+between alignments to Osaka and alignments to Norway.
+
+```{r plot_intersect_GBs}
+roiNameO <- seqlevelsInUse(roi_Oki_O$query)[1]
+roiNameOki <- seqlevelsInUse(roi)[1]
+roiNameN <- seqlevelsInUse(roi_Oki_N$query)[1]
+
+dsList <-   list(
+    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gbQuery2dna_seq(),
+    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gbRef2dna_seq(),
+    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbRef2dna_seq(),
+    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbQuery2dna_seq()
+    )
+names(dsList) <- c(roiNameO, roiNameOki, roiNameOki, roiNameN)
+
+tmpgb <- roi_Oki_O
+tmpgb$query <- granges(roi_Oki_N)
+
+compList <- list(
+    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> swap() |> gb2comp(),
+    tmpgb |> gb2comp(),
+    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gb2comp()
+  )
+
+plot_gene_map(dsList, compList, dna_seg_scale=TRUE)
+```
+
+```{r plot_intersect_GBs_with_tree}
+dsList <-   list(
+    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbRef2dna_seq(),
+    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gbQuery2dna_seq(),
+    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbQuery2dna_seq()
+    )
+names(dsList) <- c(roiNameOki, roiNameO, roiNameN)
+
+compList <- list(
+    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gb2comp(),
+    roi_O_N[seqnames(roi_O_N$query) == roiNameN] |> gb2comp()
+  )
+
+plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick2phylog(addRoot(treeNode(roiNameOki, treeNode(roiNameO, roiNameN)))))
+```
+
+# Session information
+
+```{r sessionInfo}
+sessionInfo()
+```
+
