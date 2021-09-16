@@ -176,6 +176,15 @@ plotApairOfChrs(coa2$Osa_Bar, "Chr1")
 ```
 
 
+```{r}
+x <- coa$Oki_Kum
+x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
+x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
+
+x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "new_scaffold")
+plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE)
+```
+
 ## Combine alignments to the same outgroup
 
 Since Okinawa is the outgroup, let's look for regions of it that are aligned
