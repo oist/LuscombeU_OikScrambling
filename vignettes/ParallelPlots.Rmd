@@ -152,31 +152,24 @@ plot(ade4::newick2phylog(tree))
 
 ## Genome plots with genoPlotR
 
-```{r Oki_Osa_single_chr1, fig.width=18}
-# Plot whole chromosome 1
-ds <- gr2dna_seg(coa$Oki_Osa[seqnames(coa$Oki_Osa) == "chr1"])
-head(ds) ; tail(ds)
-genoPlotR::plot_gene_map(list(ds))
-```
-
-```{r Oki_Bar_chr1, cache=TRUE, fig.width=18}
+```{r Oki_Bar_chr1, cache=TRUE, fig.width=15}
 plotApairOfChrs(coa$Oki_Bar, "chr1")
 ```
-```{r Oki_Osa_chr1, cache=TRUE, fig.width=18}
+```{r Oki_Osa_chr1, cache=TRUE, fig.width=15}
 plotApairOfChrs(coa$Oki_Osa, "chr1")
 ```
-```{r Osa_Oki_chr1, cache=TRUE, fig.width=18}
+```{r Osa_Oki_chr1, cache=TRUE, fig.width=15}
 plotApairOfChrs(coa$Osa_Oki, "Chr1")
 ```
-```{r Osa_Bar_chr1, cache=TRUE, fig.width=18}
+```{r Osa_Bar_chr1, cache=TRUE, fig.width=15}
 plotApairOfChrs(coa$Osa_Bar, "Chr1")
 ```
-```{r Oki_Bar_chr1_coa2, cache=TRUE, fig.width=18}
+```{r Oki_Bar_chr1_coa2, cache=TRUE, fig.width=15}
 plotApairOfChrs(coa2$Osa_Bar, "Chr1")
 ```
 
 
-```{r}
+```{r fig.width=15}
 x <- coa$Oki_Kum
 x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
 x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
@@ -194,57 +187,12 @@ on both the Osaka and the Norway genomes.
 x <- subsetByOverlaps(coa2$Oki_Osa, coa2$Oki_Bar)
 y <- subsetByOverlaps(coa2$Oki_Bar, coa2$Oki_Osa)
 findOverlapPairs(x,y)
-subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar))
+subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar)) |> subset(width > 1e5)
 ```
 
-## Extract ranges from the same target region in two GenomicBreaks objects
+### Plot chr1 in three species
 
-```{r intersect_GBs}
-#roi <- GRanges("chr1:1222000-1240000")
-#roi <- GRanges("chr1:1023578-1032430")
-#roi <- GRanges("chr1:2668866-2692347")
-roi <- GRanges("chr1:6379932-6505436")
-#roi <- GRanges("chr1:6683567-6744168")
-roi <- GRanges("chr1:7711018-7734330")
-#roi <- GRanges("chr1:7711018-7734330") + 10000
-
-roi_Oki_O <- subsetByOverlaps(coa2$Oki_Osa, roi)
-roi_Oki_N <- subsetByOverlaps(coa2$Oki_Nor, roi)
-roi2 <- range(subsetByOverlaps(coa2$Oki_Osa, roi)$query)
-roi_O_N <- subsetByOverlaps(coa2$Osa_Nor, roi2)
-```
-
-### Plot a simple region.
-
-This region can be plotted because there is a one-to-one correspondence
-between alignments to Osaka and alignments to Norway.
-
-```{r plot_intersect_GBs}
-roiNameO <- seqlevelsInUse(roi_Oki_O$query)[1]
-roiNameOki <- seqlevelsInUse(roi)[1]
-roiNameN <- seqlevelsInUse(roi_Oki_N$query)[1]
-
-dsList <-   list(
-    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gbQuery2dna_seq(),
-    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> gbRef2dna_seq(),
-    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbRef2dna_seq(),
-    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gbQuery2dna_seq()
-    )
-names(dsList) <- c(roiNameO, roiNameOki, roiNameOki, roiNameN)
-
-tmpgb <- roi_Oki_O
-tmpgb$query <- granges(roi_Oki_N)
-
-compList <- list(
-    roi_Oki_O[seqnames(roi_Oki_O$query) == roiNameO] |> swap() |> gb2comp(),
-    tmpgb |> gb2comp(),
-    roi_Oki_N[seqnames(roi_Oki_N$query) == roiNameN] |> gb2comp()
-  )
-
-plot_gene_map(dsList, compList, dna_seg_scale=TRUE)
-```
-
-```{r plot_intersect_GBs_with_tree}
+```{r plot_intersect_GBs_with_tree, fig.width=15}
 doubleSubset <- function(gb, a, b) {
   gb <- gb[seqnames(gb) == a]
   gb <- gb[seqnames(gb$query) == b]
