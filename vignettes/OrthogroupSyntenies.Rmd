@@ -205,30 +205,45 @@ transcripts(annots$Bar)[flagOverlaps(transcripts(annots$Bar))]
 gb[flagOverlaps(gb)]
 gb$query[flagOverlaps(gb$query)]
 
-# Remove
-gb <- gb[!flagOverlaps(gb)]
-gb <- gb[!flagOverlaps(gb$query)]
+# Remove and show how much
+
+orthoPairsFiltered <- sapply(orthoPairs, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+sapply(orthoPairsFiltered, length)
 ```
+
 
 Coalesce syntenic blocks and annotate them
 ------------------------------------------
 
 ```{r coalesce}
-# Coalesce
-coal <- coalesce_contigs(gb)
-
-# Map annotations to the coalesced blocks
-ov <- findOverlaps(coal, gb)
-
-# Extract gene names mapped to each blocks
-geneNames <- split(names(gb)[subjectHits(ov)], queryHits(ov))
-
-# Concatenate them as single strings and graft them to the coal object
-coal$geneNames <- sapply(geneNames, paste, collapse = ", ")
-
-# Count genes per syntenic block
-coal$geneNumber <- sapply(geneNames, length)
+coalOrtho <- function(gb) {
+  # Coalesce
+  coal <- coalesce_contigs(gb)
+  
+  # Map annotations to the coalesced blocks
+  ov <- findOverlaps(coal, gb)
+  
+  # Extract gene names mapped to each blocks
+  geneNames <- split(names(gb)[subjectHits(ov)], queryHits(ov))
+  
+  # Concatenate them as single strings and graft them to the coal object
+  coal$geneNames <- sapply(geneNames, paste, collapse = ", ")
+  
+  # Count genes per syntenic block
+  coal$geneNumber <- sapply(geneNames, length)
+  
+  coal
+}
+orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
+sapply(orthoBlocks, length)
 ```
+
+Test on Bar - OSKA
+==================
 
 Quick overview of the results
 -----------------------------
