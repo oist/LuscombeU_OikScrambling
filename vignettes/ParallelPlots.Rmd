@@ -178,19 +178,7 @@ x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1",
 plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE)
 ```
 
-## Combine alignments to the same outgroup
-
-Since Okinawa is the outgroup, let's look for regions of it that are aligned
-on both the Osaka and the Norway genomes.
-
-```{r combine_GBs}
-x <- subsetByOverlaps(coa2$Oki_Osa, coa2$Oki_Bar)
-y <- subsetByOverlaps(coa2$Oki_Bar, coa2$Oki_Osa)
-findOverlapPairs(x,y)
-subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar)) |> subset(width > 1e5)
-```
-
-### Plot chr1 in three species
+## Plot chr1 in three species
 
 ```{r plot_intersect_GBs_with_tree, fig.width=15}
 doubleSubset <- function(gb, a, b) {
@@ -212,6 +200,40 @@ compList <- list(
 
 genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick2phylog(addRoot(treeNode("OKI", treeNode("OSA", "BAR")))))
 ```
+
+
+## Region that is conserved between Osaka and Barcelona
+
+Since Okinawa is the outgroup, let's look for regions of it that are aligned
+on both the Osaka and the Barcelona genomes.
+
+```{r combine_GBs}
+x <- subsetByOverlaps(coa2$Oki_Osa, coa2$Oki_Bar) |> subset(width > 1e5)
+y <- subsetByOverlaps(coa2$Oki_Bar, coa2$Oki_Osa) |> subset(width > 1e5)
+findOverlapPairs(x,y)
+subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar)) |> subset(width > 1e5)
+
+a <- coa$Oki_Osa |> subsetByOverlaps(GRanges("chr2:10000000-11000000")) |> doubleSubset("chr2", "Chr2")
+b <- coa$Oki_Bar |> subsetByOverlaps(GRanges("chr2:10000000-11000000")) |> doubleSubset("chr2", "Chr2")
+c <- coa$Bar_Osa |> subsetByOverlaps(range(b$query))                    |> doubleSubset("Chr2", "Chr2")
+
+dsList <- list(
+  OSA = swap(a) |> gr2dna_seg(),
+  OKI = a |> gr2dna_seg(),
+  BAR = swap(b) |> gr2dna_seg(),
+  Osa = swap(c) |> gr2dna_seg()
+)
+
+compList <- list(
+  a |> swap() |> gb2comp(),
+  b |> gb2comp(),
+  c |> gb2comp()
+)
+
+genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE)
+
+```
+
 
 # Session information
 
