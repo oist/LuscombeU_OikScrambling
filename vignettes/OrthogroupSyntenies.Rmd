@@ -114,30 +114,73 @@ load_one_to_ones( system.file("extdata/OrthoFinder/N6.tsv.gz", package = "Breakp
                 , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
 ```
 
-Test on Bar - OSKA
-==================
 
-Prepare a GBreaks object
-------------------------
+Prepare GBreak objects
+======================
 
 ```{r Bar_Osk}
-Bar_Osk <- load_one_to_ones(
-  system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"),
-  c("Bar2_p4.Flye.prot.longest.fa_1","OSKA2016v1.9.prot.longest.fa_1"))
-Bar_Osk
+orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
+  orthoPairs <- load_one_to_ones(
+    system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"),
+    c(name1, name2))
 
-IDs2GRanges <- function (IDs, annot, prefix = "") {
-  IDs <- IDs |> sub(pat = prefix, rep = "")
-  names(annot) <- annot$tx_name
-  gr <- granges(annot[IDs])
-  strand(gr) <- "*"
-  gr
+  IDs2GRanges <- function (IDs, annot) {
+    prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
+    not_prefix <- Biobase::lcPrefix(annot$tx_name)    # Remove trailing characters that are part of the name
+    not_prefix <- paste0(not_prefix,"$")              # Anchor to end of the string
+    prefix <- sub(not_prefix, "", prefix)             # Finalise prefix
+    IDs <- sub(prefix, "", IDs)                       # Remove prefix from IDS
+    names(annot) <- annot$tx_name                     # Store transcript name in names slot
+    gr <- granges(annot[IDs])                         # Discard extra metadata and sort by ID
+    strand(gr) <- "*"                                 # Make strandless
+    gr                                                # Return the object
+  }
+  
+  gb       <- IDs2GRanges(orthoPairs[,name1], transcripts(annot1))
+  gb$query <- IDs2GRanges(orthoPairs[,name2], transcripts(annot2))
+  gb <- GenomicBreaks:::GBreaks(gb)
+  sort(gb)
 }
 
-gb       <- IDs2GRanges(Bar_Osk$Bar2_p4.Flye.prot.longest.fa_1, transcripts(annots$Bar), prefix = "Bar2_p4.Flye.")
-gb$query <- IDs2GRanges(Bar_Osk$OSKA2016v1.9.prot.longest.fa_1, transcripts(annots$Osa), prefix = "OSKA2016v1.9.")
-gb <- GenomicBreaks:::GBreaks(gb)
-gb <- sort(gb)
+orthoPairs <- SimpleList()
+orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
+                                        , annots$Oki, annots$Osa)
+orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
+                                        , annots$Oki, annots$Bar)
+orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
+                                        , annots$Oki, annots$Kum)
+orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
+                                        , annots$Oki, annots$Aom)
+## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
+# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
+#                                         , annots$Bar, annots$Nor)
+
+orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
+                                        , annots$Osa, annots$Bar)
+orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
+                                        , annots$Osa, annots$Oki)
+orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
+                                        , annots$Osa, annots$Kum)
+orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
+                                        , annots$Osa, annots$Aom)
+## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
+# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
+#                                         , annots$Bar, annots$Nor)
+
+
+orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
+                                        , annots$Bar, annots$Osa)
+orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
+                                        , annots$Bar, annots$Oki)
+orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
+                                        , annots$Bar, annots$Kum)
+orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
+                                        , annots$Bar, annots$Aom)
+## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
+# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
+#                                         , annots$Bar, annots$Nor)
+
+sapply(orthoPairs, length)
 ```
 
 Problem: some annotations overlap
