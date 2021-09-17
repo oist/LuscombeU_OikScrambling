@@ -101,12 +101,17 @@ annots$Nor <- gff2txdb_Norway("OdB3/Oikopleura_annot_v1.0.gff.gz", OdB3)
 Orthogroups
 -----------
 
-Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package.  Original
-file is in `/bucket/LuscombeU/common/Breakpoints/Orthologues/selectedTunicates+Amph+vertebrates_lp_100clstr_blast/OrthoFinder/Results_Sep07/Phylogenetic_Hierarchical_Orthogroups/N6.tsv`.
+Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
+`GenomicBreaks::load_one_to_ones()` function.  Original file is in
+`/bucket/LuscombeU/common/Breakpoints/Orthologues/selectedTunicates+Amph+vertebrates_lp_100clstr_blast/OrthoFinder/Results_Sep07/Phylogenetic_Hierarchical_Orthogroups/N6.tsv`.
 
 ```{r load_orthogroups}
-hogs <- load_one_to_ones(system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"))
-hogs
+# Example for loading all orthogroups:
+load_one_to_ones(system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"))
+
+# Example for loading a pair
+load_one_to_ones( system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData")
+                , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
 ```
 
 Test on Bar - OSKA
