@@ -181,6 +181,10 @@ orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-
 #                                         , annots$Bar, annots$Nor)
 
 sapply(orthoPairs, length)
+load("BreakPoints.Rdata")
+orthoPairs[ 1:4] <- sapply(orthoPairs[ 1:4],  flagLongShort, longShort$Oki)
+orthoPairs[ 5:8] <- sapply(orthoPairs[ 5:8],  flagLongShort, longShort$Osa)
+orthoPairs[9:11] <- sapply(orthoPairs[9:11],  flagLongShort, longShort$Bar)
 ```
 
 Problem: some annotations overlap
@@ -202,8 +206,8 @@ flagOverlaps <- function(gr) {
 transcripts(annots$Bar)[flagOverlaps(transcripts(annots$Bar))]
 
 # Show examples
-gb[flagOverlaps(gb)]
-gb$query[flagOverlaps(gb$query)]
+orthoPairs$Oki_Osa[flagOverlaps(orthoPairs$Oki_Osa)]
+orthoPairs$Oki_Osa$query[flagOverlaps(orthoPairs$Oki_Osa$query)]
 
 # Remove and show how much
 
@@ -240,30 +244,42 @@ coalOrtho <- function(gb) {
 }
 orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
 sapply(orthoBlocks, length)
+orthoBlocks[ 1:4] <- sapply(orthoBlocks[ 1:4],  flagLongShort, longShort$Oki)
+orthoBlocks[ 5:8] <- sapply(orthoBlocks[ 5:8],  flagLongShort, longShort$Osa)
+orthoBlocks[9:12] <- sapply(orthoBlocks[9:12],  flagLongShort, longShort$Bar)
 ```
 
-Test on Bar - OSKA
-==================
 
 Quick overview of the results
------------------------------
+=============================
+
+Size distribution of the blocks
+-------------------------------
 
 ```{r quick_overview}
-stem(coal$geneNumber)
-table(coal$geneNumber)
-coal[order(coal$geneNumber)] |> tail(11)
+stem(orthoBlocks$Oki_Osa$geneNumber)
+table(orthoBlocks$Oki_Osa$geneNumber)
+orthoBlocks$Oki_Osa[order(orthoBlocks$Oki_Osa$geneNumber)] |> tail(11)
+
+stem(orthoBlocks$Oki_Kum$geneNumber)
+table(orthoBlocks$Oki_Kum$geneNumber)
+orthoBlocks$Oki_Kum[order(orthoBlocks$Oki_Kum$geneNumber)] |> tail(11)
 ```
 
 Gene Order Conservation is smaller in short arms
 ------------------------------------------------
 
 ```{r GOC}
-load("BreakPoints.Rdata")
-gb <- flagLongShort(gb, longShort$Bar)
-gb <- gb[!is.na(gb$Arm)]
-gbl <- split(gb, paste(seqnames(gb), gb$Arm))
-sapply(gbl, GOC)
-t.test(c(0.9165414, 0.9278024, 0.9370166), c(0.5928854, 0.7259159, 0.7618384))
+orthoBlocks_LSnoNA <- sapply(orthoBlocks, function(gb) gb[!is.na(gb$Arm)]) |> SimpleList()
+sapply(orthoBlocks_LSnoNA, length)
+
+df <- sapply(orthoBlocks_LSnoNA,
+             function(gb) tapply(gb, paste(seqnames(gb), gb$Arm), GOC))
+
+apply(df, 2, \(x) {
+  tst <- t.test(x[c(1,3,5)], x[c(2,4,6)])
+  c(pval=tst$p.value, mx=tst$estimate[1], my=tst$estimate[2])
+}) 
 ```
 
 Agreement with nucleotide alignments
