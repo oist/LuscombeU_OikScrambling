@@ -327,12 +327,29 @@ For this reason, it would be unwise to filter by width on some operations such
 as coalescing.
 
 ```{r}
-DF <- DataFrame(width = width(gbs$Oki_Osa), Arm = gbs$Oki_Osa$Arm, chr = seqnames(gbs$Oki_Osa))
+widths <- SimpleList()
+widths$gbs <- 
+  lapply(names(gbs), \(name) {
+    DF <- mcols(gbs[[name]])
+    DF$name  <- name
+    DF$width <- width(gbs[[name]])
+    DF$chr   <- seqnames(gbs[[name]])
+    DF$query <- DF$score <- NULL
+    DF
+  }) |> do.call(what=rbind)
 
-gg_freq_poly(DF) +
+widths$gbs$chr <- sub("Chr", "chr", widths$gbs$chr)
+
+gg_freq_poly(widths$gbs) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of alignment width before collapsing, split by arm.")
+  ggtitle("Distribution of alignment widths before collapsing, split by arm.")
+
+gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
+
 ```
 
 After coalescing, width distribution becomes clearly bimodal, when faceted by
