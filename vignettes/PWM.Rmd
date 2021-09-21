@@ -77,7 +77,7 @@ distributed in the same drat repository as the alignment data.
 install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgenomes_drat/")
 ```
 
-```{r load_annotations}
+```{r load_annotations, warning=FALSE}
 annots <- SimpleList()
 
 gff2txdb <- function(file, genome) {
@@ -91,12 +91,10 @@ gff2txdb <- function(file, genome) {
 gff2txdb_Norway <- function(file, genome) {
   file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
   tx <- rtracklayer::import.gff(file)
+  tx <- tx[!is.na(tx$mRNA)]
   # Remove "scaffoldA" objects in the OdB3 annotation
   tx <- tx[seqnames(tx) %in% seqnames(genome)]
-  tx$ID <- NA_character_
-  mcols(tx)[tx$type == "mRNA","ID"] <- paste0(tx[tx$type == "mRNA"]$mRNA, ".mRNA")
-  mcols(tx)[tx$type == "CDS","ID"] <- paste0(tx[tx$type == "CDS"]$CDS, ".CDS")
-  mcols(tx)[tx$type == "UTR","ID"] <- paste0(tx[tx$type == "UTR"]$UTR, ".UTR")
+  tx$ID <- tx$mRNA
   tx <- GRanges(tx, seqinfo = seqinfo(genome))
   tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
 }
