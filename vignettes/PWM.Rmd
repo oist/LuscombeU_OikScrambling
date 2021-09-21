@@ -331,6 +331,25 @@ sapply(pwmHits, length)
 hist(pwmHits$Oki$score)
 hist(pwmHits$Osa$score)
 
+library("Gviz")
+options(ucscChromosomeNames=FALSE)
+gen <- GenomeAxisTrack(name = "genome")
+a <- AnnotationTrack(longShort$Oki, chromosome = "chr1")
+trk <- DataTrack(pwmHits |> (\(.){strand(.)<-"*";.})(), name = "pwmHits", chromosome = "chr1")
+plotTracks(list(gen, a, trk))
+a <- AnnotationTrack(longShort$Oki, chromosome = "chr2")
+trk <- DataTrack(pwmHits |> (\(.){strand(.)<-"*";.})(), name = "pwmHits", chromosome = "chr2")
+plotTracks(list(gen, a, trk))
+a <- AnnotationTrack(longShort$Oki, chromosome = "PAR")
+trk <- DataTrack(pwmHits |> (\(.){strand(.)<-"*";.})(), name = "pwmHits", chromosome = "PAR")
+plotTracks(list(gen, a, trk))
+a <- AnnotationTrack(longShort$Oki, chromosome = "XSR")
+trk <- DataTrack(pwmHits |> (\(.){strand(.)<-"*";.})(), name = "pwmHits", chromosome = "XSR")
+plotTracks(list(gen, a, trk))
+```
+
+```{r}
+
 length(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa))
 length(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa))
 
