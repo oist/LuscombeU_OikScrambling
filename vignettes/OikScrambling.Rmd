@@ -407,72 +407,28 @@ gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
   ggtitle("Distribution of alignment widths on chr1 after double-collapsing, split by genome pair") 
 ```
 
-# Genome plots with genoPlotR
 
-Pairwise chromosome plots like the one below are built in the _parallel plots_
-vignette (`vignette("ParallelPlots", package = "OikScrambling")`).
+# Pairwise chromosome plots
 
-```{r test_genoPlotR}
-library("genoPlotR")
+## Oki – Bar
 
-gr2dna_seg <- function (gr) {
-  if (is.null(names(gr))) names(gr) <- as.character(gr)
-  strand(gr[strand(gr) == "*"]) <- "+"
-  df <- data.frame(
-    name   = names(gr),
-    start  = start(gr),
-    end    = end(gr),
-    strand = strand(gr),
-    col    = "grey"
-  )
-  dna_seg(df)
-}
-
-gbRef2dna_seq <- function (gb) {
-  if (is.null(names(gb))) names(gb) <- as.character(gb)
-  strand(gb) <- "+"
-  gr2dna_seg(gb)
-}
-
-gbQuery2dna_seq <- function (gb) {
-  if (is.null(names(gb$query))) names(gb$query) <- as.character(gb)
-  strand(gb$query) <- strand(gb)
-  gr2dna_seg(gb$query)
-}
-
-gb2comp <- function(gb) {
-  ref <- gr2dna_seg(gb)
-  strand(gb$query) <- "+"
-  que <- gr2dna_seg(gb$query)
-  df <- data.frame(
-    start1 = ref$start,
-    end1   = ref$end,
-    start2 = que$start,
-    end2   = que$end
-  )
-  as.comparison(df)
-}
-
-plotApairOfChrs <- function(gb, chr) {
-  gb <- gb[seqnames(gb) == chr]
-    keepMainMatch <- function(gb) {
-    bestMatch <- tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
-    gb[seqnames(gb$query) == bestMatch]
-  }
-  roi <- keepMainMatch(gb)
-  dsList <-   list(
-      roi |> gbQuery2dna_seq(),
-      roi |> gbRef2dna_seq()
-      )
-  
-  compList <- list(
-      roi |> swap() |> gb2comp()
-    )
-  plot_gene_map(dsList, compList)
-}
-
+```{r parallel_chr_plots_Oki_Bar}
 plotApairOfChrs(coa$Oki_Bar, "chr1")
 ```
+
+## Osa – Bar
+
+```{r parallel_chr_plots_Osa_Bar}
+plotApairOfChrs(coa$Osa_Bar, "Chr1")
+```
+
+## More in the _parallel plots_ vignette!
+
+In the _parallel plots_ vignette
+(`vignette("ParallelPlots", package = "OikScrambling")`), we build a more
+more comprehensive collection of plots and explore arrangements for a figure
+panel in paper.
+
 
 # Structural variants
 
@@ -630,7 +586,7 @@ Repeated regions of genomes are notoriously difficult to assemble and align. Thu
 
 We can use another script to plot the density of tandem repeats around alignment stops (and breakpoints). In the following plots, breakpoints are aligned at the centre of the plots. Intuitively, this function can be generalised to see the density of any binary coverage characteristic around breakpoints, given a GRanges object with per-base coverage of a given characteristic. Here we stick with tandem repeat info:
 
-```{r echo=T, message=F, warning=F}
+```{r echo=T, message=F, warning=F, cache=FALSE}
 # hm_tan_O <- gr_O_Oki %>%
 #   feature_coverage(tan_O, win = 1000, lab = "Osaka ~ Okinawa", direction = "left") %>%
 #   smoothHeatmap(output.size = c(2000,500), algorithm = "kernel") %T>%
@@ -845,7 +801,7 @@ The accumulation of alignment breaks of one pairwise alignment onto another sugg
 The function `GenomicBreaks::feature_coverage()` will plot the coverage of tandem repeats around
 centred alignment stops. 
 
-```{r echo=T, message=F, warning=F}
+```{r echo=T, message=F, warning=F, cache=FALSE}
 # 
 # hm_tan1 <- feature_coverage(gr_ob = gr_O_Oki, feat = tan_O, win = 4000, lab = "Osk ~ Oki", direction = "left")
 # plotHeatmapMeta(hm_tan1)
@@ -868,7 +824,7 @@ TODO: analyse separately the breakpoint regions that are in colinear regions?
 The function `feature_coverage` will plot the coverage of tandem repeats around
 centred alignment stops. 
 
-```{r genomic_features}
+```{r genomic_features, cache=FALSE}
 #current_GB <- gr_Oki_O # To ease recomputing with another object
 current_GB <- gbs$Oki_Osa
 #current_GB <- coa$Oki_Osa
@@ -903,7 +859,7 @@ in exons ?
 
 Let's look at coverage around PWM hits of the AAGCsGCwwmkCGrCTTyn motif
 
-```{r genomic_features_pwmHits}
+```{r genomic_features_pwmHits, cache=FALSE}
 current_GB <- pwmHits
 
 hmList_PWM_OKI <- list()
@@ -923,7 +879,7 @@ plotHeatmapMeta(hmList_PWM_OKI[c("utrs5", "utrs3")])
 
 They are enriched in introns...
 
-```{r genomic_features3}
+```{r genomic_features3, cache=FALSE}
 # 
 # # Sandbox to make sanity checks.
 # 
