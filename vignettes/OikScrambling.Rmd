@@ -125,8 +125,8 @@ annots$Nor <- gff2txdb_Norway("OdB3/Oikopleura_annot_v1.0.gff.gz", OdB3)
 
 ### GenomicBreaks object
 
-The core data is a list of `GenomicBreaks::GBreak()` objects that is built
-by a separate vignette (`vignette("Load genomic break data")`).
+The core data is a list of `GenomicBreaks::GBreaks()` objects that is built
+by a separate vignette (`vignette("Load genomic break data"), package="OikSyntenies"`).
 
 The _query_ genome is the one that was provided as a FASTA file and aligned to
 the _target_ genome (the one that was indexed by the aligner).  The _target_
@@ -165,9 +165,9 @@ mutation, arising from breakage and repair of the chromosome.  Such structural
 events include insertion, deletion, inversion and translocation, and often arise
 during recombination. 
 
-## Measures of distance
+# Measures of distance
 
-### Synteny index
+## Synteny index
 
 Ad-hoc index measuring to what extent a scaffold of the _target_ genome is
 mostly aligned to a single scaffold in the _query_ genome.   See
@@ -180,7 +180,7 @@ sapply(gbs, synteny_index)
 sapply(gbs, \(g) swap(g) |> synteny_index())
 ```
 
-### Correlation
+## Correlation
 
 Ad-hoc index measuring the correlation of the coordinates of the syntenic
 alignments in scaffolds of a _target_ genome and their best match in the
@@ -193,7 +193,7 @@ sapply(gbs, correlation_index)
 sapply(gbs, \(g) swap(g) |> correlation_index())
 ```
 
-### Gene Order Conservation
+## Gene Order Conservation
 
 See `?GOC` for details.
 
@@ -202,7 +202,7 @@ sapply(gbs, GOC)
 sapply(gbs, \(g) swap(g) |> GOC())
 ```
 
-## Phylogenetic cladogram
+# Phylogenetic cladogram
 
 We assume that the _North Pacific_ and the _Atlantic_ species are more related
 to each other than to the _Okinawan_ species.
@@ -244,7 +244,7 @@ tree <-
 plot(ade4::newick2phylog(tree))
 ```
 
-## Visualising alignments
+# Visualising alignments
 
 We used the functions `GenomicBreaks::scaf_align_plot()` and
 `GenomicBreaks::align_scaf_plot_2()`to see the alignment of query
@@ -267,7 +267,7 @@ align_scaf_plot_2(gbs$Osa_Oki, scaf = c("Chr1","Chr2"))
 
 As you can see, scaffold 2 of the query genome aligns to the majority of both target scaffolds. This could be used as evidence to support the superscaffolding of these two scaffolds - in an effort toward chromosomal assembly. 
 
-## Coalescing alignments
+# Coalescing alignments
 
 Large syntenic regions can often appear cluttered with alignment breaks.  They
 are either an artefact (for instance in case of incomplete purge of haplotypes)
@@ -290,7 +290,7 @@ sapply(gbs, length)
 sapply(coa, length)
 ```
 
-## Width summary plots
+# Width summary plots
 
 The distribution of alignment widths takes a bimodal appearance after
 collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
@@ -346,7 +346,7 @@ widths$coa  <- makeWidthsDF(coa)
 widths$coa2 <- makeWidthsDF(coa2)
 ```
 
-### Aligned regions
+## Aligned regions
 
 ```{r widths_gbs}
 gg_freq_poly(widths$gbs) +
@@ -360,7 +360,7 @@ gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
   ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
 ```
 
-### Coalesced regions
+## Coalesced regions
 
 After coalescing, width distribution becomes clearly bimodal, when faceted by
 chromosome and arm type.  There is a small peak under 500 bp, found on all arms
@@ -393,7 +393,7 @@ sapply(coa, length)
 sapply(coa2, length)
 ```
 
-### Double-coalesced regions
+## Double-coalesced regions
 
 ```{r re_coalesce}
 gg_freq_poly(widths$coa2) +
@@ -407,7 +407,7 @@ gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
   ggtitle("Distribution of alignment widths on chr1 after double-collapsing, split by genome pair") 
 ```
 
-## Genome plots with genoPlotR
+# Genome plots with genoPlotR
 
 Pairwise chromosome plots like the one below are built in the _parallel plots_
 vignette (`vignette("ParallelPlots", package = "OikScrambling")`).
@@ -474,12 +474,17 @@ plotApairOfChrs <- function(gb, chr) {
 plotApairOfChrs(coa$Oki_Bar, "chr1")
 ```
 
+# Structural variants
+
 ## Trivial inversions
 
 ### Representation
 
 Details can be found in `vignette("Introduction to GenomicBreaks", package = "GenomicBreaks")`
 and `?GenomicBreaks::flagInversions`
+
+See also the [vignette](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html)
+of Gviz.
 
 ```{r ideal_breakpoints}
 example("flagInversions")
@@ -641,7 +646,8 @@ We can use another script to plot the density of tandem repeats around alignment
 #   smoothHeatmap(output.size = c(2000,500), algorithm = "kernel") %T>%
 #   plotHeatmapList
 ```
-## Coverage
+
+# Coverage
 
 Another characteristic of alignment stops that we can examine is the coverage depth over said alignment stops. By aligning raw reads to assembled genomes, we can obtain per-base coverage depth for target or query genome. Low coverage directly on and surrounding an alignment stop may suggest unreliability in it being a true breakpoint. The function `bp_coverage` returns a GRanges object of the bps, with associated averaged and point converage in the metadatacolumns. 
 
@@ -653,7 +659,7 @@ Another characteristic of alignment stops that we can examine is the coverage de
 ```
 
 
-## Breakpoint classification - master script
+# Breakpoint classification - master script
 
 The function `master_bp_analysis` brings together the information about tandem repeats and coverage, as well as coalescing the alignment. It can perform the analyses for both the target and the query genome, depending on the available input data. The output is split into two GRanges objects; one for the target genome and one for the query, with associated information in the metadata columns. 
 
@@ -666,7 +672,7 @@ The function `master_bp_analysis` brings together the information about tandem r
 ```
 
 
-# Nucleaic acid content heatmaps
+# Nucleic acid content heatmaps
 
 The `GenomicBreaks::bp_heatmap()` function plots nucleic acid content in windows
 centered on alignment stops.  Lets look at `GC` content before and after
@@ -836,7 +842,7 @@ The accumulation of alignment breaks of one pairwise alignment onto another sugg
 
 ## Tandem repeat coverage around alignment stops (breakpoints)
 
-The function `feature_coverage` will plot the coverage of tandem repeats around
+The function `GenomicBreaks::feature_coverage()` will plot the coverage of tandem repeats around
 centred alignment stops. 
 
 ```{r echo=T, message=F, warning=F}
