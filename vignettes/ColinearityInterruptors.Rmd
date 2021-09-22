@@ -1,0 +1,131 @@
+---
+title: "Regions interrupting colinearity"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Regions interrupting colinearity}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+
+# Load pacakges
+
+See the `vignette("OikScrambling", package = "OikScrambling")` for details
+on package and data load.
+
+## Core packages that provide functions we use a lot.
+
+```{r loadlib, echo=T, results='hide'}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  library('BSgenome')
+  library('GenomicFeatures')
+  library('ggplot2')
+})
+requireNamespace("plyranges")
+```
+
+## BSgenome packages
+
+```{r load_BSgenome_packages}
+# These will need to be installed by the user
+library("BSgenome.Odioica.local.OKI2018.I69")
+library("BSgenome.Odioica.local.OSKA2016v1.9")
+library("BSgenome.Odioica.local.Bar2.p4")
+library("BSgenome.Odioica.local.KUM.M3")
+library("BSgenome.Odioica.local.AOM.5")
+library("BSgenome.Odioica.local.Odioica.reference.v3.0")
+
+genomes <- SimpleList(
+  # Chromosome assemblies
+  Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
+  # Less contiguous assemblies
+  Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
+```
+
+## GenomicBreaks objects
+
+The core data is a list of `GenomicBreaks::GBreaks()` objects that is built
+by a separate vignette (`vignette("Load genomic break data"), package="OikSyntenies"`).
+
+```{r GBreaks_object}
+load("BreakPoints.Rdata")
+```
+
+# The problem:
+
+The plot below shows high colinearity between Oki and Kum, but the
+`GenomicBreaks` objects are still scattered in small pieces.  What is
+interrupting colinearity?
+
+```{r parallel_chr_plots_Oki_Kum}
+plotApairOfChrs(coa$Oki_Kum, "chr1", main = "Oki – Kum")
+```
+
+
+# Case number 1
+
+In the Osa – Bar and Oki – Kum plots above, we see large regions that appear to
+be colinear, but were not coalesced together, why?
+
+```{r}
+# The Kume contig is contig_3_1
+bestMatch <- function(gb)
+  tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
+
+coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
+
+# It appears to map roughly in the 8,000,000 – 13,000,000 region
+coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1") |>
+  plyranges::arrange(start(query))
+```
+
+How about the second alignment pair, mapping 226 bases of `contig_3_1` to the
+short arm; is it real ?
+
+```{r re_align_a_clolinearity_breaker}
+coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1", end(query) <= 21079)
+coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1",
+                                 start > 8000000,
+                                 end(query) <= 21079) |> plotApairOfChrs("chr1", dna_seg_scale=TRUE)
+
+coa$Oki_Kum |> plyranges::filter(start > 3838000, end <= 3891000) |> plotApairOfChrs("chr1", dna_seg_scale=TRUE)
+
+getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812"), as.character=TRUE)
+
+# Good march where reported
+pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), genomes$Oki$chr1[3870099:3870324], type="local")
+pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16000-17000:-")), genomes$Oki$chr1[3870000:3871000], type="global") |> writePairwiseAlignments()
+
+# No good match between the flanking pairs.
+pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:+")), genomes$Oki$chr1[8086429:8104950], type="local")
+pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), genomes$Oki$chr1[8086429:8104950], type="local")
+```
+
+Yes, the alignment looks real!
+
+
+```{r}
+coa$Oki_Kum |> plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000)
+
+# Even removing all but the best match on the query is not enough to collapse all
+coa$Oki_Kum |>
+  plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000) |>
+  plyranges::filter(seqnames(query) == "contig_3_1") |>
+  coalesce_contigs() |> flagAll() |> head(10)
+
+# Let's look at the inversion at the beginning; is it real ?
+coa$Oki_Kum |>
+  flagAll() |> flagColinearAlignments(details = TRUE) |>
+  plyranges::filter(seqnames == "chr1", start >= 8086429, end <= 8883052) |> head(10)
+```
+
