@@ -473,8 +473,11 @@ sapply(coa2, function(gb) sum(flagInversions(gb)$inv))
 Many inversions are shorter than 1 kbp.
 
 ```{r width_of_inversions}
-invs <- sapply(coa, function(gb) filterInversions(flagInversions(gb)))
+invs <- sapply(coa, function(gb) filterInversions(flagInversions(gb))) |> SimpleList()
 sapply(invs, length)
+
+# Sanity check that we detect inversions on both strands
+sapply(invs, \(x) {summary(decode(strand(x)))})
 
 widths$invs <- makeWidthsDF(invs)
 
@@ -482,6 +485,24 @@ gg_freq_poly(widths$invs) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of alignment widths for inverted regions, split by arm.") +
+  geom_vline(xintercept = 1000)
+```
+
+### Width of gaps next to the inverted regions
+
+```{r width_of_inversions}
+inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
+inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$Oki)
+inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$Osa)
+inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar)
+sapply(inv.lgaps, length)
+
+widths$invs.lgaps <- makeWidthsDF(inv.lgaps)
+
+gg_freq_poly(widths$invs.lgaps) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution widths of left gaps next to inverted regions, split by arm.") +
   geom_vline(xintercept = 1000)
 ```
 
