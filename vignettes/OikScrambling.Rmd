@@ -448,23 +448,14 @@ panel in paper.
 
 ## Trivial inversions
 
-### Representation
+### Documentation
 
-Details can be found in `vignette("Introduction to GenomicBreaks", package = "GenomicBreaks")`
+Details can be found in `vignette("Introduction to GenomicBreaks", package = "GenomicBreaks")`,
+in `vignette("Structural Variants", package = "GenomicBreaks")`,
 and `?GenomicBreaks::flagInversions`
 
 See also the [vignette](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html)
 of Gviz.
-
-```{r ideal_breakpoints}
-example("flagInversions")
-
-library("Gviz")
-options(ucscChromosomeNames=FALSE)
-gen <- GenomeAxisTrack(name = "genome")
-trk <- AnnotationTrack(inv, name = "inv")
-plotTracks(list(gen, trk))
-```
 
 ### Number of trivial inversions
 
@@ -477,10 +468,27 @@ sapply(coa, function(gb) sum(flagInversions(gb)$inv))
 sapply(coa2, function(gb) sum(flagInversions(gb)$inv))
 ```
 
+### Width of inverted regions
+
+Many inversions are shorter than 1 kbp.
+
+```{r width_of_inversions}
+invs <- sapply(coa, function(gb) filterInversions(flagInversions(gb)))
+sapply(invs, length)
+
+widths$invs <- makeWidthsDF(invs)
+
+gg_freq_poly(widths$invs) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, split by arm.") +
+  geom_vline(xintercept = 1000)
+```
+
 ### Motif search
 
-Enrichement for motifs is being searched in
-`vignette("Motif finding and analysis")`
+Enrichment for motifs is being searched in
+`vignette("Motif finding and analysis", package = "OikScrambling")`.
 
 ```{r load_PWMs}
 gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
