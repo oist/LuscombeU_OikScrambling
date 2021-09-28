@@ -337,6 +337,26 @@ gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
   ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
 ```
 
+## Unaligned regions
+
+```{r widths_unaligned}
+unal <- sapply(gbs, cleanGaps) |> SimpleList()
+unal[ 1:5]  <- sapply(unal[ 1:5],  flagLongShort, longShort$Oki)
+unal[ 6:10] <- sapply(unal[ 6:10], flagLongShort, longShort$Osa)
+unal[11:15] <- sapply(unal[11:15], flagLongShort, longShort$Bar)
+widths$unal  <- makeWidthsDF(unal)
+
+gg_freq_poly(widths$unal) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of unaligned regions width before collapsing, split by arm.")
+
+gg_freq_poly(widths$unal |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of unaligned regions width on chr1 before collapsing, split by genome pair")
+```
+
 ## Coalesced regions
 
 After coalescing, width distribution becomes clearly bimodal, when faceted by
