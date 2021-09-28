@@ -244,29 +244,6 @@ tree <-
 plot(ade4::newick2phylog(tree))
 ```
 
-# Visualising alignments
-
-We used the functions `GenomicBreaks::scaf_align_plot()` and
-`GenomicBreaks::align_scaf_plot_2()`to see the alignment of query
-scaffolds/chromosomes onto a specific target scaffold/chromosome of interest.
-
-Now that we have chromosome assemblies these functions are not much used anymore.
-
-```{r echo=T, message=F, warning=F}
-scaf_align_plot(gbs$Osa_Oki, scaf = "Chr1")
-scaf_align_plot(gbs$Oki_Osa, scaf = "chr1")
-```
-
-Here we have plotted the alignments on the Okinawa genome (y-axis) onto the Osaka genome, scaffold 2 (x-axis). The coverage of the alignment is the bar along the top. 
-
-We can plot alignments for two of the target scaffolds side-by-side, using `align_scaf_plot-2`. This can be used in aid of superscaffolding. 
-
-```{r echo=T, message=F, warning=F}
-align_scaf_plot_2(gbs$Osa_Oki, scaf = c("Chr1","Chr2"))
-```
-
-As you can see, scaffold 2 of the query genome aligns to the majority of both target scaffolds. This could be used as evidence to support the superscaffolding of these two scaffolds - in an effort toward chromosomal assembly. 
-
 # Coalescing alignments
 
 Large syntenic regions can often appear cluttered with alignment breaks.  They
