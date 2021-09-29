@@ -94,13 +94,8 @@ short arm; is it real ?
 
 ```{r re_align_a_clolinearity_breaker}
 coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1", end(query) <= 21079)
-coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1",
-                                 start > 8000000,
-                                 end(query) <= 21079) |> plotApairOfChrs("chr1", dna_seg_scale=TRUE)
-
-coa$Oki_Kum |> plyranges::filter(start > 3838000, end <= 3891000) |> plotApairOfChrs("chr1", dna_seg_scale=TRUE)
-
-getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812"), as.character=TRUE)
+coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = list(c(8086429, 8104950), c(1, 21079)), dna_seg_scale=TRUE, main = "chr1 vs contig_3_1 near ROI 1")
+coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_27_1", xlim = list(c(3838658, 3881203), c(3595219, 3630623)), dna_seg_scale=TRUE)
 
 # Good march where reported
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), genomes$Oki$chr1[3870099:3870324], type="local")
