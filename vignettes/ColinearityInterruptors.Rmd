@@ -72,10 +72,7 @@ plotApairOfChrs(coa$Oki_Kum, "chr1", main = "Oki – Kum")
 ```
 
 
-# Case number 1
-
-In the Osa – Bar and Oki – Kum plots above, we see large regions that appear to
-be colinear, but were not coalesced together, why?
+# Region of Interest (ROI) 1
 
 ```{r}
 # The Kume contig is contig_3_1
@@ -85,7 +82,7 @@ bestMatch <- function(gb)
 coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
 
 # It appears to map roughly in the 8,000,000 – 13,000,000 region
-coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1") |>
+coa$Oki_Kum |> flagAll() |> plyranges::filter(seqnames(query) == "contig_3_1") |>
   plyranges::arrange(start(query))
 ```
 
@@ -97,7 +94,7 @@ coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1", end(query) <= 
 coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = list(c(8086429, 8104950), c(1, 21079)), dna_seg_scale=TRUE, main = "chr1 vs contig_3_1 near ROI 1")
 coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_27_1", xlim = list(c(3838658, 3881203), c(3595219, 3630623)), dna_seg_scale=TRUE)
 
-# Good march where reported
+# Good match where reported
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), genomes$Oki$chr1[3870099:3870324], type="local")
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16000-17000:-")), genomes$Oki$chr1[3870000:3871000], type="global") |> writePairwiseAlignments()
 
@@ -110,7 +107,7 @@ Yes, the alignment looks real!
 
 
 ```{r}
-coa$Oki_Kum |> plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000)
+coa$Oki_Kum |> flagAll() |> plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000)
 
 # Even removing all but the best match on the query is not enough to collapse all
 coa$Oki_Kum |>
