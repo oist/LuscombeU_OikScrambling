@@ -404,6 +404,57 @@ gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
   ggtitle("Distribution of alignment widths on chr1 after double-collapsing, split by genome pair") 
 ```
 
+# Analysis of the interval regions
+
+Interval regions interrupt alignments or colinearity.  What do they contain ?
+
+## Unaligned regions
+
+```{r unaligned_regions}
+reps <- rtracklayer::import(system.file("extdata/Annotations/OKI2018_I69.v2/OKI2018_I69.repeats.gff", package = "BreakpointsData"))
+Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
+unal <- sapply(gbs[Oki_pairs], cleanGaps) |> SimpleList()
+
+(reps_gbs <- tibble::tibble(
+  pairname   = Oki_pairs,
+  total      = sapply(unal[Oki_pairs], length),
+  match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
+  match_al   = sapply( gbs[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
+  aligned   = match_al   / total * 100,
+  unaligned = match_unal / total * 100
+))
+
+ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
+  aes(name, value) +
+  ggtitle("Matches to repeats") +
+  ylab("Percent matching repeats") +
+  xlab("Type of region") +
+  geom_boxplot() +
+  geom_point(aes(col = pairname))
+```
+
+## Colinearity interruptors (unmapped regions ?)
+
+```{r unaligned_regions}
+unal_c <- sapply(coa[Oki_pairs], cleanGaps) |> SimpleList()
+
+(reps_coa <- tibble::tibble(
+  pairname   = Oki_pairs,
+  total      = sapply(unal_c[Oki_pairs], length),
+  match_unal = sapply(unal_c[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
+  match_al   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
+  aligned   = match_al   / total * 100,
+  unaligned = match_unal / total * 100
+))
+
+ggplot(reps_coa |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
+  aes(name, value) +
+  ggtitle("Matches to repeats") +
+  ylab("Percent matching repeats") +
+  xlab("Type of region") +
+  geom_boxplot() +
+  geom_point(aes(col = pairname))
+```
 
 # Pairwise chromosome plots
 
