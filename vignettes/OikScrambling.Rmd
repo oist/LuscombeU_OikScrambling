@@ -412,9 +412,12 @@ Interval regions interrupt alignments or colinearity.  What do they contain ?
 
 ```{r unaligned_regions}
 reps <- rtracklayer::import(system.file("extdata/Annotations/OKI2018_I69.v2/OKI2018_I69.repeats.gff", package = "BreakpointsData"))
+# Make sure we match both strands
+strand(reps) <- '*'
 
 # Unique regions in the OKI genome that contain repeated elements.
 reps <- reduce(reps)
+
 # They are short.
 summary(width(reps))
 
@@ -427,7 +430,8 @@ unal <- sapply(gbs[Oki_pairs], cleanGaps) |> SimpleList()
     match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
     match_al   = sapply(gbs[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
     aligned   = match_al   / total * 100,
-    unaligned = match_unal / total * 100
+    unaligned = match_unal / total * 100,
+    sum = aligned + unaligned
 ))
 
 ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
@@ -451,7 +455,8 @@ unal_c <- sapply(coa[Oki_pairs], cleanGaps) |> SimpleList()
     match_unmap = sapply(unal_c[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
     match_map   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
     mapped      = match_map   / total * 100,
-    unmapped    = match_unmap / total * 100
+    unmapped    = match_unmap / total * 100,
+    sum = mapped + unmapped
 ))
 
 ggplot(reps_coa |> tidyr::pivot_longer(c("mapped", "unmapped"))) +
