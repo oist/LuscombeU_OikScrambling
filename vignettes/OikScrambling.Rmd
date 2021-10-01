@@ -412,23 +412,30 @@ Interval regions interrupt alignments or colinearity.  What do they contain ?
 
 ```{r unaligned_regions}
 reps <- rtracklayer::import(system.file("extdata/Annotations/OKI2018_I69.v2/OKI2018_I69.repeats.gff", package = "BreakpointsData"))
+
+# Unique regions in the OKI genome that contain repeated elements.
+reps <- reduce(reps)
+# They are short.
+summary(width(reps))
+
 Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
 unal <- sapply(gbs[Oki_pairs], cleanGaps) |> SimpleList()
 
 (reps_gbs <- tibble::tibble(
-  pairname   = Oki_pairs,
-  total      = sapply(unal[Oki_pairs], length),
-  match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
-  match_al   = sapply( gbs[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
-  aligned   = match_al   / total * 100,
-  unaligned = match_unal / total * 100
+    pairname   = Oki_pairs,
+    total      = length(reps),
+    match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
+    match_al   = sapply(gbs[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
+    aligned   = match_al   / total * 100,
+    unaligned = match_unal / total * 100
 ))
 
 ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
   aes(name, value) +
-  ggtitle("Matches to repeats") +
-  ylab("Percent matching repeats") +
-  xlab("Type of region") +
+  ggtitle("Matches of repeats to aligned or unaligned regions") +
+  scale_y_continuous(limits = c(0, 100)) +
+  ylab("Percent of the repeat regions") +
+  xlab("Matching to region:") +
   geom_boxplot() +
   geom_point(aes(col = pairname))
 ```
@@ -439,19 +446,20 @@ ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
 unal_c <- sapply(coa[Oki_pairs], cleanGaps) |> SimpleList()
 
 (reps_coa <- tibble::tibble(
-  pairname   = Oki_pairs,
-  total      = sapply(unal_c[Oki_pairs], length),
-  match_unal = sapply(unal_c[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
-  match_al   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(gb, reps))),
-  aligned   = match_al   / total * 100,
-  unaligned = match_unal / total * 100
+    pairname    = Oki_pairs,
+    total       = length(reps),
+    match_unmap = sapply(unal_c[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
+    match_map   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(reps, gb))),
+    mapped      = match_map   / total * 100,
+    unmapped    = match_unmap / total * 100
 ))
 
-ggplot(reps_coa |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
+ggplot(reps_coa |> tidyr::pivot_longer(c("mapped", "unmapped"))) +
   aes(name, value) +
-  ggtitle("Matches to repeats") +
-  ylab("Percent matching repeats") +
-  xlab("Type of region") +
+  ggtitle("Matches of repeats to mapped or unmaped regions") +
+  scale_y_continuous(limits = c(0, 100)) +
+  ylab("Percent of the repeat regions") +
+  xlab("Matching to region:") +
   geom_boxplot() +
   geom_point(aes(col = pairname))
 ```
