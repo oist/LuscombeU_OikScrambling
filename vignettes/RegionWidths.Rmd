@@ -1,0 +1,364 @@
+---
+title: "Width of the aligned and mapped regions."
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Width of the aligned and mapped regions.}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+TBW
+
+# Load R pacakges and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling::loadAllGenomes())
+(annots <- OikScrambling::loadAllAnnotations() |> suppressWarnings())
+(load("BreakPoints.Rdata"))
+```
+
+# Width summary plots
+
+The distribution of alignment widths takes a bimodal appearance after
+collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
+answer is _no_.
+
+```{r width_after_coalescing}
+width2df <- function(where, what, gbl) {
+  gb <- gbl[[where]]
+  if (length(gb) == 0) return (NULL)
+  data.frame(where = where, what = what, width = width(gb))
+}
+
+df <- rbind(
+  # do.call allows a list to replace "..." in a function call
+  do.call(rbind, lapply(names(gbs), width2df, "aligned", gbs)),
+  do.call(rbind, lapply(names(coa), width2df, "collapsed", coa))
+)
+
+gg_freq_poly <- function(DF) {
+    ggplot(DF |> as("data.frame")) +
+    aes(width) +
+    geom_freqpoly() +
+    scale_x_log10()
+}
+
+gg_freq_poly(df) +
+  aes(col = what) +
+  geom_freqpoly() +
+  scale_x_log10() +
+  facet_wrap(~where, scales = "free_y") +
+  ggtitle("Distribution of alignment width before and after collapsing")
+```
+
+First, the distribution of widths is not the same on long and short arms.
+For this reason, it would be unwise to filter by width on some operations such
+as coalescing.
+
+```{r pre_compute_widths_object}
+widths <- SimpleList()
+makeWidthsDF <- function (objList) {
+  lapply(names(objList), \(name) {
+    DF <- mcols(objList[[name]])
+    DF$name  <- name
+    DF$width <- width(objList[[name]])
+    DF$chr   <- seqnames(objList[[name]]) |>  sub(pat = "Chr", rep = "chr")
+    DF$query <- DF$score <- NULL
+    DF
+  }) |> do.call(what=rbind)
+}
+
+widths$gbs  <- makeWidthsDF(gbs)
+widths$coa  <- makeWidthsDF(coa)
+widths$coa2 <- makeWidthsDF(coa2)
+```
+
+## Aligned regions
+
+```{r widths_gbs}
+gg_freq_poly(widths$gbs) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths before collapsing, split by arm.")
+
+gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
+```
+
+## Unaligned regions
+
+```{r widths_unaligned}
+unal <- sapply(gbs, cleanGaps) |> SimpleList()
+unal[ 1:5]  <- sapply(unal[ 1:5],  flagLongShort, longShort$Oki)
+unal[ 6:10] <- sapply(unal[ 6:10], flagLongShort, longShort$Osa)
+unal[11:15] <- sapply(unal[11:15], flagLongShort, longShort$Bar)
+widths$unal  <- makeWidthsDF(unal)
+
+gg_freq_poly(widths$unal) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of unaligned regions width before collapsing, split by arm.")
+
+gg_freq_poly(widths$unal |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of unaligned regions width on chr1 before collapsing, split by genome pair")
+```
+
+## Coalesced regions
+
+After coalescing, width distribution becomes clearly bimodal, when faceted by
+chromosome and arm type.  There is a small peak under 500 bp, found on all arms
+except YSR.  The second peak shows two different distributions for long and
+short arms.
+
+```{r width_of_coalesced_regions}
+gg_freq_poly(widths$coa) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths after collapsing, split by arm.")
+
+gg_freq_poly(widths$coa |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths on chr1 after collapsing, split by genome pair") +
+  geom_vline(xintercept = 500)
+```
+
+Therefore, if the first peak represents events that we do not want to consider
+breaking synteny (either alignment artefacts or insertion/transpositions of
+short mobile elements), we can re-coalesce once after removing the shortest
+intervals.
+
+The computation is done in `vignette("Load genomic break data")`
+
+```{r double_coalescing_algorithm}
+sapply(gbs, length)
+sapply(coa, length)
+sapply(coa2, length)
+```
+
+## Double-coalesced regions
+
+```{r re_coalesce}
+gg_freq_poly(widths$coa2) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths after double-collapsing, split by arm.")
+
+gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths on chr1 after double-collapsing, split by genome pair") 
+```
+
+# Analysis of the interval regions
+
+Interval regions interrupt alignments or colinearity.  What do they contain ?
+
+## Unaligned regions
+
+```{r unaligned_regions}
+reps <- rtracklayer::import(system.file("extdata/Annotations/OKI2018_I69.v2/OKI2018_I69.repeats.gff", package = "BreakpointsData"))
+reps$Class <- reps$Target |>
+  sub(pat = '".*', rep = "") |>
+  sub(pat = "Motif:", rep = "") |>
+  sub(pat = "\\(.+)n", rep = "tandem") |>
+  sub(pat = "_family.*", rep = "") |>
+  sub(pat = "SINE.*", rep = "SINE") |>
+  sub(pat = "i69_juicer.*", rep = "unknown") |>
+  sub(pat = ".*-rich", rep = "LowComplexity") |>
+  sub(pat = "rnd.*", rep = "rnd") |>
+  factor()
+
+table(reps$Class)
+
+reps.reduced <- reduce(reps, ignore.strand = TRUE)
+# They are short.
+summary(width(reps.reduced))
+
+Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
+unal <- sapply(gbs[Oki_pairs], cleanGaps) |> SimpleList()
+
+(reps_gbs <- tibble::tibble(
+    pairname   = Oki_pairs,
+    total      = length(reps.reduced),
+    match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    match_al   = sapply(gbs[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    aligned   = match_al   / total * 100,
+    unaligned = match_unal / total * 100,
+    sum = aligned + unaligned
+))
+
+ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
+  aes(name, value) +
+  ggtitle("Matches of repeats to aligned or unaligned regions") +
+  scale_y_continuous(limits = c(0, 100)) +
+  ylab("Percent of the repeat regions") +
+  xlab("Matching to region:") +
+  geom_boxplot() +
+  geom_point(aes(col = pairname))
+```
+
+## Colinearity interruptors (unmapped regions ?)
+
+```{r unaligned_regions}
+unal_c <- sapply(coa[Oki_pairs], cleanGaps) |> SimpleList()
+
+(reps_coa <- tibble::tibble(
+    pairname    = Oki_pairs,
+    total       = length(reps.reduced),
+    match_unmap = sapply(unal_c[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    match_map   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    mapped      = match_map   / total * 100,
+    unmapped    = match_unmap / total * 100,
+    sum = mapped + unmapped
+))
+
+ggplot(reps_coa |> tidyr::pivot_longer(c("mapped", "unmapped"))) +
+  aes(name, value) +
+  ggtitle("Matches of repeats to mapped or unmaped regions") +
+  scale_y_continuous(limits = c(0, 100)) +
+  ylab("Percent of the repeat regions") +
+  xlab("Matching to region:") +
+  geom_boxplot() +
+  geom_point(aes(col = pairname))
+```
+
+## Repeat annotations
+
+```{r repeat_annotations}
+reps_in <- list()
+reps_in$total <- sapply(Oki_pairs, \(.) table(reps$Class)) 
+reps_in$unal <- sapply(unal[Oki_pairs], \(gb) {
+    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    table(ov$Class)
+  })
+reps_in$gbs <- sapply(gbs[Oki_pairs], \(gb) {
+    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    table(ov$Class)
+  })
+reps_in$unmap <- sapply(unal_c[Oki_pairs], \(gb) {
+    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    table(ov$Class)
+  })
+reps_in$map <- sapply(coa[Oki_pairs], \(gb) {
+    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    table(ov$Class)
+  })
+
+toLong <- function(m, Region = NULL) {
+  m <- tibble::as_tibble(m, rownames = "Class") |>
+    tidyr::pivot_longer(c("Oki_Osa", "Oki_Bar", "Oki_Aom", "Oki_Nor"))
+  if (! is.null(Region))
+    m <- dplyr::mutate(m, Region = Region)
+  m
+}
+
+reps_in.norm <- lapply(reps_in, \(x) x / reps_in$total)
+
+
+reps_in.long <- rbind(
+  toLong(reps_in$unmap, "unmap"),
+  toLong(reps_in$map,   "map"),
+  toLong(reps_in$gbs,   "gbs"),
+  toLong(reps_in$unal, "unal")
+)
+
+reps_in.norm.long <- rbind(
+  toLong(reps_in.norm$unmap, "unmap"),
+  toLong(reps_in.norm$map,   "map"),
+  toLong(reps_in.norm$gbs,   "gbs"),
+  toLong(reps_in.norm$unal, "unal")
+)
+
+ggplot(reps_in.long) +
+  aes(Region, value) +
+  geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free")
+
+ggplot(reps_in.norm.long) +
+  aes(Region, value) +
+  geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free") +
+  ylab("Fraction overlaping") +
+  ggtitle("Repeats overlaping with (un)aligned/mapped regions")
+```
+
+
+# Structural variants
+
+## Trivial inversions
+
+### Documentation
+
+Details can be found in `vignette("Introduction to GenomicBreaks", package = "GenomicBreaks")`,
+in `vignette("Structural Variants", package = "GenomicBreaks")`,
+and `?GenomicBreaks::flagInversions`
+
+See also the [vignette](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html)
+of Gviz.
+
+### Number of trivial inversions
+
+More inversions are found after coalescing colinear blocks because of situations
+where `+ - +` was `+ - - +` before collapsing. 
+
+```{r detect_trivial_invertions}
+sapply(gbs, function(gb) sum(flagInversions(gb)$inv))
+sapply(coa, function(gb) sum(flagInversions(gb)$inv))
+sapply(coa2, function(gb) sum(flagInversions(gb)$inv))
+```
+
+### Width of inverted regions
+
+Many inversions are shorter than 1 kbp.
+
+```{r width_of_inversions}
+invs <- sapply(coa, function(gb) filterInversions(flagInversions(gb))) |> SimpleList()
+sapply(invs, length)
+
+# Sanity check that we detect inversions on both strands
+sapply(invs, \(x) {summary(decode(strand(x)))})
+
+widths$invs <- makeWidthsDF(invs)
+
+gg_freq_poly(widths$invs) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, split by arm.") +
+  geom_vline(xintercept = 1000)
+```
+
+### Width of gaps next to the inverted regions
+
+```{r width_of_inversions}
+inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
+inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$Oki)
+inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$Osa)
+inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar)
+sapply(inv.lgaps, length)
+
+widths$invs.lgaps <- makeWidthsDF(inv.lgaps)
+
+gg_freq_poly(widths$invs.lgaps) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution widths of left gaps next to inverted regions, split by arm.") +
+  geom_vline(xintercept = 1000)
+```
