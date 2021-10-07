@@ -173,6 +173,64 @@ gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
   ggtitle("Distribution of alignment widths on chr1 after double-collapsing, split by genome pair") 
 ```
 
+# Paired comparison of widths in target and query genomes.
+
+```{r paired_width_analysis}
+GBreaks2widthTibble <- function(gb, pair = NULL) {
+  df <- as.data.frame(gb)
+  tb <- tibble::tibble(target = df$width, query = df$query.width, pair = pair)
+}
+
+tb <- gbs$Oki_Osa |> GBreaks2widthTibble(pair = "Oki_Osa")
+
+ggplot(tb) +
+  aes(target, query) +
+  geom_point() +
+  geom_density_2d() +
+  scale_x_log10() +
+  scale_y_log10() +
+  ggtitle("Width of the target and query aligned regions")
+
+x <- filterColinearRegions(flagColinearAlignments(gbs$Oki_Osa))
+# Need to substract 1 because some ranges are adjascent (no gap)
+z <- GBreaks(target = cleanGaps(x-1), query = cleanGaps(x$query -1))
+
+z$reps <- FALSE
+z$reps[unique(queryHits(findOverlaps(z, reps)))] <- TRUE
+
+y <- sort(c(x,z), ignore.strand = TRUE)
+names(y) <- NULL
+as.data.frame(y) |> head(60)
+
+tb2 <- z|> GBreaks2widthTibble(pair = "Oki_Osa")
+tb2$reps <- z$reps
+
+ggplot(tb2) +
+  aes(target, query) +
+  geom_point() +
+  geom_density_2d() +
+  scale_x_log10() +
+  scale_y_log10() +
+  ggtitle("Width of the target and query unaligned regions")
+
+ggplot(tb2) +
+  aes(target, query) +
+  geom_point() +
+  geom_density_2d(aes(col = reps)) +
+  scale_x_log10() +
+  scale_y_log10() +
+  facet_wrap(~reps) +
+  ggtitle("Width of the target and query unaligned regions, matching or not matching repeats")
+
+
+ggplot(tb2) +
+  aes(target / query, col = reps) +
+  scale_x_log10() +
+  geom_freqpoly() +
+  ggtitle("In presence of a repeat, target width tends to be longer than query") +
+  geom_vline(xintercept = 1)
+```
+
 # Analysis of the interval regions
 
 Interval regions interrupt alignments or colinearity.  What do they contain ?
@@ -222,7 +280,7 @@ ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
 
 ## Colinearity interruptors (unmapped regions ?)
 
-```{r unaligned_regions}
+```{r unaligned_regions2}
 (reps_coa <- tibble::tibble(
     pairname    = Oki_pairs,
     total       = length(reps.reduced),
