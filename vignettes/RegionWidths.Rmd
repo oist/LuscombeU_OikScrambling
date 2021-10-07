@@ -30,6 +30,20 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 (load("BreakPoints.Rdata"))
 ```
 
+# Unaligned and unmapped regions
+
+```{r unal_unmap}
+unal  <- sapply(gbs, cleanGaps) |> SimpleList()
+unal[ 1:5]  <- sapply(unal[ 1:5],  flagLongShort, longShort$Oki)
+unal[ 6:10] <- sapply(unal[ 6:10], flagLongShort, longShort$Osa)
+unal[11:15] <- sapply(unal[11:15], flagLongShort, longShort$Bar)
+
+unmap <- sapply(coa, cleanGaps) |> SimpleList()
+unmap[ 1:5]  <- sapply(unmap[ 1:5],  flagLongShort, longShort$Oki)
+unmap[ 6:10] <- sapply(unmap[ 6:10], flagLongShort, longShort$Osa)
+unmap[11:15] <- sapply(unmap[11:15], flagLongShort, longShort$Bar)
+```
+
 # Precompute widths
 
 ```{r pre_compute_widths_object}
@@ -45,12 +59,14 @@ makeWidthsDF <- function (objList) {
   }) |> do.call(what=rbind)
 }
 
-widths$gbs  <- makeWidthsDF(gbs)
-widths$coa  <- makeWidthsDF(coa)
-widths$coa2 <- makeWidthsDF(coa2)
+widths$gbs    <- makeWidthsDF(gbs)
+widths$unal   <- makeWidthsDF(unal)
+widths$coa    <- makeWidthsDF(coa)
+widths$unmap  <- makeWidthsDF(unmap)
+widths$coa2   <- makeWidthsDF(coa2)
 ```
 
-# Width of aligned and mapped regions
+# Width distribution of aligned and mapped regions
 
 _Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
 
@@ -66,9 +82,11 @@ gg_freq_poly <- function(DF) {
     scale_x_log10()
 }
 
-gg_freq_poly(rbind(widths$gbs |> as.data.frame()|> dplyr::mutate(what = "aligned"),
-                   widths$coa |> as.data.frame()|> dplyr::mutate(what = "maped"),
-                   widths$coa2|> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))) +
+gg_freq_poly(rbind(widths$gbs   |> as.data.frame()|> dplyr::mutate(what = "aligned"),
+                   widths$unal  |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
+                   widths$coa   |> as.data.frame()|> dplyr::mutate(what = "mapped"),
+                   widths$unmap |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
+                   widths$coa2  |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))) +
   aes(col = what) +
   geom_freqpoly() +
   scale_x_log10() +
@@ -97,12 +115,6 @@ gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
 ## Unaligned regions
 
 ```{r widths_unaligned}
-unal <- sapply(gbs, cleanGaps) |> SimpleList()
-unal[ 1:5]  <- sapply(unal[ 1:5],  flagLongShort, longShort$Oki)
-unal[ 6:10] <- sapply(unal[ 6:10], flagLongShort, longShort$Osa)
-unal[11:15] <- sapply(unal[11:15], flagLongShort, longShort$Bar)
-widths$unal  <- makeWidthsDF(unal)
-
 gg_freq_poly(widths$unal) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -139,7 +151,7 @@ breaking synteny (either alignment artefacts or insertion/transpositions of
 short mobile elements), we can re-coalesce once after removing the shortest
 intervals.
 
-The computation is done in `vignette("Load genomic break data")`
+The computation is done in `vignette("LoadGenomicBreaks", package = "OikSyntenies")`
 
 ```{r double_coalescing_algorithm}
 sapply(gbs, length)
@@ -187,7 +199,6 @@ reps.reduced <- reduce(reps, ignore.strand = TRUE)
 summary(width(reps.reduced))
 
 Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
-unal <- sapply(gbs[Oki_pairs], cleanGaps) |> SimpleList()
 
 (reps_gbs <- tibble::tibble(
     pairname   = Oki_pairs,
@@ -212,12 +223,10 @@ ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
 ## Colinearity interruptors (unmapped regions ?)
 
 ```{r unaligned_regions}
-unal_c <- sapply(coa[Oki_pairs], cleanGaps) |> SimpleList()
-
 (reps_coa <- tibble::tibble(
     pairname    = Oki_pairs,
     total       = length(reps.reduced),
-    match_unmap = sapply(unal_c[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    match_unmap = sapply(unmap[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
     match_map   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
     mapped      = match_map   / total * 100,
     unmapped    = match_unmap / total * 100,
@@ -247,7 +256,7 @@ reps_in$gbs <- sapply(gbs[Oki_pairs], \(gb) {
     ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
     table(ov$Class)
   })
-reps_in$unmap <- sapply(unal_c[Oki_pairs], \(gb) {
+reps_in$unmap <- sapply(unmap[Oki_pairs], \(gb) {
     ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
     table(ov$Class)
   })
