@@ -25,63 +25,18 @@ vignettes.
 
 Similar objects are stored in lists to avoid cluttering the environment.
 
-Pacakges
-========
+Pacakges and data
+=================
 
-Core packages that provide functions we use a lot
--------------------------------------------------
 
-```{r loadlib, echo=T, results='hide'}
+```{r load_pacakges_and_data}
 suppressPackageStartupMessages({
   library('GenomicBreaks')
-  library('BSgenome')
   library('GenomicFeatures')
   library('ggplot2')
+  library("BreakpointsData")
 })
-```
-
-BSgenome packages
------------------
-
-Example command to install one _Oikopleura_ BSgenome package if you do not yet
-have it:
-
-```
-install.packages("BSgenome.Odioica.local.OKI2018.I69", repos="https://oist.github.io/plessy_oikgenomes_drat/")
-```
-
-```{r load_BSgenome_packages}
-# These will need to be installed by the user
-library("BSgenome.Odioica.local.OKI2018.I69")
-library("BSgenome.Odioica.local.OSKA2016v1.9")
-library("BSgenome.Odioica.local.Bar2.p4")
-library("BSgenome.Odioica.local.KUM.M3")
-library("BSgenome.Odioica.local.AOM.5")
-library("BSgenome.Odioica.local.Odioica.reference.v3.0")
-
-genomes <- SimpleList(
-  # Chromosome assemblies
-  Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
-  # Less contiguous assemblies
-  Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
-```
-
-
-Data packages
--------------
-
-In the same repository: the _BreakpointsData_ package, that installs copies
-of the files found in _deigo_ under `/bucket/LuscombeU/common/Breakpoints`.
-
-```
-install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgenomes_drat/")
-```
-
-The package itself does not contain any function but loading it will give its
-version in `sessionInfo()`.
-
-```{r load_BreakpointsData}
-library("BreakpointsData")
+(genomes <- OikScrambling:::loadAllGenomes())
 ```
 
 Genomic breaks
