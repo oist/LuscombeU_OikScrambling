@@ -30,18 +30,15 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 (load("BreakPoints.Rdata"))
 ```
 
-# Unaligned and unmapped regions
+See `vignette("LoadGenomicBreaks", package = "OikSyntenies")` for how the
+different GBreaks objects are prepared.
 
-```{r unal_unmap}
-unal  <- sapply(gbs, cleanGaps) |> SimpleList()
-unal[ 1:5]  <- sapply(unal[ 1:5],  flagLongShort, longShort$Oki)
-unal[ 6:10] <- sapply(unal[ 6:10], flagLongShort, longShort$Osa)
-unal[11:15] <- sapply(unal[11:15], flagLongShort, longShort$Bar)
-
-unmap <- sapply(coa, cleanGaps) |> SimpleList()
-unmap[ 1:5]  <- sapply(unmap[ 1:5],  flagLongShort, longShort$Oki)
-unmap[ 6:10] <- sapply(unmap[ 6:10], flagLongShort, longShort$Osa)
-unmap[11:15] <- sapply(unmap[11:15], flagLongShort, longShort$Bar)
+```{r number_of_regions}
+sapply(gbs, length)
+sapply(unal, length)
+sapply(coa, length)
+sapply(unmap, length)
+sapply(coa2, length)
 ```
 
 # Precompute widths
@@ -126,7 +123,7 @@ gg_freq_poly(widths$unal |> subset(chr == "chr1")) +
   ggtitle("Distribution of unaligned regions width on chr1 before collapsing, split by genome pair")
 ```
 
-## Coalesced regions
+## Mapped (coalesced) regions
 
 After coalescing, width distribution becomes clearly bimodal, when faceted by
 chromosome and arm type.  There is a small peak under 500 bp, found on all arms
@@ -150,14 +147,6 @@ Therefore, if the first peak represents events that we do not want to consider
 breaking synteny (either alignment artefacts or insertion/transpositions of
 short mobile elements), we can re-coalesce once after removing the shortest
 intervals.
-
-The computation is done in `vignette("LoadGenomicBreaks", package = "OikSyntenies")`
-
-```{r double_coalescing_algorithm}
-sapply(gbs, length)
-sapply(coa, length)
-sapply(coa2, length)
-```
 
 ## Double-coalesced regions
 
