@@ -148,6 +148,21 @@ breaking synteny (either alignment artefacts or insertion/transpositions of
 short mobile elements), we can re-coalesce once after removing the shortest
 intervals.
 
+## Unmapped regions
+
+```{r width_of_unmapped_regions}
+gg_freq_poly(widths$unmap) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of widths of ummapped regions, split by arm.")
+
+gg_freq_poly(widths$unmap |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of widths of unmapped regions on chr1 after collapsing, split by genome pair") +
+  geom_vline(xintercept = 500)
+```
+
 ## Double-coalesced regions
 
 ```{r re_coalesce}
