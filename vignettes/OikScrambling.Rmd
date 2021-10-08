@@ -54,25 +54,15 @@ have it:
 install.packages("BSgenome.Odioica.local.OKI2018.I69", repos="https://oist.github.io/plessy_oikgenomes_drat/")
 ```
 
-```{r load_BSgenome_packages}
-# These will need to be installed by the user
-library("BSgenome.Odioica.local.OKI2018.I69")
-library("BSgenome.Odioica.local.OSKA2016v1.9")
-library("BSgenome.Odioica.local.Bar2.p4")
-library("BSgenome.Odioica.local.KUM.M3")
-library("BSgenome.Odioica.local.AOM.5")
-library("BSgenome.Odioica.local.Odioica.reference.v3.0")
-```
+The accessory function `OikScrambling:::loadAllGenomes()` attaches `BSgenome`
+packages in the session and outputs a `SimpleList` containing references to
+the `BSgenome` objects for convenience, such as easy looping, and tab-completion
+to show the available objects.
 
-For convenience (such as easy looping, and tab-completion to show the available
-objects), we create a `genomes` list containing all the genomes.
+```{r load_genomes}
+OikScrambling:::loadAllGenomes
 
-```{r genomes_object}
-genomes <- SimpleList(
-  # Chromosome assemblies
-  Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
-  # Less contiguous assemblies
-  Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
+genomes <- (genomes <- OikScrambling:::loadAllGenomes())
 
 ## Genome lengths
 (genome.lengths <- sapply(genomes, \(g) sum(seqlengths(seqinfo(g)))))
