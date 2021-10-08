@@ -242,21 +242,7 @@ Interval regions interrupt alignments or colinearity.  What do they contain ?
 ## Unaligned regions
 
 ```{r unaligned_regions}
-reps <- rtracklayer::import(system.file("extdata/Annotations/OKI2018_I69.v2/OKI2018_I69.repeats.gff", package = "BreakpointsData"))
-reps$Class <- reps$Target |>
-  sub(pat = '".*', rep = "") |>
-  sub(pat = "Motif:", rep = "") |>
-  sub(pat = "\\(.+)n", rep = "tandem") |>
-  sub(pat = "_family.*", rep = "") |>
-  sub(pat = "SINE.*", rep = "SINE") |>
-  sub(pat = "i69_juicer.*", rep = "unknown") |>
-  sub(pat = ".*-rich", rep = "LowComplexity") |>
-  sub(pat = "rnd.*", rep = "rnd") |>
-  factor()
-
-table(reps$Class)
-
-reps.reduced <- reduce(reps, ignore.strand = TRUE)
+reps.reduced <- reduce(reps$Oki, ignore.strand = TRUE)
 # They are short.
 summary(width(reps.reduced))
 
