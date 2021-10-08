@@ -59,11 +59,11 @@ makeWidthsDF <- function (objList) {
   }) |> do.call(what=rbind)
 }
 
-widths$gbs    <- makeWidthsDF(gbs)
-widths$unal   <- makeWidthsDF(unal)
-widths$coa    <- makeWidthsDF(coa)
-widths$unmap  <- makeWidthsDF(unmap)
-widths$coa2   <- makeWidthsDF(coa2)
+widths$gbs    <- makeWidthsDF(gbs)   |> tibble::as_tibble()
+widths$unal   <- makeWidthsDF(unal)  |> tibble::as_tibble()
+widths$coa    <- makeWidthsDF(coa)   |> tibble::as_tibble()
+widths$unmap  <- makeWidthsDF(unmap) |> tibble::as_tibble()
+widths$coa2   <- makeWidthsDF(coa2)  |> tibble::as_tibble()
 ```
 
 # Width distribution of aligned and mapped regions
@@ -75,8 +75,8 @@ collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
 answer is _no_.
 
 ```{r width_after_coalescing}
-gg_freq_poly <- function(DF) {
-    ggplot(DF |> as("data.frame")) +
+gg_freq_poly <- function(tibble) {
+    ggplot(tibble) +
     aes(width) +
     geom_freqpoly() +
     scale_x_log10()
