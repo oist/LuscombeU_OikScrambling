@@ -103,6 +103,18 @@ gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             Bar2
 gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 Bar2_p4,     OdB3,          longShort$Bar)
 ```
 
+Unaligned regions
+-----------------
+
+Note that the unaligned regions are strandless by definition.
+
+```{r unal}
+unal  <- sapply(gbs, cleanGaps) |> SimpleList()
+unal[ 1:5 ] <- sapply(unal[ 1:5 ], flagLongShort, longShort$Oki)
+unal[ 6:10] <- sapply(unal[ 6:10], flagLongShort, longShort$Osa)
+unal[11:15] <- sapply(unal[11:15], flagLongShort, longShort$Bar)
+```
+
 Coalescing alignments
 ---------------------
 
@@ -111,6 +123,19 @@ coa <- sapply(gbs, coalesce_contigs) |> SimpleList()
 coa[ 1:5]  <- sapply(coa[ 1:5],  flagLongShort, longShort$Oki)
 coa[ 6:10] <- sapply(coa[ 6:10], flagLongShort, longShort$Osa)
 coa[11:15] <- sapply(coa[11:15], flagLongShort, longShort$Bar)
+```
+
+Unmapped regions
+----------------
+
+We can not call them “uncoalesced” because this would also qualify aligned
+regions that were not colinear with any other region.
+
+```{r unmap}
+unmap <- sapply(coa, cleanGaps) |> SimpleList()
+unmap[ 1:5 ] <- sapply(unmap[ 1:5 ], flagLongShort, longShort$Oki)
+unmap[ 6:10] <- sapply(unmap[ 6:10], flagLongShort, longShort$Osa)
+unmap[11:15] <- sapply(unmap[11:15], flagLongShort, longShort$Bar)
 ```
 
 Coalesce again
@@ -123,6 +148,19 @@ coa2 <- sapply(coa, coalesce_contigs, minwidth = 500) |> SimpleList()
 coa2[ 1:5]  <- sapply(coa2[ 1:5],  flagLongShort, longShort$Oki)
 coa2[ 6:10] <- sapply(coa2[ 6:10], flagLongShort, longShort$Osa)
 coa2[11:15] <- sapply(coa2[11:15], flagLongShort, longShort$Bar)
+```
+
+Coalesce within chromosomes
+---------------------------
+
+The idea is that if colinearity is only lost because of a translocation to
+another chromosome, then it is fine.
+
+```{r coalesce_by_chr, cache=TRUE, dependson="GBreaks_object"}
+gbs$Oki_Kum -> x
+gbl <- split(x, seqnames(x), drop=T)
+gbl <- endoapply(gbl, coalesce_contigs)
+unlist(gbl)
 ```
 
 Numbers of blocks
@@ -157,8 +195,8 @@ Save data
 =========
 
 ```{r save_data}
-save(gbs, coa, coa2, longShort, file = "BreakPoints.Rdata")
-system("echo 'af071e1dc125ec980aadbb7d0ca85fc0  BreakPoints.Rdata' | md5sum -c", intern = TRUE)
+save(gbs, unal, coa, unmap, coa2, longShort, file = "BreakPoints.Rdata")
+system("echo 'd7345eb72bd7166f0f7e716c5817b14c  BreakPoints.Rdata' | md5sum -c", intern = TRUE)
 ```
 
 Session information
