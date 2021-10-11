@@ -119,8 +119,21 @@ index is that it requires that at least the _query_ genome is a complete
 chromosome assembly.
 
 ```{r synteny_index}
-sapply(gbs, synteny_index)
-sapply(gbs, \(g) swap(g) |> synteny_index())
+pairs2table6x3 <- function (x) {
+  x <- as.list(x)
+  cbind(
+    Oki = c(Oki = NA,        Osa = x$Osa_Oki, Bar = x$Bar_Oki),
+    Kum = c(Oki = x$Oki_Kum, Osa = x$Osa_Kum, Bar = x$Bar_Kum),
+    Osa = c(Oki = x$Oki_Osa, Osa = NA,        Bar = x$Bar_Osa),
+    Aom = c(Oki = x$Oki_Aom, Osa = x$Osa_Aom, Bar = x$Bar_Aom),
+    Bar = c(Oki = x$Oki_Bar, Osa = x$Osa_Bar, Bar = NA       ),
+    Nor = c(Oki = x$Oki_Nor, Osa = x$Osa_Nor, Bar = x$Bar_Nor)
+  )
+}
+
+sapply(gbs, synteny_index) |> pairs2table6x3() |> round(2)
+
+sapply(gbs, \(g) swap(g) |> synteny_index())  |> pairs2table6x3() |> round(2)
 ```
 
 # Correlation
@@ -132,8 +145,8 @@ intended to be more robust to the presence of uncollapsed haplotypes in the
 _query_ genome but probably needs further testing.
 
 ```{r correlation_index}
-sapply(gbs, correlation_index)
-sapply(gbs, \(g) swap(g) |> correlation_index())
+sapply(gbs, correlation_index) |> pairs2table6x3() |> round(2)
+sapply(gbs, \(g) swap(g) |> correlation_index()) |> pairs2table6x3() |> round(2)
 ```
 
 # Gene Order Conservation
@@ -141,6 +154,6 @@ sapply(gbs, \(g) swap(g) |> correlation_index())
 See `?GOC` for details.
 
 ```{r goc_index}
-sapply(gbs, GOC)
-sapply(gbs, \(g) swap(g) |> GOC())
+sapply(gbs, GOC) |> pairs2table6x3() |> round(2)
+sapply(gbs, \(g) swap(g) |> GOC()) |> pairs2table6x3() |> round(2)
 ```
