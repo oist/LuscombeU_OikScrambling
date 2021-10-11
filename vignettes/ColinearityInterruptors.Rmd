@@ -12,52 +12,26 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup}
+```{r setup, echo=FALSE}
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
+# Load pacakges and data
 
-# Load pacakges
+See the `vignette("OikScrambling", package = "OikScrambling")` for general
+details on package and data load.
 
-See the `vignette("OikScrambling", package = "OikScrambling")` for details
-on package and data load.
+See `vignette("LoadGenomicBreaks", package = "OikSyntenies")` for how the
+different `GBreaks` objects are prepared.
 
-## Core packages that provide functions we use a lot.
-
-```{r loadlib, echo=T, results='hide'}
+```{r load_pacakges_and_data}
 suppressPackageStartupMessages({
   library('GenomicBreaks')
-  library('BSgenome')
   library('GenomicFeatures')
   library('ggplot2')
+  library("BreakpointsData")
 })
-requireNamespace("plyranges")
-```
-
-## BSgenome packages
-
-```{r load_BSgenome_packages}
-# These will need to be installed by the user
-library("BSgenome.Odioica.local.OKI2018.I69")
-library("BSgenome.Odioica.local.OSKA2016v1.9")
-library("BSgenome.Odioica.local.Bar2.p4")
-library("BSgenome.Odioica.local.KUM.M3")
-library("BSgenome.Odioica.local.AOM.5")
-library("BSgenome.Odioica.local.Odioica.reference.v3.0")
-
-genomes <- SimpleList(
-  # Chromosome assemblies
-  Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
-  # Less contiguous assemblies
-  Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
-```
-
-## GenomicBreaks objects
-
-The core data is a list of `GenomicBreaks::GBreaks()` objects that is built
-by a separate vignette (`vignette("Load genomic break data"), package="OikSyntenies"`).
-
-```{r GBreaks_object}
+(genomes <- OikScrambling:::loadAllGenomes())
 load("BreakPoints.Rdata")
 ```
 
