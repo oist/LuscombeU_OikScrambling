@@ -265,26 +265,27 @@ Summary
 -------
 
 ```{r summary}
-df <- rbind(
+df <- cbind(
   gbs = sapply(gbs, length),
   coa = sapply(coa, length),
   coa2 = sapply(coa2, length)
-) |> as.data.frame()
+) |> as.data.frame() |>
+  dplyr::arrange(gbs = gbs - coa - coa2, coa = coa - coa2)
 
-df$what <- row.names(df)
-df <- reshape2::melt(df)
+df$pair <- row.names(df)
 
-ggplot(df) +
-  aes(variable, value, fill = what) +
+ggplot(df |> tidyr::pivot_longer(!pair)) +
+  aes(pair, value, fill = name) +
   geom_bar( stat = "identity" ) +
-  ggplot2::coord_flip()
+  ggplot2::coord_flip() +
+  ggtitle("Cumulative plot (gbs ⊃ coa ⊃ coa2) of the computed genomic regions")
 ```
 
 Save data
 =========
 
 ```{r save_data}
-save(gbs, unal, coa, unmap, coa2, longShort, file = "BreakPoints.Rdata")
+save(gbs, unal, coa, unmap, unalMap, coa2, longShort, file = "BreakPoints.Rdata")
 system("echo 'c042554ce0eaed4e2d38235c075edf92  BreakPoints.Rdata' | md5sum -c", intern = TRUE)
 ```
 
