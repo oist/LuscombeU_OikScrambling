@@ -243,9 +243,9 @@ Interval regions interrupt alignments or colinearity.  What do they contain ?
 ## Unaligned regions
 
 ```{r unaligned_regions}
-reps.reduced <- reduce(reps$Oki, ignore.strand = TRUE)
+reps.reduced <- sapply(reps, reduce, ignore.strand = TRUE)
 # They are short.
-summary(width(reps.reduced))
+sapply(reps.reduced, \(gr) summary(width(gr)))
 
 Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
 
