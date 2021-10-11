@@ -191,56 +191,45 @@ gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
 
 # Paired comparison of widths in target and query genomes.
 
+
 ```{r paired_width_analysis}
 GBreaks2widthTibble <- function(gb, pair = NULL) {
   df <- as.data.frame(gb)
-  tb <- tibble::tibble(target = df$width, query = df$query.width, pair = pair)
+  if(is.null(df$query.rep)) df$query.rep <- NA
+  tb <- tibble::tibble(target     = df$width,      query     = df$query.width,
+                       target.rep = is.na(df$rep), query.rep = is.na(df$query.rep),
+                       pair = pair)
 }
 
-tb <- gbs$Oki_Osa |> GBreaks2widthTibble(pair = "Oki_Osa")
+gbs.w2w     <- do.call(rbind, lapply(names(gbs), \(name) GBreaks2widthTibble(gbs[[name]],     pair = name)))
+unalMap.w2s <- do.call(rbind, lapply(names(gbs), \(name) GBreaks2widthTibble(unalMap[[name]], pair = name)))
 
-ggplot(tb) +
-  aes(target, query) +
-  geom_point() +
-  geom_density_2d() +
-  scale_x_log10() +
-  scale_y_log10() +
+ggPlotW2W <- function(tibble) {
+  ggplot(tibble) +
+    aes(target, query) +
+    geom_point(alpha = 0.05) +
+    geom_density_2d() +
+    scale_x_log10() +
+    scale_y_log10() +
+    facet_wrap(~pair)
+}
+
+ggPlotW2W(gbs.w2w) +
   ggtitle("Width of the target and query aligned regions")
 
-x <- filterColinearRegions(flagColinearAlignments(gbs$Oki_Osa))
-# Need to substract 1 because some ranges are adjascent (no gap)
-z <- GBreaks(target = cleanGaps(x-1), query = cleanGaps(x$query -1))
+ggPlotW2W(unalMap.w2s) +
+  ggtitle("Width of the target and query mapped unaligned regions")
 
-z$reps <- FALSE
-z$reps[unique(queryHits(findOverlaps(z, reps)))] <- TRUE
+ggPlotW2W(gbs.w2w) +
+  facet_wrap(~query.rep + target.rep) +
+  ggtitle("Width of the target and query aligned regions, matching or not matching repeats")
 
-y <- sort(c(x,z), ignore.strand = TRUE)
-names(y) <- NULL
-as.data.frame(y) |> head(60)
+ggPlotW2W(unalMap.w2s) +
+  facet_wrap(~query.rep + target.rep) +
+  ggtitle("Width of the target and query mapped unaligned regions, matching or not matching repeats")
 
-tb2 <- z|> GBreaks2widthTibble(pair = "Oki_Osa")
-tb2$reps <- z$reps
-
-ggplot(tb2) +
-  aes(target, query) +
-  geom_point() +
-  geom_density_2d() +
-  scale_x_log10() +
-  scale_y_log10() +
-  ggtitle("Width of the target and query unaligned regions")
-
-ggplot(tb2) +
-  aes(target, query) +
-  geom_point() +
-  geom_density_2d(aes(col = reps)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  facet_wrap(~reps) +
-  ggtitle("Width of the target and query unaligned regions, matching or not matching repeats")
-
-
-ggplot(tb2) +
-  aes(target / query, col = reps) +
+ggplot(unalMap.w2s) +
+  aes(target / query, col = paste(target.rep, query.rep) ) +
   scale_x_log10() +
   geom_freqpoly() +
   ggtitle("In presence of a repeat, target width tends to be longer than query") +
