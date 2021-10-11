@@ -33,14 +33,6 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 See `vignette("LoadGenomicBreaks", package = "OikSyntenies")` for how the
 different GBreaks objects are prepared.
 
-```{r number_of_regions}
-sapply(gbs, length)
-sapply(unal, length)
-sapply(coa, length)
-sapply(unmap, length)
-sapply(coa2, length)
-```
-
 # Precompute widths
 
 ```{r pre_compute_widths_object}
@@ -51,16 +43,17 @@ makeWidthsDF <- function (objList) {
     DF$name  <- name
     DF$width <- width(objList[[name]])
     DF$chr   <- seqnames(objList[[name]]) |>  sub(pat = "Chr", rep = "chr")
-    DF$query <- DF$score <- NULL
+    DF$query <- DF$score <- DF$rep <- NULL
     DF
   }) |> do.call(what=rbind)
 }
 
-widths$gbs    <- makeWidthsDF(gbs)   |> tibble::as_tibble()
-widths$unal   <- makeWidthsDF(unal)  |> tibble::as_tibble()
-widths$coa    <- makeWidthsDF(coa)   |> tibble::as_tibble()
-widths$unmap  <- makeWidthsDF(unmap) |> tibble::as_tibble()
-widths$coa2   <- makeWidthsDF(coa2)  |> tibble::as_tibble()
+widths$gbs     <- makeWidthsDF(gbs)     |> tibble::as_tibble()
+widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
+widths$coa     <- makeWidthsDF(coa)     |> tibble::as_tibble()
+widths$unmap   <- makeWidthsDF(unmap)   |> tibble::as_tibble()
+widths$unalMap <- makeWidthsDF(unalMap) |> tibble::as_tibble()
+widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
 ```
 
 # Width distribution of aligned and mapped regions
@@ -79,11 +72,12 @@ gg_freq_poly <- function(tibble) {
     scale_x_log10()
 }
 
-gg_freq_poly(rbind(widths$gbs   |> as.data.frame()|> dplyr::mutate(what = "aligned"),
-                   widths$unal  |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
-                   widths$coa   |> as.data.frame()|> dplyr::mutate(what = "mapped"),
-                   widths$unmap |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
-                   widths$coa2  |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))) +
+gg_freq_poly(rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
+                   widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
+                   widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
+                   widths$unalMap |> as.data.frame()|> dplyr::mutate(what = "mapped unaligned"),
+                   widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
+                   widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))) +
   aes(col = what) +
   geom_freqpoly() +
   scale_x_log10() +
@@ -157,6 +151,24 @@ gg_freq_poly(widths$unmap) +
   ggtitle("Distribution of widths of ummapped regions, split by arm.")
 
 gg_freq_poly(widths$unmap |> subset(chr == "chr1")) +
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of widths of unmapped regions on chr1 after collapsing, split by genome pair") +
+  geom_vline(xintercept = 500)
+```
+
+
+## Mapped unaligned regions
+
+Note the short peak when comparing pairs within the same population.
+
+```{r width_of_unmapped_regions}
+gg_freq_poly(widths$unalMap) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of widths of mapped unaligned regions, split by arm.")
+
+gg_freq_poly(widths$unalMap |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
   ggtitle("Distribution of widths of unmapped regions on chr1 after collapsing, split by genome pair") +
