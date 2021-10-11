@@ -45,6 +45,7 @@ interrupting colinearity?
 plotApairOfChrs(coa$Oki_Kum, "chr1", main = "Oki – Kum")
 ```
 
+In this vignette, we look at a couple of example regions in details
 
 # Region of Interest (ROI) 1
 
@@ -64,13 +65,15 @@ How about the second alignment pair, mapping 226 bases of `contig_3_1` to the
 short arm; is it real ?
 
 ```{r re_align_a_clolinearity_breaker}
-coa$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_3_1", end(query) <= 21079)
+coa$Oki_Kum |>
+  plyranges::filter(seqnames(query) == "contig_3_1", end(query) <= 21079) |>
+  plyranges::arrange(start(query))
 coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = list(c(8086429, 8104950), c(1, 21079)), dna_seg_scale=TRUE, main = "chr1 vs contig_3_1 near ROI 1")
 coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_27_1", xlim = list(c(3838658, 3881203), c(3595219, 3630623)), dna_seg_scale=TRUE)
 
 # Good match where reported
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), genomes$Oki$chr1[3870099:3870324], type="local")
-pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16000-17000:-")), genomes$Oki$chr1[3870000:3871000], type="global") |> writePairwiseAlignments()
+pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-") + 50), genomes$Oki$chr1[(3870099 -50):(3870324 + 50)], type="global") |> writePairwiseAlignments()
 
 # No good match between the flanking pairs.
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:+")), genomes$Oki$chr1[8086429:8104950], type="local")
