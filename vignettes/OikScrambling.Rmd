@@ -84,33 +84,7 @@ install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgeno
 ```
 
 ```{r load_annotations, warning=FALSE}
-annots <- SimpleList()
-
-gff2txdb <- function(file, genome) {
-  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
-  tx <- rtracklayer::import.gff(file)
-  tx <- tx[seqnames(tx) %in% seqnames(genome)]
-  tx <- GRanges(tx, seqinfo = seqinfo(genome))
-  tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
-}
-
-gff2txdb_Norway <- function(file, genome) {
-  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
-  tx <- rtracklayer::import.gff(file)
-  tx <- tx[!is.na(tx$mRNA)]
-  # Remove "scaffoldA" objects in the OdB3 annotation
-  tx <- tx[seqnames(tx) %in% seqnames(genome)]
-  tx$ID <- tx$mRNA
-  tx <- GRanges(tx, seqinfo = seqinfo(genome))
-  tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
-}
-
-annots$Oki <- gff2txdb("OKI2018_I69.v2/OKI2018_I69.v2.gm.gff.gz",  OKI2018_I69)
-annots$Osa <- gff2txdb("OSKA2016v1.9/OSKA2016v1.9.gm.gff.gz",      OSKA2016v1.9)
-annots$Bar <- gff2txdb("Bar2_p4.Flye/Bar2_p4.Flye.gm.gff.gz",      Bar2_p4)
-annots$Kum <- gff2txdb("KUM-M3-7f/KUM-M3-7f.gm.gff.gz",            KUM_M3)
-annots$Aom <- gff2txdb("AOM-5-5f/AOM-5-5f.gm.gff.gz",              AOM_5)
-annots$Nor <- gff2txdb_Norway("OdB3/Oikopleura_annot_v1.0.gff.gz", OdB3)
+(annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
 ```
 
 ### GenomicBreaks object
@@ -144,6 +118,12 @@ in the `longShort` list.
 ```{r long_and_short_arms}
 longShort
 longShort$Oki
+```
+
+### Repeats
+
+```{r loadAllRepeats}
+(reps <- OikScrambling:::loadAllRepeats())
 ```
 
 ## Breakpoints and alignment stops
@@ -232,21 +212,22 @@ See `vignette("RegionWidths"), package="OikSyntenies"`.
 
 ```{r repeat_annotations}
 reps_in <- list()
-reps_in$total <- sapply(Oki_pairs, \(.) table(reps$Class)) 
+Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
+reps_in$total <- sapply(Oki_pairs, \(.) table(reps$Oki$Class)) 
 reps_in$unal <- sapply(unal[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
     table(ov$Class)
   })
 reps_in$gbs <- sapply(gbs[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
     table(ov$Class)
   })
-reps_in$unmap <- sapply(unal_c[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+reps_in$unmap <- sapply(unal[Oki_pairs], \(gb) {
+    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
     table(ov$Class)
   })
 reps_in$map <- sapply(coa[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
     table(ov$Class)
   })
 
@@ -346,44 +327,6 @@ where `+ - +` was `+ - - +` before collapsing.
 sapply(gbs, function(gb) sum(flagInversions(gb)$inv))
 sapply(coa, function(gb) sum(flagInversions(gb)$inv))
 sapply(coa2, function(gb) sum(flagInversions(gb)$inv))
-```
-
-### Width of inverted regions
-
-Many inversions are shorter than 1 kbp.
-
-```{r width_of_inversions}
-invs <- sapply(coa, function(gb) filterInversions(flagInversions(gb))) |> SimpleList()
-sapply(invs, length)
-
-# Sanity check that we detect inversions on both strands
-sapply(invs, \(x) {summary(decode(strand(x)))})
-
-widths$invs <- makeWidthsDF(invs)
-
-gg_freq_poly(widths$invs) +
-  aes(col=Arm) +
-  facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of alignment widths for inverted regions, split by arm.") +
-  geom_vline(xintercept = 1000)
-```
-
-### Width of gaps next to the inverted regions
-
-```{r width_of_inversions}
-inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
-inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$Oki)
-inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$Osa)
-inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar)
-sapply(inv.lgaps, length)
-
-widths$invs.lgaps <- makeWidthsDF(inv.lgaps)
-
-gg_freq_poly(widths$invs.lgaps) +
-  aes(col=Arm) +
-  facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution widths of left gaps next to inverted regions, split by arm.") +
-  geom_vline(xintercept = 1000)
 ```
 
 ### Motif search
