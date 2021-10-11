@@ -12,7 +12,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Introduction
+# Purpose
 
 We want to put numbers on visual impressiosn such as:
 
@@ -21,94 +21,17 @@ We want to put numbers on visual impressiosn such as:
  - Aligned regions are more "off the diagonal" on short arms than on long arms.
  - …
 
-# Load pacakges
+# Load R pacakges and data
 
-## Core packages that provide functions we use a lot.
-
-```{r loadlib, echo=T, results='hide'}
-suppressPackageStartupMessages({
-  library('GenomicBreaks')
-  library('BSgenome')
-  library('GenomicFeatures')
-  library('ggplot2')
-  library("BiocParallel")
-})
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling:::loadAllGenomes())
+(annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
+(load("BreakPoints.Rdata"))
 ```
 
-## BSgenome packages
-
-```{r load_BSgenome_packages}
-# These will need to be installed by the user
-library("BSgenome.Odioica.local.OKI2018.I69")
-library("BSgenome.Odioica.local.OSKA2016v1.9")
-library("BSgenome.Odioica.local.Bar2.p4")
-library("BSgenome.Odioica.local.KUM.M3")
-library("BSgenome.Odioica.local.AOM.5")
-library("BSgenome.Odioica.local.Odioica.reference.v3.0")
-```
-
-For convenience (such as easy looping, and tab-completion to show the available
-objects), we create a `genomes` list containing all the genomes.
-
-```{r genomes_object}
-genomes <- SimpleList(
-  # Chromosome assemblies
-  Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
-  # Less contiguous assemblies
-  Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
-```
-
-# Load data
-
-## Genome annotations.
-
-The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
-distributed in the same drat repository as the alignment data.
-
-```
-install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgenomes_drat/")
-```
-
-```{r load_annotations, warning=FALSE}
-annots <- SimpleList()
-
-gff2txdb <- function(file, genome) {
-  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
-  tx <- rtracklayer::import.gff(file)
-  tx <- tx[seqnames(tx) %in% seqnames(genome)]
-  tx <- GRanges(tx, seqinfo = seqinfo(genome))
-  tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
-}
-
-gff2txdb_Norway <- function(file, genome) {
-  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
-  tx <- rtracklayer::import.gff(file)
-  tx <- tx[!is.na(tx$mRNA)]
-  # Remove "scaffoldA" objects in the OdB3 annotation
-  tx <- tx[seqnames(tx) %in% seqnames(genome)]
-  tx$ID <- tx$mRNA
-  tx <- GRanges(tx, seqinfo = seqinfo(genome))
-  tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
-}
-
-annots$Oki <- gff2txdb("OKI2018_I69.v2/OKI2018_I69.v2.gm.gff.gz",  OKI2018_I69)
-annots$Osa <- gff2txdb("OSKA2016v1.9/OSKA2016v1.9.gm.gff.gz",      OSKA2016v1.9)
-annots$Bar <- gff2txdb("Bar2_p4.Flye/Bar2_p4.Flye.gm.gff.gz",      Bar2_p4)
-annots$Kum <- gff2txdb("KUM-M3-7f/KUM-M3-7f.gm.gff.gz",            KUM_M3)
-annots$Aom <- gff2txdb("AOM-5-5f/AOM-5-5f.gm.gff.gz",              AOM_5)
-annots$Nor <- gff2txdb_Norway("OdB3/Oikopleura_annot_v1.0.gff.gz", OdB3)
-```
-
-## GenomicBreaks objects
-
-```{r GBreaks_object}
-load("BreakPoints.Rdata")
-gbs$Oki_Osa
-gbs$Oki_Osa$query
-
-longShort
-longShort$Oki
-```
+See `vignette("LoadGenomicBreaks", package = "OikSyntenies")` for how the
+different GBreaks objects are prepared.
 
 # Synteny index
 
