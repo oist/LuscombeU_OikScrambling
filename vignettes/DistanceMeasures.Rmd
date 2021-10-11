@@ -131,9 +131,10 @@ pairs2table6x3 <- function (x) {
   )
 }
 
-sapply(gbs, synteny_index) |> pairs2table6x3() |> round(2)
+pairs2Kable6x3 <- function (df) df |> pairs2table6x3() |> round(2) |> knitr::kable()
 
-sapply(gbs, \(g) swap(g) |> synteny_index())  |> pairs2table6x3() |> round(2)
+sapply(gbs, synteny_index) |> pairs2Kable6x3()
+sapply(gbs, \(g) swap(g) |> synteny_index()) |> pairs2Kable6x3()
 ```
 
 # Correlation
@@ -145,8 +146,8 @@ intended to be more robust to the presence of uncollapsed haplotypes in the
 _query_ genome but probably needs further testing.
 
 ```{r correlation_index}
-sapply(gbs, correlation_index) |> pairs2table6x3() |> round(2)
-sapply(gbs, \(g) swap(g) |> correlation_index()) |> pairs2table6x3() |> round(2)
+sapply(gbs, correlation_index) |> pairs2Kable6x3()
+sapply(gbs, \(g) swap(g) |> correlation_index()) |> pairs2Kable6x3()
 ```
 
 # Gene Order Conservation
@@ -154,6 +155,6 @@ sapply(gbs, \(g) swap(g) |> correlation_index()) |> pairs2table6x3() |> round(2)
 See `?GOC` for details.
 
 ```{r goc_index}
-sapply(gbs, GOC) |> pairs2table6x3() |> round(2)
-sapply(gbs, \(g) swap(g) |> GOC()) |> pairs2table6x3() |> round(2)
+sapply(gbs, GOC) |> pairs2Kable6x3()
+sapply(gbs, \(g) swap(g) |> GOC()) |> pairs2Kable6x3()
 ```
