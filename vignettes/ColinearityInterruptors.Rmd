@@ -31,8 +31,9 @@ suppressPackageStartupMessages({
   library('ggplot2')
   library("BreakpointsData")
 })
-(genomes <- OikScrambling:::loadAllGenomes())
+genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
+reps <- OikScrambling:::loadAllRepeats()
 ```
 
 # The problem:
@@ -82,8 +83,12 @@ pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), geno
 
 Yes, the alignment looks real!
 
+# Region of Interest (ROI) 2
 
-```{r}
+Let's look at the area `chr1:8080000-12900000` covered by `contig_3_1`.  Can
+we coalesce it once we only keep the paired matches?  The answer is no…
+
+```{r ROI2}
 coa$Oki_Kum |> flagAll() |> plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000)
 
 # Even removing all but the best match on the query is not enough to collapse all
@@ -92,9 +97,16 @@ coa$Oki_Kum |>
   plyranges::filter(seqnames(query) == "contig_3_1") |>
   coalesce_contigs() |> flagAll() |> head(10)
 
-# Let's look at the inversion at the beginning; is it real ?
 coa$Oki_Kum |>
-  flagAll() |> flagColinearAlignments(details = TRUE) |>
-  plyranges::filter(seqnames == "chr1", start >= 8086429, end <= 8883052) |> head(10)
+  plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000) |>
+  plyranges::filter(seqnames(query) == "contig_3_1")|>
+  plotApairOfChrs(dna_seg_scale=TRUE)
 ```
 
+# Well-aligned repeats are kept in the one-to-one graph (Region of interest 3)
+
+```{r ROI3}
+gbs$Oki_Kum[1] |> as.data.frame()
+pairwiseAlignment(genomes$Kum$contig_10_1[52244:60120], genomes$Oki$chr1[7785:15657], type="global")
+subsetByOverlaps(reps$Oki, gbs$Oki_Kum[1])
+```
