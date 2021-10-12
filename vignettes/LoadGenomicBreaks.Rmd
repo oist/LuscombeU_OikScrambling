@@ -94,7 +94,7 @@ load_genomic_breaks_ <- function(file, genomeT, genomeQ, longShort=NULL) {
 annotateWithReps.GRanges <- function(gr, rep) {
   o         <- findOverlaps(gr, rep)
   o.grouped <- tapply(subjectHits(o), queryHits(o), c)
-  o.names   <- sapply(o.grouped, \(x) rep[x]$Class |> unique() |> as.character())
+  o.names   <- BiocParallel::bplapply(o.grouped, \(x) rep[x]$Class |> unique() |> as.character())
   gr$rep <- NA
   gr$rep[as.integer(names(o.names))] <- o.names
   gr
@@ -135,24 +135,24 @@ Unaligned regions
 Note that the unaligned regions are strandless and unpaired by definition.
 
 ```{r unal}
-unal  <- sapply(gbs, cleanGaps) |> SimpleList()
-unal[ 1:5 ] <- sapply(unal[ 1:5 ], flagLongShort, longShort$Oki)
-unal[ 6:10] <- sapply(unal[ 6:10], flagLongShort, longShort$Osa)
-unal[11:15] <- sapply(unal[11:15], flagLongShort, longShort$Bar)
+unal  <- BiocParallel::bplapply(gbs, cleanGaps) |> SimpleList()
+unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], flagLongShort, longShort$Oki)
+unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], flagLongShort, longShort$Osa)
+unal[11:15] <- BiocParallel::bplapply(unal[11:15], flagLongShort, longShort$Bar)
 
-unal[ 1:5 ] <- sapply(unal[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
-unal[ 6:10] <- sapply(unal[ 6:10], annotateWithReps.GRanges, reps$Osa)
-unal[11:15] <- sapply(unal[11:15], annotateWithReps.GRanges, reps$Bar)
+unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
+unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithReps.GRanges, reps$Osa)
+unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithReps.GRanges, reps$Bar)
 ```
 
 Coalescing alignments
 ---------------------
 
 ```{r coalescing_algorithm, cache=TRUE, dependson="GBreaks_object"}
-coa <- sapply(gbs, coalesce_contigs) |> SimpleList()
-coa[ 1:5]  <- sapply(coa[ 1:5],  flagLongShort, longShort$Oki)
-coa[ 6:10] <- sapply(coa[ 6:10], flagLongShort, longShort$Osa)
-coa[11:15] <- sapply(coa[11:15], flagLongShort, longShort$Bar)
+coa <- BiocParallel::bplapply(gbs, coalesce_contigs) |> SimpleList()
+coa[ 1:5]  <- BiocParallel::bplapply(coa[ 1:5],  flagLongShort, longShort$Oki)
+coa[ 6:10] <- BiocParallel::bplapply(coa[ 6:10], flagLongShort, longShort$Osa)
+coa[11:15] <- BiocParallel::bplapply(coa[11:15], flagLongShort, longShort$Bar)
 
 coa$Oki_Osa <- coa$Oki_Osa |> annotateWithReps.GBreaks(reps$Oki, reps$Osa)
 coa$Oki_Bar <- coa$Oki_Bar |> annotateWithReps.GBreaks(reps$Oki, reps$Bar)
@@ -177,15 +177,15 @@ We can not call them “uncoalesced” because this would also qualify aligned
 regions that were not colinear with any other region.
 
 ```{r unmap}
-unmap <- sapply(coa, cleanGaps) |> SimpleList()
+unmap <- BiocParallel::bplapply(coa, cleanGaps) |> SimpleList()
 
-unmap[ 1:5 ] <- sapply(unmap[ 1:5 ], flagLongShort, longShort$Oki)
-unmap[ 6:10] <- sapply(unmap[ 6:10], flagLongShort, longShort$Osa)
-unmap[11:15] <- sapply(unmap[11:15], flagLongShort, longShort$Bar)
+unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], flagLongShort, longShort$Oki)
+unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], flagLongShort, longShort$Osa)
+unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], flagLongShort, longShort$Bar)
 
-unmap[ 1:5 ] <- sapply(unmap[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
-unmap[ 6:10] <- sapply(unmap[ 6:10], annotateWithReps.GRanges, reps$Osa)
-unmap[11:15] <- sapply(unmap[11:15], annotateWithReps.GRanges, reps$Bar)
+unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
+unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithReps.GRanges, reps$Osa)
+unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithReps.GRanges, reps$Bar)
 ```
 
 Mapped unaligned regions
@@ -199,7 +199,7 @@ filterMappedUnaligned <- function(gb) {
   # Turning the sequence of [(TRUE)n, FALSE]n into indices.
   idx <- c(0, head(cumsum(!colinearRegions$colinear), -1))
   gbl <- split(colinearRegions, idx)
-  unalMap <- endoapply(gbl, \(gb) {
+  unalMap <- BiocParallel::bplapply(gbl, \(gb) {
     # Check strand
     onMinus <- all(strand(gb) == "-")
     # Need to subtract 1 because some ranges are adjacent (no gap)
@@ -210,11 +210,11 @@ filterMappedUnaligned <- function(gb) {
   unalMap
 }
 
-unalMap <- sapply(gbs, filterMappedUnaligned) |> as("SimpleList")
+unalMap <- BiocParallel::bplapply(gbs, filterMappedUnaligned) |> as("SimpleList")
 
-unalMap[ 1:5 ] <- sapply(unalMap[ 1:5 ], flagLongShort, longShort$Oki)
-unalMap[ 6:10] <- sapply(unalMap[ 6:10], flagLongShort, longShort$Osa)
-unalMap[11:15] <- sapply(unalMap[11:15], flagLongShort, longShort$Bar)
+unalMap[ 1:5 ] <- BiocParallel::bplapply(unalMap[ 1:5 ], flagLongShort, longShort$Oki)
+unalMap[ 6:10] <- BiocParallel::bplapply(unalMap[ 6:10], flagLongShort, longShort$Osa)
+unalMap[11:15] <- BiocParallel::bplapply(unalMap[11:15], flagLongShort, longShort$Bar)
 
 unalMap$Oki_Osa <- unalMap$Oki_Osa |> annotateWithReps.GBreaks(reps$Oki, reps$Osa)
 unalMap$Oki_Bar <- unalMap$Oki_Bar |> annotateWithReps.GBreaks(reps$Oki, reps$Bar)
@@ -241,10 +241,10 @@ Coalesce again
 See the Genomic Breaks vignette for justification.
 
 ```{r re_coalesce, cache=TRUE, dependson="coalescing_algorithm"}
-coa2 <- sapply(coa, coalesce_contigs, minwidth = 500) |> SimpleList()
-coa2[ 1:5]  <- sapply(coa2[ 1:5],  flagLongShort, longShort$Oki)
-coa2[ 6:10] <- sapply(coa2[ 6:10], flagLongShort, longShort$Osa)
-coa2[11:15] <- sapply(coa2[11:15], flagLongShort, longShort$Bar)
+coa2 <- BiocParallel::bplapply(coa, coalesce_contigs, minwidth = 500) |> SimpleList()
+coa2[ 1:5]  <- BiocParallel::bplapply(coa2[ 1:5],  flagLongShort, longShort$Oki)
+coa2[ 6:10] <- BiocParallel::bplapply(coa2[ 6:10], flagLongShort, longShort$Osa)
+coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
 ```
 
 Coalesce within chromosomes
