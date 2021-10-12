@@ -1,0 +1,175 @@
+---
+title: "Repeat regions"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Repeat regions}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+Regions matching repeat annotations in the _target_ or the _query_ genome.
+
+# Load R pacakges and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling:::loadAllGenomes())
+(annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
+(reps <- OikScrambling:::loadAllRepeats())
+(load("BreakPoints.Rdata"))
+```
+
+See `vignette("LoadGenomicBreaks", package = "OikSyntenies")` for how the
+different GBreaks objects are prepared.
+
+# Repeat
+
+```{r repeat_annotations}
+reps_in <- list()
+Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
+Osa_pairs <- c("Osa_Oki", "Osa_Bar", "Osa_Kum", "Osa_Aom", "Osa_Nor")
+Bar_pairs <- c("Bar_Oki", "Bar_Osa", "Bar_Kum", "Bar_Aom", "Bar_Nor")
+
+mkRepsIn <- function(pairs, reps) {
+  tableIntersectWithReps <- function(gb) {
+    ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
+    table(ov$Class)
+  }
+  reps_in <- list()
+  reps_in$total   <- sapply(        pairs , \(.) table(reps$Class))
+  reps_in$unal    <- sapply(unal   [pairs], tableIntersectWithReps)
+  reps_in$gbs     <- sapply(gbs    [pairs], tableIntersectWithReps)
+  reps_in$unmap   <- sapply(unmap  [pairs], tableIntersectWithReps)
+  reps_in$unalMap <- sapply(unalMap[pairs], tableIntersectWithReps)
+  reps_in$map     <- sapply(coa    [pairs], tableIntersectWithReps)
+  reps_in
+}
+
+reps_in_Oki <- mkRepsIn(Oki_pairs, reps$Oki)
+reps_in_Osa <- mkRepsIn(Osa_pairs, reps$Osa)
+reps_in_Bar <- mkRepsIn(Bar_pairs, reps$Bar)
+
+toLong <- function(m, Region = NULL) {
+  m <- tibble::as_tibble(m, rownames = "Class") |>
+    tidyr::pivot_longer(colnames(m))
+  if (! is.null(Region))
+    m <- dplyr::mutate(m, Region = Region)
+  m
+}
+
+reps_in_Oki.norm <- lapply(reps_in_Oki, \(x) x / reps_in_Oki$total)
+reps_in_Osa.norm <- lapply(reps_in_Osa, \(x) x / reps_in_Osa$total)
+
+toLong.reps <- function(reps_in)
+  rbind(
+    toLong(reps_in$unmap,   "unmap"),
+    toLong(reps_in$unalMap, "unalMap"),
+    toLong(reps_in$map,     "map"),
+    toLong(reps_in$gbs,     "gbs"),
+    toLong(reps_in$unal,    "unal")
+  )
+
+reps_in_Oki.long <- toLong.reps(reps_in_Oki)
+reps_in_Osa.long <- toLong.reps(reps_in_Osa)
+
+reps_in_Oki.norm.long <- toLong.reps(reps_in_Oki.norm)
+reps_in_Osa.norm.long <- toLong.reps(reps_in_Osa.norm)
+
+ggplot(reps_in_Oki.long) +
+  aes(Region, value) +
+  geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free")
+
+ggplot(reps_in_Osa.long) +
+  aes(Region, value) +
+  geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free")
+
+ggplot(reps_in_Oki.norm.long) +
+  aes(Region, value) +
+  geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free") +
+  ylab("Fraction overlaping") +
+  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Oki)")
+
+ggplot(reps_in_Osa.norm.long) +
+  aes(Region, value) +
+  geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free") +
+  ylab("Fraction overlaping") +
+  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Osa)")
+```
+
+# Reduced repeat set
+
+
+
+```{r}
+reps.reduced <- sapply(reps, reduce, ignore.strand = TRUE)
+# They are short.
+sapply(reps.reduced, \(gr) summary(width(gr)))
+```
+
+# Colinearity interruptors (unmapped regions ?)
+
+```{r unaligned_regions2}
+(reps_coa <- tibble::tibble(
+    pairname    = Oki_pairs,
+    total       = length(reps.reduced),
+    match_unmap = sapply(unmap[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    match_map   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    mapped      = match_map   / total * 100,
+    unmapped    = match_unmap / total * 100,
+    sum = mapped + unmapped
+))
+
+ggplot(reps_coa |> tidyr::pivot_longer(c("mapped", "unmapped"))) +
+  aes(name, value) +
+  ggtitle("Matches of repeats to mapped or unmaped regions") +
+  scale_y_continuous(limits = c(0, 100)) +
+  ylab("Percent of the repeat regions") +
+  xlab("Matching to region:") +
+  geom_boxplot() +
+  geom_point(aes(col = pairname))
+```
+
+# Unaligned regions
+
+```{r unaligned_regions}
+reps.reduced <- sapply(reps, reduce, ignore.strand = TRUE)
+# They are short.
+sapply(reps.reduced, \(gr) summary(width(gr)))
+
+Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
+
+(reps_gbs <- tibble::tibble(
+    pairname   = Oki_pairs,
+    total      = length(reps.reduced),
+    match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    match_al   = sapply(gbs[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    aligned   = match_al   / total * 100,
+    unaligned = match_unal / total * 100,
+    sum = aligned + unaligned
+))
+
+ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
+  aes(name, value) +
+  ggtitle("Matches of repeats to aligned or unaligned regions") +
+  scale_y_continuous(limits = c(0, 100)) +
+  ylab("Percent of the repeat regions") +
+  xlab("Matching to region:") +
+  geom_boxplot() +
+  geom_point(aes(col = pairname))
+```

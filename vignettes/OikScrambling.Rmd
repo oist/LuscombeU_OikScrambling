@@ -208,66 +208,11 @@ sapply(coa, length)
 
 See `vignette("RegionWidths"), package="OikSyntenies"`.
 
-## Repeat annotations
+# Repeats
 
-```{r repeat_annotations}
-reps_in <- list()
-Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
-reps_in$total <- sapply(Oki_pairs, \(.) table(reps$Oki$Class)) 
-reps_in$unal <- sapply(unal[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
-    table(ov$Class)
-  })
-reps_in$gbs <- sapply(gbs[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
-    table(ov$Class)
-  })
-reps_in$unmap <- sapply(unal[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
-    table(ov$Class)
-  })
-reps_in$map <- sapply(coa[Oki_pairs], \(gb) {
-    ov <- subsetByOverlaps(reps$Oki, gb, ignore.strand = TRUE)
-    table(ov$Class)
-  })
-
-toLong <- function(m, Region = NULL) {
-  m <- tibble::as_tibble(m, rownames = "Class") |>
-    tidyr::pivot_longer(c("Oki_Osa", "Oki_Bar", "Oki_Aom", "Oki_Nor"))
-  if (! is.null(Region))
-    m <- dplyr::mutate(m, Region = Region)
-  m
-}
-
-reps_in.norm <- lapply(reps_in, \(x) x / reps_in$total)
+See `vignette("RepeatRegions"), package="OikSyntenies"`.
 
 
-reps_in.long <- rbind(
-  toLong(reps_in$unmap, "unmap"),
-  toLong(reps_in$map,   "map"),
-  toLong(reps_in$gbs,   "gbs"),
-  toLong(reps_in$unal, "unal")
-)
-
-reps_in.norm.long <- rbind(
-  toLong(reps_in.norm$unmap, "unmap"),
-  toLong(reps_in.norm$map,   "map"),
-  toLong(reps_in.norm$gbs,   "gbs"),
-  toLong(reps_in.norm$unal, "unal")
-)
-
-ggplot(reps_in.long) +
-  aes(Region, value) +
-  geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free")
-
-ggplot(reps_in.norm.long) +
-  aes(Region, value) +
-  geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") +
-  ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions")
-```
 
 # Pairwise chromosome plots
 
