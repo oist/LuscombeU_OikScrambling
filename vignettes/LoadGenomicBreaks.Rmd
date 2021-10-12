@@ -94,7 +94,7 @@ load_genomic_breaks_ <- function(file, genomeT, genomeQ, longShort=NULL) {
 annotateWithReps.GRanges <- function(gr, rep) {
   o         <- findOverlaps(gr, rep)
   o.grouped <- tapply(subjectHits(o), queryHits(o), c)
-  o.names   <- BiocParallel::bplapply(o.grouped, \(x) rep[x]$Class |> unique() |> as.character())
+  o.names   <- sapply(o.grouped, \(x) rep[x]$Class |> unique() |> as.character())
   gr$rep <- NA
   gr$rep[as.integer(names(o.names))] <- o.names
   gr
@@ -199,7 +199,7 @@ filterMappedUnaligned <- function(gb) {
   # Turning the sequence of [(TRUE)n, FALSE]n into indices.
   idx <- c(0, head(cumsum(!colinearRegions$colinear), -1))
   gbl <- split(colinearRegions, idx)
-  unalMap <- BiocParallel::bplapply(gbl, \(gb) {
+  unalMap <- sapply(gbl, \(gb) {
     # Check strand
     onMinus <- all(strand(gb) == "-")
     # Need to subtract 1 because some ranges are adjacent (no gap)
