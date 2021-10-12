@@ -199,11 +199,13 @@ filterMappedUnaligned <- function(gb) {
   # Turning the sequence of [(TRUE)n, FALSE]n into indices.
   idx <- c(0, head(cumsum(!colinearRegions$colinear), -1))
   gbl <- split(colinearRegions, idx)
-  unalMap <- endoapply(gbl, \(gb)
+  unalMap <- endoapply(gbl, \(gb) {
+    # Check strand
+    onMinus <- all(strand(gb) == "-")
     # Need to subtract 1 because some ranges are adjacent (no gap)
     GBreaks(target = cleanGaps(gb      - 1),
-            query  = cleanGaps(gb$query -1))
-  ) |> unlist()
+            query  = cleanGaps(gb$query -1) |> sort(decreasing = onMinus))
+  }) |> unlist()
   names(unalMap) <- NULL
   unalMap
 }
