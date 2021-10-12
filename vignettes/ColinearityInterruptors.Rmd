@@ -110,3 +110,59 @@ gbs$Oki_Kum[1] |> as.data.frame()
 pairwiseAlignment(genomes$Kum$contig_10_1[52244:60120], genomes$Oki$chr1[7785:15657], type="global")
 subsetByOverlaps(reps$Oki, gbs$Oki_Kum[1])
 ```
+
+# Unaligned mapped region: ROI4
+
+Let's check examples of unaligned mapped regions.
+
+## FALSE/TRUE
+
+```{r ROI4_1}
+unalMap$Oki_Osa -> x
+x$Class <- paste(!is.na(x$rep), !is.na(x$query$rep))
+x |> head() |> as.data.frame()
+x[1]
+gbs$Oki_Osa |> subsetByOverlaps(x[1])
+gbs$Oki_Osa |> subsetByOverlaps(x[1]) |> range()
+pairwiseAlignment(genomes$Oki$chr1[552335:552383], genomes$Osa$Chr1[1730795:1731145], type="global") |> writePairwiseAlignments()
+pairwiseAlignment(genomes$Oki$chr1[551988:552647], genomes$Osa$Chr1[1730510:1731548] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+# Only one hit
+#vmatchPattern(genomes$Osa$Chr1[1730795:1731145], genomes$Osa, with.indels = TRUE, max.mismatch = 10)
+```
+
+## FALSE/FALSE
+
+```{r ROI4_2}
+x[5]
+# As character for convenience of BLAST searching.
+genomes$Oki$chr1[554365:554546]   |> as.character()  # Only one perfect BLAST hit at the NCBI, to the Oki genome.
+genomes$Osa$Chr1[1727927:1728109] |> as.character()  # No relevant BLAST hit at the NCBI (evalues >= 1e-4)
+
+vmatchPattern(genomes$Oki$chr1[554365:554546], genomes$Oki)
+
+# unaligned mapped region (+ / -)
+pairwiseAlignment(genomes$Oki$chr1[554365:554546], genomes$Osa$Chr1[1727927:1728109]                       , type="global") |> writePairwiseAlignments()
+pairwiseAlignment(genomes$Oki$chr1[554365:554546], genomes$Osa$Chr1[1727927:1728109] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+
+# unaligned mapped region with flanking colinear alignments.
+gbs$Oki_Osa |> subsetByOverlaps(x[5])
+pairwiseAlignment(genomes$Oki$chr1[554168:554692], genomes$Osa$Chr1[1727781:1728321] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+```
+
+## TRUE/TRUE
+
+```{r ROI4_2}
+x[12] |> data.frame()
+
+# As character for convenience of BLAST searching.
+genomes$Oki$chr1[561646:562124]   |> as.character()  # Only one perfect BLAST hit at the NCBI, to the Oki genome.
+genomes$Osa$Chr1[1722712:1723220] |> as.character()  # No relevant BLAST hit at the NCBI (evalues >= 1e-4)
+
+# unaligned mapped region (+ / -)
+pairwiseAlignment(genomes$Oki$chr1[561646:562124], genomes$Osa$Chr1[1722712:1723220]                       , type="global") |> writePairwiseAlignments()
+pairwiseAlignment(genomes$Oki$chr1[561646:562124], genomes$Osa$Chr1[1722712:1723220] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+
+# unaligned mapped region with flanking colinear alignments.
+gbs$Oki_Osa |> subsetByOverlaps(x[12])
+pairwiseAlignment(genomes$Oki$chr1[561142:563743], genomes$Osa$Chr1[1720807:1723727] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+```
