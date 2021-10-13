@@ -182,11 +182,18 @@ ROI5 <- subsetByOverlaps(coa$Oki_Kum, ROI5.range) |> sort(ignore.strand=T)
 # Let's capture all the pairs that overlap that range:
 ROI5 |> sort(ignore.strand=T) |> as.data.frame()
 ROI5 |> dplyr::arrange(query) |> as.data.frame()
-ROI5 |> plotApairOfChrs(xlim = list(c(1436544, 1481440), c(1409471, 1458038)))
+ROI5 |> plotApairOfChrs(xlim = list(c(1436544, 1481440), c(1409471, 1458038)), dna_seg_scale=TRUE)
 
 # Very short gaps between successive ranges in ROI5
 cleanGaps(ROI5) |> as.data.frame()
 
-ROI5 |> flagTranslocations() |> as.data.frame()
-ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagTranslocations() |> as.data.frame()
+ROI5 |> flagTranslocations()|> flagInversions() |> dist2next( ignore.strand = TRUE) |> as.data.frame()
+ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagTranslocations()|> dist2next( ignore.strand = TRUE, step =2)  |> as.data.frame()
+
+removeTranslocations <- function(gb) {
+  gb <- flagTranslocations(gb)
+  gb <- gb[-(which(gb$tra) + 1)]
+}
+
+ROI5 |> removeTranslocations() |> coalesce_contigs()  |> swap() |> sort (i=T) |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |> plotApairOfChrs(dna_seg_scale=TRUE)
 ```
