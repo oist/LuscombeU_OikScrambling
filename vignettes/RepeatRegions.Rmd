@@ -112,9 +112,134 @@ ggplot(reps_in_Osa.norm.long) +
   ggtitle("Repeats overlaping with (un)aligned/mapped regions (Osa)")
 ```
 
+# Tracking repeats across genome pairs
+
+The [upset](https://vcg.github.io/upset/) plots below show whether a repeat
+in the Okinawa or the Osaka genome as _target_ genome is located in an given
+region in respect to one or many of the _query_ genomes.
+
+*Note:* Some repeat annotations overlap.
+
+## Aligned
+
+More than 10,000 repeat annotations are in regions aligned to the
+same-population control genome, demonstrating that they are mapable in principle.
+
+```{r upset_plot_align}
+isPresent <- function(r, gb) ifelse(countOverlaps(r,gb) == 0, 0, 1)
+
+alignedRepsOki <- data.frame(
+  align_Osa = isPresent(reps$Oki, gbs$Oki_Osa),
+  align_Aom = isPresent(reps$Oki, gbs$Oki_Aom),
+  align_Bar = isPresent(reps$Oki, gbs$Oki_Bar),
+  align_Nor = isPresent(reps$Oki, gbs$Oki_Nor),
+  align_Kum = isPresent(reps$Oki, gbs$Oki_Kum)
+)
+UpSetR::upset(alignedRepsOki)
+
+alignedRepsOsa <- data.frame(
+  align_Oki = isPresent(reps$Osa, gbs$Osa_Oki),
+  align_Bar = isPresent(reps$Osa, gbs$Osa_Bar),
+  align_Nor = isPresent(reps$Osa, gbs$Osa_Nor),
+  align_Kum = isPresent(reps$Osa, gbs$Osa_Kum),
+  align_Aom = isPresent(reps$Osa, gbs$Osa_Aom)
+)
+UpSetR::upset(alignedRepsOsa)
+```
+
+## Unaligned
+
+~40,000 repeat annotations are in regions that are not aligned to a
+different-population_query_ genome.  This might be caused by insertions and
+deletions.
+
+```{r upset_plot_unal}
+unalignedRepsOki <- data.frame(
+  unal_Osa = isPresent(reps$Oki, unal$Oki_Osa),
+  unal_Aom = isPresent(reps$Oki, unal$Oki_Aom),
+  unal_Bar = isPresent(reps$Oki, unal$Oki_Bar),
+  unal_Nor = isPresent(reps$Oki, unal$Oki_Nor),
+  unal_Kum = isPresent(reps$Oki, unal$Oki_Kum)
+)
+UpSetR::upset(unalignedRepsOki)
+
+unalignedRepsOsa <- data.frame(
+  unal_Oki = isPresent(reps$Osa, unal$Osa_Oki),
+  unal_Bar = isPresent(reps$Osa, unal$Osa_Bar),
+  unal_Nor = isPresent(reps$Osa, unal$Osa_Nor),
+  unal_Kum = isPresent(reps$Osa, unal$Osa_Kum),
+  unal_Aom = isPresent(reps$Osa, unal$Osa_Aom)
+)
+UpSetR::upset(unalignedRepsOsa)
+```
+
+## Mapped
+
+```{r upset_plot_mapped}
+mappedRepsOki <- data.frame(
+  mapped_Osa = isPresent(reps$Oki, coa$Oki_Osa),
+  mapped_Aom = isPresent(reps$Oki, coa$Oki_Aom),
+  mapped_Bar = isPresent(reps$Oki, coa$Oki_Bar),
+  mapped_Nor = isPresent(reps$Oki, coa$Oki_Nor),
+  mapped_Kum = isPresent(reps$Oki, coa$Oki_Kum)
+)
+UpSetR::upset(mappedRepsOki)
+
+mappedRepsOsa <- data.frame(
+  mapped_Oki = isPresent(reps$Osa, coa$Osa_Oki),
+  mapped_Bar = isPresent(reps$Osa, coa$Osa_Bar),
+  mapped_Nor = isPresent(reps$Osa, coa$Osa_Nor),
+  mapped_Kum = isPresent(reps$Osa, coa$Osa_Kum),
+  mapped_Aom = isPresent(reps$Osa, coa$Osa_Aom)
+)
+UpSetR::upset(mappedRepsOsa)
+```
+
+## Unmapped
+
+```{r upset_plot_unmapped}
+unmappedRepsOki <- data.frame(
+  unmapped_Osa = isPresent(reps$Oki, unmap$Oki_Osa),
+  unmapped_Aom = isPresent(reps$Oki, unmap$Oki_Aom),
+  unmapped_Bar = isPresent(reps$Oki, unmap$Oki_Bar),
+  unmapped_Nor = isPresent(reps$Oki, unmap$Oki_Nor),
+  unmapped_Kum = isPresent(reps$Oki, unmap$Oki_Kum)
+)
+UpSetR::upset(unmappedRepsOki)
+
+unmappedRepsOsa <- data.frame(
+  unmapped_Oki = isPresent(reps$Osa, unmap$Osa_Oki),
+  unmapped_Bar = isPresent(reps$Osa, unmap$Osa_Bar),
+  unmapped_Nor = isPresent(reps$Osa, unmap$Osa_Nor),
+  unmapped_Kum = isPresent(reps$Osa, unmap$Osa_Kum),
+  unmapped_Aom = isPresent(reps$Osa, unmap$Osa_Aom)
+)
+UpSetR::upset(unmappedRepsOsa)
+```
+
+## Unaligned but mapped by flanking colinear blocks
+
+```{r upset_plot_unalMap}
+unalMapRepsOki <- data.frame(
+  unalMap_Osa = isPresent(reps$Oki, unalMap$Oki_Osa),
+  unalMap_Aom = isPresent(reps$Oki, unalMap$Oki_Aom),
+  unalMap_Bar = isPresent(reps$Oki, unalMap$Oki_Bar),
+  unalMap_Nor = isPresent(reps$Oki, unalMap$Oki_Nor),
+  unalMap_Kum = isPresent(reps$Oki, unalMap$Oki_Kum)
+)
+UpSetR::upset(unalMapRepsOki)
+
+unalMapRepsOsa <- data.frame(
+  unalMap_Oki = isPresent(reps$Osa, unalMap$Osa_Oki),
+  unalMap_Bar = isPresent(reps$Osa, unalMap$Osa_Bar),
+  unalMap_Nor = isPresent(reps$Osa, unalMap$Osa_Nor),
+  unalMap_Kum = isPresent(reps$Osa, unalMap$Osa_Kum),
+  unalMap_Aom = isPresent(reps$Osa, unalMap$Osa_Aom)
+)
+UpSetR::upset(unalMapRepsOsa)
+```
+
 # Reduced repeat set
-
-
 
 ```{r}
 reps.reduced <- sapply(reps, reduce, ignore.strand = TRUE)
