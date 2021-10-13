@@ -151,7 +151,7 @@ pairwiseAlignment(genomes$Oki$chr1[554168:554692], genomes$Osa$Chr1[1727781:1728
 
 ## TRUE/TRUE
 
-```{r ROI4_2}
+```{r ROI4_3}
 x[12] |> data.frame()
 
 # As character for convenience of BLAST searching.
@@ -165,4 +165,28 @@ pairwiseAlignment(genomes$Oki$chr1[561646:562124], genomes$Osa$Chr1[1722712:1723
 # unaligned mapped region with flanking colinear alignments.
 gbs$Oki_Osa |> subsetByOverlaps(x[12])
 pairwiseAlignment(genomes$Oki$chr1[561142:563743], genomes$Osa$Chr1[1720807:1723727] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+```
+
+# What still interrupts colinearity once repeats are ruled out ? (ROI5)
+
+```{r ROI5}
+# We start with a random region
+coa$Oki_Kum[200:210] |> flagAll() |> as.data.frame()
+
+# Let's focus on alignments between chr1 and contig_27_1:
+ROI5.range <- coa$Oki_Kum[200:210] |> dplyr::filter(seqnames == "chr1", seqnames(query) == "contig_27_1") |> range()
+ROI5.range
+
+ROI5 <- subsetByOverlaps(coa$Oki_Kum, ROI5.range) |> sort(ignore.strand=T)
+
+# Let's capture all the pairs that overlap that range:
+ROI5 |> sort(ignore.strand=T) |> as.data.frame()
+ROI5 |> dplyr::arrange(query) |> as.data.frame()
+ROI5 |> plotApairOfChrs(xlim = list(c(1436544, 1481440), c(1409471, 1458038)))
+
+# Very short gaps between successive ranges in ROI5
+cleanGaps(ROI5) |> as.data.frame()
+
+ROI5 |> flagTranslocations() |> as.data.frame()
+ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagTranslocations() |> as.data.frame()
 ```
