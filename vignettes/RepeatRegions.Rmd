@@ -242,7 +242,7 @@ UpSetR::upset(unalMapRepsOsa)
 # Reduced repeat set
 
 ```{r}
-reps.reduced <- sapply(reps, reduce, ignore.strand = TRUE)
+reps.reduced <- sapply(reps, reduce, ignore.strand = TRUE) |> SimpleList()
 # They are short.
 sapply(reps.reduced, \(gr) summary(width(gr)))
 ```
@@ -252,9 +252,9 @@ sapply(reps.reduced, \(gr) summary(width(gr)))
 ```{r unaligned_regions2}
 (reps_coa <- tibble::tibble(
     pairname    = Oki_pairs,
-    total       = length(reps.reduced),
-    match_unmap = sapply(unmap[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
-    match_map   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    total       = length(reps.reduced$Oki),
+    match_unmap = sapply(unmap[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced$Oki, gb))),
+    match_map   = sapply(   coa[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced$Oki, gb))),
     mapped      = match_map   / total * 100,
     unmapped    = match_unmap / total * 100,
     sum = mapped + unmapped
