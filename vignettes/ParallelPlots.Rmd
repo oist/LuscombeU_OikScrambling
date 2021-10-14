@@ -206,8 +206,8 @@ Since Okinawa is the outgroup, let's look for regions of it that are aligned
 on both the Osaka and the Barcelona genomes.
 
 ```{r combine_GBs}
-x <- subsetByOverlaps(coa2$Oki_Osa, coa2$Oki_Bar) |> subset(width > 1e5)
-y <- subsetByOverlaps(coa2$Oki_Bar, coa2$Oki_Osa) |> subset(width > 1e5)
+x <- subsetByOverlaps(coa2$Oki_Osa, granges(coa2$Oki_Bar)) |> subset(width > 1e5)
+y <- subsetByOverlaps(coa2$Oki_Bar, granges(coa2$Oki_Osa)) |> subset(width > 1e5)
 findOverlapPairs(x,y)
 subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar)) |> subset(width > 1e5)
 
