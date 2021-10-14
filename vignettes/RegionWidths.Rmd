@@ -216,14 +216,16 @@ gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
 ```{r paired_width_analysis}
 GBreaks2widthTibble <- function(gb, pair = NULL) {
   df <- as.data.frame(gb)
-  if(is.null(df$query.rep)) df$query.rep <- NA
-  tb <- tibble::tibble(target     = df$width,        query     = df$query.width,
-                       target.rep = ! is.na(df$rep), query.rep = ! is.na(df$query.rep),  # TRUE if overlaps a repeat
-                       pair = pair, Arm = df$Arm)
+  if(is.null(df$rep))       df$rep        <- NA
+  if(is.null(df$query.rep)) df$query.rep  <- NA
+  tibble::tibble(target     = df$width,        query     = df$query.width,
+                 target.rep = ! is.na(df$rep), query.rep = ! is.na(df$query.rep),  # TRUE if overlaps a repeat
+                 pair = pair, Arm = df$Arm)
 }
 
-gbs.w2w     <- do.call(rbind, lapply(names(gbs), \(name) GBreaks2widthTibble(gbs[[name]],     pair = name)))
-unalMap.w2s <- do.call(rbind, lapply(names(gbs), \(name) GBreaks2widthTibble(unalMap[[name]], pair = name)))
+gbs.w2w     <- do.call(rbind, lapply(names(gbs),      \(name) GBreaks2widthTibble(gbs[[name]],      pair = name)))
+unalMap.w2s <- do.call(rbind, lapply(names(unalMap),  \(name) GBreaks2widthTibble(unalMap[[name]],  pair = name)))
+tra.w2s     <- do.call(rbind, lapply(names(tra_only), \(name) GBreaks2widthTibble(tra_only[[name]], pair = name)))
 
 table(paste(    gbs.w2w$target.rep,     gbs.w2w$query.rep))
 table(paste(unalMap.w2s$target.rep, unalMap.w2s$query.rep))
@@ -242,6 +244,9 @@ ggPlotW2W(gbs.w2w |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
 
 ggPlotW2W(unalMap.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
   ggtitle("Width of the target and query mapped unaligned regions")
+
+ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
+  ggtitle("Width of the target and query translocated regions")
 
 ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
   ggtitle("Width of the target and query aligned regions")
