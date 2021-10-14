@@ -273,17 +273,11 @@ ggplot(reps_coa |> tidyr::pivot_longer(c("mapped", "unmapped"))) +
 # Unaligned regions
 
 ```{r unaligned_regions}
-reps.reduced <- sapply(reps, reduce, ignore.strand = TRUE)
-# They are short.
-sapply(reps.reduced, \(gr) summary(width(gr)))
-
-Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
-
 (reps_gbs <- tibble::tibble(
     pairname   = Oki_pairs,
-    total      = length(reps.reduced),
-    match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
-    match_al   = sapply(gbs[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced, gb))),
+    total      = length(reps.reduced$Oki),
+    match_unal = sapply(unal[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced$Oki, gb))),
+    match_al   = sapply(gbs[Oki_pairs], \(gb) length(subsetByOverlaps(reps.reduced$Oki, gb))),
     aligned   = match_al   / total * 100,
     unaligned = match_unal / total * 100,
     sum = aligned + unaligned
