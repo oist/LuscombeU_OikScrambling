@@ -286,6 +286,8 @@ gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 ### Representation of some inversions
 
 ```{r}
+library("Gviz")
+
 x <- coa$Oki_Osa |> flagInversions() |> dist2next(ignore.strand = TRUE)
 
 pmpcoord <- showInversions(x)
@@ -337,7 +339,6 @@ Is represented as:
 ```{r ideal_insertions}
 example("flagInsersions")
 
-library("Gviz")
 options(ucscChromosomeNames=FALSE)
 gen <- GenomeAxisTrack(name = "genome")
 trk <- AnnotationTrack(ins, name = "ins")
