@@ -278,7 +278,7 @@ sapply(invs, length)
 # Sanity check that we detect inversions on both strands
 sapply(invs, \(x) {summary(decode(strand(x)))})
 
-widths$invs <- makeWidthsDF(invs)
+widths$invs <- makeWidthsDF(invs) |> tibble::as_tibble()
 
 gg_freq_poly(widths$invs) +
   aes(col=Arm) +
@@ -289,14 +289,14 @@ gg_freq_poly(widths$invs) +
 
 ## Width of gaps next to the inverted regions
 
-```{r width_of_inversions}
+```{r width_of_inversions_gaps}
 inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
 inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$Oki)
 inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$Osa)
 inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar)
 sapply(inv.lgaps, length)
 
-widths$invs.lgaps <- makeWidthsDF(inv.lgaps)
+widths$invs.lgaps <- makeWidthsDF(inv.lgaps) |> tibble::as_tibble()
 
 gg_freq_poly(widths$invs.lgaps) +
   aes(col=Arm) +
