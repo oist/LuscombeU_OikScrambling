@@ -167,8 +167,17 @@ plotApairOfChrs(coa2$Osa_Bar, "Chr1")
 ```
 
 
-```{r fig.width=15}
+```{r coa_based fig.width=15}
 x <- coa$Oki_Kum
+x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
+x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
+
+x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "new_scaffold")
+plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE)
+```
+
+```{r coa2_based fig.width=15}
+x <- coa2$Oki_Kum
 x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
 x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
 
