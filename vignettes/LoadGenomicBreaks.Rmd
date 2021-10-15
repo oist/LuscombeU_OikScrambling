@@ -291,19 +291,6 @@ coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
 coa2 <- annotateWithReps.GBreaksSimpleList(coa2, reps)
 ```
 
-Coalesce within chromosomes
----------------------------
-
-The idea is that if colinearity is only lost because of a translocation to
-another chromosome, then it is fine.
-
-```{r coalesce_by_chr, cache=TRUE, dependson="GBreaks_object"}
-gbs$Oki_Kum -> x
-gbl <- split(x, seqnames(x), drop=T)
-gbl <- endoapply(gbl, coalesce_contigs)
-unlist(gbl)
-```
-
 Numbers of blocks
 -----------------
 
@@ -314,6 +301,7 @@ rbind(
   coa     = sapply(coa, length),
   unmap   = sapply(unmap, length),
   unalMap = sapply(unalMap, length),
+  tra     = sapply(tra, length),
   coa2    = sapply(coa2, length)
 )
 ```
