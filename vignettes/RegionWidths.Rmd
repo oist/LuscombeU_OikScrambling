@@ -53,6 +53,7 @@ widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
 widths$coa     <- makeWidthsDF(coa)     |> tibble::as_tibble()
 widths$unmap   <- makeWidthsDF(unmap)   |> tibble::as_tibble()
 widths$unalMap <- makeWidthsDF(unalMap) |> tibble::as_tibble()
+widths$tra     <- makeWidthsDF(tra)     |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
 ```
 
@@ -176,19 +177,16 @@ gg_freq_poly(widths$unalMap |> subset(chr == "chr1")) +
 
 ## Translocated regions
 
-```{r width_of_translocated_regions}
-tra <- sapply(coa, flagTranslocations)
-tra_only <- sapply(tra, filterTranslocations)
-sapply(tra_only, length)
-widths$tra <- makeWidthsDF(tra_only) |> tibble::as_tibble()
-widths$tra_op <- makeWidthsDF(sapply(tra_only, swap)) |> tibble::as_tibble()
+Reminder: here we measure the distance between the two colinear pairs that are
+separated by the translocated pair.
 
+```{r width_of_translocated_regions}
 gg_freq_poly(widths$tra) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of widths of translocated regions, split by arm.")
 
-gg_freq_poly(widths$tra_op) +
+gg_freq_poly(widths$tra) +
   ggtitle("Distribution of widths of translocated regions (opposite side)")
 
 gg_freq_poly(widths$tra |> subset(chr == "chr1")) +
@@ -225,10 +223,13 @@ GBreaks2widthTibble <- function(gb, pair = NULL) {
 
 gbs.w2w     <- do.call(rbind, lapply(names(gbs),      \(name) GBreaks2widthTibble(gbs[[name]],      pair = name)))
 unalMap.w2s <- do.call(rbind, lapply(names(unalMap),  \(name) GBreaks2widthTibble(unalMap[[name]],  pair = name)))
-tra.w2s     <- do.call(rbind, lapply(names(tra_only), \(name) GBreaks2widthTibble(tra_only[[name]], pair = name)))
+tra.w2s     <- do.call(rbind, lapply(names(tra),      \(name) GBreaks2widthTibble(tra[[name]],      pair = name)))
 
-table(paste(    gbs.w2w$target.rep,     gbs.w2w$query.rep))
-table(paste(unalMap.w2s$target.rep, unalMap.w2s$query.rep))
+rbind (
+  aligned = table(paste(    gbs.w2w$target.rep,     gbs.w2w$query.rep)),
+  unalMap = table(paste(unalMap.w2s$target.rep, unalMap.w2s$query.rep)),
+  transpo = table(paste(    tra.w2s$target.rep,     tra.w2s$query.rep))
+)
 
 ggPlotW2W <- function(tibble) {
   ggplot(tibble) +
@@ -245,14 +246,14 @@ ggPlotW2W(gbs.w2w |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
 ggPlotW2W(unalMap.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
   ggtitle("Width of the target and query mapped unaligned regions")
 
-ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
-  ggtitle("Width of the target and query translocated regions")
-
 ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
   ggtitle("Width of the target and query aligned regions")
 
 ggPlotW2W(unalMap.w2s) + facet_wrap(~pair) +
   ggtitle("Width of the target and query mapped unaligned regions")
+
+ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
+  ggtitle("Width of the target and query translocated regions")
 
 ggPlotW2W(gbs.w2w) +
   facet_wrap(~query.rep + target.rep) +

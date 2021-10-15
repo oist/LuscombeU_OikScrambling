@@ -193,7 +193,7 @@ Mapped unaligned regions
 
 We can pair the unaligned regions that are between two colinearly aligned regions.
 
-```{r mappedUnaligned}
+```{r mappedUnaligned, cache = TRUE, dependson="GBreaks_object"}
 filterMappedUnaligned <- function(gb) {
   colinearRegions <- filterColinearRegions(flagColinearAlignments(gb), rename = FALSE)
   # Turning the sequence of [(TRUE)n, FALSE]n into indices.
@@ -233,6 +233,57 @@ unalMap$Bar_Osa <- unalMap$Bar_Osa |> annotateWithReps.GBreaks(reps$Bar, reps$Os
 unalMap$Bar_Kum <- unalMap$Bar_Kum |> annotateWithReps.GBreaks(reps$Bar, reps$Kum)
 unalMap$Bar_Aom <- unalMap$Bar_Aom |> annotateWithReps.GBreaks(reps$Bar, reps$Aom)
 unalMap$Bar_Nor$rep <- unalMap$Bar_Nor$query$rep <- NA
+```
+
+Translocated regions
+--------------------
+
+```{r translocated_regions, cache=TRUE, dependson="coalescing_algorithm"}
+removeTranslocations <- function(gb) {
+  if(any(gb$tra))
+    gb <- gb[-(which(gb$tra) + 1)]
+  gb
+}
+
+traGaps <- function(coa) {
+  # The input MUST already be coalesced.
+  # First, flag translocations on the target genome
+  tra.target <- flagTranslocations(coa)$tra
+  # Second, do it again on the query genome
+  tra <- swap(coa) |> sort(ignore.strand = TRUE) |> flagTranslocations()
+  tra.query <- tra$tra
+  tra <- swap(tra) |> sort(ignore.strand = TRUE)
+  tra$tra <- tra.target | tra.query
+  # Then, remove translocated regions
+  tra <- removeTranslocations(tra)
+  # Then extract the newly "unaligned mapped" regions
+  # They contain the gaps left by the removal of the translocated regions.
+  filterMappedUnaligned(tra)
+}
+
+tra <- BiocParallel::bplapply(coa, traGaps) |> as("SimpleList")
+
+tra[ 1:5 ] <- BiocParallel::bplapply(tra[ 1:5 ], flagLongShort, longShort$Oki)
+tra[ 6:10] <- BiocParallel::bplapply(tra[ 6:10], flagLongShort, longShort$Osa)
+tra[11:15] <- BiocParallel::bplapply(tra[11:15], flagLongShort, longShort$Bar)
+
+tra$Oki_Osa <- tra$Oki_Osa |> annotateWithReps.GBreaks(reps$Oki, reps$Osa)
+tra$Oki_Bar <- tra$Oki_Bar |> annotateWithReps.GBreaks(reps$Oki, reps$Bar)
+tra$Oki_Kum <- tra$Oki_Kum |> annotateWithReps.GBreaks(reps$Oki, reps$Kum)
+tra$Oki_Aom <- tra$Oki_Aom |> annotateWithReps.GBreaks(reps$Oki, reps$Aom)
+tra$Oki_Nor$rep <- tra$Oki_Nor$query$rep <- NA
+
+tra$Osa_Oki <- tra$Osa_Oki |> annotateWithReps.GBreaks(reps$Osa, reps$Oki)
+tra$Osa_Bar <- tra$Osa_Bar |> annotateWithReps.GBreaks(reps$Osa, reps$Bar)
+tra$Osa_Kum <- tra$Osa_Kum |> annotateWithReps.GBreaks(reps$Osa, reps$Kum)
+tra$Osa_Aom <- tra$Osa_Aom |> annotateWithReps.GBreaks(reps$Osa, reps$Aom)
+tra$Osa_Nor$rep <- tra$Osa_Nor$query$rep <- NA
+
+tra$Bar_Oki <- tra$Bar_Oki |> annotateWithReps.GBreaks(reps$Bar, reps$Oki)
+tra$Bar_Osa <- tra$Bar_Osa |> annotateWithReps.GBreaks(reps$Bar, reps$Osa)
+tra$Bar_Kum <- tra$Bar_Kum |> annotateWithReps.GBreaks(reps$Bar, reps$Kum)
+tra$Bar_Aom <- tra$Bar_Aom |> annotateWithReps.GBreaks(reps$Bar, reps$Aom)
+tra$Bar_Nor$rep <- tra$Bar_Nor$query$rep <- NA
 ```
 
 Coalesce again
