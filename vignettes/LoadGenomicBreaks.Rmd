@@ -238,6 +238,10 @@ unalMap$Bar_Nor$rep <- unalMap$Bar_Nor$query$rep <- NA
 Translocated regions
 --------------------
 
+Here we compute new `GBreaks` objects representing the intervals between two
+regions that would be colinear if there would not be a translocation separating
+them.
+
 ```{r translocated_regions, cache=TRUE, dependson="coalescing_algorithm"}
 removeTranslocations <- function(gb) {
   if(any(gb$tra))
@@ -289,10 +293,24 @@ tra$Bar_Nor$rep <- tra$Bar_Nor$query$rep <- NA
 Coalesce again
 --------------
 
-See the Genomic Breaks vignette for justification.
+We remove the translocated regions that interrupt colinearity, where one of
+the colinear pairs is closer than 200 bp.
 
 ```{r re_coalesce, cache=TRUE, dependson="coalescing_algorithm"}
-coa2 <- BiocParallel::bplapply(coa, coalesce_contigs, minwidth = 500) |> SimpleList()
+removeTranslocationsOnTargetGenome <- function(gb) {
+  gb <- flagTranslocations(gb)
+  gb <- dist2next(gb, step = 2, ignore.strand = TRUE)
+  gb <- gb[-which(gb$tra & (gb$tdist < 200 | gb$qdist < 200)) + 1]
+  coalesce_contigs(gb)
+}
+removeTranslocationsOnBothGenomes <- function(gb)
+  gb |>
+    removeTranslocationsOnTargetGenome() |>
+    swap() |> sort(i=T) |>
+    removeTranslocationsOnTargetGenome() |>
+    swap() |> sort(i=T)
+
+coa2 <- BiocParallel::bplapply(coa, removeTranslocationsOnBothGenomes) |> SimpleList()
 coa2[ 1:5]  <- BiocParallel::bplapply(coa2[ 1:5],  flagLongShort, longShort$Oki)
 coa2[ 6:10] <- BiocParallel::bplapply(coa2[ 6:10], flagLongShort, longShort$Osa)
 coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
@@ -349,7 +367,7 @@ Save data
 =========
 
 ```{r save_data}
-save(gbs, unal, coa, unmap, unalMap, coa2, longShort, file = "BreakPoints.Rdata")
+save(gbs, unal, coa, unmap, unalMap, tra, coa2, longShort, file = "BreakPoints.Rdata")
 system("echo 'acb3f842f7687d618ad61ed138548ea8  BreakPoints.Rdata' | md5sum -c", intern = TRUE)
 ```
 
