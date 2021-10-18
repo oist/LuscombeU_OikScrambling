@@ -123,18 +123,24 @@ subsetByOverlaps(reps$Oki, gbs$Oki_Kum[1])
 
 # Unaligned mapped region: ROI4
 
-Let's check examples of unaligned mapped regions.
+Let's check examples of unaligned mapped regions in function of presence of repeats.
 
 ## FALSE/TRUE
 
 ```{r ROI4_1}
 unalMap$Oki_Osa -> x
-x$Class <- paste(!is.na(x$rep), !is.na(x$query$rep))
+x$Class <- paste(!sapply(x$rep, anyNA), !sapply(x$query$rep, anyNA))
 x |> head() |> as.data.frame()
-x[1]
-gbs$Oki_Osa |> subsetByOverlaps(x[1])
-gbs$Oki_Osa |> subsetByOverlaps(x[1]) |> range()
+ROI4_1 <- x[1]
+
+# Let's recover the flanking regions
+# (it works because the unalMap regions are expanded of 1 base on each side to avoid zero-length ranges)
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_1) |> as.data.frame()
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_1) |> range()
+# We confirm that unalmap regions can not be mapped
 pairwiseAlignment(genomes$Oki$chr1[552335:552383], genomes$Osa$Chr1[1730795:1731145], type="global") |> writePairwiseAlignments()
+pairwiseAlignment(genomes$Oki$chr1[552335:552383], genomes$Osa$Chr1[1730795:1731145] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+# We confirm that flanking regions map well
 pairwiseAlignment(genomes$Oki$chr1[551988:552647], genomes$Osa$Chr1[1730510:1731548] |> reverseComplement(), type="global") |> writePairwiseAlignments()
 # Only one hit
 #vmatchPattern(genomes$Osa$Chr1[1730795:1731145], genomes$Osa, with.indels = TRUE, max.mismatch = 10)
@@ -143,7 +149,7 @@ pairwiseAlignment(genomes$Oki$chr1[551988:552647], genomes$Osa$Chr1[1730510:1731
 ## FALSE/FALSE
 
 ```{r ROI4_2}
-x[5]
+ROI4_2 <- x[5]
 # As character for convenience of BLAST searching.
 genomes$Oki$chr1[554365:554546]   |> as.character()  # Only one perfect BLAST hit at the NCBI, to the Oki genome.
 genomes$Osa$Chr1[1727927:1728109] |> as.character()  # No relevant BLAST hit at the NCBI (evalues >= 1e-4)
@@ -153,16 +159,18 @@ vmatchPattern(genomes$Oki$chr1[554365:554546], genomes$Oki)
 # unaligned mapped region (+ / -)
 pairwiseAlignment(genomes$Oki$chr1[554365:554546], genomes$Osa$Chr1[1727927:1728109]                       , type="global") |> writePairwiseAlignments()
 pairwiseAlignment(genomes$Oki$chr1[554365:554546], genomes$Osa$Chr1[1727927:1728109] |> reverseComplement(), type="global") |> writePairwiseAlignments()
+# Identity of ~50% but no striking difference between strands
 
 # unaligned mapped region with flanking colinear alignments.
-gbs$Oki_Osa |> subsetByOverlaps(x[5])
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_2)
 pairwiseAlignment(genomes$Oki$chr1[554168:554692], genomes$Osa$Chr1[1727781:1728321] |> reverseComplement(), type="global") |> writePairwiseAlignments()
 ```
 
 ## TRUE/TRUE
 
 ```{r ROI4_3}
-x[12] |> data.frame()
+ROI4_3 <- x[12]
+ROI4_3 |> data.frame()
 
 # As character for convenience of BLAST searching.
 genomes$Oki$chr1[561646:562124]   |> as.character()  # Only one perfect BLAST hit at the NCBI, to the Oki genome.
@@ -173,7 +181,7 @@ pairwiseAlignment(genomes$Oki$chr1[561646:562124], genomes$Osa$Chr1[1722712:1723
 pairwiseAlignment(genomes$Oki$chr1[561646:562124], genomes$Osa$Chr1[1722712:1723220] |> reverseComplement(), type="global") |> writePairwiseAlignments()
 
 # unaligned mapped region with flanking colinear alignments.
-gbs$Oki_Osa |> subsetByOverlaps(x[12])
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_3)
 pairwiseAlignment(genomes$Oki$chr1[561142:563743], genomes$Osa$Chr1[1720807:1723727] |> reverseComplement(), type="global") |> writePairwiseAlignments()
 ```
 
@@ -202,8 +210,35 @@ ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagTranslocations()|> dist2next
 
 removeTranslocations <- function(gb) {
   gb <- flagTranslocations(gb)
-  gb <- gb[-(which(gb$tra) + 1)]
+  if(any(gb$tra))
+    gb <- gb[-(which(gb$tra) + 1)]
+  gb
 }
 
 ROI5 |> removeTranslocations() |> coalesce_contigs()  |> swap() |> sort (i=T) |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |> plotApairOfChrs(dna_seg_scale=TRUE)
 ```
+
+# What still interrupts colinearity once translocations are removed ? (ROI6)
+
+```{r ROI6}
+# We start with a broader random region
+ROI6 <- coa$Oki_Kum[200:500]
+ROI6 |> plotApairOfChrs()
+ROI6 |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |>
+        removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |>
+  plotApairOfChrs(dna_seg_scale=TRUE)
+
+# Removes too much
+ROI6 |>                        removeTranslocations() |> coalesce_contigs() |>
+        swap() |> sort(i=T) |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |>
+                               removeTranslocations() |> coalesce_contigs() |>
+        swap() |> sort(i=T) |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) -> x
+
+plotApairOfChrs(x, dna_seg_scale=TRUE)
+
+# Let's find an example where a piece of contig_27_1 is on the small arm.
+x  |> dplyr::filter(seqnames == "chr1", seqnames(query) == "contig_27_1") |> swap() |> sort(i=T) |> flagAll() 
+x |> flagAll()  |> dplyr::filter(start > 1650000, end <- 1820000) |> as.data.frame()
+
+```
+
