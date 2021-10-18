@@ -187,11 +187,15 @@ pairwiseAlignment(genomes$Oki$chr1[561142:563743], genomes$Osa$Chr1[1720807:1723
 
 # What still interrupts colinearity once repeats are ruled out ? (ROI5)
 
-```{r ROI5}
-# We start with a random region
-coa$Oki_Kum[200:210] |> flagAll() |> as.data.frame()
+We start with a random region
 
-# Let's focus on alignments between chr1 and contig_27_1:
+```{r ROI5_overview}
+coa$Oki_Kum |> flagAll() |> plyranges::slice(200:210) |> as.data.frame()
+```
+
+Let's focus on alignments between chr1 and contig_27_1:
+
+```{r ROI5}
 ROI5.range <- coa$Oki_Kum[200:210] |> dplyr::filter(seqnames == "chr1", seqnames(query) == "contig_27_1") |> range()
 ROI5.range
 
@@ -200,14 +204,19 @@ ROI5 <- subsetByOverlaps(coa$Oki_Kum, ROI5.range) |> sort(ignore.strand=T)
 # Let's capture all the pairs that overlap that range:
 ROI5 |> sort(ignore.strand=T) |> as.data.frame()
 ROI5 |> dplyr::arrange(query) |> as.data.frame()
-ROI5 |> plotApairOfChrs(xlim = list(c(1436544, 1481440), c(1409471, 1458038)), dna_seg_scale=TRUE)
+ROI5 |> plotApairOfChrs(xlim = gb2xlim(ROI5.range))
+```
 
-# Very short gaps between successive ranges in ROI5
+Very short gaps between successive ranges in ROI5
+
+```{r ROI5_cleanGaps}
 cleanGaps(ROI5) |> as.data.frame()
 
-ROI5 |> flagTranslocations()|> flagInversions() |> dist2next( ignore.strand = TRUE) |> as.data.frame()
-ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagTranslocations()|> dist2next( ignore.strand = TRUE, step =2)  |> as.data.frame()
+ROI5 |> flagAll() |> dist2next( ignore.strand = TRUE) |> as.data.frame()
+ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagAll()|> dist2next( ignore.strand = TRUE, step =2)  |> as.data.frame()
+```
 
+```{r ROI5_removeTranslocations}
 removeTranslocations <- function(gb) {
   gb <- flagTranslocations(gb)
   if(any(gb$tra))
