@@ -46,32 +46,40 @@ interrupting colinearity?
 plotApairOfChrs(coa$Oki_Kum, "chr1", main = "Oki – Kum")
 ```
 
-In this vignette, we look at a couple of example regions in details
+In this vignette, we look at a couple of example regions in details.  These
+regions helped me to decide how to process the data in _Load Genomic Breaks_
+(`vignette("LoadGenomicBreaks", package = "OikSyntenies")` and to decide
+which analysis to prioritise elsewhere.
 
 # Region of Interest (ROI) 1
 
-```{r}
-# The Kume contig is contig_3_1
+```{r ROI1}
+# The best Kume contig matching ot chr1 is contig_3_1
 bestMatch <- function(gb)
   tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
 
 coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
 
-# It appears to map roughly in the 8,000,000 – 13,000,000 region
+# contig_3_1 appears to map roughly in the 8,000,000 – 13,000,000 region
 coa$Oki_Kum |> flagAll() |> plyranges::filter(seqnames(query) == "contig_3_1") |>
   plyranges::arrange(start(query))
 ```
 
 How about the second alignment pair, mapping 226 bases of `contig_3_1` to the
-short arm; is it real ?
+short arm?
 
 ```{r re_align_a_clolinearity_breaker}
-coa$Oki_Kum |>
+ROI1 <- coa$Oki_Kum |>
   plyranges::filter(seqnames(query) == "contig_3_1", end(query) <= 21079) |>
   plyranges::arrange(start(query))
-coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = list(c(8086429, 8104950), c(1, 21079)), dna_seg_scale=TRUE, main = "chr1 vs contig_3_1 near ROI 1")
-coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_27_1", xlim = list(c(3838658, 3881203), c(3595219, 3630623)), dna_seg_scale=TRUE)
+ROI1
+coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = gb2xlim(ROI1[-2]), main = "chr1 vs contig_3_1 at ROI 1")
+coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = list(c(3838658, 3881203), c(1, 21079)), main = "chr1 matching contig_3_1 in the short arm")
+```
 
+Is the alignment convincing ?
+
+```{r pairwise_seq_alignments}
 # Good match where reported
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), genomes$Oki$chr1[3870099:3870324], type="local")
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-") + 50), genomes$Oki$chr1[(3870099 -50):(3870324 + 50)], type="global") |> writePairwiseAlignments()
