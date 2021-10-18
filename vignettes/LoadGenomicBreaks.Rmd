@@ -19,7 +19,8 @@ knitr::opts_knit$set(verbose = TRUE)
 Introduction
 ============
 
-This vignette loads the genomic breaks data, processes it and saves the
+This vignette loads the genomic breaks data, consolidates colinear regions,
+extracts unaligned and unmapped regions, transfers annotation data and saves the
 resulting objects in a serialised R object (`RData` file) for reuse in other
 vignettes.
 
@@ -32,7 +33,8 @@ Packages and data
 ```{r load_pacakges_and_data}
 suppressPackageStartupMessages({
   library('GenomicBreaks')
-  library('GenomicFeatures')
+  requireNamespace('GenomicFeatures')
+  requireNamespace('CAGEr')
   library('ggplot2')
   library("BreakpointsData")
 })
@@ -109,6 +111,51 @@ annotateWithReps.GBreaksSimpleList <- function(gbl, reps) {
 }
 ```
 
+Gene annotations
+----------------
+
+```{r load_genes}
+(annots <- OikScrambling:::loadAllAnnotations())
+
+annotateWithGenes <-  function(x, annotT, annotQ) UseMethod("annotateWithGenes")
+
+annotateWithGenes.GRanges <- function(x, annotT, annotQ = NULL) {
+  x$genes <- CAGEr:::ranges2names(x, GenomicFeatures::genes(annotT))
+  x$genes[x$genes == ''] <- NA
+  x
+}
+
+annotateWithGenes.GBreaks <- function(x, annotT, annotQ) {
+  x$query <- annotateWithGenes.GRanges(x$query, annotQ)
+  x       <- annotateWithGenes.GRanges(x,       annotT)
+  x
+}
+
+annotateWithGenes.GRangesList <- function(x, annotT, annotQ = annotT) {
+  x$Oki_Osa <- x$Oki_Osa |> annotateWithGenes(annotT$Oki, annotQ$Osa)
+  x$Oki_Bar <- x$Oki_Bar |> annotateWithGenes(annotT$Oki, annotQ$Bar)
+  x$Oki_Kum <- x$Oki_Kum |> annotateWithGenes(annotT$Oki, annotQ$Kum)
+  x$Oki_Aom <- x$Oki_Aom |> annotateWithGenes(annotT$Oki, annotQ$Aom)
+  x$Oki_Nor <- x$Oki_Nor |> annotateWithGenes(annotT$Oki, annotQ$Nor)
+  
+  x$Osa_Oki <- x$Osa_Oki |> annotateWithGenes(annotT$Osa, annotQ$Oki)
+  x$Osa_Bar <- x$Osa_Bar |> annotateWithGenes(annotT$Osa, annotQ$Bar)
+  x$Osa_Kum <- x$Osa_Kum |> annotateWithGenes(annotT$Osa, annotQ$Kum)
+  x$Osa_Aom <- x$Osa_Aom |> annotateWithGenes(annotT$Osa, annotQ$Aom)
+  x$Osa_Nor <- x$Osa_Nor |> annotateWithGenes(annotT$Osa, annotQ$Nor)
+  
+  x$Bar_Oki <- x$Bar_Oki |> annotateWithGenes(annotT$Bar, annotQ$Oki)
+  x$Bar_Osa <- x$Bar_Osa |> annotateWithGenes(annotT$Bar, annotQ$Osa)
+  x$Bar_Kum <- x$Bar_Kum |> annotateWithGenes(annotT$Bar, annotQ$Kum)
+  x$Bar_Aom <- x$Bar_Aom |> annotateWithGenes(annotT$Bar, annotQ$Aom)
+  x$Bar_Nor <- x$Bar_Nor |> annotateWithGenes(annotT$Bar, annotQ$Nor)
+  x
+}
+
+annotateWithGenes.SimpleList <- function(x, annotT, annotQ = annotT)
+  annotateWithGenes.GRangesList(x, annotT = annotT, annotQ = annotQ)
+```
+
 Mapped alignments
 -----------------
 
@@ -145,6 +192,8 @@ gbs$Bar_Osa <- load_genomic_breaks_("Bar2_p4__OSKA2016v1.9.gff.gz",         Bar2
 gbs$Bar_Kum <- load_genomic_breaks_("Bar2_p4__KUM-M3-7f.gff.gz",            Bar2_p4,     KUM_M3,        longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Kum)
 gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             Bar2_p4,     AOM_5,         longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Aom)
 gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 Bar2_p4,     OdB3,          longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Nor)
+
+gbs <- annotateWithGenes(gbs, annots)
 ```
 
 Unaligned regions
@@ -161,6 +210,10 @@ unal[11:15] <- BiocParallel::bplapply(unal[11:15], flagLongShort, longShort$Bar)
 unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
 unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithReps.GRanges, reps$Osa)
 unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithReps.GRanges, reps$Bar)
+
+unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithGenes, annots$Oki)
+unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithGenes, annots$Osa)
+unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithGenes, annots$Bar)
 ```
 
 Coalescing alignments
@@ -173,6 +226,7 @@ coa[ 6:10] <- BiocParallel::bplapply(coa[ 6:10], flagLongShort, longShort$Osa)
 coa[11:15] <- BiocParallel::bplapply(coa[11:15], flagLongShort, longShort$Bar)
 
 coa <- annotateWithReps.GBreaksSimpleList(coa, reps)
+coa <- annotateWithGenes(coa, annots)
 ```
 
 Unmapped regions
@@ -191,6 +245,10 @@ unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], flagLongShort, longShort$Ba
 unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
 unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithReps.GRanges, reps$Osa)
 unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithReps.GRanges, reps$Bar)
+
+unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithGenes, annots$Oki)
+unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithGenes, annots$Osa)
+unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithGenes, annots$Bar)
 ```
 
 Mapped unaligned regions
@@ -222,6 +280,7 @@ unalMap[ 6:10] <- BiocParallel::bplapply(unalMap[ 6:10], flagLongShort, longShor
 unalMap[11:15] <- BiocParallel::bplapply(unalMap[11:15], flagLongShort, longShort$Bar)
 
 unalMap <- annotateWithReps.GBreaksSimpleList(unalMap, reps)
+unalMap <- annotateWithGenes(unalMap, annots)
 ```
 
 Translocated regions
@@ -261,6 +320,7 @@ tra[ 6:10] <- BiocParallel::bplapply(tra[ 6:10], flagLongShort, longShort$Osa)
 tra[11:15] <- BiocParallel::bplapply(tra[11:15], flagLongShort, longShort$Bar)
 
 tra <- annotateWithReps.GBreaksSimpleList(tra, reps)
+tra <- annotateWithGenes(tra, annots)
 ```
 
 Coalesce again
@@ -289,6 +349,7 @@ coa2[ 6:10] <- BiocParallel::bplapply(coa2[ 6:10], flagLongShort, longShort$Osa)
 coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
 
 coa2 <- annotateWithReps.GBreaksSimpleList(coa2, reps)
+coa2 <- annotateWithGenes(coa2, annots)
 ```
 
 Numbers of blocks
