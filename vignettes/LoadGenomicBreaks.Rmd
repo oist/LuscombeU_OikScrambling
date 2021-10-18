@@ -34,7 +34,6 @@ Packages and data
 suppressPackageStartupMessages({
   library('GenomicBreaks')
   requireNamespace('GenomicFeatures')
-  requireNamespace('CAGEr')
   library('ggplot2')
   library("BreakpointsData")
 })
@@ -76,11 +75,13 @@ Load from `BreakpointsData` package via `OikScrambling:::loadAllRepeats()`
 (reps <- OikScrambling:::loadAllRepeats())
 
 annotateWithReps.GRanges <- function(gr, rep) {
-  o         <- findOverlaps(gr, rep)
-  o.grouped <- tapply(subjectHits(o), queryHits(o), c)
-  o.names   <- sapply(o.grouped, \(x) rep[x]$Class |> unique() |> as.character())
-  gr$rep <- NA
-  gr$rep[as.integer(names(o.names))] <- o.names
+  # Inspired from CAGEr:::ranges2names
+  o <- findOverlaps(gr, rep)
+  o <- as(o, "List")
+  o <- extractList(rep$Class |> as.character(), o)
+  o <- endoapply(o, unique)
+  o[sapply(o, length) == 0] <- NA
+  gr$rep <- o
   gr
 }
 
@@ -120,7 +121,18 @@ Gene annotations
 annotateWithGenes <-  function(x, annotT, annotQ) UseMethod("annotateWithGenes")
 
 annotateWithGenes.GRanges <- function(x, annotT, annotQ = NULL) {
-  x$genes <- CAGEr:::ranges2names(x, GenomicFeatures::genes(annotT))
+  # Taken from CAGEr (and I am the author)
+  ranges2names <- function (rangesA, rangesB) {
+    if (is.null(names(rangesB))) 
+        stop(sQuote("rangesB"), " must contain have names.")
+    names <- findOverlaps(rangesA, rangesB)
+    names <- as(names, "List")
+    names <- extractList(names(rangesB), names)
+    names <- unique(names)
+    names <- unstrsplit(names, ";")
+    Rle(names)
+  }
+  x$genes <- ranges2names(x, GenomicFeatures::genes(annotT))
   x$genes[x$genes == ''] <- NA
   x
 }
