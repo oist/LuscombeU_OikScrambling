@@ -51,7 +51,7 @@ regions helped me to decide how to process the data in _Load Genomic Breaks_
 (`vignette("LoadGenomicBreaks", package = "OikSyntenies")` and to decide
 which analysis to prioritise elsewhere.
 
-# Region of Interest (ROI) 1
+# Alignments are real (Region of Interest 1)
 
 ```{r ROI1}
 # The best Kume contig matching ot chr1 is contig_3_1
@@ -91,7 +91,7 @@ pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), geno
 
 Yes, the alignment looks real!
 
-# Region of Interest (ROI) 2
+# Colinearity interrupted by inversions and translocations (Region of Interest 2)
 
 Let's look at the area `chr1:8080000-12900000` covered by `contig_3_1`.  Can
 we coalesce it once we only keep the paired matches?  The answer is no…
@@ -108,8 +108,10 @@ coa$Oki_Kum |>
 coa$Oki_Kum |>
   plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000) |>
   plyranges::filter(seqnames(query) == "contig_3_1")|>
-  plotApairOfChrs(dna_seg_scale=TRUE)
+  plotApairOfChrs()
 ```
+
+Colinearity appears to be interrupted by many inversions and translocations.
 
 # Well-aligned repeats are kept in the one-to-one graph (Region of interest 3)
 
