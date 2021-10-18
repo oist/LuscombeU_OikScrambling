@@ -216,6 +216,8 @@ ROI5 |> flagAll() |> dist2next( ignore.strand = TRUE) |> as.data.frame()
 ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagAll()|> dist2next( ignore.strand = TRUE, step =2)  |> as.data.frame()
 ```
 
+Can we coalesce better by removing the translocations ?
+
 ```{r ROI5_removeTranslocations}
 removeTranslocations <- function(gb) {
   gb <- flagTranslocations(gb)
@@ -224,7 +226,15 @@ removeTranslocations <- function(gb) {
   gb
 }
 
-ROI5 |> removeTranslocations() |> coalesce_contigs()  |> swap() |> sort (i=T) |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |> plotApairOfChrs(dna_seg_scale=TRUE)
+ROI5 |> removeTranslocations() |> coalesce_contigs() |>
+  swap() |> sort(i=T) |> removeTranslocations() |> coalesce_contigs() |>
+  swap() |> sort(i=T) |> plotApairOfChrs()
+```
+
+This is now implemented in the `coa2` objects, with a size treshold of 200.
+
+```{r ROI5_coa2}
+subsetByOverlaps(coa2$Oki_Kum, ROI5.range) |> plotApairOfChrs(xlim = gb2xlim(ROI5.range))
 ```
 
 # What still interrupts colinearity once translocations are removed ? (ROI6)
