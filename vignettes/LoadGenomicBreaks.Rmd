@@ -345,7 +345,8 @@ the colinear pairs is closer than 200 bp.
 removeTranslocationsOnTargetGenome <- function(gb) {
   gb <- flagTranslocations(gb)
   gb <- dist2next(gb, step = 2, ignore.strand = TRUE)
-  gb <- gb[-which(gb$tra & (gb$tdist < 200 | gb$qdist < 200)) + 1]
+  idx <- 1 + which( gb$tra & (gb$tdist < 200 | gb$qdist < 200) )
+  gb <- gb[-idx]
   coalesce_contigs(gb)
 }
 removeTranslocationsOnBothGenomes <- function(gb)
