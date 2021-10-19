@@ -312,8 +312,40 @@ unalMapRepsBar <- data.frame(
   unalMap_Kum = isPresent(reps$Bar, unalMap$Bar_Kum),
   unalMap_Aom = isPresent(reps$Bar, unalMap$Bar_Aom)
 )
-UpSetR::upset(unmappedRepsBar)
+UpSetR::upset(unalMapRepsBar)
 ```
+
+## Transposed
+
+```{r upset_plot_tra}
+traRepsOki <- data.frame(
+  tra_Osa = isPresent(reps$Oki, tra$Oki_Osa),
+  tra_Aom = isPresent(reps$Oki, tra$Oki_Aom),
+  tra_Bar = isPresent(reps$Oki, tra$Oki_Bar),
+  tra_Nor = isPresent(reps$Oki, tra$Oki_Nor),
+  tra_Kum = isPresent(reps$Oki, tra$Oki_Kum)
+)
+UpSetR::upset(traRepsOki)
+
+traRepsOsa <- data.frame(
+  tra_Oki = isPresent(reps$Osa, tra$Osa_Oki),
+  tra_Bar = isPresent(reps$Osa, tra$Osa_Bar),
+  tra_Nor = isPresent(reps$Osa, tra$Osa_Nor),
+  tra_Kum = isPresent(reps$Osa, tra$Osa_Kum),
+  tra_Aom = isPresent(reps$Osa, tra$Osa_Aom)
+)
+UpSetR::upset(traRepsOsa)
+
+traRepsBar <- data.frame(
+  tra_Oki = isPresent(reps$Bar, tra$Bar_Oki),
+  tra_Osa = isPresent(reps$Bar, tra$Bar_Osa),
+  tra_Nor = isPresent(reps$Bar, tra$Bar_Nor),
+  tra_Kum = isPresent(reps$Bar, tra$Bar_Kum),
+  tra_Aom = isPresent(reps$Bar, tra$Bar_Aom)
+)
+UpSetR::upset(traRepsBar)
+```
+
 
 # Reduced repeat set
 
