@@ -42,6 +42,15 @@ Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
 Osa_pairs <- c("Osa_Oki", "Osa_Bar", "Osa_Kum", "Osa_Aom", "Osa_Nor")
 Bar_pairs <- c("Bar_Oki", "Bar_Osa", "Bar_Kum", "Bar_Aom", "Bar_Nor")
 
+
+compDistance <- function(x) {
+  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor")] <- "same_pop"
+  x[x %in% c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")] <- "Oki – North"
+  x[x %in% c("Osa_Oki", "Osa_Bar", "Osa_Kum", "Osa_Aom", "Osa_Nor",
+             "Bar_Oki", "Bar_Osa", "Bar_Kum", "Bar_Aom", "Bar_Nor")] <- "North – North"
+  x
+}
+
 mkRepsIn <- function(pairs, reps) {
   tableIntersectWithReps <- function(gb) {
     ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
@@ -54,6 +63,7 @@ mkRepsIn <- function(pairs, reps) {
   reps_in$unmap   <- sapply(unmap  [pairs], tableIntersectWithReps)
   reps_in$unalMap <- sapply(unalMap[pairs], tableIntersectWithReps)
   reps_in$map     <- sapply(coa    [pairs], tableIntersectWithReps)
+  reps_in$tra     <- sapply(tra    [pairs], tableIntersectWithReps)
   reps_in
 }
 
@@ -71,45 +81,66 @@ toLong <- function(m, Region = NULL) {
 
 reps_in_Oki.norm <- lapply(reps_in_Oki, \(x) x / reps_in_Oki$total)
 reps_in_Osa.norm <- lapply(reps_in_Osa, \(x) x / reps_in_Osa$total)
+reps_in_Bar.norm <- lapply(reps_in_Bar, \(x) x / reps_in_Bar$total)
+
 
 toLong.reps <- function(reps_in)
   rbind(
-    toLong(reps_in$unmap,   "unmap"),
-    toLong(reps_in$unalMap, "unalMap"),
-    toLong(reps_in$map,     "map"),
-    toLong(reps_in$gbs,     "gbs"),
-    toLong(reps_in$unal,    "unal")
+    toLong(reps_in$unmap,   "unMap"),
+    toLong(reps_in$unalMap, "unAlnMap"),
+    toLong(reps_in$map,     "Map"),
+    toLong(reps_in$gbs,     "Aln"),
+    toLong(reps_in$unal,    "unAln"),
+    toLong(reps_in$tra,     "Tra")
   )
 
 reps_in_Oki.long <- toLong.reps(reps_in_Oki)
 reps_in_Osa.long <- toLong.reps(reps_in_Osa)
+reps_in_Bar.long <- toLong.reps(reps_in_Bar)
 
 reps_in_Oki.norm.long <- toLong.reps(reps_in_Oki.norm)
 reps_in_Osa.norm.long <- toLong.reps(reps_in_Osa.norm)
+reps_in_Bar.norm.long <- toLong.reps(reps_in_Bar.norm)
 
-ggplot(reps_in_Oki.long) +
-  aes(Region, value) +
-  geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free")
+ggplot(reps_in_Oki.long) + aes(Region, value) +
+  geom_point(aes(col = name)) +  geom_boxplot() +
+  facet_grid(~Class, scales = "free") + coord_flip()
 
-ggplot(reps_in_Osa.long) +
-  aes(Region, value) +
-  geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free")
+ggplot(reps_in_Osa.long) + aes(Region, value) +
+  geom_point(aes(col = name)) +  geom_boxplot() +
+  facet_grid(~Class, scales = "free") + coord_flip()
 
-ggplot(reps_in_Oki.norm.long) +
-  aes(Region, value) +
-  geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") +
+ggplot(reps_in_Bar.long) + aes(Region, value) +
+  geom_point(aes(col = name)) +  geom_boxplot() +
+  facet_grid(~Class, scales = "free") + coord_flip()
+
+ggplot(reps_in_Oki.norm.long) + aes(Region, value) +
+  geom_boxplot() + geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free") + coord_flip() +
   ylab("Fraction overlaping") +
   ggtitle("Repeats overlaping with (un)aligned/mapped regions (Oki)")
 
-ggplot(reps_in_Osa.norm.long) +
-  aes(Region, value) +
-  geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") +
+ggplot(reps_in_Osa.norm.long) + aes(Region, value) +
+  geom_boxplot() + geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free") + coord_flip() +
   ylab("Fraction overlaping") +
   ggtitle("Repeats overlaping with (un)aligned/mapped regions (Osa)")
+
+ggplot(reps_in_Bar.norm.long) + aes(Region, value) +
+  geom_boxplot() + geom_point(aes(col = name)) +
+  facet_grid(~Class, scales = "free") + coord_flip() +
+  ylab("Fraction overlaping") +
+  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Bar)")
+
+ggplot(rbind(
+  reps_in_Oki.norm.long,
+  reps_in_Osa.norm.long,
+  reps_in_Bar.norm.long
+  ) |> dplyr::mutate(Distance = compDistance(name))) + aes(Region, value) +
+  geom_boxplot() + geom_point(aes(col = Distance)) +
+  facet_grid(~Class, scales = "free") + coord_flip() +
+  ylab("Fraction overlaping") +
+  ggtitle("Repeats overlaping with (un)aligned/mapped regions (all)")
 ```
 
 # Tracking repeats across genome pairs
