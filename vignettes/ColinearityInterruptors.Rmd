@@ -273,4 +273,18 @@ ROI7[35:45] |> as.data.frame()
 ROI7[37:43] |> plotApairOfChrs()
 
 showInversions(ROI7)
+
+## Annotations
+ROI7.reps <- reps$Oki |> subsetByOverlaps(ROI7[37:43] |> range())
+mids <- ROI7.reps |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- ROI7.reps$Class |> as.character()
+annot <- genoPlotR::annotation(x1=mids, text=text, rot=30)
+ROI7[37:43] |> plotApairOfChrs(annotations = annot)
+
+## Genes
+ROI7.genes <- GenomicFeatures::genes(annots$Oki) |> subsetByOverlaps(ROI7[37:43] |> range())
+mids <- ROI7.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- names(ROI7.genes) |> as.character()
+annot <- genoPlotR::annotation(x1=start(ROI7.genes), x2=end(ROI7.genes), text=text, rot=30)
+ROI7[37:43] |> plotApairOfChrs(annotations = annot)
 ```
