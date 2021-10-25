@@ -68,38 +68,22 @@ Enrichment for motifs is being searched in
 gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 ```
 
-### Representation of some inversions
+## Representation of some inversions
+
+3 consecutive inversions will cause 5 flags to be set to TRUE.  Think:
+
+```
++ + + + + + + + +  →  + - + - + - + + +
+                      T T T T T F F F F
+```
 
 ```{r}
-library("Gviz")
+ROI7 <- coa$Oki_Osa |> flagInversions() |> dist2next(ignore.strand = TRUE)
 
-x <- coa$Oki_Osa |> flagInversions() |> dist2next(ignore.strand = TRUE)
+showInversions(ROI7)
 
-pmpcoord <- showInversions(x)
+ROI7[35:45] |> as.data.frame()
+ROI7[37:43] |> plotApairOfChrs()
 
-seqinfo2gieStain <- function(si) {
-  data.frame(
-    chrom      = seqlevels(si),
-    chromStart = 0,
-    chromEnd   = seqlengths(si),
-    name       = seqlevels(si),
-    gieStain   = "gneg"
-  )
-}
-
-#r <- 63:70
-r <- 94:98
-#r <- 316:319
-options(ucscChromosomeNames=FALSE)
-gen <- GenomeAxisTrack(name="OKI2018_I69")
-ide <- IdeogramTrack(chromosome = seqlevelsInUse(x[r]), genome = "OKI2018_I69", bands = seqinfo2gieStain(OKI2018_I69))
-trk <- AnnotationTrack(x[r], name = "OKI2018_I69", id=LETTERS[seq_along(r)])
-p1 <- grid::grid.grabExpr(plotTracks(list(ide, gen, trk), featureAnnotation = "id"))
-
-gen2 <- GenomeAxisTrack(name="OSKA2016v1.9")
-ide2 <- IdeogramTrack(chromosome = seqlevelsInUse(x$query[r]), genome = "OSKA2016v1.9", bands = seqinfo2gieStain(OSKA2016v1.9))
-trk2 <- AnnotationTrack(x[r]$query, name = "OSKA2016v1.9", id=LETTERS[seq_along(r)])
-p2 <- grid::grid.grabExpr(plotTracks(list(ide2,gen2,trk2), featureAnnotation = "id"))
-
-gridExtra::grid.arrange(p1, p2, nrow=2)
+showInversions(ROI7)
 ```
