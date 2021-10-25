@@ -249,75 +249,13 @@ In the _parallel plots_ vignette
 more comprehensive collection of plots and explore arrangements for a figure
 panel in paper.
 
-
 # Structural variants
 
 ## Trivial inversions
 
 ### Documentation
 
-Details can be found in `vignette("Introduction to GenomicBreaks", package = "GenomicBreaks")`,
-in `vignette("Structural Variants", package = "GenomicBreaks")`,
-and `?GenomicBreaks::flagInversions`
-
-See also the [vignette](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html)
-of Gviz.
-
-### Number of trivial inversions
-
-More inversions are found after coalescing colinear blocks because of situations
-where `+ - +` was `+ - - +` before collapsing. 
-
-```{r detect_trivial_invertions}
-sapply(gbs, function(gb) sum(flagInversions(gb)$inv))
-sapply(coa, function(gb) sum(flagInversions(gb)$inv))
-sapply(coa2, function(gb) sum(flagInversions(gb)$inv))
-```
-
-### Motif search
-
-Enrichment for motifs is being searched in
-`vignette("Motif finding and analysis", package = "OikScrambling")`.
-
-```{r load_PWMs}
-gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
-```
-
-### Representation of some inversions
-
-```{r}
-library("Gviz")
-
-x <- coa$Oki_Osa |> flagInversions() |> dist2next(ignore.strand = TRUE)
-
-pmpcoord <- showInversions(x)
-
-seqinfo2gieStain <- function(si) {
-  data.frame(
-    chrom      = seqlevels(si),
-    chromStart = 0,
-    chromEnd   = seqlengths(si),
-    name       = seqlevels(si),
-    gieStain   = "gneg"
-  )
-}
-
-#r <- 63:70
-r <- 94:98
-#r <- 316:319
-options(ucscChromosomeNames=FALSE)
-gen <- GenomeAxisTrack(name="OKI2018_I69")
-ide <- IdeogramTrack(chromosome = seqlevelsInUse(x[r]), genome = "OKI2018_I69", bands = seqinfo2gieStain(OKI2018_I69))
-trk <- AnnotationTrack(x[r], name = "OKI2018_I69", id=LETTERS[seq_along(r)])
-p1 <- grid::grid.grabExpr(plotTracks(list(ide, gen, trk), featureAnnotation = "id"))
-
-gen2 <- GenomeAxisTrack(name="OSKA2016v1.9")
-ide2 <- IdeogramTrack(chromosome = seqlevelsInUse(x$query[r]), genome = "OSKA2016v1.9", bands = seqinfo2gieStain(OSKA2016v1.9))
-trk2 <- AnnotationTrack(x[r]$query, name = "OSKA2016v1.9", id=LETTERS[seq_along(r)])
-p2 <- grid::grid.grabExpr(plotTracks(list(ide2,gen2,trk2), featureAnnotation = "id"))
-
-gridExtra::grid.arrange(p1, p2, nrow=2)
-```
+Details can be found in `vignette("Inversions", package = "OikScrambling")`.
 
 ## Trivial insersions
 
