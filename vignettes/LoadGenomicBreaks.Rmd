@@ -365,6 +365,27 @@ coa2 <- annotateWithReps.GBreaksSimpleList(coa2, reps)
 coa2 <- annotateWithGenes(coa2, annots)
 ```
 
+Unmapped regions 2
+------------------
+
+The intervals between double-coalesced regions.
+
+```{r unmap2}
+unmap2 <- BiocParallel::bplapply(coa2, cleanGaps) |> SimpleList()
+
+unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], flagLongShort, longShort$Oki)
+unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], flagLongShort, longShort$Osa)
+unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], flagLongShort, longShort$Bar)
+
+unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
+unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithReps.GRanges, reps$Osa)
+unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithReps.GRanges, reps$Bar)
+
+unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithGenes, annots$Oki)
+unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithGenes, annots$Osa)
+unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithGenes, annots$Bar)
+```
+
 Numbers of blocks
 -----------------
 
@@ -374,6 +395,7 @@ rbind(
   unal    = sapply(unal, length),
   coa     = sapply(coa, length),
   unmap   = sapply(unmap, length),
+  unmap2  = sapply(unmap2, length),
   unalMap = sapply(unalMap, length),
   tra     = sapply(tra, length),
   coa2    = sapply(coa2, length)
