@@ -239,25 +239,18 @@ subsetByOverlaps(coa2$Oki_Kum, ROI5.range) |> plotApairOfChrs(xlim = gb2xlim(ROI
 
 # What still interrupts colinearity once translocations are removed ? (ROI6)
 
+Inversions …
+
 ```{r ROI6}
 # We start with a broader random region
-ROI6 <- coa$Oki_Kum[200:500]
+(ROI6 <- coa2$Oki_Kum |> flagAll() |> dplyr::slice(160:200))
 ROI6 |> plotApairOfChrs()
-ROI6 |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |>
-        removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |>
-  plotApairOfChrs(dna_seg_scale=TRUE)
+coa2$Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Double-collapsed")
+coa $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Collapsed")
+gbs $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Mapped")
 
-# Removes too much
-ROI6 |>                        removeTranslocations() |> coalesce_contigs() |>
-        swap() |> sort(i=T) |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) |>
-                               removeTranslocations() |> coalesce_contigs() |>
-        swap() |> sort(i=T) |> removeTranslocations() |> coalesce_contigs() |> swap() |> sort(i=T) -> x
-
-plotApairOfChrs(x, dna_seg_scale=TRUE)
-
-# Let's find an example where a piece of contig_27_1 is on the small arm.
-x  |> dplyr::filter(seqnames == "chr1", seqnames(query) == "contig_27_1") |> swap() |> sort(i=T) |> flagAll() 
-x |> flagAll()  |> dplyr::filter(start > 1650000, end <- 1820000) |> as.data.frame()
-
+# Sometimes, everything that remains is inversions
+ROI6[1:6] |> plotApairOfChrs()
+ROI6[1:6] |> dplyr::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChrs()
 ```
 
