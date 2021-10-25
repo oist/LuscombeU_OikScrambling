@@ -103,7 +103,17 @@ reps_in_Bar.long <- toLong.reps(reps_in_Bar)
 reps_in_Oki.norm.long <- toLong.reps(reps_in_Oki.norm)
 reps_in_Osa.norm.long <- toLong.reps(reps_in_Osa.norm)
 reps_in_Bar.norm.long <- toLong.reps(reps_in_Bar.norm)
+```
 
+Summary numbers.
+
+```{r summary_numbers}
+sapply(reps_in_Oki.norm, rowMeans)
+sapply(reps_in_Osa.norm, rowMeans)
+sapply(reps_in_Bar.norm, rowMeans)
+```
+
+```{r summary_plots}
 ggplot(reps_in_Oki.long) + aes(Region, value) +
   geom_point(aes(col = name)) +  geom_boxplot() +
   facet_grid(~Class, scales = "free") + coord_flip()
@@ -358,12 +368,13 @@ different GBreaks objects are annotated.
 countGbsMatchingReps <- function(gb)  sum(sapply(gb$rep, \(x) ! any(isNA(x))))
  fracGbsMatchingReps <- function(gbl) sapply(gbl, countGbsMatchingReps) / sapply(gbl, length)
 
- sapply(list(aligned    = gbs,     unAligned = unal,
+summaryMatchingReps <- (sapply(list(aligned    = gbs,     unAligned = unal,
              mapped     = coa,     unMapped  = unmap,
              unAlMapped = unalMap,
              transposed = tra,
              mapped2    = coa2,    unMapped2 = unmap2),
-        fracGbsMatchingReps)
+        fracGbsMatchingReps))
+sapply(summaryMatchingReps |> as.data.frame(), median)
 ```
 
 # Reduced repeat set
