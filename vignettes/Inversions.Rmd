@@ -68,22 +68,3 @@ Enrichment for motifs is being searched in
 gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 ```
 
-## Representation of some inversions
-
-3 consecutive inversions will cause 5 flags to be set to TRUE.  Think:
-
-```
-+ + + + + + + + +  →  + - + - + - + + +
-                      T T T T T F F F F
-```
-
-```{r}
-ROI7 <- coa$Oki_Osa |> flagInversions() |> dist2next(ignore.strand = TRUE)
-
-showInversions(ROI7)
-
-ROI7[35:45] |> as.data.frame()
-ROI7[37:43] |> plotApairOfChrs()
-
-showInversions(ROI7)
-```
