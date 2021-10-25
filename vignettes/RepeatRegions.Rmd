@@ -42,12 +42,12 @@ Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
 Osa_pairs <- c("Osa_Oki", "Osa_Bar", "Osa_Kum", "Osa_Aom", "Osa_Nor")
 Bar_pairs <- c("Bar_Oki", "Bar_Osa", "Bar_Kum", "Bar_Aom", "Bar_Nor")
 
-
 compDistance <- function(x) {
-  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor")] <- "same_pop"
-  x[x %in% c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")] <- "Oki – North"
-  x[x %in% c("Osa_Oki", "Osa_Bar", "Osa_Kum", "Osa_Aom", "Osa_Nor",
-             "Bar_Oki", "Bar_Osa", "Bar_Kum", "Bar_Aom", "Bar_Nor")] <- "North – North"
+  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor")]                       <- "same_pop"
+  x[x %in% c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor",
+             "Osa_Oki", "Osa_Kum", "Bar_Oki", "Bar_Kum")]            <- "Oki – North"
+  x[x %in% c("Osa_Bar", "Osa_Aom", "Osa_Nor",
+             "Bar_Osa", "Bar_Aom", "Bar_Nor")]                       <- "North – North"
   x
 }
 
