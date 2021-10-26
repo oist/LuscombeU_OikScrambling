@@ -365,7 +365,7 @@ See `vignette("LoadGenomicBreaks", package = "OikSyntenies")` for how the
 different GBreaks objects are annotated.
 
 ```{r gbreaks_annot}
-countGbsMatchingReps <- function(gb)  sum(sapply(gb$rep, \(x) ! any(isNA(x))))
+countGbsMatchingReps <- function(gb)  sum(sapply(gb$rep, \(x) ! any(is.na(x))))
  fracGbsMatchingReps <- function(gbl) sapply(gbl, countGbsMatchingReps) / sapply(gbl, length)
 
 summaryMatchingReps <- (sapply(list(aligned    = gbs,     unAligned = unal,
