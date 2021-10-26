@@ -256,14 +256,7 @@ ROI6[1:6] |> dplyr::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChr
 ```
 
 
-# Multiple inversions in a row cause flag inflation (ROI7)
-
-3 consecutive inversions will cause 5 flags to be set to TRUE.  Think:
-
-```
-+ + + + + + + + +  →  + - + - + - + + +
-                      T T T T T F F F F
-```
+# Multiple inversions in a row (ROI7)
 
 ```{r}
 ROI7 <- coa$Oki_Osa |> flagInversions() |> dist2next(ignore.strand = TRUE)
@@ -272,8 +265,6 @@ showInversions(ROI7)
 
 ROI7[35:45] |> as.data.frame()
 ROI7[37:43] |> plotApairOfChrs()
-
-showInversions(ROI7)
 
 ## Annotations
 ROI7.reps <- reps$Oki |> subsetByOverlaps(ROI7[37:43] |> range())
