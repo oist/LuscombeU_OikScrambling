@@ -390,16 +390,21 @@ Numbers of blocks
 -----------------
 
 ```{r lengths}
-rbind(
-  gbs     = sapply(gbs, length),
-  unal    = sapply(unal, length),
-  coa     = sapply(coa, length),
-  unmap   = sapply(unmap, length),
-  unmap2  = sapply(unmap2, length),
-  unalMap = sapply(unalMap, length),
-  tra     = sapply(tra, length),
-  coa2    = sapply(coa2, length)
-)
+bp_summary <- 
+  rbind(
+    gbs     = sapply(gbs, length),
+    unal    = sapply(unal, length),
+    coa     = sapply(coa, length),
+    unmap   = sapply(unmap, length),
+    unmap2  = sapply(unmap2, length),
+    unalMap = sapply(unalMap, length),
+    tra     = sapply(tra, length),
+    coa2    = sapply(coa2, length)
+  ) |> t() |> data.frame()
+
+sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), mean))
+sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), median))
+sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), sd))
 ```
 
 Summary
