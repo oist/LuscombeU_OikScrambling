@@ -315,6 +315,11 @@ gg_freq_poly(widths$invs.coa2) +
   aes(col=Arm) +
   ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm.") +
   geom_vline(xintercept = 1000)
+
+gg_freq_poly(widths$invs.coa2 |> dplyr::mutate(dist = OikScrambling:::compDistance(name))) +
+  facet_wrap(~dist, scale="free") + 
+  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by comparison") +
+  geom_vline(xintercept = 1000)
 ```
 
 ## Width of gaps next to the inverted regions
