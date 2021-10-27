@@ -60,16 +60,11 @@ The number of detected inversions is further increased after double-coalescing.
   map2   = sapply(coa2, function(gb) sum(flagInversions(gb)$inv))
 ))
 
-compDistance <- function(x) {
-  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor")]                       <- "same_pop"
-  x[x %in% c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor",
-             "Osa_Oki", "Osa_Kum", "Bar_Oki", "Bar_Kum")]            <- "Oki – North"
-  x[x %in% c( "Osa_Bar", "Osa_Aom", "Osa_Nor",
-              "Bar_Osa", "Bar_Aom", "Bar_Nor")]                      <- "North – North"
-  x
-}
+sapply(invs_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), mean))
+sapply(invs_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), median))
+sapply(invs_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), sd))
 
-invs_summary$pairname  <- compDistance(rownames(invs_summary))
+invs_summary$pairname  <- OikScrambling:::compDistance(rownames(invs_summary))
 invs_summary$target    <- sub("_.*", "", rownames(invs_summary))
 
 ggplot(invs_summary |> tidyr::pivot_longer(c("align", "mapped", "map2"))) +
