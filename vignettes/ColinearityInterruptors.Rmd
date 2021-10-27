@@ -280,3 +280,72 @@ text <- names(ROI7.genes) |> as.character()
 annot <- genoPlotR::annotation(x1=start(ROI7.genes), x2=end(ROI7.genes), text=text, rot=30)
 ROI7[37:43] |> plotApairOfChrs(annotations = annot)
 ```
+
+
+# Double inversions
+
+In these examples, the inversions happened on the _target_ genome, therefore
+only in this genome the names of the ranges were changed.
+
+```{r ROI8.T}
+exampleDoubleInversion |> plotApairOfChrs()
+
+x0 <- GBreaks(target = GRanges(c("T:1:+", "T:2:+", "T:3:+")),
+              query  = GRanges(c("Q:1",   "Q:2",   "Q:3")))
+
+x1 <- GBreaks(target = GRanges(c("T:1:-", "T:2:-", "T:3:+")),
+              query  = GRanges(c("Q:2",   "Q:1",   "Q:3")))
+
+x2 <- GBreaks(target = GRanges(c("T:1:-", "T:2:+", "T:3:-")),
+              query  = GRanges(c("Q:2",   "Q:3",   "Q:1")))
+
+y0 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:+", C="T:30-35:+")),
+              query  = GRanges(c(A="Q:10-15",   B="Q:20-25",   C="Q:30-35")))
+
+y1 <- GBreaks(target = GRanges(c(A="T:10-15:-", B="T:20-25:-", C="T:30-35:+")),
+              query  = GRanges(c(B="Q:20-25",   A="Q:10-15",   C="Q:30-35")))
+
+y2 <- GBreaks(target = GRanges(c(A="T:10-15:-", B="T:20-25:+", C="T:30-35:-")),
+              query  = GRanges(c(B="Q:20-25",   C="Q:30-35",   A="Q:10-15")))
+
+
+a0 <- GBreaks(target = GRanges(c(`ABC+`="T:10-39:+")),
+              query  = GRanges(c(`ABC+`="Q:10-39"  )))
+
+a1 <- GBreaks(target = GRanges(c(`AB+`="T:10-29:-", `C+`="T:30-39:+")),
+              query  = GRanges(c(`BA-`="Q:10-29",   `C+`="Q:30-39")))
+
+a2 <- GBreaks(target = GRanges(c(`A+`="T:10-19:+", `B+`="T:20-29:-", `C+`="T:30-39:-")),
+              query  = GRanges(c(`A+`="Q:30-39",   `B-`="Q:10-19",   `C-`="Q:20-29")))
+
+```
+
+Let's start with a simpler example, where the inversions happen on the
+_query_ genome.
+
+```{r ROI8.T}
+exampleDoubleInversion |> plotApairOfChrs()
+
+# Start colinear
+z0 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:+", C="T:30-35:+")),
+              query  = GRanges(c(A="Q:10-15",   B="Q:20-25",   C="Q:30-35")))
+
+# Swap coordinates of A and B on the query and flip strands
+z1 <- GBreaks(target = GRanges(c(A="T:10-15:-", B="T:20-25:-", C="T:30-35:+")),
+              query  = GRanges(c(A="Q:20-25",   B="Q:10-15",   C="Q:30-35")))
+
+# Now query order is B - A - C.  Swap A and C and flip strands
+z2 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:-", C="T:30-35:-")),
+              query  = GRanges(c(A="Q:30-35",   B="Q:10-15",   C="Q:20-25")))
+
+# We have the same configuration, plus flanking regions, in exampleDoubleInversion
+exampleDoubleInversion
+
+ROI8 <- coa2$Oki_Osa[1420:1430]
+ROI8 |> flagAll()
+ROI8 |> plotApairOfChrs()
+ROI8 |> reverse() |> sort(i=T) |> plotApairOfChrs()
+ROI8 |> reverse() |> sort(i=T) |> flagAll()
+
+
+```
