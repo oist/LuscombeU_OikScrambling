@@ -55,6 +55,7 @@ widths$coa     <- makeWidthsDF(coa)     |> tibble::as_tibble()
 widths$unmap   <- makeWidthsDF(unmap)   |> tibble::as_tibble()
 widths$unalMap <- makeWidthsDF(unalMap) |> tibble::as_tibble()
 widths$tra     <- makeWidthsDF(tra)     |> tibble::as_tibble()
+widths$tra2    <- makeWidthsDF(tra2)    |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
 ```
 
@@ -186,12 +187,26 @@ separated by the translocated pair.
 ```{r width_of_translocated_regions}
 gg_freq_poly(widths$tra) +
   aes(col=Arm) +
-  facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of widths of translocated regions, split by arm.")
 
 gg_freq_poly(widths$tra) +
   aes(col=dist) +
   ggtitle("Distribution of widths of translocated regions, split by evolutionary distance")
+```
+
+### Whole region, after removal
+
+Small peak in _“same pop”_ disapears by design.  Total number in the main peak
+also decreases, because they may pass the size filter on the _query_ genome.
+
+```{r width_of_translocated_regions2}
+gg_freq_poly(widths$tra2) +
+  aes(col=Arm) +
+  ggtitle("Distribution of widths of translocated regions (after removal), split by arm.")
+
+gg_freq_poly(widths$tra2) +
+  aes(col=dist) +
+  ggtitle("Distribution of widths of translocated regions (after removal), split by evolutionary distance")
 ```
 
 ### Aligned, before removal
@@ -254,6 +269,7 @@ GBreaks2widthTibble <- function(gb, pair = NULL) {
 gbs.w2w     <- do.call(rbind, lapply(names(gbs),      \(name) GBreaks2widthTibble(gbs[[name]],      pair = name)))
 unalMap.w2s <- do.call(rbind, lapply(names(unalMap),  \(name) GBreaks2widthTibble(unalMap[[name]],  pair = name)))
 tra.w2s     <- do.call(rbind, lapply(names(tra),      \(name) GBreaks2widthTibble(tra[[name]],      pair = name)))
+tra2.w2s    <- do.call(rbind, lapply(names(tra2),     \(name) GBreaks2widthTibble(tra2[[name]],     pair = name)))
 
 rbind (
   aligned = table(paste(    gbs.w2w$target.rep,     gbs.w2w$query.rep)),
@@ -289,6 +305,12 @@ ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
   ggtitle("Width of the target and query translocated regions")
 
 ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~dist) +
+  ggtitle("Width of the target and query translocated regions")
+
+ggPlotW2W(tra2.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
+  ggtitle("Width of the target and query translocated regions")
+
+ggPlotW2W(tra2.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~dist) +
   ggtitle("Width of the target and query translocated regions")
 
 ggPlotW2W(gbs.w2w) +
