@@ -178,6 +178,8 @@ gg_freq_poly(widths$unalMap |> subset(chr == "chr1")) +
 
 ## Translocated regions
 
+### Whole region
+
 Reminder: here we measure the distance between the two colinear pairs that are
 separated by the translocated pair.
 
@@ -188,12 +190,38 @@ gg_freq_poly(widths$tra) +
   ggtitle("Distribution of widths of translocated regions, split by arm.")
 
 gg_freq_poly(widths$tra) +
-  ggtitle("Distribution of widths of translocated regions (opposite side)")
+  aes(col=dist) +
+  ggtitle("Distribution of widths of translocated regions, split by evolutionary distance")
+```
 
-gg_freq_poly(widths$tra |> subset(chr == "chr1")) +
-  facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of widths of translocated regions on chr1 after collapsing, split by genome pair") +
-  geom_vline(xintercept = 500)
+### Aligned, before removal
+
+```{r width_of_translocated_regions_coa_aligned}
+widths$tra_coa_aln   <- makeWidthsDF(sapply(coa, \(gb) gb |> flagTranslocations() |> filterTranslocations())) |> tibble::as_tibble()
+
+gg_freq_poly(widths$tra_coa_aln) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of widths of translocated regions (aligned), split by arm.")
+
+gg_freq_poly(widths$tra_coa_aln) +
+  aes(col=dist) +
+  ggtitle("Distribution of widths of translocated regions (aligned), split by evolutionary distance")
+```
+
+### Aligned, after removal
+
+```{r width_of_translocated_regions_coa2_aligned}
+widths$tra_coa2_aln   <- makeWidthsDF(sapply(coa2, \(gb) gb |> flagTranslocations() |> filterTranslocations())) |> tibble::as_tibble()
+
+gg_freq_poly(widths$tra_coa2_aln) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of widths of translocated regions (aligned), split by arm.")
+
+gg_freq_poly(widths$tra_coa2_aln) +
+  aes(col=dist) +
+  ggtitle("Distribution of widths of translocated regions (aligned), split by evolutionary distance")
 ```
 
 ## Double-coalesced regions
