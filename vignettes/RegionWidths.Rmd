@@ -44,6 +44,7 @@ makeWidthsDF <- function (objList) {
     DF$width <- width(objList[[name]])
     DF$chr   <- seqnames(objList[[name]]) |>  sub(pat = "Chr", rep = "chr")
     DF$query <- DF$score <- DF$rep <- NULL
+    DF$dist  <- OikScrambling:::compDistance(DF$name)
     DF
   }) |> do.call(what=rbind)
 }
@@ -218,7 +219,8 @@ GBreaks2widthTibble <- function(gb, pair = NULL) {
   if(is.null(df$query.rep)) df$query.rep  <- NA
   tibble::tibble(target     = df$width,        query     = df$query.width,
                  target.rep = ! is.na(df$rep), query.rep = ! is.na(df$query.rep),  # TRUE if overlaps a repeat
-                 pair = pair, Arm = df$Arm)
+                 pair = pair, Arm = df$Arm,
+                 dist = OikScrambling:::compDistance(pair))
 }
 
 gbs.w2w     <- do.call(rbind, lapply(names(gbs),      \(name) GBreaks2widthTibble(gbs[[name]],      pair = name)))
@@ -249,10 +251,16 @@ ggPlotW2W(unalMap.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
 ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
   ggtitle("Width of the target and query aligned regions")
 
+ggPlotW2W(gbs.w2w) + facet_wrap(~dist) +
+  ggtitle("Width of the target and query aligned regions")
+
 ggPlotW2W(unalMap.w2s) + facet_wrap(~pair) +
   ggtitle("Width of the target and query mapped unaligned regions")
 
 ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
+  ggtitle("Width of the target and query translocated regions")
+
+ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~dist) +
   ggtitle("Width of the target and query translocated regions")
 
 ggPlotW2W(gbs.w2w) +
@@ -264,7 +272,7 @@ ggPlotW2W(unalMap.w2s) +
   ggtitle("Width of the target and query mapped unaligned regions, matching or not matching repeats")
 
 ggPlotW2W(tra.w2s) +
-  facet_wrap(~query.rep + target.rep) +
+  facet_wrap(~dist + query.rep + target.rep, nrow = 3) +
   ggtitle("Width of the target and query translocated regions, matching or not matching repeats")
 
 ggplot(unalMap.w2s) +
@@ -316,7 +324,7 @@ gg_freq_poly(widths$invs.coa2) +
   ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm.") +
   geom_vline(xintercept = 1000)
 
-gg_freq_poly(widths$invs.coa2 |> dplyr::mutate(dist = OikScrambling:::compDistance(name))) +
+gg_freq_poly(widths$invs.coa2) +
   facet_wrap(~dist, scale="free") + 
   ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by comparison") +
   geom_vline(xintercept = 1000)
