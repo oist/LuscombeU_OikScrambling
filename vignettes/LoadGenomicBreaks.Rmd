@@ -386,6 +386,23 @@ unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithGenes, annots
 unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithGenes, annots$Bar)
 ```
 
+Translocated regions 2
+----------------------
+
+To check that we really removed the small ones as intented.
+
+```{r translocated_regions2, cache=TRUE, dependson="re_coalesce"}
+tra2 <- BiocParallel::bplapply(coa2, traGaps) |> as("SimpleList")
+
+tra2[ 1:5 ] <- BiocParallel::bplapply(tra2[ 1:5 ], flagLongShort, longShort$Oki)
+tra2[ 6:10] <- BiocParallel::bplapply(tra2[ 6:10], flagLongShort, longShort$Osa)
+tra2[11:15] <- BiocParallel::bplapply(tra2[11:15], flagLongShort, longShort$Bar)
+
+tra2 <- annotateWithReps.GBreaksSimpleList(tra2, reps)
+tra2 <- annotateWithGenes(tra2, annots)
+```
+
+
 Numbers of blocks
 -----------------
 
@@ -399,6 +416,7 @@ bp_summary <-
     unmap2  = sapply(unmap2, length),
     unalMap = sapply(unalMap, length),
     tra     = sapply(tra, length),
+    tra2    = sapply(tra2, length),
     coa2    = sapply(coa2, length)
   ) |> t() |> data.frame()
 
@@ -431,7 +449,7 @@ Save data
 =========
 
 ```{r save_data}
-save(gbs, unal, coa, unmap, unalMap, tra, coa2, unmap2, longShort, file = "BreakPoints.Rdata")
+save(gbs, unal, coa, unmap, unalMap, tra, tra2, coa2, unmap2, longShort, file = "BreakPoints.Rdata")
 system("echo '9f273f099ecbfa44899b6c343d1382f1  BreakPoints.Rdata' | md5sum -c", intern = TRUE)
 ```
 
