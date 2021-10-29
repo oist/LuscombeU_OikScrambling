@@ -1,0 +1,76 @@
+---
+title: "Translocations"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Translocations}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+After coalescing colinear alignments, removing translocations of
+repeat-containing sequences and re-coalescing, colinearity is still broken
+hundreds of time.
+
+Here we explore the role of translocations in scrambling _Oikopleura_ genomes.
+
+# Load R pacakges and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling:::loadAllGenomes())
+(annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
+(reps <- OikScrambling:::loadAllRepeats())
+(load("BreakPoints.Rdata"))
+```
+
+See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different GBreaks objects are prepared.
+
+# Translocations
+
+## Documentation
+
+Details can be found in `vignette("GenomicBreaks", package = "GenomicBreaks")`,
+in `vignette("StructuralVariants", package = "GenomicBreaks")`,
+and `?GenomicBreaks::flagTranslocations`
+
+## Number of translocations
+
+Notes:
+
+ - Translocations in a genomic context ressembling insertion/deletion are removed
+   in the `coa2` objects.
+   
+ - At the moment, the `flagTranslocations` function only searches the _target_
+   genome.
+
+```{r detect_trivial_invertions}
+(trans_summary <- data.frame(
+  align  = sapply(gbs,  function(gb) sum(flagTranslocations(gb)$tra)),
+  mapped = sapply(coa,  function(gb) sum(flagTranslocations(gb)$tra)),
+  map2   = sapply(coa2, function(gb) sum(flagTranslocations(gb)$tra))
+))
+
+trans_summary$pairname  <- OikScrambling:::compDistance(rownames(trans_summary))
+trans_summary$target    <- sub("_.*", "", rownames(trans_summary))
+
+sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, mean))
+sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, median))
+sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, sd))
+
+ggplot(trans_summary |> tidyr::pivot_longer(c("align", "mapped", "map2"))) +
+  aes(value, name) + geom_point(aes(col = pairname, pch = target)) +
+  ggtitle ("Number of translocations found after different post-processings")
+```
