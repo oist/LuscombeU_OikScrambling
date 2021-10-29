@@ -346,6 +346,33 @@ ROI8 |> flagAll()
 ROI8 |> plotApairOfChrs()
 ROI8 |> reverse() |> sort(i=T) |> plotApairOfChrs()
 ROI8 |> reverse() |> sort(i=T) |> flagAll()
+```
 
+# Filling inversions to better see the rest (ROI9)
 
+We will not fill inversions in objects we analyse, because we do not want
+to erase their breakpoints.
+
+```{r}
+fillInversions <- function(gb) {
+  Invs <- which(flagInversions(gb)$inv) + 1
+  strand(gb)[Invs] <- ifelse(strand(gb)[Invs] == "+", "-", "+")
+  coalesce_contigs(gb)
+}
+
+ROI9.all <- fillInversions(coa2$Oki_Kum)
+
+ROI9 <- ROI9.all |>
+  plyranges::filter(seqnames(query) == "contig_3_1") |>
+  plyranges::arrange(start(query)) |>
+  plyranges::slice(10:20)
+
+ROI9.range <- range(ROI9)[1]
+
+plotApairOfChrs(ROI9)
+plotApairOfChrs(ROI9.all, xlim = gb2xlim(ROI9.range))
+
+subsetByOverlaps(ROI9.all, granges(ROI9.range)) |> flagAll() |> as.data.frame()
+
+subsetByOverlaps(ROI9.all |> swap(), ROI9.range$query)
 ```
