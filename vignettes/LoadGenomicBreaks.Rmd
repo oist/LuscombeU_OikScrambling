@@ -227,8 +227,6 @@ unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithReps.GRanges, rep
 unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithGenes, annots$Oki)
 unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithGenes, annots$Osa)
 unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithGenes, annots$Bar)
-
-unal <- sapply(unal, flagAll) |> SimpleList()
 ```
 
 Coalescing alignments
@@ -266,8 +264,6 @@ unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithReps.GRanges, r
 unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithGenes, annots$Oki)
 unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithGenes, annots$Osa)
 unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithGenes, annots$Bar)
-
-unmap <- sapply(unmap, flagAll) |> SimpleList()
 ```
 
 Mapped unaligned regions
@@ -394,8 +390,6 @@ unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithReps.GRanges,
 unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithGenes, annots$Oki)
 unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithGenes, annots$Osa)
 unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithGenes, annots$Bar)
-
-unmap2 <- sapply(unmap2, flagAll) |> SimpleList()
 ```
 
 Translocated regions 2
