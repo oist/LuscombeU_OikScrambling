@@ -60,9 +60,9 @@ The number of detected inversions is further increased after double-coalescing.
   map2   = sapply(coa2, function(gb) sum(flagInversions(gb)$inv))
 ))
 
-sapply(invs_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), mean))
-sapply(invs_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), median))
-sapply(invs_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), sd))
+sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::compDistance(), mean))
+sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::compDistance(), median))
+sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::compDistance(), sd))
 
 invs_summary$pairname  <- OikScrambling:::compDistance(rownames(invs_summary))
 invs_summary$target    <- sub("_.*", "", rownames(invs_summary))
