@@ -206,6 +206,7 @@ gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             Bar2
 gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 Bar2_p4,     OdB3,          longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Nor)
 
 gbs <- annotateWithGenes(gbs, annots)
+gbs <- sapply(gbs, flagAll) |> SimpleList()
 ```
 
 Unaligned regions
@@ -226,6 +227,8 @@ unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithReps.GRanges, rep
 unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithGenes, annots$Oki)
 unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithGenes, annots$Osa)
 unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithGenes, annots$Bar)
+
+unal <- sapply(unal, flagAll) |> SimpleList()
 ```
 
 Coalescing alignments
@@ -239,6 +242,8 @@ coa[11:15] <- BiocParallel::bplapply(coa[11:15], flagLongShort, longShort$Bar)
 
 coa <- annotateWithReps.GBreaksSimpleList(coa, reps)
 coa <- annotateWithGenes(coa, annots)
+
+coa <- sapply(coa, flagAll) |> SimpleList()
 ```
 
 Unmapped regions
@@ -261,6 +266,8 @@ unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithReps.GRanges, r
 unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithGenes, annots$Oki)
 unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithGenes, annots$Osa)
 unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithGenes, annots$Bar)
+
+unmap <- sapply(unmap, flagAll) |> SimpleList()
 ```
 
 Mapped unaligned regions
@@ -293,6 +300,7 @@ unalMap[11:15] <- BiocParallel::bplapply(unalMap[11:15], flagLongShort, longShor
 
 unalMap <- annotateWithReps.GBreaksSimpleList(unalMap, reps)
 unalMap <- annotateWithGenes(unalMap, annots)
+unalMap <- sapply(unalMap, flagAll) |> SimpleList()
 ```
 
 Translocated regions
@@ -333,6 +341,7 @@ tra[11:15] <- BiocParallel::bplapply(tra[11:15], flagLongShort, longShort$Bar)
 
 tra <- annotateWithReps.GBreaksSimpleList(tra, reps)
 tra <- annotateWithGenes(tra, annots)
+tra <- sapply(tra, flagAll) |> SimpleList()
 ```
 
 Coalesce again
@@ -363,6 +372,7 @@ coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
 
 coa2 <- annotateWithReps.GBreaksSimpleList(coa2, reps)
 coa2 <- annotateWithGenes(coa2, annots)
+coa2 <- sapply(coa2, flagAll) |> SimpleList()
 ```
 
 Unmapped regions 2
@@ -384,6 +394,8 @@ unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithReps.GRanges,
 unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithGenes, annots$Oki)
 unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithGenes, annots$Osa)
 unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithGenes, annots$Bar)
+
+unmap2 <- sapply(unmap2, flagAll) |> SimpleList()
 ```
 
 Translocated regions 2
@@ -400,6 +412,8 @@ tra2[11:15] <- BiocParallel::bplapply(tra2[11:15], flagLongShort, longShort$Bar)
 
 tra2 <- annotateWithReps.GBreaksSimpleList(tra2, reps)
 tra2 <- annotateWithGenes(tra2, annots)
+
+tra2 <- sapply(tra2, flagAll) |> SimpleList()
 ```
 
 
