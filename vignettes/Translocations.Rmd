@@ -56,7 +56,7 @@ Notes:
  - At the moment, the `flagTranslocations` function only searches the _target_
    genome.
 
-```{r detect_trivial_invertions}
+```{r count_translocations}
 (trans_summary <- data.frame(
   align  = sapply(gbs,  function(gb) sum(flagTranslocations(gb)$tra)),
   mapped = sapply(coa,  function(gb) sum(flagTranslocations(gb)$tra)),
@@ -73,4 +73,42 @@ sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summar
 ggplot(trans_summary |> tidyr::pivot_longer(c("align", "mapped", "map2"))) +
   aes(value, name) + geom_point(aes(col = pairname, pch = target)) +
   ggtitle ("Number of translocations found after different post-processings")
+```
+
+## Small translocations
+
+Translocations are "small" when the flanking colinear regions are longer.
+
+Small translocations are a majority.  Only in same-population comparison they
+seem to associate strongly with repeats.
+
+```{r translocation classes}
+flagSmallTranslocations <- function (a) {
+  a <- flagTranslocations(a)
+  a$w0  <- width(a)
+  a$w1 <- c(tail(a$w0, -1), NA)
+  a$w2 <- c(tail(a$w0, -2), NA, NA)
+  a$midSmaller <- (a$w0 + a$w2 > 2 * a$w1) & a$tra
+  a
+}
+
+smallTransObjs <- SimpleList(
+  align = sapply(gbs, flagSmallTranslocations),
+  mapped = sapply(coa, flagSmallTranslocations),
+  map2 = sapply(coa2, flagSmallTranslocations)
+)
+
+(rbind(
+  aln = sapply(gbs, length),
+  alnStrans = sapply(smallTransObjs$align, \(gb) sum(gb$midSmaller)),
+  mapTot = sapply(coa, length),
+  alltrans = sapply(tra, length),
+  mapStrans = sapply(smallTransObjs$mapped, \(gb) sum(gb$midSmaller)),
+  map2Tot = sapply(coa2, length),
+  map2allTrans = sapply(tra2,length),
+  map2Strans = sapply(smallTransObjs$map2, \(gb) sum(gb$midSmaller)),
+  map2StransRep = sapply(smallTransObjs$map2, countGbsMatchingRepsInStrans)
+))
+
+countGbsMatchingRepsInStrans <- function(gb)  sum(sapply(gb[gb$midSmaller]$rep, \(x) ! any(is.na(x))))
 ```
