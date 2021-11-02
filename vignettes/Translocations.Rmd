@@ -98,6 +98,8 @@ smallTransObjs <- SimpleList(
   map2 = sapply(coa2, flagSmallTranslocations)
 )
 
+countGbsMatchingRepsInStrans <- function(gb)  sum(sapply(gb[gb$midSmaller]$rep, \(x) ! any(is.na(x))))
+
 (rbind(
   aln = sapply(gbs, length),
   alnStrans = sapply(smallTransObjs$align, \(gb) sum(gb$midSmaller)),
@@ -110,5 +112,4 @@ smallTransObjs <- SimpleList(
   map2StransRep = sapply(smallTransObjs$map2, countGbsMatchingRepsInStrans)
 ))
 
-countGbsMatchingRepsInStrans <- function(gb)  sum(sapply(gb[gb$midSmaller]$rep, \(x) ! any(is.na(x))))
 ```
