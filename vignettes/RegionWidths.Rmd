@@ -49,8 +49,8 @@ makeWidthsDF <- function (objList) {
   }) |> do.call(what=rbind)
 }
 
-unal <- sapply(unal, \(gb) gb$flag <- NA) |> SimpleList()
-unmap <- sapply(unmap, \(gb) gb$flag <- NA) |> SimpleList()
+unal  <- sapply(unal,  \(gb) {gb$flag <- NA; gb}) |> SimpleList()
+unmap <- sapply(unmap, \(gb) {gb$flag <- NA; gb}) |> SimpleList()
 
 widths$gbs     <- makeWidthsDF(gbs)     |> tibble::as_tibble()
 widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
