@@ -78,9 +78,8 @@ orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KU
                                         , annots$Oki, annots$Kum)
 orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
                                         , annots$Oki, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                        , annots$Oki, annots$Nor)
 
 orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
                                         , annots$Osa, annots$Bar)
@@ -90,9 +89,8 @@ orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "KUM-
                                         , annots$Osa, annots$Kum)
 orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
                                         , annots$Osa, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                        , annots$Osa, annots$Nor)
 
 
 orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
@@ -103,15 +101,13 @@ orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "KUM-
                                         , annots$Bar, annots$Kum)
 orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
                                         , annots$Bar, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                        , annots$Bar, annots$Nor)
 
 sapply(orthoPairs, length)
-load("BreakPoints.Rdata")
-orthoPairs[ 1:4] <- sapply(orthoPairs[ 1:4],  flagLongShort, longShort$Oki)
-orthoPairs[ 5:8] <- sapply(orthoPairs[ 5:8],  flagLongShort, longShort$Osa)
-orthoPairs[9:11] <- sapply(orthoPairs[9:11],  flagLongShort, longShort$Bar)
+orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
+orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
+orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
 ```
 
 Problem: some annotations overlap
