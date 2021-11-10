@@ -132,14 +132,14 @@ transcripts(annots$Bar)[flagOverlaps(transcripts(annots$Bar))]
 orthoPairs$Oki_Osa[flagOverlaps(orthoPairs$Oki_Osa)]
 orthoPairs$Oki_Osa$query[flagOverlaps(orthoPairs$Oki_Osa$query)]
 
-# Remove and show how much
+# Remove and show how much was removed
 
 orthoPairsFiltered <- sapply(orthoPairs, function(gb) {
   gb <- gb[!flagOverlaps(gb)]
   gb <- gb[!flagOverlaps(gb$query)]
   gb
 }) |> SimpleList()
-sapply(orthoPairsFiltered, length)
+sapply(orthoPairs, length) - sapply(orthoPairsFiltered, length)
 ```
 
 
