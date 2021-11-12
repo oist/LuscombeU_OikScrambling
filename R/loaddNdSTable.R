@@ -4,8 +4,7 @@
 #' Requires `BreakpointsData` version >=3.6.1.
 #'
 #' @returns Returns a [`SimpleList`] of data frames with dN/dS annotations.
-
-loadAlldNdS <- function(file, alignment_type='GUIDANCE2') {
+loaddNdSTable <- function(file, alignment_type='GUIDANCE2') {
   # The first part of the function loads the dN/dS data frame from the BreakpointsData package's extdata.
   get_dnds_df <- function(file, alignment_type){
     file <- system.file(paste0('extdata/dNdS/', file), package='BreakpointsData')
