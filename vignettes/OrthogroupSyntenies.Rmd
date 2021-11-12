@@ -12,90 +12,16 @@ editor_options:
 Load packages and data
 ======================
 
-R packages
-----------
+See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllAnnotations`,
+and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different objects are prepared.
 
-Install the _GenomicBreaks_ package with:
-
-```
-devtools::install_github("oist/GenomicBreaks")
-```
-
-```{r load_packages}
-suppressPackageStartupMessages({
-  library('BreakpointsData')
-  library('GenomicBreaks')
-  library('BSgenome')
-  library('GenomicFeatures')
-})
-```
-
-BSgenome packages
------------------
-
-Example command to install one _Oikopleura_ BSgenome package if you do not yet
-have it:
-
-```
-install.packages("BSgenome.Odioica.local.OKI2018.I69", repos="https://oist.github.io/plessy_oikgenomes_drat/")
-```
-
-```{r load_BSgenome_packages}
-library("BSgenome.Odioica.local.OKI2018.I69")
-library("BSgenome.Odioica.local.OSKA2016v1.9")
-library("BSgenome.Odioica.local.Bar2.p4")
-library("BSgenome.Odioica.local.KUM.M3")
-library("BSgenome.Odioica.local.AOM.5")
-library("BSgenome.Odioica.local.Odioica.reference.v3.0")
-
-genomes <- SimpleList(
-  # Chromosome assemblies
-  Oki = OKI2018_I69, Osa = OSKA2016v1.9, Bar = Bar2_p4,
-  # Less contiguous assemblies
-  Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
-
-## Genome lengths
-sapply(genomes, \(g) sum(seqlengths(seqinfo(g))))
-```
-
-Annotations
------------
-
-The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
-distributed in the same drat repository as the alignment data.
-
-```
-install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgenomes_drat/")
-```
-
-```{r load_annotations, warning=FALSE}
-annots <- SimpleList()
-
-gff2txdb <- function(file, genome) {
-  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
-  tx <- rtracklayer::import.gff(file)
-  tx <- tx[seqnames(tx) %in% seqnames(genome)]
-  tx <- GRanges(tx, seqinfo = seqinfo(genome))
-  tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
-}
-
-gff2txdb_Norway <- function(file, genome) {
-  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
-  tx <- rtracklayer::import.gff(file)
-  tx <- tx[!is.na(tx$mRNA)]
-  # Remove "scaffoldA" objects in the OdB3 annotation
-  tx <- tx[seqnames(tx) %in% seqnames(genome)]
-  tx$ID <- tx$mRNA
-  tx <- GRanges(tx, seqinfo = seqinfo(genome))
-  tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
-}
-
-annots$Oki <- gff2txdb("OKI2018_I69.v2/OKI2018_I69.v2.gm.gff.gz",  OKI2018_I69)
-annots$Osa <- gff2txdb("OSKA2016v1.9/OSKA2016v1.9.gm.gff.gz",      OSKA2016v1.9)
-annots$Bar <- gff2txdb("Bar2_p4.Flye/Bar2_p4.Flye.gm.gff.gz",      Bar2_p4)
-annots$Kum <- gff2txdb("KUM-M3-7f/KUM-M3-7f.gm.gff.gz",            KUM_M3)
-annots$Aom <- gff2txdb("AOM-5-5f/AOM-5-5f.gm.gff.gz",              AOM_5)
-annots$Nor <- gff2txdb_Norway("OdB3/Oikopleura_annot_v1.0.gff.gz", OdB3)
+```{r load_packages_and_data}
+library('OikScrambling')   |> suppressPackageStartupMessages()
+library('GenomicFeatures') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling:::loadAllGenomes())
+(annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
+(load("BreakPoints.Rdata"))
 ```
 
 Orthogroups
@@ -103,14 +29,15 @@ Orthogroups
 
 Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
 `GenomicBreaks::load_one_to_ones()` function.  Original file is in
-`/bucket/LuscombeU/common/Breakpoints/Orthologues/selectedTunicates+Amph+vertebrates_lp_100clstr_blast/OrthoFinder/Results_Sep07/Phylogenetic_Hierarchical_Orthogroups/N6.tsv`.
+`/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`.
+See `news(package = "BreakpointsData")` for inspecting changes in more details.
 
 ```{r load_orthogroups}
 # Example for loading all orthogroups:
-load_one_to_ones(system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"))
+load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
 
 # Example for loading a pair
-load_one_to_ones( system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData")
+load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
                 , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
 ```
 
@@ -121,7 +48,7 @@ Prepare GBreak objects
 ```{r Bar_Osk}
 orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
   orthoPairs <- load_one_to_ones(
-    system.file("extdata/OrthoFinder/N6.tsv.gz", package = "BreakpointsData"),
+    system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"),
     c(name1, name2))
 
   IDs2GRanges <- function (IDs, annot) {
@@ -151,9 +78,8 @@ orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KU
                                         , annots$Oki, annots$Kum)
 orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
                                         , annots$Oki, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                        , annots$Oki, annots$Nor)
 
 orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
                                         , annots$Osa, annots$Bar)
@@ -163,9 +89,8 @@ orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "KUM-
                                         , annots$Osa, annots$Kum)
 orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
                                         , annots$Osa, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                        , annots$Osa, annots$Nor)
 
 
 orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
@@ -176,15 +101,13 @@ orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "KUM-
                                         , annots$Bar, annots$Kum)
 orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
                                         , annots$Bar, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                        , annots$Bar, annots$Nor)
 
 sapply(orthoPairs, length)
-load("BreakPoints.Rdata")
-orthoPairs[ 1:4] <- sapply(orthoPairs[ 1:4],  flagLongShort, longShort$Oki)
-orthoPairs[ 5:8] <- sapply(orthoPairs[ 5:8],  flagLongShort, longShort$Osa)
-orthoPairs[9:11] <- sapply(orthoPairs[9:11],  flagLongShort, longShort$Bar)
+orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
+orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
+orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
 ```
 
 Problem: some annotations overlap
@@ -209,14 +132,14 @@ transcripts(annots$Bar)[flagOverlaps(transcripts(annots$Bar))]
 orthoPairs$Oki_Osa[flagOverlaps(orthoPairs$Oki_Osa)]
 orthoPairs$Oki_Osa$query[flagOverlaps(orthoPairs$Oki_Osa$query)]
 
-# Remove and show how much
+# Remove and show how much was removed
 
 orthoPairsFiltered <- sapply(orthoPairs, function(gb) {
   gb <- gb[!flagOverlaps(gb)]
   gb <- gb[!flagOverlaps(gb$query)]
   gb
 }) |> SimpleList()
-sapply(orthoPairsFiltered, length)
+sapply(orthoPairs, length) - sapply(orthoPairsFiltered, length)
 ```
 
 
@@ -244,9 +167,9 @@ coalOrtho <- function(gb) {
 }
 orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
 sapply(orthoBlocks, length)
-orthoBlocks[ 1:4] <- sapply(orthoBlocks[ 1:4],  flagLongShort, longShort$Oki)
-orthoBlocks[ 5:8] <- sapply(orthoBlocks[ 5:8],  flagLongShort, longShort$Osa)
-orthoBlocks[9:12] <- sapply(orthoBlocks[9:12],  flagLongShort, longShort$Bar)
+orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
+orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
+orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
 ```
 
 
@@ -303,3 +226,9 @@ sum(width(valid))
 
 Question: what does interrupt the colinearity of nucleotide regions in gene-centric
 colinear regions ?
+
+# Session information
+
+```{r session_information}
+sessionInfo()
+```
