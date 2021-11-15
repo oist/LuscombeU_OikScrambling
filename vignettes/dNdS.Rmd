@@ -1,0 +1,144 @@
+---
+title: "Exploring coding-sequence substitutions"
+author: 
+ - "Michael Mansfield"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Exploring coding-sequence substitutions}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+```{r setup}
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+This vignette loads dN/dS statistics tables and explores the
+relationship between substitutions in coding sequences and genomic
+breaks.
+
+This vignette assumes that prior vignettes have been explored by the
+user previously and that the `GenomicBreaks` and `OikScrambling`
+packages have been installed already.
+
+# Packages and data
+
+```{r load_pacakges_and_data}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  requireNamespace('GenomicFeatures')
+  library('ggplot2')
+  library("BreakpointsData")
+})
+(genomes <- OikScrambling:::loadAllGenomes())
+```
+
+# Genomic breaks
+
+## Long/short arm information
+
+Short / long arm annotation will be done by the
+`GenomicBreaks::flagLongShort()` function.
+
+```{r long_and_short_arms}
+
+loadLongShort <- function(file, genome) {
+  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
+  gr <- rtracklayer::import.gff3(file)
+  gr$source <- gr$type <- gr$score <- gr$phase <- NULL
+  GRanges(gr, seqinfo = seqinfo(genome), strand = "*")
+}
+
+longShort <- SimpleList()
+longShort$Oki <- loadLongShort("OKI2018_I69.v2/OKI2018_I69.arms.gff3", OKI2018_I69)
+longShort$Osa <- loadLongShort("OSKA2016v1.9/OSKA2016v1.9.arms.gff3", OSKA2016v1.9)
+longShort$Bar <- loadLongShort("Bar2_p4.Flye/Bar2_p4.Flye.arms.gff3", Bar2_p4)
+
+longShort
+```
+
+## dN/dS values
+```
+transcripts <- OikScrambling:::loadAllTranscriptsGR()
+```
+
+Using this object, the strategy used in other vignettes to transmute this into a
+`GenomicBreaks` object works, with minor modification of the parsing functions:
+
+```
+orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
+  orthoPairs <- load_one_to_ones(
+    system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"),
+    c(name1, name2))
+  
+  IDs2GRanges <- function (IDs, annot) {
+    prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
+    not_prefix <- Biobase::lcPrefix(annot$tx_name)    # Remove trailing characters that are part of the name
+    not_prefix <- paste0(not_prefix,"$")              # Anchor to end of the string
+    prefix <- sub(not_prefix, "", prefix)             # Finalise prefix
+    IDs <- sub(prefix, "", IDs)                       # Remove prefix from IDS
+    names(annot) <- annot$tx_name                     # Store transcript name in names slot
+    gr <- granges(annot[IDs], use.mcols=T)            # Discard extra metadata and sort by ID
+    strand(gr) <- "*"                                 # Make strandless
+    gr                                                # Return the object
+  }
+  
+  gb       <- IDs2GRanges(orthoPairs[,name1], annot1)
+  gb$query <- IDs2GRanges(orthoPairs[,name2], annot2)
+  gb <- GenomicBreaks:::GBreaks(gb)
+  sort(gb)
+}
+
+dndsPairs <- SimpleList()
+dndsPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
+                                         , transcripts$Oki, transcripts$Osa)
+dndsPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
+                                         , transcripts$Oki, transcripts$Bar)
+dndsPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
+                                         , transcripts$Oki, transcripts$Kum)
+dndsPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
+                                         , transcripts$Oki, transcripts$Aom)
+## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
+# dndsPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
+#                                         , transcripts$Bar, transcripts$Nor)
+
+dndsPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
+                                         , transcripts$Osa, transcripts$Bar)
+dndsPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
+                                         , transcripts$Osa, transcripts$Oki)
+dndsPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
+                                         , transcripts$Osa, transcripts$Kum)
+dndsPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
+                                         , transcripts$Osa, transcripts$Aom)
+## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
+# dndsPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
+#                                         , transcripts$Bar, transcripts$Nor)
+
+
+dndsPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
+                                         , transcripts$Bar, transcripts$Osa)
+dndsPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
+                                         , transcripts$Bar, transcripts$Oki)
+dndsPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
+                                         , transcripts$Bar, transcripts$Kum)
+dndsPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
+                                         , transcripts$Bar, transcripts$Aom)
+## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
+# dndsPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
+#                                         , transcripts$Bar, transcripts$Nor)
+
+sapply(dndsPairs, length)
+```
+
+# Session information
+
+```{r session_info}
+sessionInfo()
+```
