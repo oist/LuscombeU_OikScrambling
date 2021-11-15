@@ -173,8 +173,59 @@ dndsPairs$Bar_Aom <- addMetadataToGRanges(gr=dndsPairs$Bar_Aom, gr_key="tx_name"
 
 ```
 
+Now, we can get to plotting.
 
+```
+ggplot(tibble(as.data.frame(dndsPairs$Oki_Osa))) +
+  aes(dNdS, fill=Arm) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_wrap(~seqnames) +
+  ggtitle('dN/dS by chromosome and chromosome arm for Oki/Osa')
+```
 
+Notice that an unplaced scaffold appears to have a gene that was used for the dN/dS analysis. Let's filter those out.
+
+```
+ggplot(tibble(as.data.frame(dndsPairs$Oki_Osa)) %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS, fill=Arm) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_wrap(~seqnames) +
+  ggtitle('dN/dS by chromosome and chromosome arm for Oki/Osa')
+```
+
+Let's enumerate the rest:
+
+```
+# Note that the chromosome names change.
+ggplot(tibble(as.data.frame(dndsPairs$Osa_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS, fill=Arm) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_wrap(~seqnames) +
+  ggtitle('dN/dS by chromosome and chromosome arm for Osa/Oki')
+ggplot(tibble(as.data.frame(dndsPairs$Osa_Bar)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS, fill=Arm) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_wrap(~seqnames) +
+  ggtitle('dN/dS by chromosome and chromosome arm for Osa/Bar')
+
+ggplot(tibble(as.data.frame(dndsPairs$Bar_Osa)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS, fill=Arm) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_wrap(~seqnames) +
+  ggtitle('dN/dS by chromosome and chromosome arm for Bar/Osa')
+
+ggplot(tibble(as.data.frame(dndsPairs$Bar_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS, fill=Arm) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_wrap(~seqnames) +
+  ggtitle('dN/dS by chromosome and chromosome arm for Bar/Oki')
+```
 
 # Session information
 
