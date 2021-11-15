@@ -9,7 +9,8 @@ loaddNdSTable <- function(file, alignment_type='GUIDANCE2') {
   get_dnds_df <- function(file, alignment_type){
     file <- system.file(paste0('extdata/dNdS/', file), package='BreakpointsData')
     # note that the 10th column is just NA. So I remove it. :-)
-    df <- read.delim(file, header=F)[,-10]
+    df <- read.delim(file, header=F)#[,-10]
+    df <- Filter(function(x)!all(is.na(x)), df)
     colnames(df) <- c('HOG', 'dNdS', 'Alignment', 'OKI2018_I69.v2', 'KUM-M3-7f', 'OSKA2016v1.9', 'AOM-5-5f', 'Bar2_p4_Flye', 'OdB3')
     df <- subset(df, df$Alignment == alignment_type)
     df
