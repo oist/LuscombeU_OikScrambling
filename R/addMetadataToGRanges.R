@@ -20,7 +20,21 @@ addMetadataToGRanges <- function(gr, df, gr_key="gene_id", df_key="gene_id", df_
     stop("Error. Looks like the keys in the dataframe don't match the keys in the GenomicRanges?")
   }
 
+  # Ensure column names are compatible.
+  existing_gr_colnames = colnames(mcols(gr))
+  if(df_col_name %in% existing_gr_colnames){
+    stop(paste("Error. It looks like there is already a column named ", df_col_name, " in the GRanges object.", sep=""))
+  }
+
+  if(rename_meta %in% existing_gr_colnames){
+    stop(paste("Error. Can't rename ", df_col_name, "to ", rename_meta, " because it already exists in the GRanges object.", sep=""))
+  }
   # TODO add logic to check if column names are unique
+  if(!is.na(rename_meta)){
+
+  } else {
+
+  }
 
   # Ensure the df column name is actually in the df.
   if(is.na(df_col_name)){

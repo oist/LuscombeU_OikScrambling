@@ -47,17 +47,12 @@ load("BreakPoints.Rdata")
 
 # Genomic breaks
 
-
 ## dN/dS values
+After you have loaded the transcripts using the `loadAllTranscriptsGR` function,
+you should have a `GRanges` object for every species with one interval per gene
+and dN/dS metadata columns. 
 
-Once you have a fully-populated `GBreaks` object with all of the annotations you want,
-adding additional metadata like dN/dS values is simple. First, load the dN/dS tables.
-
-This yields a `SimpleList` `dNdS_GUIDANCE2`, which contains data frames organized by dN/dS method.
-The data frames look like so:
-
-By creating a `GBreaks` object with the metadata column `tx_name`, we can combine
-this dN/dS dataframe using that shared key with the `addMetadataToGRanges` function.
+Similar to the `GBreaks` object in the `OrthogroupSyntenies` vignette. 
 
 The `GBreaks` object from the `OrthogroupSyntenies` vignette is suitable.
 
@@ -133,7 +128,7 @@ TODO resolve cases where query metadata is not precisely equal to target metadat
 
 Now, we can get to plotting.
 
-```{r plot_init_orthopairs_dNdS_GUIDANCE2}
+```{r plot_init_orthopairs_dNdS_GUIDANCE2, fig.height=4, fig.width=6, dev=c("svg", "png")}
 ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
@@ -144,7 +139,7 @@ ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa))) +
 
 Notice that an unplaced scaffold appears to have a gene that was used for the dN/dS analysis. Let's filter those out.
 
-```{r plot_enumerate_dNdS_GUIDANCE2}
+```{r plot_enumerate_dNdS_GUIDANCE2, fig.height=4, fig.width=6, dev=c("svg", "png")}
 ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa)) %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR'))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
@@ -155,7 +150,7 @@ ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa)) %>% filter(seqnames %in% c('chr
 
 Let's enumerate the rest:
 
-```{r dNdS_GUIDANCE2_enumerate}
+```{r dNdS_GUIDANCE2_enumerate, fig.height=4, fig.width=6, dev=c("svg", "png")}
 # Note that the chromosome names change.
 ggplot(tibble(as.data.frame(orthoPairs$Osa_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
@@ -183,6 +178,84 @@ ggplot(tibble(as.data.frame(orthoPairs$Bar_Oki)) %>% filter(seqnames %in% c('Chr
   coord_flip() +
   facet_wrap(~seqnames) +
   ggtitle('dN/dS by chromosome and chromosome arm for Bar/Oki')
+```
+
+## Coalescing orthogroups
+As in the `OrthogroupSyntenies` vignette, we'll need to coalesce the orthogroup
+pairs in order to continue exploring the dN/dS values.
+
+First, remove overlapping regions.
+
+```{r flag_remove_overlaps}
+flagOverlaps <- function(gr) {
+  # Find overlaps
+  ov <- findOverlaps(gr)
+  # Index of self hits in the gr object
+  idx <- queryHits(ov[!isSelfHit(ov)])
+  # Convert to Boolean indexing the gr object
+  seq_along(gr) %in% idx
+}
+
+orthoPairsFiltered <- sapply(orthoPairs, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+sapply(orthoPairsFiltered, length)
+```
+
+Now, coalesce the filtered orthogroup pairs into syntenic blocks. Note the code
+below has been modified from the `OrthogroupsSynteny` vignette to accommodate
+gluing dN/dS into the coalesced blocks.
+
+```{r coalesce_orthopairs}
+# A little helper to extract dN/dS values from the orthoPairs object.
+dNdSFromOrthoPairs <- function(orthoPair, tx_name, column_name='dNdS_GUIDANCE2'){
+  if(tx_name %in% orthoPair$tx_name){
+    dnds <- as.data.frame(orthoPair[orthoPair$tx_name == tx_name,])[[column_name]]
+  } else {
+    dnds <- NA
+  }
+  
+  dnds
+}
+
+coalOrtho <- function(gb) {
+  # Coalesce
+  coal <- coalesce_contigs(gb)
+  
+  # Map annotations to the coalesced blocks
+  ov <- findOverlaps(coal, gb)
+  
+  # Extract gene names mapped to each blocks
+  geneNames <- split(names(gb)[subjectHits(ov)], queryHits(ov))
+  
+  # Concatenate them as single strings and graft them to the coal object
+  coal$geneNames <- sapply(geneNames, paste, collapse = ", ")
+  
+  # Graft dN/dS values too.
+  coal$dNdS <- sapply(geneNames, function(name) {
+    dNdSFromOrthoPairs(gb, tx_name=name, column_name='dNdS_GUIDANCE2')
+  })
+    
+  # Count genes per syntenic block
+  coal$geneNumber <- sapply(geneNames, length)
+  
+  coal
+}
+orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
+
+orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
+orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
+orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
+```
+
+Now that we have orthoblocks, let's assess how dN/dS relates to gene synteny.
+First, create a function to look at blocks with X genes, then look up their
+dN/dS values.
+
+```{r dnds_synteny}
+
 ```
 
 # Session information
