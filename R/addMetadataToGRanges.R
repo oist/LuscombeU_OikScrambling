@@ -20,6 +20,8 @@ addMetadataToGRanges <- function(gr, df, gr_key="gene_id", df_key="gene_id", df_
     stop("Error. Looks like the keys in the dataframe don't match the keys in the GenomicRanges?")
   }
 
+  # TODO add logic to check if column names are unique
+
   # Ensure the df column name is actually in the df.
   if(is.na(df_col_name)){
     stop("Error. A column name within the metadata data frame must be specified.")

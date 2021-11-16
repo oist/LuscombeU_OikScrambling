@@ -32,64 +32,36 @@ packages have been installed already.
 
 ```{r load_pacakges_and_data}
 suppressPackageStartupMessages({
+  library("tibble")
+  library("dplyr")
   library('GenomicBreaks')
-  requireNamespace('GenomicFeatures')
   library('ggplot2')
-  library("tidyverse")
   library("BreakpointsData")
-  library("GenomicFeatures")
 })
+
+(genomes <- OikScrambling:::loadAllGenomes())
+(transcripts <- OikScrambling:::loadAllTranscriptsGR())
+
+load("BreakPoints.Rdata")
 ```
 
 # Genomic breaks
-
-Load all of the necessary objects beforehand.
-
-```
-(genomes <- OikScrambling:::loadAllGenomes())
-(annots <- OikScrambling:::loadAllAnnotations())
-
-```
-
 
 
 ## dN/dS values
 
 Once you have a fully-populated `GBreaks` object with all of the annotations you want,
 adding additional metadata like dN/dS values is simple. First, load the dN/dS tables.
-```
-dnds <- SimpleList()
-dnds$dnds_guidance   <- loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'GUIDANCE2')
-dnds$dnds_hmmcleaner <- loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'HmmCleaner')
-dnds$dnds_prank      <- loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'Alignment')
-transcripts <- sapply(names(transcripts), function(sp){
-  sp_dnds = addMetadataToGRanges(gr=transcripts[[sp]], df=dnds$dnds_guidance[[sp]], gr_key='tx_name', df_key='transcript_id_simple', df_col_name = 'dNdS', rename_meta = 'dNdS_GUIDANCE2')
-  sp_dnds = addMetadataToGRanges(gr=sp_dnds, df=dnds$dnds_hmmcleaner[[sp]], gr_key='tx_name', df_key='transcript_id_simple', df_col_name = 'dNdS', rename_meta = 'dNdS_HmmCleaner')
-  sp_dnds = addMetadataToGRanges(gr=sp_dnds, df=dnds$dnds_prank[[sp]], gr_key='tx_name', df_key='transcript_id_simple', df_col_name = 'dNdS', rename_meta = 'dNdS_PRANK')
-  sp_dnds
-})
-```
 
-This yields a `SimpleList` `dnds`, which contains data frames organized by dN/dS method.
+This yields a `SimpleList` `dNdS_GUIDANCE2`, which contains data frames organized by dN/dS method.
 The data frames look like so:
-
-```
-> head(dnds$dnds_guidance$Oki)
-  gene_id       transcript_id_full transcript_id_simple    dNdS
-1  g16808 OKI2018_I69.v2.g16808.t1            g16808.t1 0.00928
-2  g13507 OKI2018_I69.v2.g13507.t1            g13507.t1 0.01340
-3   g4633  OKI2018_I69.v2.g4633.t1             g4633.t1 0.01920
-4  g12080 OKI2018_I69.v2.g12080.t1            g12080.t1 0.02840
-5  g12181 OKI2018_I69.v2.g12181.t1            g12181.t1 0.02653
-6   g8257  OKI2018_I69.v2.g8257.t1             g8257.t1 0.03106
-```
 
 By creating a `GBreaks` object with the metadata column `tx_name`, we can combine
 this dN/dS dataframe using that shared key with the `addMetadataToGRanges` function.
 
 The `GBreaks` object from the `OrthogroupSyntenies` vignette is suitable.
 
-```
+```{r create_dNdS_GUIDANCE2_orthopairs, fig.height=12, fig.width=8.5, dev=c('svg', 'png')}
 orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
   orthoPairs <- load_one_to_ones(
     system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"),
@@ -107,54 +79,50 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
     gr                                                # Return the object
   }
   
-  gb       <- IDs2GRanges(orthoPairs[,name1], transcripts(annot1))
-  gb$query <- IDs2GRanges(orthoPairs[,name2], transcripts(annot2))
+  gb       <- IDs2GRanges(orthoPairs[,name1], annot1)
+  gb$query <- IDs2GRanges(orthoPairs[,name2], annot2)
   gb <- GenomicBreaks:::GBreaks(gb)
   sort(gb)
 }
 
 orthoPairs <- SimpleList()
 orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
-                                        , annots$Oki, annots$Osa)
+                                        , transcripts$Oki, transcripts$Osa)
 orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
-                                        , annots$Oki, annots$Bar)
+                                        , transcripts$Oki, transcripts$Bar)
 orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , annots$Oki, annots$Kum)
+                                        , transcripts$Oki, transcripts$Kum)
 orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , annots$Oki, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+                                        , transcripts$Oki, transcripts$Aom)
+orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                       , transcripts$Oki, transcripts$Nor)
 
 orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
-                                        , annots$Osa, annots$Bar)
+                                        , transcripts$Osa, transcripts$Bar)
 orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
-                                        , annots$Osa, annots$Oki)
+                                        , transcripts$Osa, transcripts$Oki)
 orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , annots$Osa, annots$Kum)
+                                        , transcripts$Osa, transcripts$Kum)
 orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , annots$Osa, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+                                        , transcripts$Osa, transcripts$Aom)
+orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                       , transcripts$Osa, transcripts$Nor)
 
 
 orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
-                                        , annots$Bar, annots$Osa)
+                                        , transcripts$Bar, transcripts$Osa)
 orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
-                                        , annots$Bar, annots$Oki)
+                                        , transcripts$Bar, transcripts$Oki)
 orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , annots$Bar, annots$Kum)
+                                        , transcripts$Bar, transcripts$Kum)
 orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , annots$Bar, annots$Aom)
-## Problem: some Norway transcripts come from alternative "scaffoldA" sequences that are not in the genome file.
-# orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1"
-#                                         , annots$Bar, annots$Nor)
+                                        , transcripts$Bar, transcripts$Aom)
+orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
+                                       , transcripts$Bar, transcripts$Nor)
 
-load("BreakPoints.Rdata")
-orthoPairs[ 1:4] <- sapply(orthoPairs[ 1:4],  flagLongShort, longShort$Oki)
-orthoPairs[ 5:8] <- sapply(orthoPairs[ 5:8],  flagLongShort, longShort$Osa)
-orthoPairs[9:11] <- sapply(orthoPairs[9:11],  flagLongShort, longShort$Bar)
+orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
+orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
+orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
 ```
 
 Using these transcript-based `GBreaks` objects, you can annotate those
@@ -163,31 +131,11 @@ is relative to the target.
 
 TODO resolve cases where query metadata is not precisely equal to target metadata
 
-```
-dndsPairs <- orthoPairs
-
-dndsPairs$Oki_Osa <- addMetadataToGRanges(gr=dndsPairs$Oki_Osa, gr_key="tx_name", df=dnds$dnds_guidance$Oki, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Oki_Bar <- addMetadataToGRanges(gr=dndsPairs$Oki_Bar, gr_key="tx_name", df=dnds$dnds_guidance$Oki, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Oki_Kum <- addMetadataToGRanges(gr=dndsPairs$Oki_Kum, gr_key="tx_name", df=dnds$dnds_guidance$Oki, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Oki_Aom <- addMetadataToGRanges(gr=dndsPairs$Oki_Aom, gr_key="tx_name", df=dnds$dnds_guidance$Oki, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-
-dndsPairs$Osa_Bar <- addMetadataToGRanges(gr=dndsPairs$Osa_Bar, gr_key="tx_name", df=dnds$dnds_guidance$Osa, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Osa_Oki <- addMetadataToGRanges(gr=dndsPairs$Osa_Oki, gr_key="tx_name", df=dnds$dnds_guidance$Osa, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Osa_Kum <- addMetadataToGRanges(gr=dndsPairs$Osa_Kum, gr_key="tx_name", df=dnds$dnds_guidance$Osa, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Osa_Aom <- addMetadataToGRanges(gr=dndsPairs$Osa_Aom, gr_key="tx_name", df=dnds$dnds_guidance$Osa, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-
-dndsPairs$Bar_Osa <- addMetadataToGRanges(gr=dndsPairs$Bar_Osa, gr_key="tx_name", df=dnds$dnds_guidance$Bar, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Bar_Oki <- addMetadataToGRanges(gr=dndsPairs$Bar_Oki, gr_key="tx_name", df=dnds$dnds_guidance$Bar, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Bar_Kum <- addMetadataToGRanges(gr=dndsPairs$Bar_Kum, gr_key="tx_name", df=dnds$dnds_guidance$Bar, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-dndsPairs$Bar_Aom <- addMetadataToGRanges(gr=dndsPairs$Bar_Aom, gr_key="tx_name", df=dnds$dnds_guidance$Bar, df_key="transcript_id_simple", df_col_name = "dNdS", rename_meta = "dNdS")
-
-```
-
 Now, we can get to plotting.
 
-```
-ggplot(tibble(as.data.frame(dndsPairs$Oki_Osa))) +
-  aes(dNdS, fill=Arm) +
+```{r plot_init_orthopairs_dNdS_GUIDANCE2}
+ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa))) +
+  aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
@@ -196,9 +144,9 @@ ggplot(tibble(as.data.frame(dndsPairs$Oki_Osa))) +
 
 Notice that an unplaced scaffold appears to have a gene that was used for the dN/dS analysis. Let's filter those out.
 
-```
-ggplot(tibble(as.data.frame(dndsPairs$Oki_Osa)) %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS, fill=Arm) +
+```{r plot_enumerate_dNdS_GUIDANCE2}
+ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa)) %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
@@ -207,30 +155,30 @@ ggplot(tibble(as.data.frame(dndsPairs$Oki_Osa)) %>% filter(seqnames %in% c('chr1
 
 Let's enumerate the rest:
 
-```
+```{r dNdS_GUIDANCE2_enumerate}
 # Note that the chromosome names change.
-ggplot(tibble(as.data.frame(dndsPairs$Osa_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS, fill=Arm) +
+ggplot(tibble(as.data.frame(orthoPairs$Osa_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
   ggtitle('dN/dS by chromosome and chromosome arm for Osa/Oki')
-ggplot(tibble(as.data.frame(dndsPairs$Osa_Bar)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS, fill=Arm) +
+ggplot(tibble(as.data.frame(orthoPairs$Osa_Bar)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
   ggtitle('dN/dS by chromosome and chromosome arm for Osa/Bar')
 
-ggplot(tibble(as.data.frame(dndsPairs$Bar_Osa)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS, fill=Arm) +
+ggplot(tibble(as.data.frame(orthoPairs$Bar_Osa)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
   ggtitle('dN/dS by chromosome and chromosome arm for Bar/Osa')
 
-ggplot(tibble(as.data.frame(dndsPairs$Bar_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS, fill=Arm) +
+ggplot(tibble(as.data.frame(orthoPairs$Bar_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+  aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
