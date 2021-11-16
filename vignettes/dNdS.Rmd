@@ -216,7 +216,6 @@ dNdSFromOrthoPairs <- function(orthoPair, tx_name, column_name='dNdS_GUIDANCE2')
   } else {
     dnds <- NA
   }
-  
   dnds
 }
 
@@ -235,7 +234,14 @@ coalOrtho <- function(gb) {
   
   # Graft dN/dS values too.
   coal$dNdS <- sapply(geneNames, function(name) {
-    dNdSFromOrthoPairs(gb, tx_name=name, column_name='dNdS_GUIDANCE2')
+    if(length(name) == 1){
+      dnds = dNdSFromOrthoPairs(gb, tx_name=name, column_name='dNdS_GUIDANCE2')
+    } else {
+      dnds = unlist(sapply(name, function(gene) {
+        dNdSFromOrthoPairs(gb, tx_name=gene, column_name='dNdS_GUIDANCE2')
+      }))
+    }
+    dnds
   })
     
   # Count genes per syntenic block
