@@ -27,14 +27,13 @@ different `GBreaks` objects are prepared.
 ```{r load_pacakges_and_data}
 suppressPackageStartupMessages({
   library('GenomicBreaks')
-  library('GenomicFeatures')
   library('ggplot2')
   library("BreakpointsData")
 })
 genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
 reps <- OikScrambling:::loadAllRepeats()
-annots <- OikScrambling:::loadAllAnnotations()
+transcripts <- OikScrambling:::loadAllTranscriptsGR()
 ```
 
 # The problem:
@@ -274,9 +273,9 @@ annot <- genoPlotR::annotation(x1=mids, text=text, rot=30)
 ROI7[37:43] |> plotApairOfChrs(annotations = annot)
 
 ## Genes
-ROI7.genes <- GenomicFeatures::genes(annots$Oki) |> subsetByOverlaps(ROI7[37:43] |> range())
+ROI7.genes <- transcripts$Oki |> subsetByOverlaps(ROI7[37:43] |> range())
 mids <- ROI7.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
-text <- names(ROI7.genes) |> as.character()
+text <- ROI7.genes$tx_name |> as.character()
 annot <- genoPlotR::annotation(x1=start(ROI7.genes), x2=end(ROI7.genes), text=text, rot=30)
 ROI7[37:43] |> plotApairOfChrs(annotations = annot)
 ```
