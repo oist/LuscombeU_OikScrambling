@@ -57,7 +57,7 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
     prefix <- sub(not_prefix, "", prefix)             # Finalise prefix
     IDs <- sub(prefix, "", IDs)                       # Remove prefix from IDS
     names(annot) <- annot$tx_name                     # Store transcript name in names slot
-    gr <- granges(annot[IDs])                         # Discard extra metadata and sort by ID
+    gr <- annot[IDs]                                  # Sort by ID
     strand(gr) <- "*"                                 # Make strandless
     gr                                                # Return the object
   }
