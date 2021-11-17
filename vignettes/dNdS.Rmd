@@ -233,7 +233,7 @@ coalOrtho <- function(gb) {
   coal$geneNames <- sapply(geneNames, paste, collapse = ", ")
   
   # Graft dN/dS values too.
-  coal$dNdS <- sapply(geneNames, function(name) {
+  coal$dNdS <- BiocParallel::bplapply(geneNames, function(name) {
     if(length(name) == 1){
       dnds = dNdSFromOrthoPairs(gb, tx_name=name, column_name='dNdS_GUIDANCE2')
     } else {
