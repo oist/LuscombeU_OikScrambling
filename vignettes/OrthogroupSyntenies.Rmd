@@ -12,15 +12,14 @@ editor_options:
 Load packages and data
 ======================
 
-See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllAnnotations`,
+See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllTranscriptsGR`,
 and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different objects are prepared.
 
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
-library('GenomicFeatures') |> suppressPackageStartupMessages()
 (genomes <- OikScrambling:::loadAllGenomes())
-(annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
+(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
 (load("BreakPoints.Rdata"))
 ```
 
@@ -58,51 +57,51 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
     prefix <- sub(not_prefix, "", prefix)             # Finalise prefix
     IDs <- sub(prefix, "", IDs)                       # Remove prefix from IDS
     names(annot) <- annot$tx_name                     # Store transcript name in names slot
-    gr <- granges(annot[IDs])                         # Discard extra metadata and sort by ID
+    gr <- annot[IDs]                                  # Sort by ID
     strand(gr) <- "*"                                 # Make strandless
     gr                                                # Return the object
   }
   
-  gb       <- IDs2GRanges(orthoPairs[,name1], transcripts(annot1))
-  gb$query <- IDs2GRanges(orthoPairs[,name2], transcripts(annot2))
+  gb       <- IDs2GRanges(orthoPairs[,name1], annot1)
+  gb$query <- IDs2GRanges(orthoPairs[,name2], annot2)
   gb <- GenomicBreaks:::GBreaks(gb)
   sort(gb)
 }
 
 orthoPairs <- SimpleList()
 orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
-                                        , annots$Oki, annots$Osa)
+                                        , transcripts$Oki, transcripts$Osa)
 orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
-                                        , annots$Oki, annots$Bar)
+                                        , transcripts$Oki, transcripts$Bar)
 orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , annots$Oki, annots$Kum)
+                                        , transcripts$Oki, transcripts$Kum)
 orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , annots$Oki, annots$Aom)
+                                        , transcripts$Oki, transcripts$Aom)
 orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
-                                        , annots$Oki, annots$Nor)
+                                        , transcripts$Oki, transcripts$Nor)
 
 orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
-                                        , annots$Osa, annots$Bar)
+                                        , transcripts$Osa, transcripts$Bar)
 orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
-                                        , annots$Osa, annots$Oki)
+                                        , transcripts$Osa, transcripts$Oki)
 orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , annots$Osa, annots$Kum)
+                                        , transcripts$Osa, transcripts$Kum)
 orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , annots$Osa, annots$Aom)
+                                        , transcripts$Osa, transcripts$Aom)
 orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
-                                        , annots$Osa, annots$Nor)
+                                        , transcripts$Osa, transcripts$Nor)
 
 
 orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
-                                        , annots$Bar, annots$Osa)
+                                        , transcripts$Bar, transcripts$Osa)
 orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
-                                        , annots$Bar, annots$Oki)
+                                        , transcripts$Bar, transcripts$Oki)
 orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , annots$Bar, annots$Kum)
+                                        , transcripts$Bar, transcripts$Kum)
 orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , annots$Bar, annots$Aom)
+                                        , transcripts$Bar, transcripts$Aom)
 orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
-                                        , annots$Bar, annots$Nor)
+                                        , transcripts$Bar, transcripts$Nor)
 
 sapply(orthoPairs, length)
 orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
@@ -114,8 +113,8 @@ Problem: some annotations overlap
 ---------------------------------
 
 ```{r fix_Bar_Osk}
-transcripts(annots$Bar) |> length()
-transcripts(annots$Bar) |> reduce(min = 0) |> length()
+transcripts$Bar |> length()
+transcripts$Bar |> reduce(min = 0) |> length()
 
 flagOverlaps <- function(gr) {
   # Find overlaps
@@ -126,7 +125,7 @@ flagOverlaps <- function(gr) {
   seq_along(gr) %in% idx
 }
 
-transcripts(annots$Bar)[flagOverlaps(transcripts(annots$Bar))]
+transcripts$Bar[flagOverlaps(transcripts$Bar)]
 
 # Show examples
 orthoPairs$Oki_Osa[flagOverlaps(orthoPairs$Oki_Osa)]
@@ -155,16 +154,25 @@ coalOrtho <- function(gb) {
   ov <- findOverlaps(coal, gb)
   
   # Extract gene names mapped to each blocks
-  geneNames <- split(names(gb)[subjectHits(ov)], queryHits(ov))
+  coal$geneNames <- CharacterList(split(names(gb)[subjectHits(ov)], queryHits(ov))) |> unname()
+  # We can use the `ov` object for query ranges as well because of the way `coal` was constructed.
+  coal$query$geneNames <- CharacterList(split(names(gb$query)[subjectHits(ov)], queryHits(ov))) |> unname()
   
-  # Concatenate them as single strings and graft them to the coal object
-  coal$geneNames <- sapply(geneNames, paste, collapse = ", ")
-  
+  # Extract dNdS values
+  coal$dNdS_GUIDANCE2  <- NumericList(split(gb$dNdS_GUIDANCE2 [subjectHits(ov)], queryHits(ov)))
+  coal$dNdS_HmmCleaner <- NumericList(split(gb$dNdS_HmmCleaner[subjectHits(ov)], queryHits(ov)))
+  coal$dNdS_PRANK      <- NumericList(split(gb$dNdS_PRANK     [subjectHits(ov)], queryHits(ov)))
+  # We just copy dNdS values to query ranges because they are the same.
+  coal$query$dNdS_GUIDANCE2  <- coal$dNdS_GUIDANCE2
+  coal$query$dNdS_HmmCleaner <- coal$dNdS_HmmCleaner
+  coal$query$dNdS_PRANK      <- coal$dNdS_PRANK
+
   # Count genes per syntenic block
-  coal$geneNumber <- sapply(geneNames, length)
+  coal$geneNumber <- sapply(coal$geneNames, length)
   
   coal
 }
+
 orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
 sapply(orthoBlocks, length)
 orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)

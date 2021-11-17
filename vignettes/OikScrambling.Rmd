@@ -74,7 +74,7 @@ genomes <- (genomes <- OikScrambling:::loadAllGenomes())
 
 ## Load data
 
-### Genome annotations.
+### Genome annotations
 
 The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
 distributed in the same drat repository as the alignment data.
@@ -83,8 +83,22 @@ distributed in the same drat repository as the alignment data.
 install.packages("BreakpointsData", repos="https://oist.github.io/plessy_oikgenomes_drat/")
 ```
 
-```{r load_annotations, warning=FALSE}
+The `OikScrambling:::loadAllAnnotations()` function returns `TxDB` objects.
+Be careful that they are broken each time the R session restarts, because they
+rely on local file storage.
+
+
+```{r load_TxDb, warning=FALSE}
 (annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
+```
+
+For vignettes that do not use information on the intron/exon structure of
+genes, the `OikScrambling:::loadAllTranscriptsGR()` returns a `SimpleList`
+of `GRanges`, which is more convenient.  Bonus point: the dNdS value for
+conserved genes is included.
+
+```{r load_transcripts, warning=FALSE}
+(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
 ```
 
 ### GenomicBreaks object
