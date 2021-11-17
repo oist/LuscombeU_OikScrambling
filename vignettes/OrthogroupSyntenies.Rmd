@@ -154,16 +154,25 @@ coalOrtho <- function(gb) {
   ov <- findOverlaps(coal, gb)
   
   # Extract gene names mapped to each blocks
-  geneNames <- split(names(gb)[subjectHits(ov)], queryHits(ov))
+  coal$geneNames <- CharacterList(split(names(gb)[subjectHits(ov)], queryHits(ov))) |> unname()
+  # We can use the `ov` object for query ranges as well because of the way `coal` was constructed.
+  coal$query$geneNames <- CharacterList(split(names(gb$query)[subjectHits(ov)], queryHits(ov))) |> unname()
   
-  # Concatenate them as single strings and graft them to the coal object
-  coal$geneNames <- sapply(geneNames, paste, collapse = ", ")
-  
+  # Extract dNdS values
+  coal$dNdS_GUIDANCE2  <- NumericList(split(gb$dNdS_GUIDANCE2 [subjectHits(ov)], queryHits(ov)))
+  coal$dNdS_HmmCleaner <- NumericList(split(gb$dNdS_HmmCleaner[subjectHits(ov)], queryHits(ov)))
+  coal$dNdS_PRANK      <- NumericList(split(gb$dNdS_PRANK     [subjectHits(ov)], queryHits(ov)))
+  # We just copy dNdS values to query ranges because they are the same.
+  coal$query$dNdS_GUIDANCE2  <- coal$dNdS_GUIDANCE2
+  coal$query$dNdS_HmmCleaner <- coal$dNdS_HmmCleaner
+  coal$query$dNdS_PRANK      <- coal$dNdS_PRANK
+
   # Count genes per syntenic block
-  coal$geneNumber <- sapply(geneNames, length)
+  coal$geneNumber <- sapply(coal$geneNames, length)
   
   coal
 }
+
 orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
 sapply(orthoBlocks, length)
 orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
