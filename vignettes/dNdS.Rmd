@@ -37,6 +37,7 @@ suppressPackageStartupMessages({
   library('GenomicBreaks')
   library('ggplot2')
   library("BreakpointsData")
+  library("ggpubr")
 })
 
 (genomes <- OikScrambling:::loadAllGenomes())
@@ -128,7 +129,7 @@ synteny. First, plot global patterns of dN/dS between chromosomes and chromosome
 arms.
 
 ```{r plot_init_orthopairs_dNdS_GUIDANCE2, fig.height=4, fig.width=6, dev=c("svg", "png")}
-ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa))) +
+ggplot(as.data.frame(orthoPairs$Oki_Osa)) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
@@ -139,7 +140,7 @@ ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa))) +
 Notice that an unplaced scaffold contains a gene that was used for the dN/dS analysis. Let's filter those out.
 
 ```{r plot_enumerate_dNdS_GUIDANCE2, fig.height=4, fig.width=6, dev=c("svg", "png")}
-ggplot(tibble(as.data.frame(orthoPairs$Oki_Osa)) %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR'))) +
+ggplot(as.data.frame(orthoPairs$Oki_Osa) %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR'))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
@@ -151,27 +152,27 @@ Let's enumerate the rest:
 
 ```{r dNdS_GUIDANCE2_enumerate, fig.height=4, fig.width=6, dev=c("svg", "png")}
 # Note that the chromosome names change.
-ggplot(tibble(as.data.frame(orthoPairs$Osa_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+ggplot(as.data.frame(orthoPairs$Osa_Oki) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
   ggtitle('dN/dS by chromosome and chromosome arm for Osa/Oki')
-ggplot(tibble(as.data.frame(orthoPairs$Osa_Bar)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+ggplot(as.data.frame(orthoPairs$Osa_Bar) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
   ggtitle('dN/dS by chromosome and chromosome arm for Osa/Bar')
 
-ggplot(tibble(as.data.frame(orthoPairs$Bar_Osa)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+ggplot(as.data.frame(orthoPairs$Bar_Osa) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
   ggtitle('dN/dS by chromosome and chromosome arm for Bar/Osa')
 
-ggplot(tibble(as.data.frame(orthoPairs$Bar_Oki)) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+ggplot(as.data.frame(orthoPairs$Bar_Oki) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
@@ -182,7 +183,7 @@ ggplot(tibble(as.data.frame(orthoPairs$Bar_Oki)) %>% filter(seqnames %in% c('Chr
 For the rest of the vignette, we will be relating dN/dS values to synteny
 in more specific ways. To do that, we'll need the coalesced `GBreaks` object.
 
-```{r getting_orthobreaks}
+```{r getting_orthobreaks, fig.height=4, fig.width=6, dev=c("svg", "png")}
 transcripts$Bar |> length()
 transcripts$Bar |> reduce(min = 0) |> length()
 
@@ -247,23 +248,137 @@ orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
 ## Relating dN/dS values to synteny
 The `orthoBlocks` object contains coalesced alignments based on orthologous protein sequences. This is therefore suitable to examine more specific relationships between dN/dS and synteny.
 
+First, let's explore some of the properties of the `orthoBlocks` object, and how they relate to dN/dS.
+
+```{r exploring_dnds_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+# Distribution of gene number in syntenic blocks
+plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber )) +
+  geom_histogram() +
+  ggtitle("Oki/Osa: genes per syntenic block")
+
+plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+  geom_histogram() +
+  ggtitle("Oki/Osa: dN/dS") + xlab('dN/dS')
+
+plot3 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber )) +
+  geom_histogram() +
+  scale_y_continuous(trans='log10') +
+  ggtitle("Oki/Osa: genes per syntenic block (log10 axis)")
+
+plot4 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+  geom_histogram() +
+  scale_y_continuous(trans='log10') +
+  ggtitle("Oki/Osa: dN/dS (log10 axis)") + xlab('dN/dS')
+
+ggarrange(plot1, plot2, plot3, plot4)
+```
+
+How do they relate to one another?
+
+```{r exploring_dnds_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))), group=geneNumber) ) +
+  geom_boxplot(aes(fill=geneNumber)) +
+  ylab('dN/dS') +
+  ggtitle("Oki/Osa: dN/dS vs. gene count")
+
+plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T)))) ) +
+  geom_point() +
+  geom_smooth(method='lm', formula=y~x) +
+  ylab('dN/dS') +
+  ggtitle("Oki/Osa: dN/dS vs. gene count")
+
+ggarrange(plot1, plot2)
+
+```
+
+Are these relationships true for other combinations? Starting with Okinawa/Barcelona:
+
+```{r exploring_dnds_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber )) +
+  geom_histogram() +
+  ggtitle("Oki/Bar: genes per syntenic block")
+
+plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+  geom_histogram() +
+  ggtitle("Oki/Bar: dN/dS") + xlab('dN/dS')
+
+plot3 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber )) +
+  geom_histogram() +
+  scale_y_continuous(trans='log10') +
+  ggtitle("Oki/Bar: genes per syntenic block (log10 axis)")
+
+plot4 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+  geom_histogram() +
+  scale_y_continuous(trans='log10') +
+  ggtitle("Oki/Bar: dN/dS (log10 axis)") + xlab('dN/dS')
+
+
+plot5 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))), group=geneNumber) ) +
+  geom_boxplot(aes(fill=geneNumber)) +
+  ylab('dN/dS') +
+  ggtitle("Oki/Bar: dN/dS vs. gene count")
+
+plot6 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T)))) ) +
+  geom_point() +
+  geom_smooth(method='lm', formula=y~x) +
+  ylab('dN/dS') +
+  ggtitle("Oki/Bar: dN/dS vs. gene count")
+
+ggarrange(plot1, plot2, plot3, plot4, plot5, plot6, ncol = 2, nrow=3)
+
+```
+
+```{r exploring_dnds_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plot1 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber )) +
+  geom_histogram() +
+  ggtitle("Osa/Bar: genes per syntenic block")
+
+plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+  geom_histogram() +
+  ggtitle("Osa/Bar: dN/dS") + xlab('dN/dS')
+
+plot3 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber )) +
+  geom_histogram() +
+  scale_y_continuous(trans='log10') +
+  ggtitle("Osa/Bar: genes per syntenic block (log10 axis)")
+
+plot4 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+  geom_histogram() +
+  scale_y_continuous(trans='log10') +
+  ggtitle("Osa/Bar: dN/dS (log10 axis)") + xlab('dN/dS')
+
+
+plot5 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))), group=geneNumber) ) +
+  geom_boxplot(aes(fill=geneNumber)) +
+  ylab('dN/dS') +
+  ggtitle("Osa/Bar: dN/dS vs. gene count")
+
+plot6 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T)))) ) +
+  geom_point() +
+  geom_smooth(method='lm', formula=y~x) +
+  ylab('dN/dS') +
+  ggtitle("Osa/Bar: dN/dS vs. gene count")
+
+ggarrange(plot1, plot2, plot3, plot4, plot5, plot6, ncol = 2, nrow=3)
+```
+
 For instance, how do dN/dS values compare between individual genes and genes within syntenic blocks?
 
-```{r evaluating_dnds_blocks_oki_osa_1 fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r evaluating_dnds_blocks_oki_osa_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
 # Make a function to retrieve dN/dS values based on how many genes are in a block.
 get_dnds <- function(orthoblocks, alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2){
-  gene_numbers = orthoblocks$geneNumber
-  matching_rows = block_min_size < gene_numbers & gene_numbers < block_max_size
-  matching_dnds = na.omit(unlist(as.data.frame(orthoblocks[matching_rows,])[[alignment_type]], recursive=T))
+  gene_numbers <- orthoblocks$geneNumber
+  matching_rows <- block_min_size < gene_numbers & gene_numbers < block_max_size
+  matching_dnds <- na.omit(unlist(as.data.frame(orthoblocks[matching_rows,])[[alignment_type]], recursive=T))
   matching_dnds
 }
 
 dndsBlocks <- SimpleList()
 dndsBlocks$Oki_Osa <- SimpleList()
 # Subset to syntenic blocks with more than 0 genes and less than 2 - aka, just one gene.
-dndsBlocks$Oki_Osa$blocksize_1_gene <- get_dnds(orthoBlocks$Oki_Osa, alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+dndsBlocks$Oki_Osa$single_gene_block <- get_dnds(orthoBlocks$Oki_Osa, alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
 # Subset to syntenic blocks with more than 1 gene.
-dndsBlocks$Oki_Osa$blocksize_gt_1_gene <- get_dnds(orthoBlocks$Oki_Osa, alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
+dndsBlocks$Oki_Osa$multi_gene_block <- get_dnds(orthoBlocks$Oki_Osa, alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
 
 # Plot distributions of dN/dS by syntenic block size.
 ggplot(as.data.frame(dndsBlocks$Oki_Osa), aes(y=value, fill=group_name)) +
@@ -289,8 +404,8 @@ Indeed, in this case it seems there is a modestly significant difference between
 
 ```{r evaluating_dnds_blocks_oki_bar, fig.height=4, fig.width=6, dev=c("svg", "png")}
 dndsBlocks$Oki_Bar <- SimpleList()
-dndsBlocks$Oki_Bar$blocksize_1_gene <- get_dnds(orthoBlocks$Oki_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
-dndsBlocks$Oki_Bar$blocksize_gt_1_gene <- get_dnds(orthoBlocks$Oki_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
+dndsBlocks$Oki_Bar$single_gene_block <- get_dnds(orthoBlocks$Oki_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+dndsBlocks$Oki_Bar$multi_gene_block <- get_dnds(orthoBlocks$Oki_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
 
 ggplot(as.data.frame(dndsBlocks$Oki_Bar), aes(y=value, fill=group_name)) +
   geom_histogram(position='identity', bins=30) +
@@ -311,8 +426,8 @@ For Okinawa-Barcelona, it is also significant.
 
 ```{r evaluating_dnds_blocks_osa_bar, fig.height=4, fig.width=6, dev=c("svg", "png")}
 dndsBlocks$Osa_Bar <- SimpleList()
-dndsBlocks$Osa_Bar$blocksize_1_gene <- get_dnds(orthoBlocks$Osa_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
-dndsBlocks$Osa_Bar$blocksize_gt_1_gene <- get_dnds(orthoBlocks$Osa_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
+dndsBlocks$Osa_Bar$single_gene_block <- get_dnds(orthoBlocks$Osa_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+dndsBlocks$Osa_Bar$multi_gene_block <- get_dnds(orthoBlocks$Osa_Bar, alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
 
 ggplot(as.data.frame(dndsBlocks$Osa_Bar), aes(y=value, fill=group_name)) +
   geom_histogram(position='identity', bins=30) +
@@ -333,12 +448,138 @@ ggplot(as.data.frame(dndsBlocks$Osa_Bar), aes(y=value, fill=group_name)) +
 But for Osaka-Barcelona, it is not.
 
 A contributing factor might be that short and long arms differ in the size of their syntenic blocks,
-and as we have already observed, there is an arm-specific difference in dN/dS values.
+and as we have already observed, there is an arm-specific difference in dN/dS values. Let's modify the
+script to account for these differences.
+
+```{r evaluating_dnds_with_arms_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+get_dnds_with_arms <- function(orthoblocks, arm='long', alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2){
+  gene_numbers <- orthoblocks$geneNumber
+  arms <- orthoblocks$Arm
+  ob <- subset(orthoblocks, block_min_size < geneNumber & geneNumber < block_max_size & Arm == arm)
+  matching_dnds <- na.omit(unlist(as.data.frame(ob)[[alignment_type]], recursive=T))
+  matching_dnds
+}
+
+dndsBlocks <- SimpleList()
+dndsBlocks$Oki_Osa <- SimpleList()
+dndsBlocks$Oki_Osa$single_gene_long <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+dndsBlocks$Oki_Osa$single_gene_short <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+
+dndsBlocks$Oki_Osa$multi_gene_long <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
+dndsBlocks$Oki_Osa$multi_gene_short <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=2, block_max_size=Inf)
+
+ggplot(as.data.frame(dndsBlocks$Oki_Osa), aes(y=value, fill=group_name)) +
+  geom_boxplot(position='identity') +
+  facet_grid(~group_name, scales='free_x') +
+  ggtitle("Oki/Osa: dN/dS of individual genes vs. syntenic block genes")
+
+(pairwise.t.test(g=as.data.frame(dndsBlocks$Oki_Osa)$group_name,
+                 x=as.data.frame(dndsBlocks$Oki_Osa)$value,
+                 p.adjust.method='bonferroni'))
 
 ```
 
+
+```{r evaluating_dnds_with_arms_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+get_dnds_with_arms <- function(orthoblocks, arm='long', alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2){
+  gene_numbers <- orthoblocks$geneNumber
+  arms <- orthoblocks$Arm
+  ob <- subset(orthoblocks, block_min_size < geneNumber & geneNumber < block_max_size & Arm == arm)
+  matching_dnds <- na.omit(unlist(as.data.frame(ob)[[alignment_type]], recursive=T))
+  matching_dnds
+}
+
+dndsBlocks <- SimpleList()
+dndsBlocks$Oki_Osa <- SimpleList()
+dndsBlocks$Oki_Osa$single_gene_long <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+dndsBlocks$Oki_Osa$single_gene_short <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+
+dndsBlocks$Oki_Osa$btw2_5_genes_long <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=1, block_max_size=6)
+dndsBlocks$Oki_Osa$btw2_5_genes_short <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=1, block_max_size=6)
+
+
+dndsBlocks$Oki_Osa$mt_6_genes_long <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=6, block_max_size=Inf)
+dndsBlocks$Oki_Osa$mt_6_genes_short <- get_dnds_with_arms(orthoBlocks$Oki_Osa, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=6, block_max_size=Inf)
+
+ggplot(as.data.frame(dndsBlocks$Oki_Osa), aes(y=value, fill=group_name)) +
+  geom_boxplot(position='identity') +
+  facet_wrap(~group_name, scales='free_x', nrow=3, ncol=2) +
+  coord_cartesian(ylim=c(0,0.1)) + 
+  ggtitle("Oki/Osa: dN/dS of individual genes vs. syntenic block genes")
+
+(pairwise.t.test(g=as.data.frame(dndsBlocks$Oki_Osa)$group_name,
+                 x=as.data.frame(dndsBlocks$Oki_Osa)$value,
+                 p.adjust.method='bonferroni'))
 ```
 
+
+
+```{r evaluating_dnds_with_arms_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+get_dnds_with_arms <- function(orthoblocks, arm='long', alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2){
+  gene_numbers <- orthoblocks$geneNumber
+  arms <- orthoblocks$Arm
+  ob <- subset(orthoblocks, block_min_size < geneNumber & geneNumber < block_max_size & Arm == arm)
+  matching_dnds <- na.omit(unlist(as.data.frame(ob)[[alignment_type]], recursive=T))
+  matching_dnds
+}
+
+dndsBlocks <- SimpleList()
+dndsBlocks$Osa_Bar <- SimpleList()
+dndsBlocks$Osa_Bar$single_gene_long <- get_dnds_with_arms(orthoBlocks$Osa_Bar, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+dndsBlocks$Osa_Bar$single_gene_short <- get_dnds_with_arms(orthoBlocks$Osa_Bar, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+
+dndsBlocks$Osa_Bar$btw2_5_genes_long <- get_dnds_with_arms(orthoBlocks$Osa_Bar, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=1, block_max_size=6)
+dndsBlocks$Osa_Bar$btw2_5_genes_short <- get_dnds_with_arms(orthoBlocks$Osa_Bar, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=1, block_max_size=6)
+
+
+dndsBlocks$Osa_Bar$mt_6_genes_long <- get_dnds_with_arms(orthoBlocks$Osa_Bar, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=6, block_max_size=Inf)
+dndsBlocks$Osa_Bar$mt_6_genes_short <- get_dnds_with_arms(orthoBlocks$Osa_Bar, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=6, block_max_size=Inf)
+
+ggplot(as.data.frame(dndsBlocks$Osa_Bar), aes(y=value, fill=group_name)) +
+  geom_boxplot(position='identity') +
+  facet_wrap(~group_name, scales='free_x', nrow=3, ncol=2) +
+  ggtitle("Osa/Bar: dN/dS of individual genes vs. syntenic block genes")
+
+(pairwise.t.test(g=as.data.frame(dndsBlocks$Osa_Bar)$group_name,
+                 x=as.data.frame(dndsBlocks$Osa_Bar)$value,
+                 p.adjust.method='bonferroni'))
+
+```
+
+
+```{r evaluating_dnds_with_arms_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
+get_dnds_with_arms <- function(orthoblocks, arm='long', alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2){
+  gene_numbers <- orthoblocks$geneNumber
+  arms <- orthoblocks$Arm
+  ob <- subset(orthoblocks, block_min_size < geneNumber & geneNumber < block_max_size & Arm == arm)
+  matching_dnds <- na.omit(unlist(as.data.frame(ob)[[alignment_type]], recursive=T))
+  matching_dnds
+}
+
+dndsBlocks <- SimpleList()
+dndsBlocks$Oki_Bar <- SimpleList()
+dndsBlocks$Oki_Bar$single_gene_long <- get_dnds_with_arms(orthoBlocks$Oki_Bar, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+dndsBlocks$Oki_Bar$single_gene_short <- get_dnds_with_arms(orthoBlocks$Oki_Bar, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=0, block_max_size=2)
+
+dndsBlocks$Oki_Bar$btw2_5_genes_long <- get_dnds_with_arms(orthoBlocks$Oki_Bar, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=1, block_max_size=6)
+dndsBlocks$Oki_Bar$btw2_5_genes_short <- get_dnds_with_arms(orthoBlocks$Oki_Bar, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=1, block_max_size=6)
+
+
+dndsBlocks$Oki_Bar$mt_6_genes_long <- get_dnds_with_arms(orthoBlocks$Oki_Bar, arm="long", alignment_type="dNdS_GUIDANCE2", block_min_size=6, block_max_size=Inf)
+dndsBlocks$Oki_Bar$mt_6_genes_short <- get_dnds_with_arms(orthoBlocks$Oki_Bar, arm="short", alignment_type="dNdS_GUIDANCE2", block_min_size=6, block_max_size=Inf)
+
+ggplot(as.data.frame(dndsBlocks$Oki_Bar), aes(y=value, fill=group_name)) +
+  geom_boxplot(position='identity') +
+  facet_wrap(~group_name, scales='free_x', nrow=3, ncol=2) +
+  ggtitle("Oki/Bar: dN/dS of individual genes vs. syntenic block genes")
+
+(pairwise.t.test(g=as.data.frame(dndsBlocks$Oki_Bar)$group_name,
+                 x=as.data.frame(dndsBlocks$Oki_Bar)$value,
+                 p.adjust.method='bonferroni'))
+
+```
+
+  
 # Session information
 
 ```{r session_info}
