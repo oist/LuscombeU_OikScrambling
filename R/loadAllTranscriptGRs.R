@@ -3,6 +3,9 @@
 #' Accessory function to load all transcript annotations provided by the
 #' `BreakpointsData` package
 #'
+#' @author Charles Plessy
+#' @author Michael Mansfield
+#'
 #' @returns Returns a [`SimpleList`] of `GRanges` objects representing the
 #' annotations of the genomes we study.
 
