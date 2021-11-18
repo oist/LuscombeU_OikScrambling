@@ -11,5 +11,6 @@ loadAllTranscriptsGR <- function() {
   annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings()
   transcripts <- sapply(annots, GenomicFeatures::transcripts) |> SimpleList()
   # Start modifying the object here.
+  transcripts <- sapply(transcripts, \(x) {names(x) <- x$tx_name ; x}) |> SimpleList()
   transcripts
 }
