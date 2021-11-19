@@ -17,9 +17,9 @@ loadAllTranscriptsGR <- function() {
   transcripts <- sapply(annots, GenomicFeatures::transcripts) |> SimpleList()
   # Load dNdS values
   dnds <- SimpleList()
-  dnds$dnds_guidance   <- loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'GUIDANCE2')
-  dnds$dnds_hmmcleaner <- loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'HmmCleaner')
-  dnds$dnds_prank      <- loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'Alignment')
+  dnds$dnds_guidance   <- loaddNdSTable(system.file("extdata/dNdS/v2.0.0/genewise_oikopleura.extended.txt", package='BreakpointsData'), alignment_type = 'GUIDANCE2')
+  dnds$dnds_hmmcleaner <- loaddNdSTable(system.file("extdata/dNdS/v2.0.0/genewise_oikopleura.extended.txt", package='BreakpointsData'), alignment_type = 'HmmCleaner')
+  dnds$dnds_prank      <- loaddNdSTable(system.file("extdata/dNdS/v2.0.0/genewise_oikopleura.extended.txt", package='BreakpointsData'), alignment_type = 'Alignment')
   # Stitch them in the objects
   transcripts <- sapply(names(transcripts), function(sp){
     sp_dnds = addMetadataToGRanges(gr=transcripts[[sp]], df=dnds$dnds_guidance[[sp]], gr_key='tx_name', df_key='transcript_id_simple', df_col_name = 'dNdS', rename_meta = 'dNdS_GUIDANCE2')

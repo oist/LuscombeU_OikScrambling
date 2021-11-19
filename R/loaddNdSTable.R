@@ -6,10 +6,9 @@
 #' @author Michael Mansfield
 #'
 #' @returns Returns a [`SimpleList`] of data frames with dN/dS annotations.
-loaddNdSTable <- function(file, alignment_type='GUIDANCE2') {
+loaddNdSTable <- function(file=system.file(paste0('extdata/dNdS/', file), package='BreakpointsData'), alignment_type='GUIDANCE2') {
   # The first part of the function loads the dN/dS data frame from the BreakpointsData package's extdata.
   get_dnds_df <- function(file, alignment_type){
-    file <- system.file(paste0('extdata/dNdS/', file), package='BreakpointsData')
     # note that the 10th column is just NA. So I remove it. :-)
     df <- read.delim(file, header=F)#[,-10]
     df <- Filter(function(x)!all(is.na(x)), df)
@@ -17,7 +16,7 @@ loaddNdSTable <- function(file, alignment_type='GUIDANCE2') {
     df <- subset(df, df$Alignment == alignment_type)
     df
   }
-  df <- get_dnds_df("v2.0.0/genewise_oikopleura.extended.txt", alignment_type=alignment_type)
+  df <- get_dnds_df(file, alignment_type=alignment_type)
   # Remove NAs just in case.
   df <- df[!is.na(df$dNdS),]
 
