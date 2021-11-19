@@ -15,5 +15,9 @@ compDistance <- function(x) {
              "Osa_Oki", "Osa_Kum", "Bar_Oki", "Bar_Kum")]            <- "Oki – North"
   x[x %in% c("Osa_Bar", "Osa_Aom", "Osa_Nor",
              "Bar_Osa", "Bar_Aom", "Bar_Nor")]                       <- "North – North"
+  x[x %in% c("Rob_Sav", "Ply_Sav")]                                  <- "Int/Rob – Sav"
+  x[x %in% c("Rob_Oki", "Ply_Oki")]                                  <- "Int/Rob – Oki"
+  x[x %in% c("Ply_Ros")]                                             <- "Int – Int"
+  x[x %in% c("Ply_Rob", "Rob_Ros", "Rob_Ply")]                       <- "Int – Rob"
   x
 }

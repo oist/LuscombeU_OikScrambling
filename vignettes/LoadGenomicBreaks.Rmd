@@ -206,7 +206,15 @@ gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 Bar2
 
 Oik_Oik <- names(gbs)
 
-gbs$Ply_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_int_R.gff.gz", package = "BreakpointsData"),                 NULL,     NULL)
+gbs$Ply_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_int_R.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
+gbs$Ply_Rob <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_rob_HT.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
+gbs$Ply_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_sav.gff.gz",            package = "BreakpointsData"),    NULL,     NULL)
+gbs$Ply_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__OKI2018_I69_1.0.gff.gz",  package = "BreakpointsData"),    NULL,     OKI2018_I69)
+
+gbs$Rob_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_int_R.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
+gbs$Rob_Ply <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_int_P.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
+gbs$Rob_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_sav.gff.gz",           package = "BreakpointsData"),    NULL,     NULL)
+gbs$Rob_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__OKI2018_I69_1.0.gff.gz", package = "BreakpointsData"),    NULL,     OKI2018_I69)
 
 gbs[Oik_Oik] <- annotateWithTranscripts(gbs[Oik_Oik], transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
@@ -354,7 +362,8 @@ removeTranslocationsOnTargetGenome <- function(gb) {
   gb <- flagTranslocations(gb)
   gb <- dist2next(gb, step = 2, ignore.strand = TRUE)
   idx <- 1 + which( gb$tra & (gb$tdist < 200 | gb$qdist < 200) )
-  gb <- gb[-idx]
+  if(length(idx) != 0)
+    gb <- gb[-idx]
   coalesce_contigs(gb)
 }
 removeTranslocationsOnBothGenomes <- function(gb)
