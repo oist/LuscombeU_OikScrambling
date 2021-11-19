@@ -32,7 +32,7 @@ loadAllAnnotations <- function() {
   gff2txdb_other <- function(file) {
     file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
     tx <- rtracklayer::import.gff(file)
-    tx <- GRanges(tx)
+    tx <- tx[!tx$type %in% c("stop_codon", "start_codon")]  # These cause many entries to be discarded by makeTxDbFromGRanges
     tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
   }
 
