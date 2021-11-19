@@ -34,8 +34,8 @@ packages have been installed already.
 suppressPackageStartupMessages({
   library("tibble")
   library("dplyr")
-  library('GenomicBreaks')
-  library('ggplot2')
+  library("GenomicBreaks")
+  library("ggplot2")
   library("BreakpointsData")
   library("ggpubr")
 })
@@ -128,56 +128,46 @@ This object is sufficient to start exploring the relationship of dN/dS to
 synteny. First, plot global patterns of dN/dS between chromosomes and chromosome
 arms.
 
-```{r plot_init_orthopairs_dNdS_GUIDANCE2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r orthopairs_dNdS_oki_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
 ggplot(as.data.frame(orthoPairs$Oki_Osa)) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
-  ggtitle('dN/dS by chromosome and chromosome arm for Oki/Osa')
+  ggtitle("Oki/Osa: dN/dS by chromosome and chromosome arm")
 ```
 
 Notice that an unplaced scaffold contains a gene that was used for the dN/dS analysis. Let's filter those out.
 
-```{r plot_enumerate_dNdS_GUIDANCE2, fig.height=4, fig.width=6, dev=c("svg", "png")}
-ggplot(as.data.frame(orthoPairs$Oki_Osa) %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR'))) +
+```{r orthopairs_dNdS_oki_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+ggplot(as.data.frame(orthoPairs$Oki_Osa) %>% filter(seqnames %in% c("chr1", "chr2", "PAR", "XSR", "YSR"))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
-  ggtitle('dN/dS by chromosome and chromosome arm for Oki/Osa')
+  xlab("dN/dS (GUIDANCE2)") + 
+  ggtitle("Okinawa: dN/dS by chromosome and chromosome arm")
 ```
 
-Let's enumerate the rest:
+Let's enumerate the rest of the combinations. 
+```{r orthopairs_dNdS_osa, fig.height=4, fig.width=6, dev=c("svg", "png")}
+ggplot(as.data.frame(orthoPairs$Osa_Oki) %>% filter(seqnames %in% c("Chr1", "Chr2", "PAR", "XSR", "YSR"))) +
+  aes(dNdS_GUIDANCE2, fill=Arm) +
+  geom_boxplot() +
+  coord_flip() +
+  facet_wrap(~seqnames) +
+  xlab("dN/dS (GUIDANCE2)") + 
+  ggtitle("Osaka: dN/dS by chromosome and chromosome arm")
+```
 
-```{r dNdS_GUIDANCE2_enumerate, fig.height=4, fig.width=6, dev=c("svg", "png")}
-# Note that the chromosome names change.
-ggplot(as.data.frame(orthoPairs$Osa_Oki) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
+```{r orthopairs_dNdS_bar}
+ggplot(as.data.frame(orthoPairs$Bar_Oki) %>% filter(seqnames %in% c("Chr1", "Chr2", "PAR", "XSR", "YSR"))) +
   aes(dNdS_GUIDANCE2, fill=Arm) +
   geom_boxplot() +
   coord_flip() +
   facet_wrap(~seqnames) +
-  ggtitle('dN/dS by chromosome and chromosome arm for Osa/Oki')
-ggplot(as.data.frame(orthoPairs$Osa_Bar) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS_GUIDANCE2, fill=Arm) +
-  geom_boxplot() +
-  coord_flip() +
-  facet_wrap(~seqnames) +
-  ggtitle('dN/dS by chromosome and chromosome arm for Osa/Bar')
-
-ggplot(as.data.frame(orthoPairs$Bar_Osa) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS_GUIDANCE2, fill=Arm) +
-  geom_boxplot() +
-  coord_flip() +
-  facet_wrap(~seqnames) +
-  ggtitle('dN/dS by chromosome and chromosome arm for Bar/Osa')
-
-ggplot(as.data.frame(orthoPairs$Bar_Oki) %>% filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR'))) +
-  aes(dNdS_GUIDANCE2, fill=Arm) +
-  geom_boxplot() +
-  coord_flip() +
-  facet_wrap(~seqnames) +
-  ggtitle('dN/dS by chromosome and chromosome arm for Bar/Oki')
+  xlab("dN/dS (GUIDANCE2)") + 
+  ggtitle("Barcelona: dN/dS by chromosome and chromosome arm")
 ```
 
 For the rest of the vignette, we will be relating dN/dS values to synteny
@@ -251,36 +241,40 @@ The `orthoBlocks` object contains coalesced alignments based on orthologous prot
 First, let's explore some of the properties of the `orthoBlocks` object, and how they relate to dN/dS.
 
 ```{r exploring_dnds_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
-# Distribution of gene number in syntenic blocks
+# Genes per syntenic block
 plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber )) +
   geom_histogram() +
   ggtitle("Oki/Osa: genes per syntenic block")
 
 plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
   geom_histogram() +
-  ggtitle("Oki/Osa: dN/dS") + xlab('dN/dS')
+  ggtitle("Oki/Osa: dN/dS") + xlab("dN/dS")
 
+# Genes per syntenic block, but on a logarithmic scale
 plot3 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber )) +
   geom_histogram() +
-  scale_y_continuous(trans='log10') +
+  scale_y_continuous(trans="log10") +
   ggtitle("Oki/Osa: genes per syntenic block (log10 axis)")
 
 plot4 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
   geom_histogram() +
-  scale_y_continuous(trans='log10') +
-  ggtitle("Oki/Osa: dN/dS (log10 axis)") + xlab('dN/dS')
+  scale_y_continuous(trans="log10") +
+  ggtitle("Oki/Osa: dN/dS (log10 axis)") + xlab("dN/dS")
 
 ggarrange(plot1, plot2, plot3, plot4)
+
 ```
 
 How do they relate to one another?
 
 ```{r exploring_dnds_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+# Boxplots - distribution of dN/dS, divided by the number of genes per block
 plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))), group=geneNumber) ) +
   geom_boxplot(aes(fill=geneNumber)) +
   ylab('dN/dS') +
   ggtitle("Oki/Osa: dN/dS vs. gene count")
 
+# Scatterplot of dN/dS vs. gene number, with linear model
 plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T)))) ) +
   geom_point() +
   geom_smooth(method='lm', formula=y~x) +
@@ -298,7 +292,7 @@ plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber )) +
   geom_histogram() +
   ggtitle("Oki/Bar: genes per syntenic block")
 
-plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
   geom_histogram() +
   ggtitle("Oki/Bar: dN/dS") + xlab('dN/dS')
 
@@ -312,6 +306,7 @@ plot4 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=unlist(lapply(dNdS_GUI
   scale_y_continuous(trans='log10') +
   ggtitle("Oki/Bar: dN/dS (log10 axis)") + xlab('dN/dS')
 
+ggarrange(plot1, plot2, plot3, plot4)
 
 plot5 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))), group=geneNumber) ) +
   geom_boxplot(aes(fill=geneNumber)) +
@@ -324,16 +319,15 @@ plot6 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber, y=unlist(l
   ylab('dN/dS') +
   ggtitle("Oki/Bar: dN/dS vs. gene count")
 
-ggarrange(plot1, plot2, plot3, plot4, plot5, plot6, ncol = 2, nrow=3)
-
+ggarrange(plot5, plot6)
 ```
 
-```{r exploring_dnds_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r exploring_dnds_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
 plot1 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber )) +
   geom_histogram() +
   ggtitle("Osa/Bar: genes per syntenic block")
 
-plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
+plot2 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))) )) +
   geom_histogram() +
   ggtitle("Osa/Bar: dN/dS") + xlab('dN/dS')
 
@@ -347,6 +341,7 @@ plot4 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=unlist(lapply(dNdS_GUI
   scale_y_continuous(trans='log10') +
   ggtitle("Osa/Bar: dN/dS (log10 axis)") + xlab('dN/dS')
 
+ggarrange(plot1, plot2, plot3, plot4)
 
 plot5 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber, y=unlist(lapply(dNdS_GUIDANCE2, function(x) median(x, na.rm=T))), group=geneNumber) ) +
   geom_boxplot(aes(fill=geneNumber)) +
@@ -359,9 +354,13 @@ plot6 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber, y=unlist(l
   ylab('dN/dS') +
   ggtitle("Osa/Bar: dN/dS vs. gene count")
 
-ggarrange(plot1, plot2, plot3, plot4, plot5, plot6, ncol = 2, nrow=3)
+ggarrange(plot5, plot6)
 ```
 
+It seems, therefore, the relationship between dN/dS values (or, the global substitution rates),
+is not strongly related to the number of genes in a syntenic block. 
+
+## More targeted dN/dS analyses: grouping genes by organization
 For instance, how do dN/dS values compare between individual genes and genes within syntenic blocks?
 
 ```{r evaluating_dnds_blocks_oki_osa_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
