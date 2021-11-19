@@ -3,6 +3,8 @@
 #' Accessory function to load the dNdS table provided by the `BreakpointsData` package.
 #' Requires `BreakpointsData` version >=3.6.1.
 #'
+#' @author Michael Mansfield
+#'
 #' @returns Returns a [`SimpleList`] of data frames with dN/dS annotations.
 loaddNdSTable <- function(file, alignment_type='GUIDANCE2') {
   # The first part of the function loads the dN/dS data frame from the BreakpointsData package's extdata.

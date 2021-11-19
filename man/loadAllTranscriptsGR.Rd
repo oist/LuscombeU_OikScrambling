@@ -14,3 +14,8 @@ annotations of the genomes we study.
 Accessory function to load all transcript annotations provided by the
 \code{BreakpointsData} package
 }
+\author{
+Charles Plessy
+
+Michael Mansfield
+}

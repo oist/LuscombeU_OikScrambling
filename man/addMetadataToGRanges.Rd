@@ -19,3 +19,6 @@ An annotated GenomicRanges object with a new metadata column added.
 \description{
 Function to add metadata columns to a GenomicRanges object. Potentially useful for \code{GenomicBreaks}.
 }
+\author{
+Michael Mansfield
+}

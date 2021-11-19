@@ -13,3 +13,6 @@ Returns a \code{\link{SimpleList}} of data frames with dN/dS annotations.
 Accessory function to load the dNdS table provided by the \code{BreakpointsData} package.
 Requires \code{BreakpointsData} version >=3.6.1.
 }
+\author{
+Michael Mansfield
+}

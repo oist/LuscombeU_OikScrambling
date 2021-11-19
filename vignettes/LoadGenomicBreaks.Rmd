@@ -204,7 +204,7 @@ gbs$Bar_Kum <- load_genomic_breaks_("Bar2_p4__KUM-M3-7f.gff.gz",            Bar2
 gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             Bar2_p4,     AOM_5,         longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Aom)
 gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 Bar2_p4,     OdB3,          longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Nor)
 
-gbs <- annotateWithTranscripts(gbs, annots)
+gbs <- annotateWithTranscripts(gbs, transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
 ```
 
@@ -223,9 +223,9 @@ unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithReps.GRanges, rep
 unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithReps.GRanges, reps$Osa)
 unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithReps.GRanges, reps$Bar)
 
-unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithTranscripts, annots$Oki)
-unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithTranscripts, annots$Osa)
-unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithTranscripts, annots$Bar)
+unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithTranscripts, transcripts$Oki)
+unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithTranscripts, transcripts$Osa)
+unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithTranscripts, transcripts$Bar)
 ```
 
 Coalescing alignments
@@ -238,7 +238,7 @@ coa[ 6:10] <- BiocParallel::bplapply(coa[ 6:10], flagLongShort, longShort$Osa)
 coa[11:15] <- BiocParallel::bplapply(coa[11:15], flagLongShort, longShort$Bar)
 
 coa <- annotateWithReps.GBreaksSimpleList(coa, reps)
-coa <- annotateWithTranscripts(coa, annots)
+coa <- annotateWithTranscripts(coa, transcripts)
 
 coa <- sapply(coa, flagAll) |> SimpleList()
 ```
@@ -260,9 +260,9 @@ unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithReps.GRanges, r
 unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithReps.GRanges, reps$Osa)
 unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithReps.GRanges, reps$Bar)
 
-unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithTranscripts, annots$Oki)
-unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithTranscripts, annots$Osa)
-unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithTranscripts, annots$Bar)
+unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithTranscripts, transcripts$Oki)
+unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithTranscripts, transcripts$Osa)
+unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithTranscripts, transcripts$Bar)
 ```
 
 Mapped unaligned regions
@@ -294,7 +294,7 @@ unalMap[ 6:10] <- BiocParallel::bplapply(unalMap[ 6:10], flagLongShort, longShor
 unalMap[11:15] <- BiocParallel::bplapply(unalMap[11:15], flagLongShort, longShort$Bar)
 
 unalMap <- annotateWithReps.GBreaksSimpleList(unalMap, reps)
-unalMap <- annotateWithTranscripts(unalMap, annots)
+unalMap <- annotateWithTranscripts(unalMap, transcripts)
 unalMap <- sapply(unalMap, flagAll) |> SimpleList()
 ```
 
@@ -335,7 +335,7 @@ tra[ 6:10] <- BiocParallel::bplapply(tra[ 6:10], flagLongShort, longShort$Osa)
 tra[11:15] <- BiocParallel::bplapply(tra[11:15], flagLongShort, longShort$Bar)
 
 tra <- annotateWithReps.GBreaksSimpleList(tra, reps)
-tra <- annotateWithTranscripts(tra, annots)
+tra <- annotateWithTranscripts(tra, transcripts)
 tra <- sapply(tra, flagAll) |> SimpleList()
 ```
 
@@ -366,7 +366,7 @@ coa2[ 6:10] <- BiocParallel::bplapply(coa2[ 6:10], flagLongShort, longShort$Osa)
 coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
 
 coa2 <- annotateWithReps.GBreaksSimpleList(coa2, reps)
-coa2 <- annotateWithTranscripts(coa2, annots)
+coa2 <- annotateWithTranscripts(coa2, transcripts)
 coa2 <- sapply(coa2, flagAll) |> SimpleList()
 ```
 
@@ -386,9 +386,9 @@ unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithReps.GRanges,
 unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithReps.GRanges, reps$Osa)
 unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithReps.GRanges, reps$Bar)
 
-unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithTranscripts, annots$Oki)
-unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithTranscripts, annots$Osa)
-unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithTranscripts, annots$Bar)
+unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithTranscripts, transcripts$Oki)
+unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithTranscripts, transcripts$Osa)
+unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithTranscripts, transcripts$Bar)
 ```
 
 Translocated regions 2
@@ -404,7 +404,7 @@ tra2[ 6:10] <- BiocParallel::bplapply(tra2[ 6:10], flagLongShort, longShort$Osa)
 tra2[11:15] <- BiocParallel::bplapply(tra2[11:15], flagLongShort, longShort$Bar)
 
 tra2 <- annotateWithReps.GBreaksSimpleList(tra2, reps)
-tra2 <- annotateWithTranscripts(tra2, annots)
+tra2 <- annotateWithTranscripts(tra2, transcripts)
 
 tra2 <- sapply(tra2, flagAll) |> SimpleList()
 ```
