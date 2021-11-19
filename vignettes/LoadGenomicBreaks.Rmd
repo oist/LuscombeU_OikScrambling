@@ -445,6 +445,28 @@ sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compD
 sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), sd))
 ```
 
+Fraction of the genome aligned or mapped
+----------------------------------------
+
+```{r fraction_aligned}
+  aligned_tot  <- sapply(gbs,   \(x) sum(width(x)))
+  mapped_tot   <- sapply(coa,   \(x) sum(width(x)))
+  mapped2_tot  <- sapply(coa2,  \(x) sum(width(x)))
+unaligned_tot  <- sapply(unal,   \(x) sum(width(x)))
+unmapped_tot   <- sapply(unmap,  \(x) sum(width(x)))
+unmapped2_tot  <- sapply(unmap2, \(x) sum(width(x)))
+
+(align_summary <- 100 * cbind(
+  align_frac = aligned_tot / ( aligned_tot + unaligned_tot ),
+  map_frac   = mapped_tot  / ( mapped_tot  + unmapped_tot ),
+  map2_frac  = mapped2_tot / ( mapped2_tot + unmapped2_tot)
+ )|> as.data.frame())
+
+sapply(align_summary, \(x) tapply(x, row.names(align_summary) |> OikScrambling:::compDistance(), mean))   |> round(1)
+sapply(align_summary, \(x) tapply(x, row.names(align_summary) |> OikScrambling:::compDistance(), median)) |> round(1)
+sapply(align_summary, \(x) tapply(x, row.names(align_summary) |> OikScrambling:::compDistance(), sd))     |> round(1)
+```
+
 Summary
 -------
 
