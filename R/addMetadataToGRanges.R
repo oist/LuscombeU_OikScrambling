@@ -2,6 +2,8 @@
 #'
 #' Function to add metadata columns to a GenomicRanges object. Potentially useful for `GenomicBreaks`.
 #'
+#' @author Michael Mansfield
+#'
 #' @returns An annotated GenomicRanges object with a new metadata column added.
 #'
 
@@ -28,12 +30,6 @@ addMetadataToGRanges <- function(gr, df, gr_key="gene_id", df_key="gene_id", df_
 
   if(rename_meta %in% existing_gr_colnames){
     stop(paste("Error. Can't rename ", df_col_name, "to ", rename_meta, " because it already exists in the GRanges object.", sep=""))
-  }
-  # TODO add logic to check if column names are unique
-  if(!is.na(rename_meta)){
-
-  } else {
-
   }
 
   # Ensure the df column name is actually in the df.
