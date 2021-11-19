@@ -45,9 +45,9 @@ Prepare GBreak objects
 ======================
 
 ```{r Bar_Osk}
-orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
+orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19") {
   orthoPairs <- load_one_to_ones(
-    system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"),
+    system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
     c(name1, name2))
 
   IDs2GRanges <- function (IDs, annot) {
@@ -102,6 +102,9 @@ orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-
                                         , transcripts$Bar, transcripts$Aom)
 orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
                                         , transcripts$Bar, transcripts$Nor)
+
+orthoPairs$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
+                                        , transcripts$Ply, transcripts$Ros, treeName="N20")
 
 sapply(orthoPairs, length)
 orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
@@ -173,7 +176,8 @@ coalOrtho <- function(gb) {
   coal
 }
 
-orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
+orthoBlocks <- sapply(orthoPairsFiltered[1:15], coalOrtho) |> SimpleList()
+orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
 sapply(orthoBlocks, length)
 orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
 orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
@@ -211,6 +215,31 @@ apply(df, 2, \(x) {
   tst <- t.test(x[c(1,3,5)], x[c(2,4,6)])
   c(pval=tst$p.value, mx=tst$estimate[1], my=tst$estimate[2])
 }) 
+```
+
+Fraction of the genome covered or syntenic
+------------------------------------------
+
+```{r fraction_aligned}
+
+uncov  <- BiocParallel::bplapply(orthoPairsFiltered, cleanGaps) |> SimpleList()
+unsyn  <- BiocParallel::bplapply(orthoBlocks,        cleanGaps) |> SimpleList()
+
+  covered_tot    <- sapply(orthoPairsFiltered,   \(x) sum(width(x)))
+  syntenic_tot   <- sapply(orthoBlocks,          \(x) sum(width(x)))
+uncovered_tot    <- sapply(uncov,                \(x) sum(width(x)))
+unsyntenic_tot   <- sapply(unsyn,                \(x) sum(width(x)))
+
+(syn_summary <- cbind(
+  covered_frac   = covered_tot   / ( covered_tot   + uncovered_tot ) * 100,
+  orthogenes_n   = sapply(orthoPairsFiltered, length),
+  syntenic_frac  = syntenic_tot  / ( syntenic_tot  + unsyntenic_tot ) * 100,
+  syntenic_reg   = sapply(orthoBlocks, length)
+ )|> as.data.frame())
+
+sapply(syn_summary, \(x) tapply(x, row.names(syn_summary) |> OikScrambling:::compDistance(), mean))   |> round(1)
+sapply(syn_summary, \(x) tapply(x, row.names(syn_summary) |> OikScrambling:::compDistance(), median)) |> round(1)
+sapply(syn_summary, \(x) tapply(x, row.names(syn_summary) |> OikScrambling:::compDistance(), sd))     |> round(1)
 ```
 
 Agreement with nucleotide alignments
