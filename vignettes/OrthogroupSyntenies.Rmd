@@ -27,16 +27,16 @@ Orthogroups
 -----------
 
 Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
-`GenomicBreaks::load_one_to_ones()` function.  Original file is in
+`OikScrambling::load_one_to_ones()` function.  Original file is in
 `/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`.
 See `news(package = "BreakpointsData")` for inspecting changes in more details.
 
 ```{r load_orthogroups}
 # Example for loading all orthogroups:
-load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
+OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
 
 # Example for loading a pair
-load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
+OikScrambling:::load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
                 , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
 ```
 
@@ -46,7 +46,7 @@ Prepare GBreak objects
 
 ```{r Bar_Osk}
 orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19") {
-  orthoPairs <- load_one_to_ones(
+  orthoPairs <- OikScrambling:::load_one_to_ones(
     system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
     c(name1, name2))
 
