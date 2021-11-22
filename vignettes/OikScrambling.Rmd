@@ -33,7 +33,7 @@ the `?pkgdown::build_site` function, in a Git clone on my subdirectory
 on `/flash`.
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e 'pkgdown::build_site(devel=TRUE, lazy=TRUE)'
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"
 ```
 
 Sometimes it is necessary to upgrade the OikScrambling package; this is done with:
@@ -42,15 +42,22 @@ Sometimes it is necessary to upgrade the OikScrambling package; this is done wit
 /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif R CMD INSTALL .
 ```
 
-And to update `GenomicBreaks`:
+And before, it may be needed to update `GenomicBreaks` or `BreakpointsData`:
 
 ```
 /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
 ```
 
 The trick is that the `GenomicBreaks` singularity images are hardcoded to
 install new packages in `R/library/GBreaks_singularity`, which bypasses the
 the problem that the images are read-only.
+
+Command to recompute the `BreakPoints.Rdata` file
+
+```
+srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "pkgdown::build_article('LoadGenomicBreaks')"
+```
 
 ## Load pacakges
 
