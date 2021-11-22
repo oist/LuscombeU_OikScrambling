@@ -47,12 +47,30 @@ flagOrthofinderGenes <- function(file, clades=NULL, species_name_map=NULL) {
     stop("Error. Not all names in the specified clades match column names in the HOG table?")
   }
 
+  # Make sure that none of the clades consist of exactly the same species identifiers.
+  if( length(clades) != length(unique(lapply(clades, sort))) ){
+    problem_clade = lapply(names(clades), function(x) {
+      taxa = paste(sort(clades[[x]]), collapse=',')
+      informative_df = data.frame("clade"=x, "sorted_taxa"=taxa)
+      #b = paste(x, ": ", taxa, sep="")
+      return(informative_df)
+    })
+    problem_clades = do.call(rbind, problem_clade)
+    print(problem_clades)
+    stop("Error. Not all clades contain unique taxa?")
+  }
+
   # The next lines just count how many entries (genes) there are in every cell across the
   # HOG table.
   count_flag_orthofinder <- function(row){
+    # Gather some information from the non-count cells for later.
     hog <- row[["HOG"]]
+    og <- row[["OG"]]
+    gtpc <- row[["Gene Tree Parent Clade"]]
     species <- names(row[4:length(row)])
     cells <- row[4:length(row)]
+    transcript_names <- paste0(na.omit(cells), collapse=',')
+
     counts <- sapply(cells, function(cell){
       if(is.na(cell)){
         ngenes <- 0
@@ -86,24 +104,19 @@ flagOrthofinderGenes <- function(file, clades=NULL, species_name_map=NULL) {
 
     # Count the counts (e.g. count1=5, count2=1, NA=0)
     # Make this a list (index = count, contents = count)
-    count_freq = as.list(table(counts, useNA="always"))
+    count_freq = as.list(table(counts))
     # If none missing...
     if(all(counts != 0)){
-      # Pretty self-explanatory
+      present_in_all_species = "present_in_all_spp"
+      # If all species have 1 of this HOG
       if(all(counts==1)){
         flag = "one_to_one"
-      # Check whether there are 1-count entries in the HOG (not all HOGs have 1-counts).
-      } else if("1" %in% names(count_freq)){
-        # If only a single species has >1 gene, it is a species-specific HOG.
-        if(count_freq[["1"]] == num_species-1){
-          flag = paste("expansion_", names(which.max(counts)), sep="")
-        }
       # If more than one species has >1 copy...
       } else {
         # Check whether the counts are consistent with a named clade.
         # Loop over every clade, and check whether all of that clade's
         # counts exceed all of the counts outside the clade.
-        # Yields a logical vector for every clade.
+        # Yields a logical for every clade.
         satisfied_clades = unlist(lapply(names(clades), function(clade){
           species = clades[[clade]]
           clade_counts = counts[species]
@@ -117,39 +130,101 @@ flagOrthofinderGenes <- function(file, clades=NULL, species_name_map=NULL) {
         names(satisfied_clades) <- names(clades)
 
         if(any(satisfied_clades)){
+          # This block checks whether one or more clades are satisfied.
+          # If more than one clade filter is satisfied, then it defaults to the largest-possible
+          # clade. E.g. if Bar-Nor is satisfied and Bar-Nor-Osa-Aom is satisfied, the latter
+          # gets the flag.
           if(sum(satisfied_clades, na.rm=T) > 1){
             possible_clades = names(which(c(satisfied_clades)))
-            biggest_clade   = which.max(unlist(lapply(clades[match(possible_clades, clades)], length)))
-            flag = paste("expansion_", names(clades)[biggest_clade],  sep="")
+            matching_clades = clades[match(possible_clades, names(clades))]
+            biggest_clade   = names(which.max(unlist(lapply(matching_clades, length))))
+            flag = paste("expansion_", biggest_clade,  sep="")
+            warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
+            warning(warning_message)
+            # If only one clade is satisfied, then the flag is that clade.
           } else {
             flag = paste("expansion_", names(which(c(satisfied_clades))),  sep="")
           }
         } else {
-          flag = "irreconcilable_paralogue"
+          # If only a single species has >1 gene, it is a species-specific HOG.
+          if(names(count_freq[which.max(count_freq)]) == 1){
+            flag = paste("expansion_", names(which.max(counts)), sep="")
+            #print(flag)
+          } else {
+            # If a HOG family is not specific to any clade, it is labeled as a difficult case.
+            flag = "irreconcilable_paralogue"
+          }
         }
       }
-    # TODO deal with missing genes
     # If any missing...
     } else {
-      if(all(counts == 1)){
-        flag = "blah"
+      present_in_all_species = "absent_in_1_or_more_spp"
+      # If 1 or more genes are found in only one taxon, it is a lineage-specific gene.
+      if(count_freq[["0"]] == num_species-1){
+        flag = paste("lineage_specific_", names(which.max(counts)), sep="")
       } else {
-        flag = "nah"
+        # Check whether counts are consistent with a named clade.
+        # Loop over every clade, and check whether all of that clade's
+        # counts exceed all of the counts outside the clade.
+        # Yields a logical for every clade.
+        satisfied_clades = unlist(lapply(names(clades), function(clade){
+          species = clades[[clade]]
+          clade_counts = counts[species]
+          nonclade_counts = counts[!names(counts) %in% species]
+          if(all(clade_counts > nonclade_counts)){
+            return(TRUE)
+          } else {
+            return(FALSE)
+          }
+        }))
+        names(satisfied_clades) <- names(clades)
+
+        if(any(satisfied_clades)){
+          # This block checks whether one or more clades are satisfied.
+          # If more than one clade filter is satisfied, then it defaults to the largest-possible
+          # clade. E.g. if Bar-Nor is satisfied and Bar-Nor-Osa-Aom is satisfied, the latter
+          # gets the flag.
+          if(sum(satisfied_clades, na.rm=T) > 1){
+            possible_clades = names(which(c(satisfied_clades)))
+            matching_clades = clades[match(possible_clades, names(clades))]
+            biggest_clade = names(which.max(unlist(lapply(matching_clades, length))))
+            flag = paste("lineage_specific_", biggest_clade,  sep="")
+            warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
+            warning(warning_message)
+          # If only one clade is satisfied, then the flag is that clade.
+          } else {
+            flag = paste("lineage_specific_", names(which(c(satisfied_clades))),  sep="")
+          }
+        } else {
+          # If there is a non-clade-specific contraction - for any reason - it is labeled as a difficult case.
+          flag = "irreconcilable_patchiness"
+        }
       }
     }
-    #print(c(counts, flag=flag))
 
-    #transcript_names = SimpleList(as.list(cells))
-    #hog_list = SimpleList()
-    #hog_list$counts = counts
-    #hog_list
+    # Make some nicely-formatted strings for appending to the HOG table.
+    # Taxa in which the HOG exists
+    taxa_string <- paste0(names(counts[which(counts>0)]), collapse=',')
+    # Taxon counts within HOG
+    taxa_count_string <- paste0(lapply(names(counts), function(x) {
+      count <- counts[[x]]
+      paste0(x, ":", count)
+    }), collapse=",")
+    result <- data.frame(hog=hog, og=og, gene_tree_parent_clade=gtpc)
+    # All transcript IDs for all taxa within HOG
+    taxa_transcripts <- t(as.data.frame(cells))
+    rownames(taxa_transcripts) <- NULL
+    result <- cbind(result, taxa_transcripts)
+    result$transcripts <- transcript_names
+    #
+    result$taxa <- taxa_string
+    result$taxa_count <- taxa_count_string
+    result$flag <- flag
+    result$present_in_all_species <- present_in_all_species
+    return(result)
   }
-  res = apply(head(pho, n=10000), 1, count_flag_orthofinder)
-  res
-  # Flag interesting entries
-  #pho$orthofinder_counts_per_species =
-  #pho$orthofinder_transcripts_in_hog =
-  #pho$orthofinder_hog_flag           =
+  res = setNames(apply(pho, 1, count_flag_orthofinder), pho$HOG)
+  res |> SimpleList()
 }
 clades=list("Oki_Kum"=c("Kum", "Oki"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar","Nor"), "Northern"=c("Bar","Nor","Osa","Aom"))
 
@@ -157,5 +232,6 @@ species_name_map = data.frame(old_names=c("AOM-5-5f.prot.longest.fa_1", "Bar2_p4
                               new_names=c("Aom", "Bar", "Kum", "Oki", "Osa", "Nor")
                               )
 
-b = flagOrthofinderGenes(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map)
+b = do.call(rbind, flagOrthofinderGenes(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map))
 
+# ggplot(b) + aes(x=reorder(flag, flag, function(x) length(x))) + geom_bar(stat="count", position="dodge") + facet_wrap(~ present_in_all_species, scales = 'free' ) + xlab(NULL) + coord_flip()
