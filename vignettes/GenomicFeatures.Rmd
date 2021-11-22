@@ -95,7 +95,7 @@ coalescing:
 ```{r echo=T, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 library(heatmaps)
 #hm_GC1 <- sapply(gbs,  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
-hm_GC2 <- sapply(coa,  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
+hm_GC2 <- sapply(coa[1:15],  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
 #hm_GC3 <- sapply(coa2, bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
 
 maxHeight <- 2000
@@ -122,7 +122,7 @@ Now looking at TATA content:
 
 ```{r TATA, fig.height=6, fig.width=12}
 #hm_GC1_TATA <- sapply(gbs, bp_heatmap, basep_range = 1000, pat = "TATA", direction = "left") |> SimpleList()
-hm_GC2_TATA <- sapply(coa, bp_heatmap, basep_range = 1000, pat = "TATA", direction = "left") |> SimpleList()
+hm_GC2_TATA <- sapply(coa[1:15], bp_heatmap, basep_range = 1000, pat = "TATA", direction = "left") |> SimpleList()
 
 maxHeight <- 2000
 #sm_GC1_TATA <- sapply(hm_GC1_TATA, smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
@@ -147,7 +147,7 @@ directly after promoter regions.
 
 ```{r AAGCsGCwwmkCGrCTTyn, fig.height=6, fig.width=12}
 #hm_GC1_mot <- sapply(gbs, bp_heatmap, basep_range = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
-hm_GC2_mot <- sapply(coa, bp_heatmap, basep_range = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
+hm_GC2_mot <- sapply(coa[1:15], bp_heatmap, basep_range = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
 
 maxHeight <- 2000
 #sm_GC1_mot <- sapply(hm_GC1_mot, smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
