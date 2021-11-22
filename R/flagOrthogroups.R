@@ -180,8 +180,8 @@ flagOrthofinderGenes <- function(file, clades=NULL, species_name_map=NULL) {
         names(satisfied_clades) <- names(clades)
 
         if(any(satisfied_clades)){
-          # This block checks whether one or more clades are satisfied.
-          # If more than one clade filter is satisfied, then it defaults to the largest-possible
+          # This block checks whether one or more clades are satisfied (i.e., all members of the clade > any other group).
+          # If more than one clade is satisfied, then it defaults to the largest-possible
           # clade. E.g. if Bar-Nor is satisfied and Bar-Nor-Osa-Aom is satisfied, the latter
           # gets the flag.
           if(sum(satisfied_clades, na.rm=T) > 1){
@@ -195,9 +195,36 @@ flagOrthofinderGenes <- function(file, clades=NULL, species_name_map=NULL) {
           } else {
             flag = paste("lineage_specific_", names(which(c(satisfied_clades))),  sep="")
           }
+        # If no clades are satisfied...
         } else {
-          # If there is a non-clade-specific contraction - for any reason - it is labeled as a difficult case.
-          flag = "irreconcilable_patchiness"
+          # Check for clade-specific deletion.
+          clade_deletion = unlist(lapply(names(clades), function(clade){
+            species = clades[[clade]]
+            clade_counts = counts[species]
+            nonclade_counts = counts[!names(counts) %in% species]
+            if(all(clade_counts < nonclade_counts)){
+              return(TRUE)
+            } else {
+              return(FALSE)
+            }
+          }))
+          names(clade_deletion) <- names(clades)
+          if(any(clade_deletion)){
+            if(sum(satisfied_clades, na.rm=T) > 1){
+              possible_clades = names(which(c(clade_deletion)))
+              matching_clades = clades[match(possible_clades, names(clades))]
+              biggest_clade = names(which.max(unlist(lapply(matching_clades, length))))
+              flag = paste("deletion_", biggest_clade,  sep="")
+              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
+              warning(warning_message)
+              stop()
+            } else {
+              flag = paste("deletion_", names(which(c(clade_deletion))),  sep="")
+            }
+          } else {
+            # If there is a non-clade-specific contraction - for any reason - it is labeled as a difficult case.
+            flag = "irreconcilable_patchiness"
+          }
         }
       }
     }
