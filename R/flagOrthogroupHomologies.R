@@ -14,7 +14,7 @@
 #'
 #' @returns IDK yet
 
-flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL) {
+flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, multiple_clade_resolution="biggest") {
   # Read table. Note that empty cells become NA.
   pho <- read.delim(file, check.names=FALSE, na.strings=c("", NA))
   # Remove all-NA columns
@@ -58,6 +58,10 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL) {
     problem_clades = do.call(rbind, problem_clade)
     print(problem_clades)
     stop("Error. Not all clades contain unique taxa?")
+  }
+
+  if(!multiple_clade_resolution %in% c("biggest_clade", "max_mean_count")){
+     stop("Error. The only valid options for this function are \"biggest_clade\" or \"max_mean_count\".")
   }
 
   # The next lines just count how many entries (genes) there are in every cell across the
@@ -138,15 +142,22 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL) {
             possible_clades = names(which(c(satisfied_clades)))
             matching_clades = clades[match(possible_clades, names(clades))]
             biggest_clade   = names(which.max(unlist(lapply(matching_clades, length))))
-            flag = paste("expansion_", biggest_clade,  sep="")
-            warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
-            warning(warning_message)
+            if(multiple_clade_resolution=="biggest"){
+              flag = paste("expansion_", biggest_clade,  sep="")
+              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
+              warning(warning_message)
+            } else if(multiple_clade_resolution=="max_mean_count") {
+              biggest_clade =
+              flag = paste("expansion_", max_clade,  sep="")
+              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nMax. count clade mode selected: ", max_clade, "\nFlag: ", flag, "\n", sep="")
+              warning(warning_message)
+            }
             # If only one clade is satisfied, then the flag is that clade.
           } else {
             flag = paste("expansion_", names(which(c(satisfied_clades))),  sep="")
           }
         } else {
-          # If only a single species has >1 gene, it is a species-specific HOG.
+          # If there is a single species that has the maximum number of copies, it is a species-specific HOG.
           if(names(count_freq[which.max(count_freq)]) == 1){
             flag = paste("expansion_", names(which.max(counts)), sep="")
           } else {
@@ -191,7 +202,9 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL) {
             if(sum(satisfied_clades, na.rm=T) > 1){
               possible_clades = names(which(c(satisfied_clades)))
               matching_clades = clades[match(possible_clades, names(clades))]
-              biggest_clade = names(which.max(unlist(lapply(matching_clades, length))))
+              biggest_clade   = names(which.max(unlist(lapply(matching_clades, length))))
+              max_clade       = names(which.max(matching_clades))
+              if()
               flag = paste("lineage_specific_", biggest_clade,  sep="")
               warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
               warning(warning_message)

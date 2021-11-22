@@ -18,6 +18,7 @@ different objects are prepared.
 
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
+library("ggpubr")
 (genomes <- OikScrambling:::loadAllGenomes())
 (transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
 (load("BreakPoints.Rdata"))
@@ -30,6 +31,107 @@ Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
 `GenomicBreaks::load_one_to_ones()` function.  Original file is in
 `/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`.
 See `news(package = "BreakpointsData")` for inspecting changes in more details.
+
+Flagging orthogroups by inferred homology class
+-----------------------------------------------
+While single-copy orthologues are arguably the most important component of the genome for between-species comparisons, it is also useful to know - or at least guess - at the other kinds of homologous relations that may exist within a gene family. This can identify, for example, clade-specific gene family expansions or clade-specific gene family deletions.
+
+In the following section, I flag different types of homology by inferring them from OrthoFinder hierarchical orthogroup (HOG) counts.
+
+Flag orthogroups:
+
+```{r flagging_orthogroup_1}
+# Create a list of clades. Each clade contains a vector of species names (the "new_names" of the next
+# data frame. The clades can overlap.
+clades=list("Oki_Kum"=c("Kum", "Oki"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar","Nor"), "Northern"=c("Bar","Nor","Osa","Aom"))
+
+# Create a data frame that maps the original species names in the OrthoFinder 
+# output to a set of new names that are easier to read.
+species_name_map = data.frame(old_names=c("AOM-5-5f.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"),
+                              new_names=c("Aom", "Bar", "Kum", "Oki", "Osa", "Nor")
+                              )
+
+# Use the flagOrthogroupHomologies function to identify different kinds of homologies.
+# This includes species-specific expansions (i.e., a HOG that contains one species)
+# or specific-specific deletions (i.e., a HOG in all species but one).
+# The clade list makes it possible to identify more fine-grained groupings.
+orthoflags = do.call(rbind, OikScrambling:::flagOrthogroupHomologies(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map))
+rownames(orthoflags) <- NULL
+(head(orthoflags))
+```
+
+The `orthoflags` object yields a data frame with one row per orthogroup, the other columns of the HOG table, as well as a set of orthogroup annotations based on the counts of every species and clade. 
+
+```{r flagging_orthogroups_2}
+# Take a look at the distribution of different species flags. 
+ggplot(orthoflags) +
+    aes(x=reorder(flag, flag, function(x) length(x))) + geom_bar(stat="count", position="dodge") +
+    facet_wrap(~ present_in_all_species, scales = 'free' ) +
+    xlab(NULL) +
+    coord_flip()
+```
+
+In order to get these orthogroup annotations into the `GBreaks` object later, we add them as metadata columns to the `transcripts` object from above. 
+
+```{r flagging_orthogroups_3}
+# This function takes the output of `flagOrthogroupHomologies` and parses it into a data frame
+# suitable for glomming with addMetadataToGRanges.
+orthoflagsToDF <- function(orthoflags, species) {
+  annotations_per_row <- apply(orthoflags, 1, function(row) {
+    row <- as.list(row)
+    sp_transcripts <- row[[species]]
+    transcript_ids <- unname(unlist(strsplit(x = sp_transcripts, ",")))
+    hog <- row[["hog"]]
+    og <- row[["og"]]
+    gene_tree_parent_clade <- row[["gene_tree_parent_clade"]]
+    hog_transcripts <- row[["transcripts"]]
+    hog_taxa <- row[["taxa"]]
+    hog_taxa_count <- row[["taxa_count"]]
+    hog_flag <- row[["flag"]]
+    hog_presence <- row[["present_in_all_species"]]
+    if(!any(is.na(transcript_ids))){
+      annotation <- lapply(transcript_ids, function(tx) {
+        list(tx_name=tx, hog=hog, og=og, gene_tree_parent_clade=gene_tree_parent_clade, hog_transcripts=hog_transcripts, hog_taxa=hog_taxa, hog_taxa_count=hog_taxa_count, hog_flag=hog_flag, hog_presence=hog_presence)
+      })
+      annotation <- do.call(rbind, annotation)
+    }
+  })
+  annotations <- as.data.frame(do.call(rbind, annotations_per_row))
+  annotations
+}
+
+orthoflagsDF <- SimpleList()
+orthoflagsDF$Oki <- orthoflagsToDF(orthoflags=orthoflags, species="Oki")
+orthoflagsDF$Osa <- orthoflagsToDF(orthoflags=orthoflags, species="Osa")
+orthoflagsDF$Bar <- orthoflagsToDF(orthoflags=orthoflags, species="Bar")
+orthoflagsDF$Kum <- orthoflagsToDF(orthoflags=orthoflags, species="Kum")
+orthoflagsDF$Aom <- orthoflagsToDF(orthoflags=orthoflags, species="Aom")
+orthoflagsDF$Nor <- orthoflagsToDF(orthoflags=orthoflags, species="Nor")
+```
+
+Note that the "full" transcript names are used in the OrthoFinder output, whereas parsed names are used in the `transcript` object. Let's fix the names to make them parseable.
+
+```{r adding_simple_names}
+orthoflagsDF$Oki$tx_name_simple = unname(sapply(orthoflagsDF$Oki$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[3:4], collapse='.')))
+orthoflagsDF$Osa$tx_name_simple = unname(sapply(orthoflagsDF$Osa$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[3:4], collapse='.')))
+orthoflagsDF$Bar$tx_name_simple = unname(sapply(orthoflagsDF$Bar$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2:3], collapse='.')))
+orthoflagsDF$Kum$tx_name_simple = unname(sapply(orthoflagsDF$Kum$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2:3], collapse='.')))
+orthoflagsDF$Aom$tx_name_simple = unname(sapply(orthoflagsDF$Aom$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2:3], collapse='.')))
+orthoflagsDF$Nor$tx_name_simple = unname(sapply(orthoflagsDF$Nor$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2], collapse='.')))
+```
+
+The `orthoflagsDF` object contains all the same information as the `orthoflags` object, but is in a slightly more convenient formatting for gluing on to the transcript annotations later. We do so here:
+
+```{r gluing_orthoflags}
+transcripts <- sapply(names(transcripts), function(sp){
+  stitched <- OikScrambling:::addMetadataToGRanges(gr=transcripts[[sp]], df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_taxa', rename_meta = 'HOG_taxa')
+  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_taxa_count', rename_meta = 'HOG_taxa_counts')
+  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_flag', rename_meta = 'HOG_flag')
+  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_presence', rename_meta = 'HOG_presence')
+  stitched
+})
+transcripts |> SimpleList()
+```
 
 ```{r load_orthogroups}
 # Example for loading all orthogroups:
@@ -141,6 +243,8 @@ orthoPairsFiltered <- sapply(orthoPairs, function(gb) {
 sapply(orthoPairs, length) - sapply(orthoPairsFiltered, length)
 ```
 
+Exploring patterns in the pairwise objects
+------------------------------------------
 
 Coalesce syntenic blocks and annotate them
 ------------------------------------------
@@ -166,6 +270,13 @@ coalOrtho <- function(gb) {
   coal$query$dNdS_GUIDANCE2  <- coal$dNdS_GUIDANCE2
   coal$query$dNdS_HmmCleaner <- coal$dNdS_HmmCleaner
   coal$query$dNdS_PRANK      <- coal$dNdS_PRANK
+  
+  # Add orthoflags. Since the flags are assigned to orthogroups, the flags are the same
+  # for all single-copy orthologues.
+  coal$HOG_taxa <- CharacterList(split(gb$HOG_taxa [subjectHits(ov)], queryHits(ov))) |> unname()
+  coal$HOG_taxa_counts <- CharacterList(split(gb$HOG_taxa_counts [subjectHits(ov)], queryHits(ov))) |> unname()
+  coal$HOG_flag <- CharacterList(split(gb$HOG_flag [subjectHits(ov)], queryHits(ov))) |> unname()
+  coal$HOG_presence <- CharacterList(split(gb$HOG_presence [subjectHits(ov)], queryHits(ov))) |> unname()
 
   # Count genes per syntenic block
   coal$geneNumber <- sapply(coal$geneNames, length)
@@ -179,7 +290,6 @@ orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
 orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
 orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
 ```
-
 
 Quick overview of the results
 =============================
@@ -234,6 +344,46 @@ sum(width(valid))
 
 Question: what does interrupt the colinearity of nucleotide regions in gene-centric
 colinear regions ?
+
+Genes per syntenic block
+------------------------
+```{r genes_per_block_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+# Oki-Osa
+# Genes per syntenic block
+plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber)) +
+  geom_histogram() +
+  ggtitle("Oki/Osa: genes per syntenic block")
+# Genes per syntenic block, but on a logarithmic scale.
+# Note the trickery to ensure counts of 1 are shown.
+plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Osa), aes(x=geneNumber)) +
+  geom_histogram(aes(y=..count..*10)) +
+  scale_y_log10(labels=function(y) y/10, name="count") +
+  ggtitle("Oki/Osa: genes per syntenic block (log10 axis)")
+
+ggarrange(plot1, plot2)
+
+# Oki-Bar
+plot1 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber )) +
+  geom_histogram() +
+  ggtitle("Oki/Bar: genes per syntenic block")
+plot2 <- ggplot(as.data.frame(orthoBlocks$Oki_Bar), aes(x=geneNumber)) +
+  geom_histogram(aes(y=..count..*10)) +
+  scale_y_log10(labels=function(y) y/10, name="count") +
+  ggtitle("Oki/Bar: genes per syntenic block (log10 axis)")
+ggarrange(plot1, plot2)
+
+# Osa-Bar
+plot1 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber )) +
+  geom_histogram() +
+  ggtitle("Osa/Bar: genes per syntenic block")
+plot2 <- ggplot(as.data.frame(orthoBlocks$Osa_Bar), aes(x=geneNumber)) +
+  geom_histogram(aes(y=..count..*10)) +
+  scale_y_log10(labels=function(y) y/10, name="count") +
+  ggtitle("Osa/Bar: genes per syntenic block (log10 axis)")
+ggarrange(plot1, plot2)
+
+```
+
 
 # Session information
 
