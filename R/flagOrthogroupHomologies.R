@@ -12,9 +12,9 @@
 #' having one copy means it is a 1-to-1 orthologue. The more complicated logic
 #' is explained in detail in the function.
 #'
-#' @returns IDK yet
+#' @returns A data frame with phylogenetic hierarchical orthogroups and annotations.
 
-flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, multiple_clade_resolution="biggest") {
+flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, multiple_clade_resolution="largest", deletion_clade_resolution="largest") {
   # Read table. Note that empty cells become NA.
   pho <- read.delim(file, check.names=FALSE, na.strings=c("", NA))
   # Remove all-NA columns
@@ -60,8 +60,12 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, m
     stop("Error. Not all clades contain unique taxa?")
   }
 
-  if(!multiple_clade_resolution %in% c("biggest_clade", "max_mean_count")){
-     stop("Error. The only valid options for this function are \"biggest_clade\" or \"max_mean_count\".")
+  if(!multiple_clade_resolution %in% c("largest", "mean")){
+     stop("Error. The only valid options for this function are \"largest\" or \"mean\".\n\"largest\" breaks ties by assigning it to clade that includes the most species.\n\"mean\" breaks ties by assigning it to the clade with the highest mean count.")
+  }
+
+  if(!deletion_clade_resolution %in% c("largest", "mean")){
+    stop("Error. The only valid options for this function are \"largest\" or \"mean\".\n\"largest\" breaks ties by assigning it to clade that includes the most species.\n\"mean\" breaks ties by assigning it to the clade with the lowest mean count.")
   }
 
   # The next lines just count how many entries (genes) there are in every cell across the
@@ -83,6 +87,68 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, m
       }
       ngenes
     })
+
+    # Count the counts (e.g. count1=5, count2=1, NA=0)
+    # Make this a list (index = count, contents = count)
+    count_freq = as.list(table(counts))
+
+    # Check whether the counts are consistent with a named clade.
+    # Loop over every clade, and check whether all of that clade's
+    # counts exceed all of the counts outside the clade.
+    # Yields a logical for every clade.
+    check_clades = function(clade_list, counts, comparison="gt") {
+      satisfied_clades = lapply(names(clade_list), function(clade){
+        result = SimpleList()
+        species = clade_list[[clade]]
+        clade_counts = counts[species]
+        nonclade_counts = counts[!names(counts) %in% species]
+        if(comparison == "gt") {
+          if(all(clade_counts > nonclade_counts)){
+            result$clade_counts     = paste0(clade_counts, collapse=',')
+            result$nonclade_counts  = paste0(nonclade_counts, collapse=',')
+            result$clade_size       = length(clade_counts)
+            result$mean_clade_count = mean(clade_counts)
+            result$satisfied        = TRUE
+          } else {
+            result$clade_counts     = paste0(clade_counts, collapse=',')
+            result$nonclade_counts  = paste0(nonclade_counts, collapse=',')
+            result$clade_size       = length(clade_counts)
+            result$mean_clade_count = mean(clade_counts)
+            result$satisfied        = FALSE
+          }
+        } else if(comparison == "lt") {
+          if(all(clade_counts < nonclade_counts)){
+            result$clade_counts     = paste0(clade_counts, collapse=',')
+            result$nonclade_counts  = paste0(nonclade_counts, collapse=',')
+            result$clade_size       = length(clade_counts)
+            result$mean_clade_count = mean(clade_counts)
+            result$satisfied        = TRUE
+          # The following block is kind of speculative. It is used later to call
+          # clade-specific counts - but just because all counts in one clade are
+          # 0, that does not make a deletion lineage-specific. The only way to
+          # truly call it clade-specific is if all in clade are 0 and all outside
+          # are >0. Delete this comment and the following block if this behaviour
+          # is undesirable.
+          } else if(all(clade_counts == 0)) {
+            result$clade_counts     = paste0(clade_counts, collapse=',')
+            result$nonclade_counts  = paste0(nonclade_counts, collapse=',')
+            result$clade_size       = length(clade_counts)
+            result$mean_clade_count = mean(clade_counts)
+            result$satisfied        = TRUE
+          } else {
+            result$clade_counts     = paste0(clade_counts, collapse=',')
+            result$nonclade_counts  = paste0(nonclade_counts, collapse=',')
+            result$clade_size       = length(clade_counts)
+            result$mean_clade_count = mean(clade_counts)
+            result$satisfied        = FALSE
+          }
+        }
+        result
+      })
+      names(satisfied_clades) <- names(clade_list)
+      satisfied_clades = as.data.frame(do.call(rbind, satisfied_clades))
+      return(satisfied_clades)
+    }
 
     # Here we lay out the logic for how HOG counts relate to gene family evolution.
     # Some of the "flags" are intuitive - e.g. 1-to-1 - some less so.
@@ -106,9 +172,6 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, m
     #        If ALL missing except one species:                     species-specific HOG
     #        Other:                                                 some other explanation, misannotation, etc.
 
-    # Count the counts (e.g. count1=5, count2=1, NA=0)
-    # Make this a list (index = count, contents = count)
-    count_freq = as.list(table(counts))
     # If none missing...
     if(all(counts != 0)){
       present_in_all_species = "present_in_all_spp"
@@ -117,44 +180,30 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, m
         flag = "one_to_one"
       # If more than one species has >1 copy...
       } else {
-        # Check whether the counts are consistent with a named clade.
-        # Loop over every clade, and check whether all of that clade's
-        # counts exceed all of the counts outside the clade.
-        # Yields a logical for every clade.
-        satisfied_clades = unlist(lapply(names(clades), function(clade){
-          species = clades[[clade]]
-          clade_counts = counts[species]
-          nonclade_counts = counts[!names(counts) %in% species]
-          if(all(clade_counts > nonclade_counts)){
-            return(TRUE)
-          } else {
-            return(FALSE)
-          }
-        }))
-        names(satisfied_clades) <- names(clades)
-
-        if(any(satisfied_clades)){
-          # This block checks whether one or more clades are satisfied.
-          # If more than one clade filter is satisfied, then it defaults to the largest-possible
-          # clade. E.g. if Bar-Nor is satisfied and Bar-Nor-Osa-Aom is satisfied, the latter
-          # gets the flag.
-          if(sum(satisfied_clades, na.rm=T) > 1){
-            possible_clades = names(which(c(satisfied_clades)))
-            matching_clades = clades[match(possible_clades, names(clades))]
-            biggest_clade   = names(which.max(unlist(lapply(matching_clades, length))))
-            if(multiple_clade_resolution=="biggest"){
-              flag = paste("expansion_", biggest_clade,  sep="")
-              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
+        # Check if counts are consistent with a clade.
+        clade_check = check_clades(clade_list=clades, counts=counts, comparison="gt")
+        satisfied_clades = clade_check[unlist(clade_check$satisfied)==TRUE,]
+        # If any clade is satisfied...
+        if(any(unlist(clade_check$satisfied))){
+          # If more than one clade filter is satisfied...
+          if(nrow(satisfied_clades) > 1){
+            # Then settle the tie, either by selecting the biggest clade ("largest")
+            # or by the clade with the highest mean gene count ("mean").
+            possible_clades = rownames(satisfied_clades)
+            if(multiple_clade_resolution=="largest"){
+              clade = rownames(head(satisfied_clades[order(unlist(satisfied_clades$clade_size), decreasing=T),], n=1))
+              flag = paste("expansion_", clade,  sep="")
+              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade:\n", paste(capture.output(print(satisfied_clades)), collapse='\n'), "\nBreaking tie in favour of largest clade: ", clade, "\nFlag: ", flag, "\n", sep="")
               warning(warning_message)
-            } else if(multiple_clade_resolution=="max_mean_count") {
-              biggest_clade =
-              flag = paste("expansion_", max_clade,  sep="")
-              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nMax. count clade mode selected: ", max_clade, "\nFlag: ", flag, "\n", sep="")
+            } else if(multiple_clade_resolution=="mean") {
+              clade = rownames(head(satisfied_clades[order(unlist(satisfied_clades$mean_clade_count), decreasing=T),], n=1))
+              flag = paste("expansion_", clade,  sep="")
+              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade:\n", paste(capture.output(print(satisfied_clades)), collapse='\n'), "\nBreaking tie in favour of clade with greatest mean count: ", clade, "\nFlag: ", flag, "\n", sep="")
               warning(warning_message)
             }
-            # If only one clade is satisfied, then the flag is that clade.
+          # If only one clade is satisfied, then the flag is that clade.
           } else {
-            flag = paste("expansion_", names(which(c(satisfied_clades))),  sep="")
+            flag = paste("expansion_", rownames(satisfied_clades),  sep="")
           }
         } else {
           # If there is a single species that has the maximum number of copies, it is a species-specific HOG.
@@ -166,76 +215,72 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, m
           }
         }
       }
+
     # If any missing...
     } else {
       present_in_all_species = "absent_in_1_or_more_spp"
-      # If 1 or more genes are found in only one taxon, it is a lineage-specific gene.
+      # If a HOG is found in only one species, it is a species-specific HOG.
       if(count_freq[["0"]] == num_species-1){
-        flag = paste("lineage_specific_", names(which.max(counts)), sep="")
+        flag = paste("species_specific_", names(which.max(counts)), sep="")
       } else {
-        # If a single species has 0 and every species has >=1
+        # If a single species has 0 while every other species has >=1
         if(count_freq[["0"]] == 1 ){
           flag = paste("deletion_", names(which.min(counts)), sep="")
         } else {
-          # Check whether counts are consistent with a named clade.
-          # Loop over every clade, and check whether all of that clade's
-          # counts exceed all of the counts outside the clade.
-          # Yields a logical for every clade.
-          satisfied_clades = unlist(lapply(names(clades), function(clade){
-            species = clades[[clade]]
-            clade_counts = counts[species]
-            nonclade_counts = counts[!names(counts) %in% species]
-            if(all(clade_counts > nonclade_counts)){
-              return(TRUE)
+          # Check for clade-specific HOG, allowing for missing genes in one or more species.
+          clade_check = check_clades(clade_list=clades, counts=counts, comparison="gt")
+          satisfied_clades = clade_check[clade_check$satisfied==TRUE,]
+          # If gene counts consistent with any clade...
+          if(any(unlist(satisfied_clades$satisfied))){
+            # If more than one clade is satisfied....
+            if(nrow(satisfied_clades)>1){
+              # Then settle the tie, either by selecting the biggest clade ("largest")
+              # or by the clade with the highest mean gene count ("mean").
+              possible_clades = rownames(satisfied_clades)
+              if(multiple_clade_resolution=="largest"){
+                clade = rownames(head(satisfied_clades[order(unlist(satisfied_clades$clade_size), decreasing=T),], n=1))
+                flag = paste("expansion_", clade,  sep="")
+                warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade:\n", paste(capture.output(print(satisfied_clades)), collapse='\n'), "\nBreaking tie in favour of largest clade: ", clade, "\nFlag: ", flag, "\n", sep="")
+                warning(warning_message)
+              } else if(multiple_clade_resolution=="mean") {
+                clade = rownames(head(satisfied_clades[order(unlist(satisfied_clades$mean_clade_count), decreasing=T),], n=1))
+                flag = paste("expansion_", clade,  sep="")
+                warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade:\n", paste(capture.output(print(satisfied_clades)), collapse='\n'), "\nBreaking tie in favour of clade with greatest mean count: ", clade, "\nFlag: ", flag, "\n", sep="")
+                warning(warning_message)
+              }
+            # If only one clade is satisfied, then it is a clade-specific HOG.
             } else {
-              return(FALSE)
-            }
-          }))
-          names(satisfied_clades) <- names(clades)
-
-          if(any(satisfied_clades)){
-            # This block checks whether one or more clades are satisfied:
-            # (i.e., all members of the clade > any other group, and groups include missing genes).
-            # If more than one clade is satisfied, then it defaults to the largest-possible
-            # clade. E.g. if Bar-Nor is satisfied and Bar-Nor-Osa-Aom is satisfied, the latter
-            # gets the flag.
-            if(sum(satisfied_clades, na.rm=T) > 1){
-              possible_clades = names(which(c(satisfied_clades)))
-              matching_clades = clades[match(possible_clades, names(clades))]
-              biggest_clade   = names(which.max(unlist(lapply(matching_clades, length))))
-              max_clade       = names(which.max(matching_clades))
-              if()
-              flag = paste("lineage_specific_", biggest_clade,  sep="")
-              warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
-              warning(warning_message)
-            # If only one clade is satisfied, then the flag is that clade.
-            } else {
-              flag = paste("lineage_specific_", names(which(c(satisfied_clades))),  sep="")
+              flag = paste("clade_specific_", rownames(satisfied_clades), sep="")
             }
           # If no clades are satisfied...
           } else {
             # Check for clade-specific deletion.
-            clade_deletion = unlist(lapply(names(clades), function(clade){
-              species = clades[[clade]]
-              clade_counts = counts[species]
-              nonclade_counts = counts[!names(counts) %in% species]
-              if(all(clade_counts == 0) & all(nonclade_counts>0)){
-                return(TRUE)
+            # Note that here we check if ALL species in the clade are lower than ALL other clades.
+            deletion_check = check_clades(clade_list=clades, counts=counts, comparison="lt")
+            satisfied_deletions = deletion_check[deletion_check$satisfied==TRUE,]
+            #print(deletion_check)
+            # If more than one clade has a deletion...
+            if(any(unlist(satisfied_deletions$satisfied))){
+              # Settle the tie.
+              # The tie should in almost all situations be resolved such that deletion is inferred
+              # to belong to the largest clade. But there is the option to use something else if for
+              # some reason this is not desired.
+              if(nrow(satisfied_deletions) > 1){
+                possible_clades = rownames(satisfied_deletions)
+                if(deletion_clade_resolution=="largest"){
+                  clade = rownames(head(satisfied_deletions[order(unlist(satisfied_deletions$clade_size), decreasing=T),], n=1))
+                  flag = paste("clade_specific_deletion_", clade,  sep="")
+                  warning_message = paste("HOG ", hog, " seems to be deleted in more than one clade:\n", paste(capture.output(print(satisfied_deletions)), collapse='\n'), "\nBreaking tie in favour of largest clade: ", clade, "\nFlag: ", flag, "\n", sep="")
+                  warning(warning_message)
+                } else if(deletion_clade_resolution=="mean") {
+                  clade = rownames(head(satisfied_deletions[order(unlist(satisfied_deletions$mean_clade_count), decreasing=T),], n=1))
+                  flag = paste("clade_specific_deletion_", clade,  sep="")
+                  warning_message = paste("HOG ", hog, " seems to be deleted in more than one clade:\n", paste(capture.output(print(satisfied_deletions)), collapse='\n'), "\nBreaking tie in favour of clade with greatest mean count: ", clade, "\nFlag: ", flag, "\n", sep="")
+                  warning(warning_message)
+                }
+              # If only one clade seems to have it deleted, it is a clade-specific deletion.
               } else {
-                return(FALSE)
-              }
-            }))
-            names(clade_deletion) <- names(clades)
-            if(any(clade_deletion)){
-              if(sum(satisfied_clades, na.rm=T) > 1){
-                possible_clades = names(which(c(clade_deletion)))
-                matching_clades = clades[match(possible_clades, names(clades))]
-                biggest_clade = names(which.max(unlist(lapply(matching_clades, length))))
-                flag = paste("deletion_", biggest_clade,  sep="")
-                warning_message = paste("HOG ", hog, " has counts that satisfy more than one clade: ",  paste0(names(counts), collapse=", "), ", counts: ", paste0(counts, collapse=", "), "\nSatisfied clades: ", paste0(possible_clades, collapse=", "), "\nDefaulting to the biggest clade: ", biggest_clade, "\nFlag: ", flag, "\n", sep="")
-                warning(warning_message)
-              } else {
-                flag = paste("deletion_", names(which(c(clade_deletion))),  sep="")
+                flag = paste("clade_specific_deletion_", rownames(satisfied_deletions),  sep="")
               }
             } else {
               # If there is a non-clade-specific deletion - for any reason - it is labeled as a difficult case.
@@ -266,6 +311,7 @@ flagOrthogroupHomologies <- function(file, clades=NULL, species_name_map=NULL, m
     result$present_in_all_species <- present_in_all_species
     return(result)
   }
-  res = setNames(apply(pho, 1, count_flag_orthofinder), pho$HOG)
-  res |> SimpleList()
+  res = setNames(apply(pho, 1, count_flag_orthofinder), pho$HOG) |> SimpleList()
+  res = do.call(rbind, res)
+  res
 }
