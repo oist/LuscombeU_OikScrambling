@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>License • OikScrambling</title>
+<title>Load one-to-one orthogroups for a set of species — load_one_to_ones • OikScrambling</title>
 
 
 <!-- jquery -->
@@ -18,8 +18,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
-<link rel="stylesheet" href="bootstrap-toc.css">
-<script src="bootstrap-toc.js"></script>
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
@@ -33,13 +33,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
-<link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script>
+<link href="../pkgdown.css" rel="stylesheet">
+<script src="../pkgdown.js"></script>
 
 
 
 
-<meta property="og:title" content="License" />
+<meta property="og:title" content="Load one-to-one orthogroups for a set of species — load_one_to_ones" />
+<meta property="og:description" content="Takes a phylogenetic hierarchical orthogroup table from the output of
+OrthoFinder, optionally subsets it for some species, and returns the
+table containing one-to-one orthogroups." />
 
 
 
@@ -58,7 +61,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-title-body">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -70,7 +73,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">OikScrambling</a>
+        <a class="navbar-link" href="../index.html">OikScrambling</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
@@ -78,16 +81,16 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">
+  <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="articles/OikScrambling.html">Get started</a>
+  <a href="../articles/OikScrambling.html">Get started</a>
 </li>
 <li>
-  <a href="reference/index.html">Reference</a>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -97,42 +100,42 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="articles/ColinearityInterruptors.html">Regions interrupting colinearity</a>
+      <a href="../articles/ColinearityInterruptors.html">Regions interrupting colinearity</a>
     </li>
     <li>
-      <a href="articles/DistanceMeasures.html">Distance Measures</a>
+      <a href="../articles/DistanceMeasures.html">Distance Measures</a>
     </li>
     <li>
-      <a href="articles/GenomicFeatures.html">Introduction to the OikScrambling package</a>
+      <a href="../articles/GenomicFeatures.html">Introduction to the OikScrambling package</a>
     </li>
     <li>
-      <a href="articles/Inversions.html">Inversions</a>
+      <a href="../articles/Inversions.html">Inversions</a>
     </li>
     <li>
-      <a href="articles/LoadGenomicBreaks.html">Load genomic break data</a>
+      <a href="../articles/LoadGenomicBreaks.html">Load genomic break data</a>
     </li>
     <li>
-      <a href="articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
+      <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
-      <a href="articles/PWM.html">Motif finding and analysis</a>
+      <a href="../articles/PWM.html">Motif finding and analysis</a>
     </li>
     <li>
-      <a href="articles/ParallelPlots.html">Whole-chromosome parallel plots</a>
+      <a href="../articles/ParallelPlots.html">Whole-chromosome parallel plots</a>
     </li>
     <li>
-      <a href="articles/RegionWidths.html">Width of the aligned and mapped regions.</a>
+      <a href="../articles/RegionWidths.html">Width of the aligned and mapped regions.</a>
     </li>
     <li>
-      <a href="articles/RepeatRegions.html">Repeat regions</a>
+      <a href="../articles/RepeatRegions.html">Repeat regions</a>
     </li>
     <li>
-      <a href="articles/Translocations.html">Translocations</a>
+      <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="news/index.html">Changelog</a>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -153,26 +156,53 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>License</h1>
+    <h1>Load one-to-one orthogroups for a set of species</h1>
+    <small class="dont-index">Source: <a href='https://github.com/oist/LuscombeU_OikScrambling/blob/master/R/load_one_to_ones.R'><code>R/load_one_to_ones.R</code></a></small>
+    <div class="hidden name"><code>load_one_to_ones.Rd</code></div>
     </div>
 
-<pre>YEAR: 2020
-COPYRIGHT HOLDER: CW and CP, or maybe just OIST?
-ORGANIZATION: OIST
-</pre>
+    <div class="ref-description">
+    <p>Takes a <em>phylogenetic hierarchical orthogroup</em> table from the output of
+<em>OrthoFinder</em>, optionally subsets it for some species, and returns the
+table containing one-to-one orthogroups.</p>
+    </div>
+
+    <pre class="usage"><span class='fu'>load_one_to_ones</span><span class='op'>(</span><span class='va'>file</span>, species <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>file</th>
+      <td><p>Path to the <em>OrthoFinder</em> table.</p></td>
+    </tr>
+    <tr>
+      <th>species</th>
+      <td><p>A character vector of species annotation names matching
+exactly the names of the columns in the <em>OrthoFinder</em> table.</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>Returns a <code>DataFrame</code> with one column per species, containing
+protein identifiers, and the columns <code>HOG</code>, <code>OG</code> and <code>Gene.Tree.Parent.Clade</code>.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Orthogroups that are not one-to-one have either a missing entry for one
+species, represented as an empty string, or multiple entries, separated
+with comma characters.  Species that are not part of the clade covered by
+the table have <code>NA</code> in every row.</p>
 
   </div>
-
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
-
 </div>
-
 
 
       <footer>

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -91,6 +91,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -129,28 +132,23 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling">'OikScrambling'</a></span><span class="op">)</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8
-
-## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8</code></pre>
 <pre><code>## List of length 6
 ## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">transcripts</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllTranscriptsGR.html">loadAllTranscriptsGR</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## List of length 6
-## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<pre><code>## List of length 8
+## names(8): Oki Osa Bar Kum Aom Nor Ply Ros</code></pre>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      
 ##  [7] "tra2"      "coa2"      "unmap2"    "longShort"</code></pre>
 <div id="orthogroups" class="section level2">
 <h2 class="hasAnchor">
 <a href="#orthogroups" class="anchor"></a>Orthogroups</h2>
-<p>Load Orthogroups for <em>Oikopleura</em> from the <code>BreakpointsData</code> package with the <code><a href="https://oist.github.io/GenomicBreaks/reference/load_one_to_ones.html">GenomicBreaks::load_one_to_ones()</a></code> function. Original file is in <code>/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv</code>. See <code><a href="https://rdrr.io/r/utils/news.html">news(package = "BreakpointsData")</a></code> for inspecting changes in more details.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>Load Orthogroups for <em>Oikopleura</em> from the <code>BreakpointsData</code> package with the <code><a href="../reference/load_one_to_ones.html">OikScrambling::load_one_to_ones()</a></code> function. Original file is in <code>/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv</code>. See <code><a href="https://rdrr.io/r/utils/news.html">news(package = "BreakpointsData")</a></code> for inspecting changes in more details.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Example for loading all orthogroups:</span>
-<span class="fu">load_one_to_ones</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/load_one_to_ones.html">load_one_to_ones</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## DataFrame with 5162 rows and 9 columns
 ##                 HOG          OG Gene Tree Parent Clade
 ##         &lt;character&gt; &lt;character&gt;            &lt;character&gt;
@@ -204,9 +202,9 @@
 ## 5160         OSKA2016v1.9.g12790.t1      OdB3.GSOIDT00006489001
 ## 5161         OSKA2016v1.9.g12773.t1      OdB3.GSOIDT00006508001
 ## 5162         OSKA2016v1.9.g12766.t1      OdB3.GSOIDT00006515001</code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Example for loading a pair</span>
-<span class="fu">load_one_to_ones</span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>
+<span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/load_one_to_ones.html">load_one_to_ones</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>
                 , <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## DataFrame with 9172 rows and 5 columns
 ##                 HOG          OG Gene Tree Parent Clade
@@ -240,10 +238,10 @@
 <div id="prepare-gbreak-objects" class="section level1">
 <h1 class="hasAnchor">
 <a href="#prepare-gbreak-objects" class="anchor"></a>Prepare GBreak objects</h1>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">orthoPairToGBreaks</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name1</span>, <span class="va">name2</span>, <span class="va">annot1</span>, <span class="va">annot2</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">orthoPairs</span> <span class="op">&lt;-</span> <span class="fu">load_one_to_ones</span><span class="op">(</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">orthoPairToGBreaks</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name1</span>, <span class="va">name2</span>, <span class="va">annot1</span>, <span class="va">annot2</span>, <span class="va">treeName</span><span class="op">=</span><span class="st">"N19"</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">orthoPairs</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/load_one_to_ones.html">load_one_to_ones</a></span><span class="op">(</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/"</span>,<span class="va">treeName</span>,<span class="st">".tsv"</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,
     <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">name1</span>, <span class="va">name2</span><span class="op">)</span><span class="op">)</span>
 
   <span class="va">IDs2GRanges</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">IDs</span>, <span class="va">annot</span><span class="op">)</span> <span class="op">{</span>
@@ -264,50 +262,53 @@
   <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
 <span class="op">}</span>
 
-<span class="va">orthoPairs</span> <span class="op">&lt;-</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Osa</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Bar</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Kum</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"KUM-M3-7f.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Kum</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Aom</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"AOM-5-5f.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Aom</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Nor</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"OdB3.v1.0.prot.fa_1.nohaplo"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Nor</span><span class="op">)</span>
+<span class="va">orthoPairToGBreaks_all_Oiks</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">treeName</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">orthoPairs</span> <span class="op">&lt;-</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Osa</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>,   <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Bar</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>,   <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Kum</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"KUM-M3-7f.prot.longest.fa_1"</span>,      <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Kum</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Aom</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"AOM-5-5f.prot.longest.fa_1"</span>,       <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Aom</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Nor</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="st">"OdB3.v1.0.prot.fa_1.nohaplo"</span>,      <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Nor</span>, <span class="va">treeName</span><span class="op">)</span>
+  
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Bar</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>,   <span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>,   <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Oki</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>,   <span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Kum</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>,   <span class="st">"KUM-M3-7f.prot.longest.fa_1"</span>,      <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Kum</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Aom</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>,   <span class="st">"AOM-5-5f.prot.longest.fa_1"</span>,       <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Aom</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Nor</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>,   <span class="st">"OdB3.v1.0.prot.fa_1.nohaplo"</span>,      <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Nor</span>, <span class="va">treeName</span><span class="op">)</span>
+  
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Osa</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>,   <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>,   <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Oki</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>,   <span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Kum</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>,   <span class="st">"KUM-M3-7f.prot.longest.fa_1"</span>,      <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Kum</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Aom</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>,   <span class="st">"AOM-5-5f.prot.longest.fa_1"</span>,       <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Aom</span>, <span class="va">treeName</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Nor</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>,   <span class="st">"OdB3.v1.0.prot.fa_1.nohaplo"</span>,      <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Nor</span>, <span class="va">treeName</span><span class="op">)</span>
+  
+  <span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
+  <span class="va">orthoPairs</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
+  
+  <span class="va">orthoPairs</span>
+<span class="op">}</span>
 
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Bar</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>, <span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Oki</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>, <span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Kum</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>, <span class="st">"KUM-M3-7f.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Kum</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Aom</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>, <span class="st">"AOM-5-5f.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Aom</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Osa_Nor</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>, <span class="st">"OdB3.v1.0.prot.fa_1.nohaplo"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Nor</span><span class="op">)</span>
+<span class="va">orthoPairs</span>         <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks_all_Oiks</span><span class="op">(</span><span class="st">"N19"</span><span class="op">)</span>
+<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"C_int_P.prot.longest.fa_1"</span>, <span class="st">"C_int_R.prot.longest.fa_1"</span>
+                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Ply</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Ros</span>, treeName<span class="op">=</span><span class="st">"N20"</span><span class="op">)</span>
 
-
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Osa</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Oki</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"OKI2018_I69.v2.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Kum</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"KUM-M3-7f.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Kum</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Aom</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"AOM-5-5f.prot.longest.fa_1"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Aom</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">$</span><span class="va">Bar_Nor</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"OdB3.v1.0.prot.fa_1.nohaplo"</span>
-                                        , <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Nor</span><span class="op">)</span>
+<span class="co"># Same as above but using the same core orthogroups for all species.</span>
+<span class="va">orthoPairs_core</span>         <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks_all_Oiks</span><span class="op">(</span><span class="st">"N3"</span><span class="op">)</span>
+<span class="va">orthoPairs_core</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu">orthoPairToGBreaks</span><span class="op">(</span><span class="st">"C_int_P.prot.longest.fa_1"</span>, <span class="st">"C_int_R.prot.longest.fa_1"</span>
+                                             , <span class="va">transcripts</span><span class="op">$</span><span class="va">Ply</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Ros</span>, treeName<span class="op">=</span><span class="st">"N3"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Bar Osa_Oki Osa_Kum Osa_Aom Osa_Nor 
 ##    9538    9273   11525    9604    8771    9172    9538    9465   10379    8415 
-## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor 
-##    9172    9273    9223    9250    8508</code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
-<span class="va">orthoPairs</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span></code></pre></div>
+## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor Ply_Ros 
+##    9172    9273    9223    9250    8508    5438</code></pre>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs_core</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
+<pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Bar Osa_Oki Osa_Kum Osa_Aom Osa_Nor 
+##    6794    6697    8315    6902    6118    6707    6794    6697    7644    5981 
+## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor Ply_Ros 
+##    6707    6697    6643    6804    6151    2582</code></pre>
 <div id="problem-some-annotations-overlap" class="section level2">
 <h2 class="hasAnchor">
 <a href="#problem-some-annotations-overlap" class="anchor"></a>Problem: some annotations overlap</h2>
@@ -441,19 +442,32 @@
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="op">!</span><span class="fu">flagOverlaps</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">]</span>
   <span class="va">gb</span>
 <span class="op">}</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
+
+<span class="va">orthoPairsFiltered_core</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs_core</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="op">!</span><span class="fu">flagOverlaps</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">]</span>
+  <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="op">!</span><span class="fu">flagOverlaps</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">]</span>
+  <span class="va">gb</span>
+<span class="op">}</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
+
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span>, <span class="va">length</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Bar Osa_Oki Osa_Kum Osa_Aom Osa_Nor 
 ##     132     131     202     166     119      98     132     114     121     103 
-## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor 
-##      98     132     119     108     125</code></pre>
+## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor Ply_Ros 
+##      98     132     119     108     125      26</code></pre>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairs_core</span>, <span class="va">length</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
+<pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Bar Osa_Oki Osa_Kum Osa_Aom Osa_Nor 
+##      74      85     125      93      58      72      74      67      75      48 
+## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor Ply_Ros 
+##      72      85      85      72      64      10</code></pre>
 </div>
 <div id="coalesce-syntenic-blocks-and-annotate-them" class="section level2">
 <h2 class="hasAnchor">
 <a href="#coalesce-syntenic-blocks-and-annotate-them" class="anchor"></a>Coalesce syntenic blocks and annotate them</h2>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coalOrtho</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Coalesce</span>
-  <span class="va">coal</span> <span class="op">&lt;-</span> <span class="fu">coalesce_contigs</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
+  <span class="va">coal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html">coalesce_contigs</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   
   <span class="co"># Map annotations to the coalesced blocks</span>
   <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu">findOverlaps</span><span class="op">(</span><span class="va">coal</span>, <span class="va">gb</span><span class="op">)</span>
@@ -478,16 +492,29 @@
   <span class="va">coal</span>
 <span class="op">}</span>
 
-<span class="va">orthoBlocks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span>, <span class="va">coalOrtho</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
+<span class="va">orthoBlocks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">coalOrtho</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
+<span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html">coalesce_contigs</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span>
+<span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
+<span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
+<span class="va">orthoBlocks</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
+
+<span class="va">orthoBlocks_core</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">coalOrtho</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
+<span class="va">orthoBlocks_core</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html">coalesce_contigs</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span>
+<span class="va">orthoBlocks_core</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
+<span class="va">orthoBlocks_core</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
+<span class="va">orthoBlocks_core</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
+
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Bar Osa_Oki Osa_Kum Osa_Aom Osa_Nor 
 ##    6587    6461    2724    6710    6062    6298    6587    6490    6217    5357 
-## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor 
-##    6298    6459    6537    4832    3831</code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
-<span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
-<span class="va">orthoBlocks</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span></code></pre></div>
+## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor Ply_Ros 
+##    6298    6459    6537    4832    3831    2695</code></pre>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
+<pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Bar Osa_Oki Osa_Kum Osa_Aom Osa_Nor 
+##    4721    4704    1969    4887    4248    4633    4721    4611    4619    3844 
+## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor Ply_Ros 
+##    4633    4702    4737    3566    2788     819</code></pre>
 </div>
 </div>
 <div id="quick-overview-of-the-results" class="section level1">
@@ -496,7 +523,7 @@
 <div id="size-distribution-of-the-blocks" class="section level2">
 <h2 class="hasAnchor">
 <a href="#size-distribution-of-the-blocks" class="anchor"></a>Size distribution of the blocks</h2>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/stem.html">stem</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ##   The decimal point is at the |
@@ -521,14 +548,14 @@
 ##   34 | 
 ##   36 | 
 ##   38 | 0</code></pre>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ##    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 
 ## 5873  270  113   96   54   38   18   24   12   14   11    6   13    9    7    3 
 ##   17   18   19   20   21   23   24   26   27   28   31   38 
 ##    5    5    3    2    1    1    3    1    2    1    1    1</code></pre>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 11 ranges and 8 metadata columns:
 ##        seqnames            ranges strand |                query     score
@@ -585,7 +612,7 @@
 ##   [11]     long
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/stem.html">stem</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ##   The decimal point is 1 digit(s) to the right of the |
@@ -614,7 +641,7 @@
 ##   42 | 38
 ##   44 | 9
 ##   46 | 5</code></pre>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span></code></pre></div>
 <pre><code>## 
 ##    1    2    3    4    5    6    7    9   10   11   12   13   14   15   17   18 
@@ -627,7 +654,7 @@
 ##    1    1    1    1    1    1    1    1    2    1    1    1    1    1    2    1 
 ##  143  149  161  170  180  197  199  200  269  308  356  367  423  438  459  475 
 ##    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1</code></pre>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 11 ranges and 8 metadata columns:
 ##        seqnames            ranges strand |                        query
@@ -688,14 +715,14 @@
 <div id="gene-order-conservation-is-smaller-in-short-arms" class="section level2">
 <h2 class="hasAnchor">
 <a href="#gene-order-conservation-is-smaller-in-short-arms" class="anchor"></a>Gene Order Conservation is smaller in short arms</h2>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">orthoBlocks_LSnoNA</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="va">gb</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">Arm</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">orthoBlocks_LSnoNA</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="va">gb</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">Arm</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_LSnoNA</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Bar Osa_Oki Osa_Kum Osa_Aom Osa_Nor 
 ##    6581    6459    2721    6708    6060    6254    6524    6435    6165    5305 
 ## Bar_Osa Bar_Oki Bar_Kum Bar_Aom Bar_Nor 
 ##    6267    6427    6497    4800    3800</code></pre>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_LSnoNA</span>,
              <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">gb</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>, <span class="va">gb</span><span class="op">$</span><span class="va">Arm</span><span class="op">)</span>, <span class="va">GOC</span><span class="op">)</span><span class="op">)</span>
 
@@ -703,23 +730,140 @@
   <span class="va">tst</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/t.test.html">t.test</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span>,<span class="fl">5</span><span class="op">)</span><span class="op">]</span>, <span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">4</span>,<span class="fl">6</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>pval<span class="op">=</span><span class="va">tst</span><span class="op">$</span><span class="va">p.value</span>, mx<span class="op">=</span><span class="va">tst</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, my<span class="op">=</span><span class="va">tst</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>
 <span class="op">}</span><span class="op">)</span> </code></pre></div>
-<pre><code>##                  Oki_Osa   Oki_Bar   Oki_Kum     Oki_Aom    Oki_Nor    Osa_Bar
-## pval         0.006174706 0.1307515 0.5281037 0.007531954 0.01625441 0.05446025
-## mx.mean of x 0.634550190 0.6405225 0.8938027 0.644711828 0.58827497 0.89945292
-## my.mean of y 0.259664774 0.3400770 0.8351882 0.254648919 0.13254765 0.58420414
-##                  Osa_Oki     Osa_Kum    Osa_Aom     Osa_Nor    Bar_Osa
-## pval         0.001845796 0.001317803 0.03132756 0.003227965 0.04620375
-## mx.mean of x 0.629792446 0.624003632 0.97076402 0.816071953 0.89356892
-## my.mean of y 0.237408326 0.229909890 0.91054704 0.509009640 0.58162692
-##                  Bar_Oki    Bar_Kum    Bar_Aom   Bar_Nor
-## pval         0.002509115 0.00887552 0.02880473 0.7430172
-## mx.mean of x 0.628126993 0.64262873 0.88412576 0.8489394
-## my.mean of y 0.235626438 0.24093149 0.57761530 0.8294883</code></pre>
+<pre><code>##                   Oki_Osa    Oki_Bar   Oki_Kum     Oki_Aom      Oki_Nor
+## pval         0.0008180622 0.00510478 0.3495793 0.001466663 0.0002307985
+## mx.mean of x 0.6265961432 0.62777811 0.9443013 0.642716150 0.5826445675
+## my.mean of y 0.2291568873 0.22458716 0.8546687 0.233573215 0.1993314793
+##                 Osa_Bar     Osa_Oki     Osa_Kum    Osa_Aom     Osa_Nor
+## pval         0.05446025 0.001845796 0.001317803 0.03132756 0.003227965
+## mx.mean of x 0.89945292 0.629792446 0.624003632 0.97076402 0.816071953
+## my.mean of y 0.58420414 0.237408326 0.229909890 0.91054704 0.509009640
+##                 Bar_Osa     Bar_Oki    Bar_Kum    Bar_Aom   Bar_Nor
+## pval         0.04620375 0.002509115 0.00887552 0.02880473 0.7430172
+## mx.mean of x 0.89356892 0.628126993 0.64262873 0.88412576 0.8489394
+## my.mean of y 0.58162692 0.235626438 0.24093149 0.57761530 0.8294883</code></pre>
+</div>
+<div id="fraction-of-the-genome-covered-or-syntenic" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fraction-of-the-genome-covered-or-syntenic" class="anchor"></a>Fraction of the genome covered or syntenic</h2>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">uncov</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## </code></pre>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">unsyn</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span>,        <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## </code></pre>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R">  <span class="va">covered_tot</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">syntenic_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span>,          \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">uncovered_tot</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">uncov</span>,                \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">unsyntenic_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">unsyn</span>,                \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
+<span class="op">(</span><span class="va">syn_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>
+  covered_frac   <span class="op">=</span> <span class="va">covered_tot</span>   <span class="op">/</span> <span class="op">(</span> <span class="va">covered_tot</span>   <span class="op">+</span> <span class="va">uncovered_tot</span> <span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+  orthogenes_n   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span>, <span class="va">length</span><span class="op">)</span>,
+  syntenic_frac  <span class="op">=</span> <span class="va">syntenic_tot</span>  <span class="op">/</span> <span class="op">(</span> <span class="va">syntenic_tot</span>  <span class="op">+</span> <span class="va">unsyntenic_tot</span> <span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+  syntenic_reg   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span>, <span class="va">length</span><span class="op">)</span>
+ <span class="op">)</span>|&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>##         covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Oki_Osa     38.33865         9406      49.25160         6587
+## Oki_Bar     38.21979         9142      48.49976         6461
+## Oki_Kum     43.70838        11323      79.98109         2724
+## Oki_Aom     38.60839         9438      48.85534         6710
+## Oki_Nor     34.90562         8652      44.47331         6062
+## Osa_Bar     42.10034         9074      54.29955         6298
+## Osa_Oki     43.87692         9406      54.31486         6587
+## Osa_Kum     42.96814         9351      53.32877         6490
+## Osa_Aom     45.38916        10258      63.81142         6217
+## Osa_Nor     38.20910         8312      52.58827         5357
+## Bar_Osa     40.94778         9074      52.84271         6298
+## Bar_Oki     41.86938         9141      51.32324         6459
+## Bar_Kum     42.24314         9104      51.20871         6537
+## Bar_Aom     41.88404         9142      59.24603         4832
+## Bar_Nor     38.13315         8383      60.50565         3831
+## Ply_Ros     25.53249         5412      50.62040         2695</code></pre>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">syn_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">syn_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Int – Int             25.5       5412.0          50.6       2695.0
+## North – North         40.8       8900.5          54.7       5696.2
+## Oki – North           40.1       9205.0          50.2       6486.6
+## same_pop              42.4       9988.0          68.1       4257.3</code></pre>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">syn_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">syn_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Int – Int             25.5       5412.0          50.6       2695.0
+## North – North         41.4       9074.0          53.6       5827.5
+## Oki – North           40.2       9246.5          50.2       6513.5
+## same_pop              43.7      10258.0          63.8       3831.0</code></pre>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">syn_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">syn_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span>     |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Int – Int               NA           NA            NA           NA
+## North – North          1.8        393.6           3.1        727.1
+## Oki – North            3.1        262.0           3.1        190.6
+## same_pop               3.8       1488.5          10.4       1785.1</code></pre>
+<p>Unfortunately, there are not enough transcripts from Ciona that are part of the pan-tunicate orthogroup set, which makes the comparison difficult between Oikopleura and Ciona…</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">uncov</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## </code></pre>
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">unsyn</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span>,        <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## </code></pre>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<code class="sourceCode R">  <span class="va">covered_tot</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">syntenic_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span>,          \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">uncovered_tot</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">uncov</span>,                     \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">unsyntenic_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">unsyn</span>,                     \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
+<span class="op">(</span><span class="va">syn_summary_core</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>
+  covered_frac   <span class="op">=</span> <span class="va">covered_tot</span>   <span class="op">/</span> <span class="op">(</span> <span class="va">covered_tot</span>   <span class="op">+</span> <span class="va">uncovered_tot</span> <span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+  orthogenes_n   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span>, <span class="va">length</span><span class="op">)</span>,
+  syntenic_frac  <span class="op">=</span> <span class="va">syntenic_tot</span>  <span class="op">/</span> <span class="op">(</span> <span class="va">syntenic_tot</span>  <span class="op">+</span> <span class="va">unsyntenic_tot</span> <span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+  syntenic_reg   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span>, <span class="va">length</span><span class="op">)</span>
+ <span class="op">)</span>|&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>##         covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Oki_Osa     27.48424         6720      38.99181         4721
+## Oki_Bar     28.30197         6612      41.29087         4704
+## Oki_Kum     31.22509         8190      76.71492         1969
+## Oki_Aom     28.75649         6809      40.14053         4887
+## Oki_Nor     24.52914         6060      34.15494         4248
+## Osa_Bar     31.13847         6635      44.53833         4633
+## Osa_Oki     30.76206         6720      41.52869         4721
+## Osa_Kum     30.69252         6630      42.21453         4611
+## Osa_Aom     33.29049         7569      55.90694         4619
+## Osa_Nor     27.50044         5933      43.27374         3844
+## Bar_Osa     30.15263         6635      42.92734         4633
+## Bar_Oki     30.84109         6612      41.76898         4702
+## Bar_Kum     31.17019         6558      40.47310         4737
+## Bar_Aom     31.42929         6732      52.01187         3566
+## Bar_Nor     27.93441         6087      53.80174         2788
+## Ply_Ros     11.39509         2572      43.18689          819</code></pre>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">syn_summary_core</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">syn_summary_core</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Int – Int             11.4       2572.0          43.2        819.0
+## North – North         30.1       6483.8          45.7       4169.0
+## Oki – North           29.1       6590.1          40.1       4666.4
+## same_pop              30.8       7282.0          62.1       3125.3</code></pre>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">syn_summary_core</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">syn_summary_core</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Int – Int             11.4         2572          43.2        819.0
+## North – North         30.6         6635          43.9       4238.5
+## Oki – North           29.7         6621          40.9       4712.5
+## same_pop              31.2         7569          55.9       2788.0</code></pre>
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">syn_summary_core</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">syn_summary_core</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span>     |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               covered_frac orthogenes_n syntenic_frac syntenic_reg
+## Int – Int               NA           NA            NA           NA
+## North – North          1.8        370.0           4.3        547.7
+## Oki – North            2.3        228.7           2.6        185.3
+## same_pop               2.7       1080.5          12.7       1356.8</code></pre>
 </div>
 <div id="agreement-with-nucleotide-alignments" class="section level2">
 <h2 class="hasAnchor">
 <a href="#agreement-with-nucleotide-alignments" class="anchor"></a>Agreement with nucleotide alignments</h2>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">gb_P</span> <span class="op">&lt;-</span> <span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 6298 ranges and 8 metadata columns:
 ##          seqnames          ranges strand |                query     score
@@ -763,10 +907,10 @@
 ##   [6298]          1      YSR
 ##   -------
 ##   seqinfo: 68 sequences from Bar2_p4 genome</code></pre>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">gb_P</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 28632444</code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">gb_N</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 4073 ranges and 6 metadata columns:
 ##          seqnames          ranges strand |                query     score
@@ -797,10 +941,10 @@
 ##   [4073]      YSR             rnd        &lt;NA&gt;        &lt;NA&gt;
 ##   -------
 ##   seqinfo: 68 sequences from Bar2_p4 genome</code></pre>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">gb_N</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 45289525</code></pre>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 5879 ranges and 8 metadata columns:
 ##          seqnames          ranges strand |                query     score
@@ -844,10 +988,10 @@
 ##   [5879]          1      YSR
 ##   -------
 ##   seqinfo: 68 sequences from Bar2_p4 genome</code></pre>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">jaccard</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">ov</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="fu">reduce</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 0.2569798</code></pre>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gb_P</span> <span class="op">&lt;-</span> <span class="va">gb_P</span><span class="op">[</span><span class="va">gb_P</span><span class="op">$</span><span class="va">geneNumber</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">]</span>
 <span class="va">gb_P</span></code></pre></div>
 <pre><code>## GBreaks object with 407 ranges and 8 metadata columns:
@@ -905,10 +1049,10 @@
 ##   [407]      YSR
 ##   -------
 ##   seqinfo: 68 sequences from Bar2_p4 genome</code></pre>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">gb_P</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 3183</code></pre>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">valid</span> <span class="op">&lt;-</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 229 ranges and 8 metadata columns:
 ##         seqnames            ranges strand |                 query     score
@@ -965,10 +1109,10 @@
 ##   [229]      XSR
 ##   -------
 ##   seqinfo: 68 sequences from Bar2_p4 genome</code></pre>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">valid</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 1399</code></pre>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">valid</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 5441676</code></pre>
 <p>Question: what does interrupt the colinearity of nucleotide regions in gene-centric colinear regions ?</p>
@@ -977,9 +1121,9 @@
 <div id="session-information" class="section level1">
 <h1 class="hasAnchor">
 <a href="#session-information" class="anchor"></a>Session information</h1>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## R version 4.1.1 (2021-08-10)
+<pre><code>## R version 4.1.2 (2021-11-01)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
 ## Running under: Debian GNU/Linux bookworm/sid
 ## 
@@ -988,11 +1132,16 @@
 ## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
 ## 
 ## locale:
-## [1] C
+##  [1] LC_CTYPE=en_GB.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_GB.UTF-8        LC_COLLATE=en_GB.UTF-8    
+##  [5] LC_MONETARY=en_GB.UTF-8    LC_MESSAGES=en_GB.UTF-8   
+##  [7] LC_PAPER=en_GB.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_GB.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## attached base packages:
-## [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
-## [8] methods   base     
+## [1] stats4    stats     graphics  grDevices utils     datasets  methods  
+## [8] base     
 ## 
 ## other attached packages:
 ##  [1] BSgenome.Odioica.local.Odioica.reference.v3.0_1.0.1
@@ -1001,26 +1150,26 @@
 ##  [4] BSgenome.Odioica.local.Bar2.p4_1.0.0               
 ##  [5] BSgenome.Odioica.local.OSKA2016v1.9_1.0.0          
 ##  [6] BSgenome.Odioica.local.OKI2018.I69_1.0.0           
-##  [7] OikScrambling_0.4.0                                
+##  [7] OikScrambling_0.5.0                                
 ##  [8] ggplot2_3.3.5                                      
-##  [9] GenomicBreaks_0.10.0                               
-## [10] BSgenome_1.60.0                                    
-## [11] rtracklayer_1.52.1                                 
-## [12] Biostrings_2.60.2                                  
-## [13] XVector_0.32.0                                     
-## [14] GenomicRanges_1.44.0                               
-## [15] GenomeInfoDb_1.28.4                                
-## [16] IRanges_2.26.0                                     
-## [17] S4Vectors_0.30.2                                   
-## [18] BiocGenerics_0.38.0                                
+##  [9] GenomicBreaks_0.11.0                               
+## [10] BSgenome_1.62.0                                    
+## [11] rtracklayer_1.54.0                                 
+## [12] Biostrings_2.62.0                                  
+## [13] XVector_0.34.0                                     
+## [14] GenomicRanges_1.46.1                               
+## [15] GenomeInfoDb_1.30.0                                
+## [16] IRanges_2.28.0                                     
+## [17] S4Vectors_0.32.2                                   
+## [18] BiocGenerics_0.40.0                                
 ## 
 ## loaded via a namespace (and not attached):
 ##   [1] backports_1.3.0             Hmisc_4.6-0                
-##   [3] BiocFileCache_2.0.0         systemfonts_1.0.3          
-##   [5] plyr_1.8.6                  splines_4.1.1              
-##   [7] BiocParallel_1.26.2         digest_0.6.28              
+##   [3] BiocFileCache_2.2.0         systemfonts_1.0.3          
+##   [5] plyr_1.8.6                  splines_4.1.2              
+##   [7] BiocParallel_1.28.1         digest_0.6.28              
 ##   [9] htmltools_0.5.2             tiff_0.1-10                
-##  [11] GO.db_3.13.0                gdata_2.18.0               
+##  [11] GO.db_3.14.0                gdata_2.18.0               
 ##  [13] fansi_0.5.0                 magrittr_2.0.1             
 ##  [15] checkmate_2.0.0             memoise_2.0.0              
 ##  [17] cluster_2.1.2               tzdb_0.2.0                 
@@ -1033,8 +1182,8 @@
 ##  [31] dplyr_1.0.7                 crayon_1.4.2               
 ##  [33] RCurl_1.98-1.5              lme4_1.1-27.1              
 ##  [35] survival_3.2-13             glue_1.5.0                 
-##  [37] gtable_0.3.0                zlibbioc_1.38.0            
-##  [39] DelayedArray_0.18.0         weights_1.0.4              
+##  [37] gtable_0.3.0                zlibbioc_1.40.0            
+##  [39] DelayedArray_0.20.0         weights_1.0.4              
 ##  [41] abind_1.4-5                 scales_1.1.1               
 ##  [43] DBI_1.1.1                   Rcpp_1.0.7                 
 ##  [45] plotrix_3.8-2               progress_1.2.2             
@@ -1048,8 +1197,8 @@
 ##  [61] dbplyr_2.1.1                nnet_7.3-16                
 ##  [63] locfit_1.5-9.4              utf8_1.2.2                 
 ##  [65] tidyselect_1.1.1            rlang_0.4.12               
-##  [67] reshape2_1.4.4              AnnotationDbi_1.56.1       
-##  [69] munsell_0.5.0               tools_4.1.1                
+##  [67] reshape2_1.4.4              AnnotationDbi_1.56.2       
+##  [69] munsell_0.5.0               tools_4.1.2                
 ##  [71] cachem_1.0.6                generics_0.1.1             
 ##  [73] RSQLite_2.2.8               ade4_1.7-18                
 ##  [75] broom_0.7.10                evaluate_0.14              
@@ -1057,33 +1206,34 @@
 ##  [79] fftwtools_0.9-11            yaml_2.2.1                 
 ##  [81] ragg_1.1.3                  knitr_1.36                 
 ##  [83] bit64_4.0.5                 fs_1.5.0                   
-##  [85] purrr_0.3.4                 heatmaps_1.16.0            
+##  [85] purrr_0.3.4                 heatmaps_1.18.0            
 ##  [87] KEGGREST_1.34.0             nlme_3.1-153               
 ##  [89] R.oo_1.24.0                 poweRlaw_0.70.6            
 ##  [91] xml2_1.3.2                  pracma_2.3.3               
-##  [93] biomaRt_2.48.3              compiler_4.1.1             
+##  [93] biomaRt_2.50.0              compiler_4.1.2             
 ##  [95] rstudioapi_0.13             filelock_1.0.2             
 ##  [97] curl_4.3.2                  png_0.1-7                  
 ##  [99] tibble_3.1.6                stringi_1.7.5              
-## [101] GenomicFeatures_1.44.2      desc_1.4.0                 
-## [103] lattice_0.20-45             CNEr_1.28.0                
+## [101] GenomicFeatures_1.46.1      desc_1.4.0                 
+## [103] lattice_0.20-45             CNEr_1.30.0                
 ## [105] Matrix_1.3-4                nloptr_1.2.2.3             
 ## [107] vctrs_0.3.8                 pillar_1.6.4               
 ## [109] lifecycle_1.0.1             data.table_1.14.2          
 ## [111] bitops_1.0-7                R6_2.5.1                   
-## [113] BiocIO_1.2.0                latticeExtra_0.6-29        
+## [113] BiocIO_1.4.0                latticeExtra_0.6-29        
 ## [115] KernSmooth_2.23-20          gridExtra_2.3              
 ## [117] boot_1.3-28                 MASS_7.3-54                
 ## [119] gtools_3.9.2                assertthat_0.2.1           
-## [121] SummarizedExperiment_1.22.0 rprojroot_2.0.2            
+## [121] SummarizedExperiment_1.24.0 rprojroot_2.0.2            
 ## [123] rjson_0.2.20                withr_2.4.2                
-## [125] GenomicAlignments_1.28.0    Rsamtools_2.8.0            
-## [127] GenomeInfoDbData_1.2.6      hms_1.1.1                  
-## [129] EBImage_4.34.0              grid_4.1.1                 
-## [131] rpart_4.1-15                tidyr_1.1.4                
-## [133] minqa_1.2.4                 rmarkdown_2.11             
-## [135] MatrixGenerics_1.4.3        Biobase_2.52.0             
-## [137] base64enc_0.1-3             restfulr_0.0.13</code></pre>
+## [125] GenomicAlignments_1.30.0    Rsamtools_2.10.0           
+## [127] GenomeInfoDbData_1.2.7      parallel_4.1.2             
+## [129] hms_1.1.1                   EBImage_4.36.0             
+## [131] grid_4.1.2                  rpart_4.1-15               
+## [133] tidyr_1.1.4                 minqa_1.2.4                
+## [135] rmarkdown_2.11              MatrixGenerics_1.6.0       
+## [137] Biobase_2.54.0              base64enc_0.1-3            
+## [139] restfulr_0.0.13</code></pre>
 </div>
   </div>
 
