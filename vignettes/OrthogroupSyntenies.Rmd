@@ -55,7 +55,14 @@ species_name_map = data.frame(old_names=c("AOM-5-5f.prot.longest.fa_1", "Bar2_p4
 # This includes species-specific expansions (i.e., a HOG that contains one species)
 # or specific-specific deletions (i.e., a HOG in all species but one).
 # The clade list makes it possible to identify more fine-grained groupings.
-orthoflags = do.call(rbind, OikScrambling:::flagOrthogroupHomologies(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map))
+orthoflags = do.call(rbind, flagOrthogroupHomologies(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map))
+#orthoflags = do.call(rbind, OikScrambling:::flagOrthogroupHomologies(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map))
+# Note that the function produces warnings when more than one clade is satisfied
+# by the counts. You can observe these with warnings().
+# warnings()
+```
+
+```{r cleaning_orthoflags}
 rownames(orthoflags) <- NULL
 (head(orthoflags))
 ```
