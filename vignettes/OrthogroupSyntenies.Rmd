@@ -19,6 +19,7 @@ different objects are prepared.
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
 library("ggpubr")
+library("SummarizedExperiment")
 (genomes <- OikScrambling:::loadAllGenomes())
 (transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
 (load("BreakPoints.Rdata"))
@@ -28,9 +29,59 @@ Orthogroups
 -----------
 
 Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
-`GenomicBreaks::load_one_to_ones()` function.  Original file is in
+`GenomicBreaks::load_one_to_ones_SE()` function.  Original file is in
 `/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`.
 See `news(package = "BreakpointsData")` for inspecting changes in more details.
+
+```{r load_one_to_ones}
+# Create a data frame that maps the original species names in the OrthoFinder 
+# output to a set of new names that are easier to read.
+species_name_map = data.frame(
+  old_names=c("AOM-5-5f.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"),
+  new_names=c("Aom", "Bar", "Kum", "Oki", "Osa", "Nor")
+)
+
+load_one_to_ones_SE <- function(file, species_name_map) {
+  # Read table
+  pho <- read.delim(file, check.names = FALSE)
+  
+  # Remove all-NA columns
+  pho <- pho[,sapply(pho, \(col) ! all(is.na(col)))]
+  
+  # Use the species name map to rename columns here.
+  old_names <- colnames(pho)[4:ncol(pho)]
+  new_names <- species_name_map[match(old_names, species_name_map$old_names),]$new_names
+  colnames(pho)[4:ncol(pho)] <- new_names
+  
+  # Convert to SummarizedExperiment
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(txs = pho[,-(1:3)]),
+    rowData = DataFrame(pho[1:3])
+  )
+
+  assay(se, "txLists", withDimnames=FALSE) <- sapply(assay(se, 'txs'),     strsplit, split = ", ")
+  assay(se, "txCount", withDimnames=FALSE) <- sapply(DataFrame(assay(se, 'txLists')), \(x) sapply(x, length))  # Not sure why it only works when putting a DataFrame at the middle
+  assay(se, "txLists")[(assay(se, "txCount")) == 0] <- NA_character_
+  
+  rowData(se)$one2ones    <- rowSums(as.matrix(assay(se, "txCount")) == 1) == ncol(se)
+  rowData(se)$anyMissing  <- rowSums(as.matrix(assay(se, "txCount")) == 0) > 0
+  rowData(se)$anyDup      <- rowSums(as.matrix(assay(se, "txCount"))  > 1) > 0
+  
+  rowData(se)$txNames     <- apply(assay(se, "txLists"), 1, \(row) {
+    row               |>  # Take a row from a matrix, a data.frame or a DataFrame
+      as.list()       |>  # It is already list of character vectors, except for DataFrame subsets, which have to be coerced
+      unlist()        |>  # Flatten it.  That is: `list(c("A", "B"), "C")` becomes `c("A", "B", "C")`
+      unname()            # Remove element names
+  })
+  rowData(se)$txNames     <- sapply(rowData(se)$txNames, \(x) x[!is.na(x)])
+  rowData(se)$txNames     <- CharacterList(rowData(se)$txNames)     # Convert to `CharacterList` for more comfortable display
+  # rowData(se)$txNamesString <- unstrsplit(rowData(se)$txNames, ",") # If you would want it as a string...
+  se
+}
+
+se <-  load_one_to_ones_SE(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), species_name_map=species_name_map)
+
+```
 
 Flagging orthogroups by inferred homology class
 -----------------------------------------------
@@ -38,44 +89,75 @@ While single-copy orthologues are arguably the most important component of the g
 
 In the following section, I flag different types of homology by inferring them from OrthoFinder hierarchical orthogroup (HOG) counts.
 
-Flag orthogroups:
+To flag orthogroups, we need a count matrix. Extract this from the `SummarizedExperiment` object `se` with `assay()`.
 
-```{r flagging_orthogroup_1}
+```{r orthoflagging}
+se_m <- assay(se, 'txCount')
+rownames(se_m) <- rowData(se)$HOG
+
 # Create a list of clades. Each clade contains a vector of species names (the "new_names" of the next
 # data frame. The clades can overlap.
-clades=list("Oki_Kum"=c("Kum", "Oki"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar","Nor"), "Northern"=c("Bar","Nor","Osa","Aom"))
+clades=list("Oki_Kum"=c("Kum","Oki"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar","Nor"), "Northern"=c("Osa","Aom","Bar","Nor"))
 
-# Create a data frame that maps the original species names in the OrthoFinder 
-# output to a set of new names that are easier to read.
-species_name_map = data.frame(old_names=c("AOM-5-5f.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"),
-                              new_names=c("Aom", "Bar", "Kum", "Oki", "Osa", "Nor")
-                              )
-
-# Use the flagOrthogroupHomologies function to identify different kinds of homologies.
-# This includes species-specific expansions (i.e., a HOG that contains one species)
-# or specific-specific deletions (i.e., a HOG in all species but one).
-# The clade list makes it possible to identify more fine-grained groupings.
-orthoflags = do.call(rbind, flagOrthogroupHomologies(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map))
-#orthoflags = do.call(rbind, OikScrambling:::flagOrthogroupHomologies(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"), clades=clades, species_name_map=species_name_map))
-# Note that the function produces warnings when more than one clade is satisfied
-# by the counts. You can observe these with warnings().
+# clade_list: a named list where each list contains a vector of species.
+# expansion_reconciliation: How to reconcile situations where more than 1 clade shows an expansion. 
+#                           There are only two options: "largest_clade" and "mean_count".
+#                           "largest_clade" flags it to the clade with the most species
+#                           "mean_count" flags it to the clade with the highest mean count
+# deletion_reconciliation:  As above. "largest_clade" makes the most sense most of the time.
+#                           For now, no other options are supported.
+orthoflags <- flagAllPHO(tmp, clade_list=clades, expansion_reconciliation = "largest_clade", deletion_reconciliation="largest_clade")
+# The function warns whenever there is an inconsistency with the flag. You can inspect these:
 # warnings()
+# If you want to see too many warnings, you can also use deletion_warnings=T in the flagAllPHO function.
 ```
 
-```{r cleaning_orthoflags}
-rownames(orthoflags) <- NULL
-(head(orthoflags))
+You can then summarize the flags as follows:
+
+```{r summarizing_orthoflags}
+apply(orthoflags[,7:20], 2, function(x) table(unlist(x)))
 ```
 
-The `orthoflags` object yields a data frame with one row per orthogroup, the other columns of the HOG table, as well as a set of orthogroup annotations based on the counts of every species and clade. 
+The `orthoflags` object yields a matrix with one row per orthogroup, the count columns of the HOG table, and most importantly, a set of orthogroup annotations based on the counts of every species and clade. 
+
+These annotations are not mutually exclusive. Consider the following:
+```{r summarizing_orthoflags_2}
+orthoflags[15,]
+```
+
+You can have a species-specific expansion (i.e., Okinawa) at the same time as a clade-specific expansion (i.e., Oki/Kum). 
+
+Here there is also a non-clade-specific deletion. The Osaka-Aomori clade is wholly deleted, while Bar-Nor is not.
 
 ```{r flagging_orthogroups_2}
 # Take a look at the distribution of different species flags. 
 ggplot(orthoflags) +
-    aes(x=reorder(flag, flag, function(x) length(x))) + geom_bar(stat="count", position="dodge") +
-    facet_wrap(~ present_in_all_species, scales = 'free' ) +
-    xlab(NULL) +
-    coord_flip()
+  aes(x=reorder(unlist(expansion_reconciled), unlist(expansion_reconciled), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
+  facet_wrap(~ present_in_all_spp, scales = 'free' ) +
+  xlab(NULL) +
+  coord_flip() +
+  ggtitle("Orthogroups by clade-specific HOG expansions (TRUE=present in all spp.)")
+
+ggplot(orthoflags) +
+  aes(x=reorder(unlist(deletion_reconciled), unlist(deletion_reconciled), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
+  xlab(NULL) +
+  coord_flip() +
+  ggtitle("Orthogroups by clade-specific HOG deletions")
+
+
+ggplot(orthoflags) +
+  aes(x=reorder(unlist(expansion_species_specific), unlist(expansion_species_specific), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
+  facet_wrap(~ present_in_all_spp, scales = 'free' ) +
+  xlab(NULL) +
+  coord_flip() +
+  ggtitle("Orthogroups by species-specific HOG expansions (TRUE=present in all spp.)")
+
+
+ggplot(orthoflags) +
+  aes(x=reorder(unlist(deletion_species_specific), unlist(deletion_species_specific), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
+  xlab(NULL) +
+  coord_flip() +
+  ggtitle("Orthogroups by species-specific HOG deletions")
 ```
 
 In order to get these orthogroup annotations into the `GBreaks` object later, we add them as metadata columns to the `transcripts` object from above. 
