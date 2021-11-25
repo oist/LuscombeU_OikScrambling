@@ -41,15 +41,6 @@ Oki_pairs <- c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor")
 Osa_pairs <- c("Osa_Oki", "Osa_Bar", "Osa_Kum", "Osa_Aom", "Osa_Nor")
 Bar_pairs <- c("Bar_Oki", "Bar_Osa", "Bar_Kum", "Bar_Aom", "Bar_Nor")
 
-compDistance <- function(x) {
-  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor")]                       <- "same_pop"
-  x[x %in% c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor",
-             "Osa_Oki", "Osa_Kum", "Bar_Oki", "Bar_Kum")]            <- "Oki – North"
-  x[x %in% c("Osa_Bar", "Osa_Aom", "Osa_Nor",
-             "Bar_Osa", "Bar_Aom", "Bar_Nor")]                       <- "North – North"
-  x
-}
-
 mkRepsIn <- function(pairs, reps) {
   tableIntersectWithReps <- function(gb) {
     ov <- subsetByOverlaps(reps, gb, ignore.strand = TRUE)
@@ -147,7 +138,7 @@ ggplot(rbind(
   reps_in_Oki.norm.long,
   reps_in_Osa.norm.long,
   reps_in_Bar.norm.long
-  ) |> dplyr::mutate(Distance = compDistance(name))) + aes(Region, value) +
+  ) |> dplyr::mutate(Distance = OikScrambling:::compDistance(name))) + aes(Region, value) +
   geom_boxplot() + geom_point(aes(col = Distance)) +
   facet_grid(~Class, scales = "free") + coord_flip() +
   ylab("Fraction overlaping") +
@@ -367,13 +358,17 @@ different GBreaks objects are annotated.
 countGbsMatchingReps <- function(gb)  sum(sapply(gb$rep, \(x) ! any(is.na(x))))
  fracGbsMatchingReps <- function(gbl) sapply(gbl, countGbsMatchingReps) / sapply(gbl, length)
 
-summaryMatchingReps <- (sapply(list(aligned    = gbs,     unAligned = unal,
-             mapped     = coa,     unMapped  = unmap,
-             unAlMapped = unalMap,
-             transposed = tra,     transposed2 = tra2,
-             mapped2    = coa2,    unMapped2 = unmap2),
+summaryMatchingReps <- (sapply(list(aligned    = gbs[1:15],     unAligned = unal[1:15],
+             mapped     = coa[1:15],     unMapped  = unmap[1:15],
+             unAlMapped = unalMap[1:15],
+             transposed = tra[1:15],     transposed2 = tra2[1:15],
+             mapped2    = coa2[1:15],    unMapped2 = unmap2[1:15]),
         fracGbsMatchingReps))
-sapply(summaryMatchingReps |> as.data.frame(), median)
+
+summaryMatchingReps |> tibble::as_tibble() |>
+  dplyr::group_by(dist=rownames(summaryMatchingReps) |> OikScrambling:::compDistance()) |>
+  dplyr::summarise_all(mean)
+
 ```
 
 # Reduced repeat set

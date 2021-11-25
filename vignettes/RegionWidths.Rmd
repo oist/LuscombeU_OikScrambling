@@ -25,6 +25,7 @@ TBW
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
+library('ggplot2')
 (genomes <- OikScrambling:::loadAllGenomes())
 (load("BreakPoints.Rdata"))
 ```
@@ -39,10 +40,17 @@ widths <- SimpleList()
 makeWidthsDF <- function (objList) {
   lapply(names(objList), \(name) {
     DF <- mcols(objList[[name]])
+    if (nrow(DF) == 0) return(DataFrame())
+    if (is.null(DF$Arm)) DF$Arm <- NA
     DF$name  <- name
     DF$width <- width(objList[[name]])
-    DF$chr   <- seqnames(objList[[name]]) |>  sub(pat = "Chr", rep = "chr")
-    DF$query <- DF$score <- DF$rep <- NULL
+    DF$chr   <- seqnames(objList[[name]]) |>
+      sub(pat = "Chr",    rep = "chr")    |>
+      sub(pat = "BNJZ.*", rep = "Ply")    |>
+      sub(pat = "BNKA.*", rep = "Ros")    |>
+      sub(pat = "BJTB.*", rep = "Rob")    |>
+      sub(pat = "^R.*", rep = "Sav")
+    DF$query <- DF$score <- DF$rep <- DF$transcripts <- NULL
     DF$dist  <- OikScrambling:::compDistance(DF$name)
     DF
   }) |> do.call(what=rbind)
@@ -50,6 +58,7 @@ makeWidthsDF <- function (objList) {
 
 unal  <- sapply(unal,  \(gb) {gb$flag <- NA; gb}) |> SimpleList()
 unmap <- sapply(unmap, \(gb) {gb$flag <- NA; gb}) |> SimpleList()
+unalMap<-sapply(unalMap,\(gb){gb$flag <- NA; gb}) |> SimpleList()
 
 widths$gbs     <- makeWidthsDF(gbs)     |> tibble::as_tibble()
 widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
@@ -260,6 +269,7 @@ gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
 ```{r paired_width_analysis}
 GBreaks2widthTibble <- function(gb, pair = NULL) {
   df <- as.data.frame(gb)
+  if(is.null(df$Arm))       df$Arm        <- NA
   if(is.null(df$rep))       df$rep        <- NA
   if(is.null(df$query.rep)) df$query.rep  <- NA
   tibble::tibble(target     = df$width,        query     = df$query.width,

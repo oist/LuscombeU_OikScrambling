@@ -224,10 +224,10 @@ transcripts |> SimpleList()
 
 ```{r load_orthogroups}
 # Example for loading all orthogroups:
-load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
+OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
 
 # Example for loading a pair
-load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
+OikScrambling:::load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
                 , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
 ```
 
@@ -236,9 +236,9 @@ Prepare GBreak objects
 ======================
 
 ```{r Bar_Osk}
-orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
-  orthoPairs <- load_one_to_ones(
-    system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"),
+orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19") {
+  orthoPairs <- OikScrambling:::load_one_to_ones(
+    system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
     c(name1, name2))
 
   IDs2GRanges <- function (IDs, annot) {
@@ -259,45 +259,44 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2) {
   sort(gb)
 }
 
-orthoPairs <- SimpleList()
-orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
-                                        , transcripts$Oki, transcripts$Osa)
-orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
-                                        , transcripts$Oki, transcripts$Bar)
-orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , transcripts$Oki, transcripts$Kum)
-orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , transcripts$Oki, transcripts$Aom)
-orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
-                                        , transcripts$Oki, transcripts$Nor)
+orthoPairToGBreaks_all_Oiks <- function(treeName) {
+  orthoPairs <- SimpleList()
+  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Oki, transcripts$Osa, treeName)
+  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Oki, transcripts$Bar, treeName)
+  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$Oki, transcripts$Kum, treeName)
+  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$Oki, transcripts$Aom, treeName)
+  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Oki, transcripts$Nor, treeName)
+  
+  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Osa, transcripts$Bar, treeName)
+  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Osa, transcripts$Oki, treeName)
+  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Osa, transcripts$Kum, treeName)
+  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Osa, transcripts$Aom, treeName)
+  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Osa, transcripts$Nor, treeName)
+  
+  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar, transcripts$Osa, treeName)
+  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar, transcripts$Oki, treeName)
+  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar, transcripts$Kum, treeName)
+  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar, transcripts$Aom, treeName)
+  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar, transcripts$Nor, treeName)
+  
+  orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
+  orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
+  orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
+  
+  orthoPairs
+}
 
-orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1"
-                                        , transcripts$Osa, transcripts$Bar)
-orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
-                                        , transcripts$Osa, transcripts$Oki)
-orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , transcripts$Osa, transcripts$Kum)
-orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , transcripts$Osa, transcripts$Aom)
-orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
-                                        , transcripts$Osa, transcripts$Nor)
+orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
+orthoPairs$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
+                                        , transcripts$Ply, transcripts$Ros, treeName="N20")
 
-
-orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"
-                                        , transcripts$Bar, transcripts$Osa)
-orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1"
-                                        , transcripts$Bar, transcripts$Oki)
-orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1"
-                                        , transcripts$Bar, transcripts$Kum)
-orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1"
-                                        , transcripts$Bar, transcripts$Aom)
-orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"
-                                        , transcripts$Bar, transcripts$Nor)
+# Same as above but using the same core orthogroups for all species.
+orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
+orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
+                                             , transcripts$Ply, transcripts$Ros, treeName="N3")
 
 sapply(orthoPairs, length)
-orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
-orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
-orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
+sapply(orthoPairs_core, length)
 ```
 
 Problem: some annotations overlap
@@ -329,7 +328,15 @@ orthoPairsFiltered <- sapply(orthoPairs, function(gb) {
   gb <- gb[!flagOverlaps(gb$query)]
   gb
 }) |> SimpleList()
+
+orthoPairsFiltered_core <- sapply(orthoPairs_core, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+
 sapply(orthoPairs, length) - sapply(orthoPairsFiltered, length)
+sapply(orthoPairs_core, length) - sapply(orthoPairsFiltered_core, length)
 ```
 
 Exploring patterns in the pairwise objects
@@ -373,11 +380,21 @@ coalOrtho <- function(gb) {
   coal
 }
 
-orthoBlocks <- sapply(orthoPairsFiltered, coalOrtho) |> SimpleList()
-sapply(orthoBlocks, length)
+orthoBlocks <- sapply(orthoPairsFiltered[1:15], coalOrtho) |> SimpleList()
+orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
 orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
 orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
 orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
+
+orthoBlocks_core <- sapply(orthoPairsFiltered_core[1:15], coalOrtho) |> SimpleList()
+orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
+orthoBlocks_core[ 1:5 ] <- sapply(orthoBlocks_core[ 1:5 ],  flagLongShort, longShort$Oki)
+orthoBlocks_core[ 6:10] <- sapply(orthoBlocks_core[ 6:10],  flagLongShort, longShort$Osa)
+orthoBlocks_core[11:15] <- sapply(orthoBlocks_core[11:15],  flagLongShort, longShort$Bar)
+
+sapply(orthoBlocks, length)
+sapply(orthoBlocks_core, length)
+
 ```
 
 Quick overview of the results
@@ -400,7 +417,7 @@ Gene Order Conservation is smaller in short arms
 ------------------------------------------------
 
 ```{r GOC}
-orthoBlocks_LSnoNA <- sapply(orthoBlocks, function(gb) gb[!is.na(gb$Arm)]) |> SimpleList()
+orthoBlocks_LSnoNA <- sapply(orthoBlocks[1:15], function(gb) gb[!is.na(gb$Arm)]) |> SimpleList()
 sapply(orthoBlocks_LSnoNA, length)
 
 df <- sapply(orthoBlocks_LSnoNA,
@@ -410,6 +427,55 @@ apply(df, 2, \(x) {
   tst <- t.test(x[c(1,3,5)], x[c(2,4,6)])
   c(pval=tst$p.value, mx=tst$estimate[1], my=tst$estimate[2])
 }) 
+```
+
+Fraction of the genome covered or syntenic
+------------------------------------------
+
+```{r fraction_aligned}
+uncov  <- BiocParallel::bplapply(orthoPairsFiltered, cleanGaps) |> SimpleList()
+unsyn  <- BiocParallel::bplapply(orthoBlocks,        cleanGaps) |> SimpleList()
+
+  covered_tot    <- sapply(orthoPairsFiltered,   \(x) sum(width(x)))
+  syntenic_tot   <- sapply(orthoBlocks,          \(x) sum(width(x)))
+uncovered_tot    <- sapply(uncov,                \(x) sum(width(x)))
+unsyntenic_tot   <- sapply(unsyn,                \(x) sum(width(x)))
+
+(syn_summary <- cbind(
+  covered_frac   = covered_tot   / ( covered_tot   + uncovered_tot ) * 100,
+  orthogenes_n   = sapply(orthoPairsFiltered, length),
+  syntenic_frac  = syntenic_tot  / ( syntenic_tot  + unsyntenic_tot ) * 100,
+  syntenic_reg   = sapply(orthoBlocks, length)
+ )|> as.data.frame())
+
+sapply(syn_summary, \(x) tapply(x, row.names(syn_summary) |> OikScrambling:::compDistance(), mean))   |> round(1)
+sapply(syn_summary, \(x) tapply(x, row.names(syn_summary) |> OikScrambling:::compDistance(), median)) |> round(1)
+sapply(syn_summary, \(x) tapply(x, row.names(syn_summary) |> OikScrambling:::compDistance(), sd))     |> round(1)
+```
+
+Unfortunately, there are not enough transcripts from Ciona that are part of the
+pan-tunicate orthogroup set, which makes the comparison difficult between
+Oikopleura and Ciona…
+
+```{r fraction_aligned_core}
+uncov  <- BiocParallel::bplapply(orthoPairsFiltered_core, cleanGaps) |> SimpleList()
+unsyn  <- BiocParallel::bplapply(orthoBlocks_core,        cleanGaps) |> SimpleList()
+
+  covered_tot    <- sapply(orthoPairsFiltered_core,   \(x) sum(width(x)))
+  syntenic_tot   <- sapply(orthoBlocks_core,          \(x) sum(width(x)))
+uncovered_tot    <- sapply(uncov,                     \(x) sum(width(x)))
+unsyntenic_tot   <- sapply(unsyn,                     \(x) sum(width(x)))
+
+(syn_summary_core <- cbind(
+  covered_frac   = covered_tot   / ( covered_tot   + uncovered_tot ) * 100,
+  orthogenes_n   = sapply(orthoPairsFiltered_core, length),
+  syntenic_frac  = syntenic_tot  / ( syntenic_tot  + unsyntenic_tot ) * 100,
+  syntenic_reg   = sapply(orthoBlocks_core, length)
+ )|> as.data.frame())
+
+sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), mean))   |> round(1)
+sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), median)) |> round(1)
+sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), sd))     |> round(1)
 ```
 
 Agreement with nucleotide alignments

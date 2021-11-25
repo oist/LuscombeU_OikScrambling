@@ -204,7 +204,19 @@ gbs$Bar_Kum <- load_genomic_breaks_("Bar2_p4__KUM-M3-7f.gff.gz",            Bar2
 gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             Bar2_p4,     AOM_5,         longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Aom)
 gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 Bar2_p4,     OdB3,          longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Nor)
 
-gbs <- annotateWithTranscripts(gbs, transcripts)
+Oik_Oik <- names(gbs)
+
+gbs$Ply_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_int_R.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
+gbs$Ply_Rob <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_rob_HT.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
+gbs$Ply_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_sav.gff.gz",            package = "BreakpointsData"),    NULL,     NULL)
+gbs$Ply_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__OKI2018_I69_1.0.gff.gz",  package = "BreakpointsData"),    NULL,     OKI2018_I69)
+
+gbs$Rob_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_int_R.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
+gbs$Rob_Ply <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_int_P.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
+gbs$Rob_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_sav.gff.gz",           package = "BreakpointsData"),    NULL,     NULL)
+gbs$Rob_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__OKI2018_I69_1.0.gff.gz", package = "BreakpointsData"),    NULL,     OKI2018_I69)
+
+gbs[Oik_Oik] <- annotateWithTranscripts(gbs[Oik_Oik], transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
 ```
 
@@ -237,8 +249,8 @@ coa[ 1:5]  <- BiocParallel::bplapply(coa[ 1:5],  flagLongShort, longShort$Oki)
 coa[ 6:10] <- BiocParallel::bplapply(coa[ 6:10], flagLongShort, longShort$Osa)
 coa[11:15] <- BiocParallel::bplapply(coa[11:15], flagLongShort, longShort$Bar)
 
-coa <- annotateWithReps.GBreaksSimpleList(coa, reps)
-coa <- annotateWithTranscripts(coa, transcripts)
+coa[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(coa[Oik_Oik], reps)
+coa[Oik_Oik] <- annotateWithTranscripts(coa[Oik_Oik], transcripts)
 
 coa <- sapply(coa, flagAll) |> SimpleList()
 ```
@@ -293,9 +305,9 @@ unalMap[ 1:5 ] <- BiocParallel::bplapply(unalMap[ 1:5 ], flagLongShort, longShor
 unalMap[ 6:10] <- BiocParallel::bplapply(unalMap[ 6:10], flagLongShort, longShort$Osa)
 unalMap[11:15] <- BiocParallel::bplapply(unalMap[11:15], flagLongShort, longShort$Bar)
 
-unalMap <- annotateWithReps.GBreaksSimpleList(unalMap, reps)
-unalMap <- annotateWithTranscripts(unalMap, transcripts)
-unalMap <- sapply(unalMap, flagAll) |> SimpleList()
+unalMap[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(unalMap[Oik_Oik], reps)
+unalMap[Oik_Oik] <- annotateWithTranscripts(unalMap[Oik_Oik], transcripts)
+unalMap[Oik_Oik] <- sapply(unalMap[Oik_Oik], flagAll) |> SimpleList()
 ```
 
 Translocated regions
@@ -334,8 +346,8 @@ tra[ 1:5 ] <- BiocParallel::bplapply(tra[ 1:5 ], flagLongShort, longShort$Oki)
 tra[ 6:10] <- BiocParallel::bplapply(tra[ 6:10], flagLongShort, longShort$Osa)
 tra[11:15] <- BiocParallel::bplapply(tra[11:15], flagLongShort, longShort$Bar)
 
-tra <- annotateWithReps.GBreaksSimpleList(tra, reps)
-tra <- annotateWithTranscripts(tra, transcripts)
+tra[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(tra[Oik_Oik], reps)
+tra[Oik_Oik] <- annotateWithTranscripts(tra[Oik_Oik], transcripts)
 tra <- sapply(tra, flagAll) |> SimpleList()
 ```
 
@@ -350,7 +362,8 @@ removeTranslocationsOnTargetGenome <- function(gb) {
   gb <- flagTranslocations(gb)
   gb <- dist2next(gb, step = 2, ignore.strand = TRUE)
   idx <- 1 + which( gb$tra & (gb$tdist < 200 | gb$qdist < 200) )
-  gb <- gb[-idx]
+  if(length(idx) != 0)
+    gb <- gb[-idx]
   coalesce_contigs(gb)
 }
 removeTranslocationsOnBothGenomes <- function(gb)
@@ -365,8 +378,8 @@ coa2[ 1:5]  <- BiocParallel::bplapply(coa2[ 1:5],  flagLongShort, longShort$Oki)
 coa2[ 6:10] <- BiocParallel::bplapply(coa2[ 6:10], flagLongShort, longShort$Osa)
 coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
 
-coa2 <- annotateWithReps.GBreaksSimpleList(coa2, reps)
-coa2 <- annotateWithTranscripts(coa2, transcripts)
+coa2[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(coa2[Oik_Oik], reps)
+coa2[Oik_Oik] <- annotateWithTranscripts(coa2[Oik_Oik], transcripts)
 coa2 <- sapply(coa2, flagAll) |> SimpleList()
 ```
 
@@ -403,8 +416,8 @@ tra2[ 1:5 ] <- BiocParallel::bplapply(tra2[ 1:5 ], flagLongShort, longShort$Oki)
 tra2[ 6:10] <- BiocParallel::bplapply(tra2[ 6:10], flagLongShort, longShort$Osa)
 tra2[11:15] <- BiocParallel::bplapply(tra2[11:15], flagLongShort, longShort$Bar)
 
-tra2 <- annotateWithReps.GBreaksSimpleList(tra2, reps)
-tra2 <- annotateWithTranscripts(tra2, transcripts)
+tra2[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(tra2[Oik_Oik], reps)
+tra2[Oik_Oik] <- annotateWithTranscripts(tra2[Oik_Oik], transcripts)
 
 tra2 <- sapply(tra2, flagAll) |> SimpleList()
 ```
@@ -430,6 +443,28 @@ bp_summary <-
 sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), mean))
 sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), median))
 sapply(bp_summary, \(x) tapply(x, row.names(bp_summary) |> OikScrambling:::compDistance(), sd))
+```
+
+Fraction of the genome aligned or mapped
+----------------------------------------
+
+```{r fraction_aligned}
+  aligned_tot  <- sapply(gbs,   \(x) sum(width(x)))
+  mapped_tot   <- sapply(coa,   \(x) sum(width(x)))
+  mapped2_tot  <- sapply(coa2,  \(x) sum(width(x)))
+unaligned_tot  <- sapply(unal,   \(x) sum(width(x)))
+unmapped_tot   <- sapply(unmap,  \(x) sum(width(x)))
+unmapped2_tot  <- sapply(unmap2, \(x) sum(width(x)))
+
+(align_summary <- 100 * cbind(
+  align_frac = aligned_tot / ( aligned_tot + unaligned_tot ),
+  map_frac   = mapped_tot  / ( mapped_tot  + unmapped_tot ),
+  map2_frac  = mapped2_tot / ( mapped2_tot + unmapped2_tot)
+ )|> as.data.frame())
+
+sapply(align_summary, \(x) tapply(x, row.names(align_summary) |> OikScrambling:::compDistance(), mean))   |> round(1)
+sapply(align_summary, \(x) tapply(x, row.names(align_summary) |> OikScrambling:::compDistance(), median)) |> round(1)
+sapply(align_summary, \(x) tapply(x, row.names(align_summary) |> OikScrambling:::compDistance(), sd))     |> round(1)
 ```
 
 Summary
