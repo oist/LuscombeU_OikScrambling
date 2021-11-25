@@ -1,0 +1,92 @@
+---
+title: "Whole-genome dot-plots"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Whole-genome dot-plots}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+In this vignette I dot-plot pairs of genomes in parallel to illustrate
+differences in the extend of scrambling in Oikopleura compared to equivalent
+pairs in other genera.
+
+The core functions used here are maintained in our _GenomicBreaks_ R package,
+which is fully documented at: <https://oist.github.io/GenomicBreaks>.
+
+See `vignette("ParallelPlots", package = "OikScrambling")` for parallel
+comparisons of homologous chromosomes in more than one species.
+
+## Load pacakges
+
+# Load R pacakges and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling:::loadAllGenomes())
+(load("BreakPoints.Rdata"))
+```
+
+# Ciona
+
+## _Ciona intestinalis_ (Plymouth vs Roscoff)
+
+```{r Ply_Ros}
+makeOxfordPlots(coa$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+```
+
+## _Ciona intestinalis_ (Plymouth) vs _Ciona robusta_
+
+```{r Ply_Rob}
+makeOxfordPlots(coa$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+```
+
+## Troubleshoot of grid pattern
+
+We see horizontal patterns what are they?  I think they may be pericentromeric
+regions.
+
+```{r Ply_Rob_subset}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000010.1", "BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1", "BJTB01000014.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000005.1", "BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1", "BNJZ01000009.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000012.1 and BNJZ01000007.1")
+```
+
+```{r Ply_Rob_subset2}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000012.1 and BNJZ01000007.1")
+```
+
+```{r Ply_Rob_subset3}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000002.1", "BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1", "BJTB01000006.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000010.1", "BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1", "BNJZ01000014.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000004.1 and BNJZ01000012.1")
+```
+
+```{r Ply_Rob_subset4}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000004.1 and BNJZ01000012.1")
+```
+
+## _Ciona intestinalis_ (Plymouth) vs _Ciona savignyi_
+
+```{r Ply_Sav}
+makeOxfordPlots(coa$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+```
