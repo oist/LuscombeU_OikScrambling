@@ -487,6 +487,130 @@ ggplot(df |> tidyr::pivot_longer(!pair)) +
   ggtitle("Cumulative plot (gbs ⊃ coa ⊃ coa2) of the computed genomic regions")
 ```
 
+NOTE: how does that compare with ANI (Average Nucleotide Identity) ?
+
+```{r}
+sim <- c(`Bar2_p4__AOM-5-5f` = 87.489, Bar2_p4__Bar2_p4 = 100, `Bar2_p4__KUM-M3-7f` = 78.45822, 
+Bar2_p4__O_alb = 69.79983, Bar2_p4__O_lon = 66.11535, Bar2_p4__O_van = 69.29796, 
+Bar2_p4__OdB3 = 97.7499, Bar2_p4__OKI2018_I69_1.0 = 78.68358, 
+Bar2_p4__OSKA2016v1.9 = 87.46913, C_int_P__C_int_P = 100, C_int_P__C_int_R = 96.16641, 
+C_int_P__C_rob_HT = 90.49159, C_int_P__C_sav = 73.27976, C_int_P__OKI2018_I69_1.0 = 65.14351, 
+C_int_P__OSKA2016v1.9 = 64.71592, C_int_P__St_cla = 68.16588, 
+C_rob_HT__C_int_P = 90.41795, C_rob_HT__C_int_R = 90.4192, C_rob_HT__C_rob_HT = 100, 
+C_rob_HT__C_sav = 73.16812, C_rob_HT__OKI2018_I69_1.0 = 65.53052, 
+C_rob_HT__OSKA2016v1.9 = 65.09903, C_rob_HT__St_cla = 68.30626, 
+Dalb__AaegL5.0 = 65.6799, Dalb__AalbS3_pri_1.0 = 68.17702, Dalb__Cfrigida_v1.1 = 72.42817, 
+`Dalb__Dalb_15112-1751.03v1` = 100, Dalb__Dath_EB_1.0 = 80.60732, 
+Dalb__Dbif_1.0 = 81.08233, Dalb__Dbus_ASM1175060v1 = 85.11277, 
+Dalb__Dinn_ASM435438v2 = 87.86721, Dalb__Dlow_1.0 = 81.1923, 
+Dalb__Dmau_ASM438214v1 = 81.65325, Dalb__Dmel_BDGP6 = 81.14, 
+Dalb__Dmir_PacBio2.1 = 81.76273, Dalb__Dpse_MV25 = 81.20186, 
+Dalb__Eten_idEriTena2.1 = 70.77767, Dalb__Paka_ASM1839793v1 = 66.22446, 
+Dalb__Prin_Dyak_Tai18E2_2.0 = 81.21401, Dalb__RU_Dsub_v1.1 = 82.53274, 
+Dalb__RU_Dtri_1.1 = 81.93057, Dath__AaegL5.0 = 66.28782, Dath__AalbS3_pri_1.0 = 69.08501, 
+Dath__Cfrigida_v1.1 = 72.40521, `Dath__Dalb_15112-1751.03v1` = 81.90288, 
+Dath__Dath_EB_1.0 = 100, Dath__Dbif_1.0 = 90.09103, Dath__Dbus_ASM1175060v1 = 81.89253, 
+Dath__Dinn_ASM435438v2 = 82.2395, Dath__Dlow_1.0 = 92.30271, 
+Dath__Dmau_ASM438214v1 = 85.84368, Dath__Dmel_BDGP6 = 85.72521, 
+Dath__Dmir_PacBio2.1 = 91.84388, Dath__Dpse_MV25 = 91.87636, 
+Dath__Eten_idEriTena2.1 = 71.32619, Dath__Paka_ASM1839793v1 = 65.05051, 
+Dath__Prin_Dyak_Tai18E2_2.0 = 85.03599, Dath__RU_Dsub_v1.1 = 86.28124, 
+Dath__RU_Dtri_1.1 = 86.45957, Dinn__AaegL5.0 = 66.17064, Dinn__AalbS3_pri_1.0 = 67.58017, 
+DDinn__Cfrigida_v1.1 = 71.83029, `Dinn__Dalb_15112-1751.03v1` = 87.04083, 
+Dinn__Dath_EB_1.0 = 79.57953, Dinn__Dbif_1.0 = 80.19957, Dinn__Dbus_ASM1175060v1 = 84.28436, 
+Dinn__Dinn_ASM435438v2 = 100, Dinn__Dlow_1.0 = 80.67069, Dinn__Dmau_ASM438214v1 = 81.0131, 
+Dinn__Dmel_BDGP6 = 80.77358, Dinn__Dmir_PacBio2.1 = 80.56467, 
+Dinn__Dpse_MV25 = 79.94521, Dinn__Eten_idEriTena2.1 = 69.06343, 
+Dinn__Paka_ASM1839793v1 = 66.33035, Dinn__Prin_Dyak_Tai18E2_2.0 = 80.57511, 
+Dinn__RU_Dsub_v1.1 = 81.50381, Dinn__RU_Dtri_1.1 = 81.46686, 
+Dmel__AaegL5.0 = 66.80427, Dmel__AalbS3_pri_1.0 = 68.20054, Dmel__Cfrigida_v1.1 = 72.50621, 
+`Dmel__Dalb_15112-1751.03v1` = 80.26274, Dmel__Dath_EB_1.0 = 83.20431, 
+Dmel__Dbif_1.0 = 82.25649, Dmel__Dbus_ASM1175060v1 = 80.08149, 
+Dmel__Dinn_ASM435438v2 = 80.79603, Dmel__Dlow_1.0 = 83.56816, 
+Dmel__Dmau_ASM438214v1 = 95.36722, Dmel__Dmel_BDGP6 = 100, Dmel__Dmir_PacBio2.1 = 84.10367, 
+Dmel__Dpse_MV25 = 83.27086, Dmel__Eten_idEriTena2.1 = 70.18941, 
+Dmel__Paka_ASM1839793v1 = 65.26859, Dmel__Prin_Dyak_Tai18E2_2.0 = 91.33685, 
+Dmel__RU_Dsub_v1.1 = 88.09201, Dmel__RU_Dtri_1.1 = 86.06675, 
+Dpse__AaegL5.0 = 67.05445, Dpse__AalbS3_pri_1.0 = 68.72562, Dpse__Cfrigida_v1.1 = 72.71335, 
+`Dpse__Dalb_15112-1751.03v1` = 81.69273, Dpse__Dath_EB_1.0 = 91.50727, 
+Dpse__Dbif_1.0 = 90.07924, Dpse__Dbus_ASM1175060v1 = 81.28797, 
+Dpse__Dinn_ASM435438v2 = 81.96187, Dpse__Dlow_1.0 = 95.02922, 
+Dpse__Dmau_ASM438214v1 = 85.43473, Dpse__Dmel_BDGP6 = 85.32083, 
+Dpse__Dmir_PacBio2.1 = 97.38482, Dpse__Dpse_MV25 = 100, Dpse__Eten_idEriTena2.1 = 69.74893, 
+Dpse__Paka_ASM1839793v1 = 64.9258, Dpse__Prin_Dyak_Tai18E2_2.0 = 84.58586, 
+Dpse__RU_Dsub_v1.1 = 86.0418, Dpse__RU_Dtri_1.1 = 85.93798, Dsub__AaegL5.0 = 66.08828, 
+Dsub__AalbS3_pri_1.0 = 68.42965, Dsub__Cfrigida_v1.1 = 71.28905, 
+`Dsub__Dalb_15112-1751.03v1` = 80.48788, Dsub__Dath_EB_1.0 = 82.75689, 
+Dsub__Dbif_1.0 = 83.14488, Dsub__Dbus_ASM1175060v1 = 80.4126, 
+Dsub__Dinn_ASM435438v2 = 81.50499, Dsub__Dlow_1.0 = 84.02854, 
+Dsub__Dmau_ASM438214v1 = 88.26478, Dsub__Dmel_BDGP6 = 87.81593, 
+Dsub__Dmir_PacBio2.1 = 84.50135, Dsub__Dpse_MV25 = 82.88658, 
+Dsub__Eten_idEriTena2.1 = 69.00946, Dsub__Paka_ASM1839793v1 = 64.88739, 
+Dsub__Prin_Dyak_Tai18E2_2.0 = 87.79101, Dsub__RU_Dsub_v1.1 = 100, 
+Dsub__RU_Dtri_1.1 = 87.23365, Dyak__AaegL5.0 = 65.96956, Dyak__AalbS3_pri_1.0 = 68.30608, 
+Dyak__Cfrigida_v1.1 = 72.36378, `Dyak__Dalb_15112-1751.03v1` = 80.31928, 
+Dyak__Dath_EB_1.0 = 82.77286, Dyak__Dbif_1.0 = 82.36289, Dyak__Dbus_ASM1175060v1 = 79.76272, 
+Dyak__Dinn_ASM435438v2 = 80.83953, Dyak__Dlow_1.0 = 83.68068, 
+Dyak__Dmau_ASM438214v1 = 91.8662, Dyak__Dmel_BDGP6 = 91.52635, 
+Dyak__Dmir_PacBio2.1 = 84.21573, Dyak__Dpse_MV25 = 83.25226, 
+Dyak__Eten_idEriTena2.1 = 70.75961, Dyak__Paka_ASM1839793v1 = 65.18495, 
+Dyak__Prin_Dyak_Tai18E2_2.0 = 100, Dyak__RU_Dsub_v1.1 = 88.18683, 
+Dyak__RU_Dtri_1.1 = 86.18934, `OKI2018_I69_1.0__AOM-5-5f` = 79.19197, 
+OKI2018_I69_1.0__Bar2_p4 = 78.97216, `OKI2018_I69_1.0__KUM-M3-7f` = 96.6692, 
+OKI2018_I69_1.0__O_alb = 69.58952, OKI2018_I69_1.0__O_lon = 65.9365, 
+OKI2018_I69_1.0__O_van = 69.21153, OKI2018_I69_1.0__OdB3 = 78.80925, 
+OKI2018_I69_1.0__OKI2018_I69_1.0 = 100, OKI2018_I69_1.0__OSKA2016v1.9 = 78.82942, 
+`OSKA2016v1.9__AOM-5-5f` = 97.14968, OSKA2016v1.9__Bar2_p4 = 87.56705, 
+`OSKA2016v1.9__KUM-M3-7f` = 78.52209, OSKA2016v1.9__O_alb = 68.88416, 
+OSKA2016v1.9__O_lon = 66.94376, OSKA2016v1.9__O_van = 68.66089, 
+OSKA2016v1.9__OdB3 = 87.51462, OSKA2016v1.9__OKI2018_I69_1.0 = 78.52812, 
+OSKA2016v1.9__OSKA2016v1.9 = 100)
+
+align_summary$sim <- sim[c(
+  "OKI2018_I69_1.0__OSKA2016v1.9",
+  "OKI2018_I69_1.0__Bar2_p4",
+  "OKI2018_I69_1.0__KUM-M3-7f",
+  "OKI2018_I69_1.0__AOM-5-5f",
+  "OKI2018_I69_1.0__OdB3",
+  "OSKA2016v1.9__OKI2018_I69_1.0",
+  "OSKA2016v1.9__Bar2_p4",
+  "OSKA2016v1.9__KUM-M3-7f",
+  "OSKA2016v1.9__AOM-5-5f",
+  "OSKA2016v1.9__OdB3",
+  "Bar2_p4__OKI2018_I69_1.0",
+  "Bar2_p4__OSKA2016v1.9",
+  "Bar2_p4__KUM-M3-7f",
+  "Bar2_p4__AOM-5-5f",
+  "Bar2_p4__OdB3",
+  "C_int_P__C_int_R",
+  "C_int_P__C_rob_HT",
+  "C_int_P__C_sav",
+  "C_int_P__OKI2018_I69_1.0",
+  "C_rob_HT__C_int_R",
+  "C_rob_HT__C_int_P",
+  "C_rob_HT__C_sav",
+  "C_rob_HT__OKI2018_I69_1.0"
+)]
+
+df <- align_summary[,c("align_frac", "sim")]
+df$pairname <- rownames(df)
+df <- tidyr::pivot_longer(df, c("align_frac", "sim"))
+df$dist <- OikScrambling:::compDistance(df$pairname)
+df$genus <- "Oikopleura"
+df$genus[grepl("Int", df$dist)] <- "Ciona"
+df <- df[!grepl("– Oki", df$dist),]
+
+library(ggplot2)
+
+ggplot(df) +
+  aes(value, name, pch = dist, col= genus) +
+  geom_point() +
+  facet_wrap(~name, ncol = 1, scale = "free") +
+  theme_bw()
+
+
+```
+
 Save data
 =========
 
