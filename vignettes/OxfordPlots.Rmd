@@ -43,19 +43,24 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 ## _Ciona intestinalis_ (Plymouth vs Roscoff)
 
 ```{r Ply_Ros}
-makeOxfordPlots(coa$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+makeOxfordPlots(coa$Ply_Ros, type = "l") + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
 ```
 
 ## _Ciona intestinalis_ (Plymouth) vs _Ciona robusta_
 
 ```{r Ply_Rob}
-makeOxfordPlots(coa$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+makeOxfordPlots(coa$Ply_Rob, type = "l") + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
 ```
 
 ## Troubleshoot of grid pattern
 
 We see horizontal patterns what are they?  I think they may be pericentromeric
 regions.
+
+
+```{r Ply_Rob_point_plot}
+makeOxfordPlots(coa$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+```
 
 ```{r Ply_Rob_subset}
 coa$Ply_Rob |>
@@ -88,5 +93,45 @@ coa$Ply_Rob |>
 ## _Ciona intestinalis_ (Plymouth) vs _Ciona savignyi_
 
 ```{r Ply_Sav}
-makeOxfordPlots(coa$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+makeOxfordPlots(coa$Ply_Sav, type = "l") + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+```
+
+
+# Oikopleura
+
+## Oki vs Bar
+
+```{r Oki_Bar}
+makeOxfordPlots(coa$Oki_Bar, type = "l") + ggtitle("OKI vs BAR")
+```
+
+## Osa vs Bar
+
+```{r Osa_bar}
+makeOxfordPlots(coa$Osa_Bar, type = "l") + ggtitle("OSA vs BAR")
+```
+
+## Oki vs Kum
+
+```{r Oki_Kum}
+makeOxfordPlots(coa$Oki_Kum, type = "l") + ggtitle("OKI vs KUM")
+```
+
+
+# Drosophila
+
+```{r Dmel_Dmau}
+makeOxfordPlots(coa$Dme_Dma, type = "l") + ggtitle("Dmel vs Dmau")
+```
+
+```{r Dmel_Dyak}
+makeOxfordPlots(coa$Dme_Dya, type = "l") + ggtitle("Dmel vs Dyak")
+```
+
+```{r Dmel_Dsub}
+makeOxfordPlots(coa$Dme_Dsu, type = "l") + ggtitle("Dmel vs Dsub")
+```
+
+```{r Dmel_Dbus}
+makeOxfordPlots(coa$Dme_Dbu, type = "l") + ggtitle("Dmel vs Dbus")
 ```
