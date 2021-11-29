@@ -216,6 +216,11 @@ gbs$Rob_Ply <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_
 gbs$Rob_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_sav.gff.gz",           package = "BreakpointsData"),    NULL,     NULL)
 gbs$Rob_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__OKI2018_I69_1.0.gff.gz", package = "BreakpointsData"),    NULL,     OKI2018_I69)
 
+gbs$Dme_Dbu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Dbus_ASM1175060v1.gff.gz",     package = "BreakpointsData"),    NULL,     NULL)
+gbs$Dme_Dsu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__RU_Dsub_v1.1.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
+gbs$Dme_Dya <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Prin_Dyak_Tai18E2_2.0.gff.gz", package = "BreakpointsData"),    NULL,     NULL)
+gbs$Dme_Dma <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Dmau_ASM438214v1.gff.gz",      package = "BreakpointsData"),    NULL,     NULL)
+
 gbs[Oik_Oik] <- annotateWithTranscripts(gbs[Oik_Oik], transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
 ```
@@ -589,26 +594,46 @@ align_summary$sim <- sim[c(
   "C_rob_HT__C_int_R",
   "C_rob_HT__C_int_P",
   "C_rob_HT__C_sav",
-  "C_rob_HT__OKI2018_I69_1.0"
+  "C_rob_HT__OKI2018_I69_1.0",
+  "Dmel__Dbus_ASM1175060v1",
+  "Dmel__RU_Dsub_v1.1",
+  "Dmel__Prin_Dyak_Tai18E2_2.0",
+  "Dmel__Dmau_ASM438214v1"
 )]
 
-df <- align_summary[,c("align_frac", "sim")]
-df$pairname <- rownames(df)
-df <- tidyr::pivot_longer(df, c("align_frac", "sim"))
-df$dist <- OikScrambling:::compDistance(df$pairname)
-df$genus <- "Oikopleura"
-df$genus[grepl("Int", df$dist)] <- "Ciona"
+align_summary["Hum_Mou",] <- c(10.3264, 54.39799, NA, 75.20007)
+
+align_summary$pairname <- rownames(align_summary)
+align_summary$dist <- OikScrambling:::compDistance(align_summary$pairname)
+align_summary$genus <- "Oikopleura"
+align_summary$genus[grepl("Int", align_summary$dist)] <- "Ciona"
+align_summary$genus[grepl("Dme", align_summary$dist)] <- "Drosophila"
+align_summary$genus[grepl("Hum", align_summary$dist)] <- "Mammalian"
+
+df <- tidyr::pivot_longer(align_summary, c("align_frac", "map_frac", "map2_frac", "sim"))
 df <- df[!grepl("– Oki", df$dist),]
 
 library(ggplot2)
 
 ggplot(df) +
-  aes(value, name, pch = dist, col= genus) +
+  aes(value, name, col= genus) +
   geom_point() +
   facet_wrap(~name, ncol = 1, scale = "free") +
   theme_bw()
 
+align_summary |>
+  dplyr::filter(!grepl("– Oki", dist)) |>
+  ggplot() +
+  aes(align_frac, sim, col= genus) +
+  geom_point(size=10) +
+  theme_bw()
 
+align_summary |>
+  dplyr::filter(!grepl("– Oki", dist)) |>
+  ggplot() +
+  aes(map_frac, sim, col= genus) +
+  geom_point() +
+  theme_bw()
 ```
 
 Save data
