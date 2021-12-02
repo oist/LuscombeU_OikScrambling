@@ -126,7 +126,7 @@ cutoff_coas_tables$LargestSegment <- as.data.frame(do.call(rbind, lapply(cutoff_
     biggest_segment
   })
   cut_gb
-})))
+}))) |> suppressWarnings()
 # Get name of largest segment, which can change based on the cutoffs.
 cutoff_coas_tables$LargestSegmentName <- as.data.frame(do.call(rbind, lapply(cutoff_coas, function(cutoff) {
   cut_gb <- sapply(names(cutoff), function(sp_pair) {
@@ -140,7 +140,7 @@ cutoff_coas_tables$LargestSegmentName <- as.data.frame(do.call(rbind, lapply(cut
     biggest_segment_name
   })
   cut_gb
-})))
+}))) |> suppressWarnings()
 
 
 # Write a little function to relate a pair of species (A_B) to their genome size.
@@ -181,31 +181,32 @@ cutoff_coas_tables$PercentOriginalAlignment <- do.call(rbind, apply(cutoff_coas_
 
 ### Plotting features at different cutoffs
 ##### Number of segments
-```{r coa_cutoff_numSegs, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_numSegs, fig.height=6, fig.width=8, dev="svg"}
 # Number of segments
 pheatmap(cutoff_coas_tables$NumSegments, col=magma(100), cluster_cols=F, cluster_row=F, gaps_col=15, angle_col = 90, main='Number of alignments (uncoalesced) or syntenic regions (coalesced)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f")
 ```
 ##### Total aligned
-```{r coa_cutoff_totAli, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_totAli, fig.height=6, fig.width=8, dev="svg"}
 pheatmap(cutoff_coas_tables$TotalAligned, col=magma(100), cluster_cols=F, gaps_col=15, cluster_row=F, angle_col = 90, main='Sum of all alignment widths (Mbp)', display_numbers=T, number_color='#d9d9d9')
 ```
 
 ##### Largest segment
-```{r coa_cutoff_totAli, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_lrgstSeg, fig.height=6, fig.width=8, dev="svg"}
 pheatmap(cutoff_coas_tables$LargestSegment, col=magma(100), cluster_cols=F, gaps_col=15, cluster_row=F, angle_col = 90, main='Size of largest segment (Mbp)', display_numbers=T, number_color='#d9d9d9')
 ```
 
 ##### Percent of genome covered by alignments
 Note the denominator here is the mean of the query and target genome sizes.
-```{r coa_cutoff_totAli, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_pctGen, fig.height=6, fig.width=8, dev="svg"}
 pheatmap(cutoff_coas_tables$PercentGenomeCovered, col=magma(100), cluster_cols=F, gaps_col=15, cluster_row=F, angle_col = 90, main='Percentage of query/target genomes covered (%)', display_numbers=T, number_color='#d9d9d9')
 ```
 
 ##### Percent of total aligned positions represented in alignments
 Note the denominator here is the mean of the query and target genome sizes.
-```{r coa_cutoff_totAli, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_pctOrig, fig.height=6, fig.width=8, dev="svg"}
 pheatmap(cutoff_coas_tables$PercentOriginalAlignment, col=magma(100), cluster_cols=F, gaps_col=15, cluster_row=F, angle_col = 90, main='Percentage of query/target genomes covered (%)', display_numbers=T, number_color='#d9d9d9')
 ```
+
 
 # Session information
 
