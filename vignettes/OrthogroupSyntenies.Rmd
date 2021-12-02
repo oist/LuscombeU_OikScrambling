@@ -106,7 +106,7 @@ clades=list("Oki_Kum"=c("Kum","Oki"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar
 #                           "mean_count" flags it to the clade with the highest mean count
 # deletion_reconciliation:  As above. "largest_clade" makes the most sense most of the time.
 #                           For now, no other options are supported.
-orthoflags <- flagAllPHO(tmp, clade_list=clades, expansion_reconciliation = "largest_clade", deletion_reconciliation="largest_clade")
+orthoflags <- flagAllPHO(se_m, clade_list=clades, expansion_reconciliation = "largest_clade", deletion_reconciliation="largest_clade")
 # The function warns whenever there is an inconsistency with the flag. You can inspect these:
 # warnings()
 # If you want to see too many warnings, you can also use deletion_warnings=T in the flagAllPHO function.
@@ -129,11 +129,11 @@ You can have a species-specific expansion (i.e., Okinawa) at the same time as a 
 
 Here there is also a non-clade-specific deletion. The Osaka-Aomori clade is wholly deleted, while Bar-Nor is not.
 
-```{r flagging_orthogroups_2}
+```{r summarizing_orthoflags_3}
 # Take a look at the distribution of different species flags. 
 ggplot(orthoflags) +
   aes(x=reorder(unlist(expansion_reconciled), unlist(expansion_reconciled), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
-  facet_wrap(~ present_in_all_spp, scales = 'free' ) +
+  facet_wrap(~ present_in_all_spp, scales = 'free') +
   xlab(NULL) +
   coord_flip() +
   ggtitle("Orthogroups by clade-specific HOG expansions (TRUE=present in all spp.)")
@@ -143,7 +143,6 @@ ggplot(orthoflags) +
   xlab(NULL) +
   coord_flip() +
   ggtitle("Orthogroups by clade-specific HOG deletions")
-
 
 ggplot(orthoflags) +
   aes(x=reorder(unlist(expansion_species_specific), unlist(expansion_species_specific), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
@@ -163,7 +162,7 @@ ggplot(orthoflags) +
 In order to get these orthogroup annotations into the `GBreaks` object later, we add them as metadata columns to the `transcripts` object from above. 
 
 ```{r flagging_orthogroups_3}
-# This function takes the output of `flagOrthogroupHomologies` and parses it into a data frame
+# This function takes the output of `flagAllPHO` and parses it into a data frame
 # suitable for glomming with addMetadataToGRanges.
 orthoflagsToDF <- function(orthoflags, species) {
   annotations_per_row <- apply(orthoflags, 1, function(row) {

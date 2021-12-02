@@ -51,6 +51,19 @@ flagPHOOneToOnes <- function(count_matrix) {
   flags
 }
 
+# Iterate over rows in a HOG count matrix and return whether all species
+# at least one gene AND at least one species has more than 1 gene (TRUE),
+# or not (FALSE).
+flagPHODuplications <- function(count_matrix) {
+  flags <- apply(count_matrix, 1, function(row) {
+    if(all(row > 0) & any(row > 1)){
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  })
+  flags
+}
 # Iterate over rows in a HOG count matrix and return whether any species
 # has more genes than every other species (expansion_speciesName)
 # or not (NA).
@@ -233,12 +246,13 @@ reconcilePHODeletions <-  function(count_matrix, clade_list, reconciliation="lar
 }
 
 flagAllPHO <- function(count_matrix, clade_list, expansion_reconciliation="largest_clade", deletion_reconciliation="largest_clade", deletion_warnings=F){
-  annotated_matrix                        <- as.data.frame(count_matrix)
-  annotated_matrix[,"present_in_all_spp"] <- flagPHOPresenceAbsence(count_matrix)
-  annotated_matrix[,"one_to_one"]         <- flagPHOOneToOnes(count_matrix)
+  annotated_matrix                                <- as.data.frame(matrix(nrow=nrow(count_matrix)))
+  colnames(annotated_matrix) <- "present_in_all_spp"
+  annotated_matrix[,"present_in_all_spp"]         <- flagPHOPresenceAbsence(count_matrix)
+  annotated_matrix[,"one_to_one"]                 <- flagPHOOneToOnes(count_matrix)
   annotated_matrix[,"expansion_species_specific"] <- flagPHOSpeciesSpecificExpansions(count_matrix)
-  annotated_matrix                        <- cbind(annotated_matrix, reconcilePHOExpansions(count_matrix=count_matrix, clade_list = clade_list, reconciliation = expansion_reconciliation))
-  annotated_matrix[,"deletion_species_specific"]   <- flagSpeciesSpecificDeletions(count_matrix)
-  annotated_matrix                        <- cbind(annotated_matrix, reconcilePHODeletions(count_matrix=count_matrix, clade_list = clade_list, reconciliation=deletion_reconciliation, verbose=deletion_warnings))
+  annotated_matrix                                <- cbind(annotated_matrix, reconcilePHOExpansions(count_matrix=count_matrix, clade_list = clade_list, reconciliation = expansion_reconciliation))
+  annotated_matrix[,"deletion_species_specific"]  <- flagSpeciesSpecificDeletions(count_matrix)
+  annotated_matrix                                <- cbind(annotated_matrix, reconcilePHODeletions(count_matrix=count_matrix, clade_list = clade_list, reconciliation=deletion_reconciliation, verbose=deletion_warnings))
   annotated_matrix
 }
