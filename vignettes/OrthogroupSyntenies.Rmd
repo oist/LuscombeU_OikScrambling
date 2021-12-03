@@ -17,7 +17,7 @@ and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different objects are prepared.
 
 ```{r load_packages_and_data}
-library('OikScrambling')   |> suppressPackageStartupMessages()
+library("OikScrambling")   |> suppressPackageStartupMessages()
 library("ggpubr")
 library("SummarizedExperiment")
 (genomes <- OikScrambling:::loadAllGenomes())
@@ -34,6 +34,8 @@ Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
 See `news(package = "BreakpointsData")` for inspecting changes in more details.
 
 ```{r load_one_to_ones}
+# Note that for now, I am only worried about Oikopleura. Subset the transcripts to include only oiks.
+transcripts = subset(transcripts, names(transcripts) %in% c('Oki', 'Osa', 'Bar', 'Nor', 'Aom', 'Kum'))
 # Create a data frame that maps the original species names in the OrthoFinder 
 # output to a set of new names that are easier to read.
 species_name_map = data.frame(
@@ -60,13 +62,11 @@ load_one_to_ones_SE <- function(file, species_name_map) {
   )
 
   assay(se, "txLists", withDimnames=FALSE) <- sapply(assay(se, 'txs'),     strsplit, split = ", ")
+  rowData(se)$"txLists" <- sapply(assay(se, 'txs'),     strsplit, split = ", ")
+
   assay(se, "txCount", withDimnames=FALSE) <- sapply(DataFrame(assay(se, 'txLists')), \(x) sapply(x, length))  # Not sure why it only works when putting a DataFrame at the middle
   assay(se, "txLists")[(assay(se, "txCount")) == 0] <- NA_character_
-  
-  rowData(se)$one2ones    <- rowSums(as.matrix(assay(se, "txCount")) == 1) == ncol(se)
-  rowData(se)$anyMissing  <- rowSums(as.matrix(assay(se, "txCount")) == 0) > 0
-  rowData(se)$anyDup      <- rowSums(as.matrix(assay(se, "txCount"))  > 1) > 0
-  
+
   rowData(se)$txNames     <- apply(assay(se, "txLists"), 1, \(row) {
     row               |>  # Take a row from a matrix, a data.frame or a DataFrame
       as.list()       |>  # It is already list of character vectors, except for DataFrame subsets, which have to be coerced
@@ -75,7 +75,7 @@ load_one_to_ones_SE <- function(file, species_name_map) {
   })
   rowData(se)$txNames     <- sapply(rowData(se)$txNames, \(x) x[!is.na(x)])
   rowData(se)$txNames     <- CharacterList(rowData(se)$txNames)     # Convert to `CharacterList` for more comfortable display
-  # rowData(se)$txNamesString <- unstrsplit(rowData(se)$txNames, ",") # If you would want it as a string...
+  #rowData(se)$txNamesString <- unstrsplit(rowData(se)$txNames, ",") # If you would want it as a string...
   se
 }
 
@@ -106,28 +106,32 @@ clades=list("Oki_Kum"=c("Kum","Oki"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar
 #                           "mean_count" flags it to the clade with the highest mean count
 # deletion_reconciliation:  As above. "largest_clade" makes the most sense most of the time.
 #                           For now, no other options are supported.
-orthoflags <- flagAllPHO(se_m, clade_list=clades, expansion_reconciliation = "largest_clade", deletion_reconciliation="largest_clade")
+orthoflags <- OikScrambling:::flagAllPHO(se_m, clade_list=clades, expansion_reconciliation = "largest_clade", deletion_reconciliation="largest_clade")
 # The function warns whenever there is an inconsistency with the flag. You can inspect these:
-# warnings()
+#     warnings()
 # If you want to see too many warnings, you can also use deletion_warnings=T in the flagAllPHO function.
+# This will warn you every time there is a deletion that satisfies more than one clade - which will be often!
+# Several thousand times, in my case.
 ```
 
 You can then summarize the flags as follows:
 
 ```{r summarizing_orthoflags}
-apply(orthoflags[,7:20], 2, function(x) table(unlist(x)))
+apply(orthoflags, 2, function(x) table(unlist(x)))
 ```
 
 The `orthoflags` object yields a matrix with one row per orthogroup, the count columns of the HOG table, and most importantly, a set of orthogroup annotations based on the counts of every species and clade. 
 
 These annotations are not mutually exclusive. Consider the following:
+
 ```{r summarizing_orthoflags_2}
-orthoflags[15,]
+assays(se)$txCount[15,]
+(orthoflags[15,])
 ```
 
-You can have a species-specific expansion (i.e., Okinawa) at the same time as a clade-specific expansion (i.e., Oki/Kum). 
+In this example, there is a species-specific expansion (i.e., Okinawa) at the same time as a clade-specific expansion (i.e., Oki/Kum). There is also a non-clade-specific deletion. The Osaka-Aomori clade is wholly deleted, while Bar-Nor is not.
 
-Here there is also a non-clade-specific deletion. The Osaka-Aomori clade is wholly deleted, while Bar-Nor is not.
+In the following plots, I summarize some of the features of the `orthoflags` object.
 
 ```{r summarizing_orthoflags_3}
 # Take a look at the distribution of different species flags. 
@@ -151,7 +155,6 @@ ggplot(orthoflags) +
   coord_flip() +
   ggtitle("Orthogroups by species-specific HOG expansions (TRUE=present in all spp.)")
 
-
 ggplot(orthoflags) +
   aes(x=reorder(unlist(deletion_species_specific), unlist(deletion_species_specific), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
   xlab(NULL) +
@@ -161,75 +164,63 @@ ggplot(orthoflags) +
 
 In order to get these orthogroup annotations into the `GBreaks` object later, we add them as metadata columns to the `transcripts` object from above. 
 
+Since the indices of `orthoflags` are HOG IDs and not transcripts, we transmute the data a little to get a data frame indexed by a transcript ID. This format makes it easy to glom onto the transcripts file with `addMetadataToGRanges()`.
+
 ```{r flagging_orthogroups_3}
-# This function takes the output of `flagAllPHO` and parses it into a data frame
-# suitable for glomming with addMetadataToGRanges.
-orthoflagsToDF <- function(orthoflags, species) {
-  annotations_per_row <- apply(orthoflags, 1, function(row) {
-    row <- as.list(row)
-    sp_transcripts <- row[[species]]
-    transcript_ids <- unname(unlist(strsplit(x = sp_transcripts, ",")))
-    hog <- row[["hog"]]
-    og <- row[["og"]]
-    gene_tree_parent_clade <- row[["gene_tree_parent_clade"]]
-    hog_transcripts <- row[["transcripts"]]
-    hog_taxa <- row[["taxa"]]
-    hog_taxa_count <- row[["taxa_count"]]
-    hog_flag <- row[["flag"]]
-    hog_presence <- row[["present_in_all_species"]]
-    if(!any(is.na(transcript_ids))){
-      annotation <- lapply(transcript_ids, function(tx) {
-        list(tx_name=tx, hog=hog, og=og, gene_tree_parent_clade=gene_tree_parent_clade, hog_transcripts=hog_transcripts, hog_taxa=hog_taxa, hog_taxa_count=hog_taxa_count, hog_flag=hog_flag, hog_presence=hog_presence)
+# The indices of the orthoflag matrix are HOG identifiers. So, relate the HOGs to transcripts and transfer
+# the orthoflags to them.
+rowData(se)$orthoFlags <- apply(orthoflags, 1, function(flags) flags)
+# Transmute the SummarizedExperiment to make a species-specific data frame, indexed by gene IDs.
+make_transcript_df <- function(SummarizedExperiment, species) {
+  # Go over all of the rows in the annotation.
+  tdf <- apply(rowData(se), 1, function(row) {
+    # Grab some of the useful information.
+    hog <- row$HOG
+    og <- row$OG
+    gtpc <- row$Gene.Tree.Parent.Clade
+    #txNames <- row$txNames #|> CharacterList()
+    hog_orthoflags <- row$orthoFlags
+    species_transcripts <- row[[species]] |> unlist()
+    # Make sure there are any transcripts for that species first.
+    if(!identical(species_transcripts, character(0))) {
+      species_df <- lapply(species_transcripts, function(transcript) {
+        transcript_list <- list(hog=hog, txFull=transcript, og=og, gtpc=gtpc)
+        # Note this hacky line that assumes gene IDs can be parsed out according to the .gX name
+        # which is assigned by AUGUSTUS.
+        transcript_list$txSimple <- paste("g", unlist(strsplit(transcript, ".g"))[2], sep="")
+        transcript_list <- append(transcript_list, hog_orthoflags)
+        #transcript_list$txNames <- txNames
+        transcript_list
       })
-      annotation <- do.call(rbind, annotation)
+      species_df = do.call(rbind, species_df)
+      species_df
     }
   })
-  annotations <- as.data.frame(do.call(rbind, annotations_per_row))
-  annotations
+  tdf = do.call(rbind, tdf)
+  # Make sure that the columns aren't themselves lists.
+  tdf[,1:20] = apply(tdf[,1:20], 2, unlist) |> as.data.frame()
+  #tdf <- as.data.frame(tdf)
+  tdf
 }
-
-orthoflagsDF <- SimpleList()
-orthoflagsDF$Oki <- orthoflagsToDF(orthoflags=orthoflags, species="Oki")
-orthoflagsDF$Osa <- orthoflagsToDF(orthoflags=orthoflags, species="Osa")
-orthoflagsDF$Bar <- orthoflagsToDF(orthoflags=orthoflags, species="Bar")
-orthoflagsDF$Kum <- orthoflagsToDF(orthoflags=orthoflags, species="Kum")
-orthoflagsDF$Aom <- orthoflagsToDF(orthoflags=orthoflags, species="Aom")
-orthoflagsDF$Nor <- orthoflagsToDF(orthoflags=orthoflags, species="Nor")
+orthoflagsDF     <- SimpleList()
+orthoflagsDF$Oki <- make_transcript_df(se, 'Oki')
+orthoflagsDF$Osa <- make_transcript_df(se, 'Osa')
+orthoflagsDF$Bar <- make_transcript_df(se, 'Bar')
+orthoflagsDF$Aom <- make_transcript_df(se, 'Aom')
+orthoflagsDF$Nor <- make_transcript_df(se, 'Nor')
 ```
 
-Note that the "full" transcript names are used in the OrthoFinder output, whereas parsed names are used in the `transcript` object. Let's fix the names to make them parseable.
-
-```{r adding_simple_names}
-orthoflagsDF$Oki$tx_name_simple = unname(sapply(orthoflagsDF$Oki$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[3:4], collapse='.')))
-orthoflagsDF$Osa$tx_name_simple = unname(sapply(orthoflagsDF$Osa$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[3:4], collapse='.')))
-orthoflagsDF$Bar$tx_name_simple = unname(sapply(orthoflagsDF$Bar$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2:3], collapse='.')))
-orthoflagsDF$Kum$tx_name_simple = unname(sapply(orthoflagsDF$Kum$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2:3], collapse='.')))
-orthoflagsDF$Aom$tx_name_simple = unname(sapply(orthoflagsDF$Aom$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2:3], collapse='.')))
-orthoflagsDF$Nor$tx_name_simple = unname(sapply(orthoflagsDF$Nor$tx_name, function(s) paste(unlist(strsplit(s, '\\.'))[2], collapse='.')))
-```
-
-The `orthoflagsDF` object contains all the same information as the `orthoflags` object, but is in a slightly more convenient formatting for gluing on to the transcript annotations later. We do so here:
+The `orthoflagsDF` object contains the same information as the `orthoflags` object, but is in a slightly more convenient formatting for gluing on to the transcript annotations. We do so here:
 
 ```{r gluing_orthoflags}
-transcripts <- sapply(names(transcripts), function(sp){
-  stitched <- OikScrambling:::addMetadataToGRanges(gr=transcripts[[sp]], df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_taxa', rename_meta = 'HOG_taxa')
-  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_taxa_count', rename_meta = 'HOG_taxa_counts')
-  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_flag', rename_meta = 'HOG_flag')
-  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='tx_name_simple', df_col_name = 'hog_presence', rename_meta = 'HOG_presence')
+
+transcripts2 <- sapply(names(transcripts), function(sp){
+  stitched <- OikScrambling:::addMetadataToGRanges(gr=transcripts[[sp]], df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='txSimple', df_col_name = 'hog', rename_meta = 'HOG')
+  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='txSimple', df_col_name = 'present_in_all_spp', rename_meta = 'present_in_all_spp')
   stitched
 })
-transcripts |> SimpleList()
+transcripts2 |> SimpleList()
 ```
-
-```{r load_orthogroups}
-# Example for loading all orthogroups:
-OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
-
-# Example for loading a pair
-OikScrambling:::load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
-                , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
-```
-
 
 Prepare GBreak objects
 ======================
