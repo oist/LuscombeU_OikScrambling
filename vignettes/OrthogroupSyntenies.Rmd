@@ -187,7 +187,11 @@ make_transcript_df <- function(SummarizedExperiment, species) {
         transcript_list <- list(hog=hog, txFull=transcript, og=og, gtpc=gtpc)
         # Note this hacky line that assumes gene IDs can be parsed out according to the .gX name
         # which is assigned by AUGUSTUS.
-        transcript_list$txSimple <- paste("g", unlist(strsplit(transcript, ".g"))[2], sep="")
+        if(grepl(".t", transcript)){
+          transcript_list$txSimple <- paste("g", unlist(strsplit(transcript, ".g"))[2], sep="")
+        } else {
+          transcript_list$txSimple <- unlist(strsplit(transcript, "\\."))[2]
+        }
         transcript_list <- append(transcript_list, hog_orthoflags)
         #transcript_list$txNames <- txNames
         transcript_list
@@ -198,28 +202,27 @@ make_transcript_df <- function(SummarizedExperiment, species) {
   })
   tdf = do.call(rbind, tdf)
   # Make sure that the columns aren't themselves lists.
-  tdf[,1:20] = apply(tdf[,1:20], 2, unlist) |> as.data.frame()
-  #tdf <- as.data.frame(tdf)
+  tdf = apply(tdf, 2, unlist)
+  tdf <- as.data.frame(tdf)
+  tdf$orthoFlagDF <- apply(tdf, 1, function(row) as.data.frame(as.list(row[5:20])))
   tdf
 }
 orthoflagsDF     <- SimpleList()
 orthoflagsDF$Oki <- make_transcript_df(se, 'Oki')
 orthoflagsDF$Osa <- make_transcript_df(se, 'Osa')
 orthoflagsDF$Bar <- make_transcript_df(se, 'Bar')
+orthoflagsDF$Kum <- make_transcript_df(se, 'Kum')
 orthoflagsDF$Aom <- make_transcript_df(se, 'Aom')
 orthoflagsDF$Nor <- make_transcript_df(se, 'Nor')
 ```
 
-The `orthoflagsDF` object contains the same information as the `orthoflags` object, but is in a slightly more convenient formatting for gluing on to the transcript annotations. We do so here:
+The `orthoflagsDF` object contains the same information as the `orthoflags` object, but is in a slightly more convenient format for gluing on to the transcript annotations. We do so here:
 
 ```{r gluing_orthoflags}
-
-transcripts2 <- sapply(names(transcripts), function(sp){
-  stitched <- OikScrambling:::addMetadataToGRanges(gr=transcripts[[sp]], df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='txSimple', df_col_name = 'hog', rename_meta = 'HOG')
-  stitched <- OikScrambling:::addMetadataToGRanges(gr=stitched, df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='txSimple', df_col_name = 'present_in_all_spp', rename_meta = 'present_in_all_spp')
+transcripts <- sapply(names(transcripts), function(sp){
+  stitched <- OikScrambling:::addMetadataToGRanges(gr=transcripts[[sp]], df=orthoflagsDF[[sp]], gr_key='tx_name', df_key='txSimple', df_col_name = 'orthoFlagDF', rename_meta = 'orthoFlagDF')
   stitched
-})
-transcripts2 |> SimpleList()
+}) |> SimpleList()
 ```
 
 Prepare GBreak objects
@@ -277,13 +280,13 @@ orthoPairToGBreaks_all_Oiks <- function(treeName) {
 }
 
 orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
-orthoPairs$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
-                                        , transcripts$Ply, transcripts$Ros, treeName="N20")
+#orthoPairs$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
+#                                        , transcripts$Ply, transcripts$Ros, treeName="N20")
 
 # Same as above but using the same core orthogroups for all species.
 orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
-orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
-                                             , transcripts$Ply, transcripts$Ros, treeName="N3")
+#orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
+#                                             , transcripts$Ply, transcripts$Ros, treeName="N3")
 
 sapply(orthoPairs, length)
 sapply(orthoPairs_core, length)
@@ -359,10 +362,7 @@ coalOrtho <- function(gb) {
   
   # Add orthoflags. Since the flags are assigned to orthogroups, the flags are the same
   # for all single-copy orthologues.
-  coal$HOG_taxa <- CharacterList(split(gb$HOG_taxa [subjectHits(ov)], queryHits(ov))) |> unname()
-  coal$HOG_taxa_counts <- CharacterList(split(gb$HOG_taxa_counts [subjectHits(ov)], queryHits(ov))) |> unname()
-  coal$HOG_flag <- CharacterList(split(gb$HOG_flag [subjectHits(ov)], queryHits(ov))) |> unname()
-  coal$HOG_presence <- CharacterList(split(gb$HOG_presence [subjectHits(ov)], queryHits(ov))) |> unname()
+  coal$orthoFlagDF <- CharacterList(split(gb$orthoFlagDF [subjectHits(ov)], queryHits(ov))) |> unname()
 
   # Count genes per syntenic block
   coal$geneNumber <- sapply(coal$geneNames, length)
@@ -371,13 +371,13 @@ coalOrtho <- function(gb) {
 }
 
 orthoBlocks <- sapply(orthoPairsFiltered[1:15], coalOrtho) |> SimpleList()
-orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
+#orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
 orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
 orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
 orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
 
 orthoBlocks_core <- sapply(orthoPairsFiltered_core[1:15], coalOrtho) |> SimpleList()
-orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
+#orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
 orthoBlocks_core[ 1:5 ] <- sapply(orthoBlocks_core[ 1:5 ],  flagLongShort, longShort$Oki)
 orthoBlocks_core[ 6:10] <- sapply(orthoBlocks_core[ 6:10],  flagLongShort, longShort$Osa)
 orthoBlocks_core[11:15] <- sapply(orthoBlocks_core[11:15],  flagLongShort, longShort$Bar)
@@ -529,6 +529,83 @@ ggarrange(plot1, plot2)
 
 ```
 
+Patterns of gene family expansion and contraction
+-------------------------------------------------
+Genes that are found in all species are found where in the genome?
+
+```{r expand_contract_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
+ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  facet_wrap(~Arm) +
+  xlab('Present in all spp.') +
+  ggtitle("Oki-Osa: Location of HOGs present in all spp.")
+```
+
+```{r expand_contract_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoPairs$Oki_Bar), as.data.frame(orthoPairs$Oki_Bar)$seqnames %in% big_chr)
+ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  facet_wrap(~Arm) +
+  xlab('Present in all spp.') +
+  ggtitle("Oki-Bar: Location of HOGs present in all spp.")
+```
+
+```{r expand_contract_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoPairs$Osa_Bar), as.data.frame(orthoPairs$Osa_Bar)$seqnames %in% big_chr)
+ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  facet_wrap(~Arm) +
+  xlab('Present in all spp.') +
+  ggtitle("Osa-Bar: Location of HOGs present in all spp.")
+```
+
+It seems that, in general, a greater fraction of genes on long arms can be found across all species. Let us continue this logic further.
+
+Where are one-to-one orthologues found?
+
+```{r expand_contract_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
+ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$one_to_one))) +
+  geom_bar(stat='count') +
+  facet_wrap(~Arm) +
+  xlab('One-to-one HOG') +
+  ggtitle("Oki-Osa: Location of one-to-one HOGs")
+```
+
+```{r expand_contract_5, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoPairs$Oki_Bar), as.data.frame(orthoPairs$Oki_Bar)$seqnames %in% big_chr)
+ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$one_to_one))) +
+  geom_bar(stat='count') +
+  facet_wrap(~Arm) +
+  xlab('One-to-one HOG') +
+  ggtitle("Oki-Bar: Location of one-to-one HOGs")
+```
+
+```{r expand_contract_6, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoPairs$Osa_Bar), as.data.frame(orthoPairs$Osa_Bar)$seqnames %in% big_chr)
+ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$one_to_one))) +
+  geom_bar(stat='count') +
+  facet_wrap(~Arm) +
+  xlab('One-to-one HOG') +
+  ggtitle("Osa-Bar: Location of one-to-one HOGs")
+```
+
+So, it also seems that one-to-one genes, as a proportion, are less common in short arms.
+
+TBD
 
 # Session information
 
