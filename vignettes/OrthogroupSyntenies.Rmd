@@ -97,7 +97,7 @@ rownames(se_m) <- rowData(se)$HOG
 
 # Create a list of clades. Each clade contains a vector of species names (the "new_names" of the next
 # data frame. The clades can overlap.
-clades=list("Oki_Kum"=c("Kum","Oki"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar","Nor"), "Northern"=c("Osa","Aom","Bar","Nor"))
+clades=list("Oki_Kum"=c("Oki","Kum"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar","Nor"), "Northern"=c("Osa","Aom","Bar","Nor"))
 
 # clade_list: a named list where each list contains a vector of species.
 # expansion_reconciliation: How to reconcile situations where more than 1 clade shows an expansion. 
@@ -284,12 +284,12 @@ orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
 #                                        , transcripts$Ply, transcripts$Ros, treeName="N20")
 
 # Same as above but using the same core orthogroups for all species.
-orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
+#orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
 #orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
 #                                             , transcripts$Ply, transcripts$Ros, treeName="N3")
 
 sapply(orthoPairs, length)
-sapply(orthoPairs_core, length)
+#sapply(orthoPairs_core, length)
 ```
 
 Problem: some annotations overlap
@@ -362,7 +362,7 @@ coalOrtho <- function(gb) {
   
   # Add orthoflags. Since the flags are assigned to orthogroups, the flags are the same
   # for all single-copy orthologues.
-  coal$orthoFlagDF <- CharacterList(split(gb$orthoFlagDF [subjectHits(ov)], queryHits(ov))) |> unname()
+  coal$orthoFlagDF <- split(gb$orthoFlagDF [subjectHits(ov)], queryHits(ov)) |> unname()
 
   # Count genes per syntenic block
   coal$geneNumber <- sapply(coal$geneNames, length)
@@ -529,11 +529,56 @@ ggarrange(plot1, plot2)
 
 ```
 
+Where do these blocks occur?
+
+```{r genes_per_block_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+dat = as.data.frame(orthoBlocks$Oki_Osa)
+dat = subset(dat, dat$seqnames %in% big_chr)
+simple_plot <- ggplot( dat ) +
+  aes(x=geneNumber) +
+  geom_bar(stat='count') +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('Genes per block') +
+  geom_histogram(aes(y=..count..*10), binwidth = 1) +
+  scale_y_log10(labels=function(y) y/10, name="count") +
+  ggtitle("Oki-Osa: All-species HOGs by genomic location")
+simple_plot
+```
+
+```{r genes_per_block_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoBlocks$Oki_Bar), as.data.frame(orthoBlocks$Oki_Bar)$seqnames %in% big_chr)
+simple_plot <- ggplot( dat ) +
+  aes(x=geneNumber) +
+  geom_bar(stat='count') +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('Genes per block') +
+  geom_histogram(aes(y=..count..*10), binwidth = 1) +
+  scale_y_log10(labels=function(y) y/10, name="count") +
+  ggtitle("Oki-Bar: All-species HOGs by genomic location")
+simple_plot
+```
+
+```{r genes_per_block_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
+dat = subset(as.data.frame(orthoBlocks$Osa_Bar), as.data.frame(orthoBlocks$Osa_Bar)$seqnames %in% big_chr)
+simple_plot <- ggplot( dat ) +
+  aes(x=geneNumber) +
+  geom_bar(stat='count') +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('Genes per block') +
+  geom_histogram(aes(y=..count..*10), binwidth = 1) +
+  scale_y_log10(labels=function(y) y/10, name="count") +
+  ggtitle("Osa-Bar: All-species HOGs by genomic location")
+simple_plot
+```
+
 Patterns of gene family expansion and contraction
 -------------------------------------------------
 Genes that are found in all species are found where in the genome?
 
-```{r expand_contract_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -557,7 +602,7 @@ complex_plot <- ggplot( dat ) +
 complex_plot
 ```
 
-```{r expand_contract_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Bar), as.data.frame(orthoPairs$Oki_Bar)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -581,7 +626,7 @@ complex_plot <- ggplot( dat ) +
 complex_plot
 ```
 
-```{r expand_contract_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Osa_Bar), as.data.frame(orthoPairs$Osa_Bar)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -609,7 +654,7 @@ Taken together: in general, a greater fraction of genes on long arms can be foun
 
 Where are one-to-one orthologues found?
 
-```{r expand_contract_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -633,7 +678,7 @@ complex_plot <- ggplot( dat ) +
 complex_plot
 ```
 
-```{r expand_contract_5, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_5, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Bar), as.data.frame(orthoPairs$Oki_Bar)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -657,7 +702,7 @@ complex_plot <- ggplot( dat ) +
 complex_plot
 ```
 
-```{r expand_contract_6, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_6, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Osa_Bar), as.data.frame(orthoPairs$Osa_Bar)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -685,8 +730,100 @@ As a point of clarification, a HOG is either exactly one-to-one (exactly one HOG
 
 Thus, it seems that whether or not a gene participates in a one-to-one HOG also depends on where the gene is encoded. Long chromosome arms are more often host to one-to-ones, and this is also true for the XSR, which always has the highest proportion of one-to-one genes across all species pairs.
 
+Common-gene duplications
+------------------------
+Genes that are found in all species, and which have seemingly been duplicated (>1 in any species), occur where across the genome?
+
+```{r species_expansion_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+arm_df = as.data.frame(longShort$Oki)
+arm_df$chr_arm = paste(arm_df$seqnames, "_", arm_df$Type, sep="")
+transcript_df = as.data.frame(transcripts$Oki)
+
+arm_df$geneNumber <- apply(arm_df, 1, function(region){
+  region = as.list(region)
+  gene_count = nrow(subset(transcript_df, transcript_df$seqnames == region$seqnames & as.numeric(transcript_df$end) <= as.numeric(region$end) & as.numeric(transcript_df$start) >= as.numeric(region$start) ))
+  gene_count
+})
+
+dat =  subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
+dat = dat[unlist(lapply(dat$orthoFlagDF, function(x) x$common_gene_duplication ==TRUE)) , ]
+dat = dat |> dplyr::group_by(seqnames, Arm) |> dplyr::summarise(count=dplyr::n())
+
+dat$count_per_gene = apply(dat, 1, function(region){
+  gene_number = arm_df[arm_df$chr_arm==paste(region[["seqnames"]], region[["Arm"]], sep="_"),]$geneNumber
+  mod_count = as.numeric(region[["count"]])/gene_number
+  mod_count
+})
+
+dat$count_per_Mbp = apply(dat, 1, function(region){
+  n_mbp = arm_df[arm_df$chr_arm==paste(region[["seqnames"]], region[["Arm"]], sep="_"),]$width/1000000
+  mod_count = as.numeric(region[["count"]])/n_mbp
+  mod_count
+})
+
+ggplot(dat) +
+  aes(x=seqnames, y=count) +
+  geom_bar(stat='identity') +
+  facet_wrap(~Arm)
+```
+
+
+```{r hello}
+# Find midpoints of a GRanges.
+grMidpoint <- function(gr) {
+  starts <- as.data.frame(ranges(gr))$start
+  ends <- as.data.frame(ranges(gr))$end
+  mids <- (starts+ends)/2
+  mids
+}
+
+big_chr <- c("chr1","chr2","PAR","XSR","YSR")
+
+# Given a chromosome-scale assembly (sp1) and a second species of a clade (sp2),
+# plot coordinates of clade-specific gene expansions (common to sp1+sp2) and
+# species-specific expansions.
+collect_clade_expansions <- function(orthopairs, sp1, sp2, big_chr) {
+  result <- SimpleList()
+  orthopair <- orthopairs[[paste(sp1, sp2, sep="_")]]
+  orthopair$midpoints <- grMidpoint(orthopair)
+  orthopair <- as.data.frame(orthopair)
+  df <- subset(orthopair, orthopair$seqnames %in% big_chr)
+  # Identify clade-specific expansions
+  dat_clade <- df[as.logical(unlist(lapply(df$orthoFlagDF, function(x) x[[paste("expansion_clade_", sp1, "_", sp2, sep="")]] )))==TRUE,] |> as.data.frame()
+  result[[paste(sp1, sp2, sep="_")]] <- dat_clade
+  # Obtain species-specific expansions for both species
+  # sp1 must be a chromosomal assembly - and getting its gene coordinates relative to the
+  # sp1 assembly is therefore really easy
+  df_sp1 <- as.data.frame(transcripts[[sp1]])
+  df_sp1 <- subset(df_sp1, df_sp1$seqnames %in% big_chr)
+  dat_sp1 <- df_sp1[which(unlist(lapply(df_sp1$orthoFlagDF, function(x) x$expansion_species_specific ))==sp1),]
+  result[[sp1]] <- dat_sp1
+  # TODO
+  # sp2 is trickier.
+  # Its species-specific expansions cannot be part of the orthoPairs, by definition.
+  # So what you can do is guess where that transcript corresponds to on the reference
+  # genome based on its transcript coordinates, but this is tricky...
+  df_sp2 <- as.data.frame(transcripts[[sp2]])
+  
+  result
+}
+dat <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Oki", sp2="Kum", big_chr=big_chr)
+```
+```
+ggplot(dat) +
+  aes(x=midpoints) +
+  #geom_density() + 
+  geom_histogram(binwidth=500000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2)
+
+```
 
 TBD
+ 
+```
+apply(head(as.data.frame(orthoBlocks$Oki_Osa),n=100), 1, function(x) table(unlist(lapply(x$orthoFlagDF, function(y) y$present_in_all_spp))))
+```
 
 # Session information
 
