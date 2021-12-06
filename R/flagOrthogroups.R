@@ -64,6 +64,7 @@ flagPHODuplications <- function(count_matrix) {
   })
   flags
 }
+
 # Iterate over rows in a HOG count matrix and return whether any species
 # has more genes than every other species (expansion_speciesName)
 # or not (NA).
@@ -170,7 +171,7 @@ flagSpeciesSpecificDeletions <- function(count_matrix) {
     if(min_count == 0 & all(other_counts > 0)) {
       flag <- min_taxon
     } else {
-      flag <- FALSE
+      flag <- NA
     }
     flag
   })
@@ -250,6 +251,7 @@ flagAllPHO <- function(count_matrix, clade_list, expansion_reconciliation="large
   colnames(annotated_matrix) <- "present_in_all_spp"
   annotated_matrix[,"present_in_all_spp"]         <- flagPHOPresenceAbsence(count_matrix)
   annotated_matrix[,"one_to_one"]                 <- flagPHOOneToOnes(count_matrix)
+  annotated_matrix[,"common_gene_duplication"]    <- flagPHODuplications(count_matrix)
   annotated_matrix[,"expansion_species_specific"] <- flagPHOSpeciesSpecificExpansions(count_matrix)
   annotated_matrix                                <- cbind(annotated_matrix, reconcilePHOExpansions(count_matrix=count_matrix, clade_list = clade_list, reconciliation = expansion_reconciliation))
   annotated_matrix[,"deletion_species_specific"]  <- flagSpeciesSpecificDeletions(count_matrix)
