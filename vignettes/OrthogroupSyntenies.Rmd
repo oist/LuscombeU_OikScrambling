@@ -536,74 +536,155 @@ Genes that are found in all species are found where in the genome?
 ```{r expand_contract_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
-ggplot( dat ) +
+simple_plot <- ggplot( dat ) +
   aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
   geom_bar(stat='count') +
   facet_wrap(~Arm) +
-  xlab('Present in all spp.') +
-  ggtitle("Oki-Osa: Location of HOGs present in all spp.")
+  xlab('All-species HOG') +
+  ggtitle("Oki-Osa: All-species HOGs by genomic location")
+
+simple_plot
+
+complex_plot <- ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  geom_text(aes(label=paste(..count.., ' (', scales::percent((..count..)/sum(..count..), accuracy = 0.1), ')', sep=''), y=..count..), stat='count', vjust=-0.5, size=2.5) +
+  scale_y_continuous(expand=expansion(mult=c(0, 0.35))) +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('All-species HOG') +
+  ggtitle("Oki-Osa: All-species HOGs by genomic location")
+
+complex_plot
 ```
 
 ```{r expand_contract_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Bar), as.data.frame(orthoPairs$Oki_Bar)$seqnames %in% big_chr)
-ggplot( dat ) +
+simple_plot <- ggplot( dat ) +
   aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
   geom_bar(stat='count') +
   facet_wrap(~Arm) +
-  xlab('Present in all spp.') +
-  ggtitle("Oki-Bar: Location of HOGs present in all spp.")
+  xlab('All-species HOG') +
+  ggtitle("Oki-Bar: All-species HOGs by genomic location")
+
+simple_plot
+
+complex_plot <- ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  geom_text(aes(label=paste(..count.., ' (', scales::percent((..count..)/sum(..count..), accuracy = 0.1), ')', sep=''), y=..count..), stat='count', vjust=-0.5, size=2.5) +
+  scale_y_continuous(expand=expansion(mult=c(0, 0.35))) +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('All-species HOG') +
+  ggtitle("Oki-Bar: All-species HOGs by genomic location")
+
+complex_plot
 ```
 
 ```{r expand_contract_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Osa_Bar), as.data.frame(orthoPairs$Osa_Bar)$seqnames %in% big_chr)
-ggplot( dat ) +
+simple_plot <- ggplot( dat ) +
   aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
   geom_bar(stat='count') +
   facet_wrap(~Arm) +
-  xlab('Present in all spp.') +
-  ggtitle("Osa-Bar: Location of HOGs present in all spp.")
+  xlab('All-species HOG') +
+  ggtitle("Osa-Bar: All-species HOGs by genomic location")
+
+simple_plot
+
+complex_plot <- ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  geom_text(aes(label=paste(..count.., ' (', scales::percent((..count..)/sum(..count..), accuracy = 0.1), ')', sep=''), y=..count..), stat='count', vjust=-0.5, size=2.5) +
+  scale_y_continuous(expand=expansion(mult=c(0, 0.35))) +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('All-species HOG') +
+  ggtitle("Osa-Bar: All-species HOGs by genomic location")
+
+complex_plot
 ```
 
-It seems that, in general, a greater fraction of genes on long arms can be found across all species. Let us continue this logic further.
+Taken together: in general, a greater fraction of genes on long arms can be found in all species. Let us continue this logic further.
 
 Where are one-to-one orthologues found?
 
 ```{r expand_contract_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
-ggplot( dat ) +
+simple_plot <- ggplot( dat ) +
   aes(x=unlist(lapply(orthoFlagDF, function(x) x$one_to_one))) +
   geom_bar(stat='count') +
   facet_wrap(~Arm) +
   xlab('One-to-one HOG') +
-  ggtitle("Oki-Osa: Location of one-to-one HOGs")
+  ggtitle("Oki-Osa: One-to-one HOGs by genomic location")
+
+simple_plot
+
+complex_plot <- ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  geom_text(aes(label=paste(..count.., ' (', scales::percent((..count..)/sum(..count..), accuracy = 0.1), ')', sep=''), y=..count..), stat='count', vjust=-0.5, size=2.5) +
+  scale_y_continuous(expand=expansion(mult=c(0, 0.35))) +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('One-to-one HOG') +
+  ggtitle("Oki-Osa: One-to-one HOGs by genomic location")
+
+complex_plot
 ```
 
 ```{r expand_contract_5, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Bar), as.data.frame(orthoPairs$Oki_Bar)$seqnames %in% big_chr)
-ggplot( dat ) +
+simple_plot <- ggplot( dat ) +
   aes(x=unlist(lapply(orthoFlagDF, function(x) x$one_to_one))) +
   geom_bar(stat='count') +
   facet_wrap(~Arm) +
   xlab('One-to-one HOG') +
-  ggtitle("Oki-Bar: Location of one-to-one HOGs")
+  ggtitle("Oki-Bar: One-to-one HOGs by genomic location")
+
+simple_plot
+
+complex_plot <- ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  geom_text(aes(label=paste(..count.., ' (', scales::percent((..count..)/sum(..count..), accuracy = 0.1), ')', sep=''), y=..count..), stat='count', vjust=-0.5, size=2.5) +
+  scale_y_continuous(expand=expansion(mult=c(0, 0.35))) +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('One-to-one HOG') +
+  ggtitle("Oki-Bar: One-to-one HOGs by genomic location")
+
+complex_plot
 ```
 
 ```{r expand_contract_6, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Osa_Bar), as.data.frame(orthoPairs$Osa_Bar)$seqnames %in% big_chr)
-ggplot( dat ) +
+simple_plot <- ggplot( dat ) +
   aes(x=unlist(lapply(orthoFlagDF, function(x) x$one_to_one))) +
   geom_bar(stat='count') +
   facet_wrap(~Arm) +
   xlab('One-to-one HOG') +
-  ggtitle("Osa-Bar: Location of one-to-one HOGs")
+  ggtitle("Osa-Bar: One-to-one HOGs by genomic location")
+
+simple_plot
+
+complex_plot <- ggplot( dat ) +
+  aes(x=unlist(lapply(orthoFlagDF, function(x) x$present_in_all_spp))) +
+  geom_bar(stat='count') +
+  geom_text(aes(label=paste(..count.., ' (', scales::percent((..count..)/sum(..count..), accuracy = 0.1), ')', sep=''), y=..count..), stat='count', vjust=-0.5, size=2.5) +
+  scale_y_continuous(expand=expansion(mult=c(0, 0.35))) +
+  facet_wrap(seqnames~Arm, ncol=2) +
+  xlab('One-to-one HOG') +
+  ggtitle("Osa-Bar: One-to-one HOGs by genomic location")
+
+complex_plot
 ```
 
-So, it also seems that one-to-one genes, as a proportion, are less common in short arms.
+As a point of clarification, a HOG is either exactly one-to-one (exactly one HOG participant from every species) or not (meaning a gene has been duplicated somewhere and has not been fully resolved into clade-specific HOGs, or else the gene is missing in one or more species).
+
+Thus, it seems that whether or not a gene participates in a one-to-one HOG also depends on where the gene is encoded. Long chromosome arms are more often host to one-to-ones, and this is also true for the XSR, which always has the highest proportion of one-to-one genes across all species pairs.
+
 
 TBD
 
