@@ -730,46 +730,11 @@ As a point of clarification, a HOG is either exactly one-to-one (exactly one HOG
 
 Thus, it seems that whether or not a gene participates in a one-to-one HOG also depends on where the gene is encoded. Long chromosome arms are more often host to one-to-ones, and this is also true for the XSR, which always has the highest proportion of one-to-one genes across all species pairs.
 
-Common-gene duplications
-------------------------
+Species- and clade-specific duplications across genome
+------------------------------------------------------
 Genes that are found in all species, and which have seemingly been duplicated (>1 in any species), occur where across the genome?
 
-```{r species_expansion_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
-big_chr = c("chr1","chr2","PAR","XSR","YSR")
-arm_df = as.data.frame(longShort$Oki)
-arm_df$chr_arm = paste(arm_df$seqnames, "_", arm_df$Type, sep="")
-transcript_df = as.data.frame(transcripts$Oki)
-
-arm_df$geneNumber <- apply(arm_df, 1, function(region){
-  region = as.list(region)
-  gene_count = nrow(subset(transcript_df, transcript_df$seqnames == region$seqnames & as.numeric(transcript_df$end) <= as.numeric(region$end) & as.numeric(transcript_df$start) >= as.numeric(region$start) ))
-  gene_count
-})
-
-dat =  subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
-dat = dat[unlist(lapply(dat$orthoFlagDF, function(x) x$common_gene_duplication ==TRUE)) , ]
-dat = dat |> dplyr::group_by(seqnames, Arm) |> dplyr::summarise(count=dplyr::n())
-
-dat$count_per_gene = apply(dat, 1, function(region){
-  gene_number = arm_df[arm_df$chr_arm==paste(region[["seqnames"]], region[["Arm"]], sep="_"),]$geneNumber
-  mod_count = as.numeric(region[["count"]])/gene_number
-  mod_count
-})
-
-dat$count_per_Mbp = apply(dat, 1, function(region){
-  n_mbp = arm_df[arm_df$chr_arm==paste(region[["seqnames"]], region[["Arm"]], sep="_"),]$width/1000000
-  mod_count = as.numeric(region[["count"]])/n_mbp
-  mod_count
-})
-
-ggplot(dat) +
-  aes(x=seqnames, y=count) +
-  geom_bar(stat='identity') +
-  facet_wrap(~Arm)
-```
-
-
-```{r hello}
+```{r gene_duplications_1}
 # Find midpoints of a GRanges.
 grMidpoint <- function(gr) {
   starts <- as.data.frame(ranges(gr))$start
@@ -777,8 +742,6 @@ grMidpoint <- function(gr) {
   mids <- (starts+ends)/2
   mids
 }
-
-big_chr <- c("chr1","chr2","PAR","XSR","YSR")
 
 # Given a chromosome-scale assembly (sp1) and a second species of a clade (sp2),
 # plot coordinates of clade-specific gene expansions (common to sp1+sp2) and
@@ -789,17 +752,23 @@ collect_clade_expansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
   orthopair$midpoint <- grMidpoint(orthopair)
   orthopair <- as.data.frame(orthopair)
   orthopair <- subset(orthopair, orthopair$seqnames %in% big_chr)
+
   # Identify clade-specific expansions
+  # Get some data we will need later. The Clade-specific data frame is easiest because it just needs to be subset from the pair by flag.
   dat_clade <- orthopair[as.logical(unlist(lapply(orthopair$orthoFlagDF, function(x) x[[paste("expansion_clade_", sp1, "_", sp2, sep="")]] )))==TRUE,] |> as.data.frame()
   result[[paste(sp1, sp2, sep="_")]] <- dat_clade
-  # Obtain species-specific expansions for both species
-  # sp1 must be a chromosomal assembly - and getting its gene coordinates relative to the
-  # sp1 assembly is therefore really easy.
+  
+  # sp1-specific expansion
+  # sp1 must be the chromosomal assembly. We transfer the coordinates of its species-specific gene family
+  # expansions into a dummy orthoPairs object to facilitate rbind'ing later.
   df_sp1 <- as.data.frame(transcripts[[sp1]])
-  df_sp1$midpoint <- grMidpoint(transcripts[[sp1]])
   df_sp1 <- subset(df_sp1, df_sp1$seqnames %in% big_chr) # Subset to only chromosome-scale scaffolds
   df_sp1 <- df_sp1[which(unlist(lapply(df_sp1$orthoFlagDF, function(x) x$expansion_species_specific ))==sp1),] # Subset to species-specific expansions
-  dat_sp1 <- flagLongShort(GRanges(df_sp1), longShort) |> as.data.frame()
+  # Add a bunch of empty columns to make the object look like an orthoPair
+  df_sp1 <- cbind(df_sp1, query.seqnames=NA, query.start=NA, query.end=NA, query.width=NA, query.strand=NA, query.tx_id=NA, query.tx_name=NA, query.dNdS_GUIDANCE2=NA, query.dNdS_HmmCleaner=NA, query.dNdS_PRANK=NA, query.orthoFlagDF=df_sp1$orthoFlagDF)
+  df_sp1 <- flagLongShort(GRanges(df_sp1), longShort) |> as.data.frame() # Add back in long-short arm information
+  df_sp1$midpoint <- grMidpoint(GRanges(df_sp1)) # Add in gene midpoints
+  dat_sp1 <- df_sp1
   result[[sp1]] <- dat_sp1
 
   # sp2 is trickier.
@@ -878,37 +847,200 @@ collect_clade_expansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
     }
   })
   dat_sp2 <- do.call(rbind, df_sp2_specific) |> as.data.frame()
-  
+  # bind rows back into a data.frame
   result[[sp2]] <- dat_sp2
-  # bind rows
+
   result
 }
-dat <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Oki", sp2="Kum", bigChr=big_chr, longShort=longShort$Oki)
+
+big_chr <- c("chr1","chr2","PAR","XSR","YSR")
+duplications <- SimpleList()
+duplications$Oki_Kum <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Oki", sp2="Kum", bigChr=big_chr, longShort=longShort$Oki)
+big_chr <- c("Chr1","Chr2","PAR","XSR","YSR")
+duplications$Osa_Aom <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Osa", sp2="Aom", bigChr=big_chr, longShort=longShort$Osa)
+duplications$Bar_Nor <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Bar", sp2="Nor", bigChr=big_chr, longShort=longShort$Bar)
 ```
-```{r hello2}
-ggplot(dat$Oki_Kum) +
+
+Quickly check where these gene expansions are located:
+```{r gene_duplications_2}
+lapply(duplications, function(pair) {
+  sapply(pair, function(dup_tb) table(dup_tb$seqnames))
+})
+```
+
+
+Now we have data frames that count up the number of clade- and species-specific genomes. Where do duplications fall in the genome?
+
+```{r gene_duplications_pos_oki_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+# Make sure factor levels are in alphabetical order. Otherwise the faceting looks ugly.
+duplications$Oki_Kum  <- lapply(duplications$Oki_Kum, function(sp){
+  sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
+  sp
+})
+
+# Plot distribution of clade-specific duplications across the genome.
+ggplot(duplications$Oki_Kum$Oki_Kum) +
   aes(x=midpoint) +
-  #geom_density() + 
-  geom_histogram(binwidth=500000) +
+  geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
   ggtitle('Gene family expansions: Oki-Kum')
 
+# Oki-specific.
+ggplot(duplications$Oki_Kum$Oki) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Species-specific gene family expansions: Oki')
 
-ggplot(dat$Oki) +
+# Kum-specific.
+ggplot(duplications$Oki_Kum$Kum) +
   aes(x=midpoint) +
   #geom_density() + 
   geom_histogram(binwidth=100000) +
-  #geom_boxplot() +
+  #geom_boxplot(stat='count') + 
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Gene family expansions: Oki-specific')
+  ggtitle('Species-specific gene family expansions: Kum')
 
+# All gene expansions: Oki-specific, Kum-specific, and Oki+Kum-specific.
+ggplot(do.call(rbind, duplications$Oki_Kum)) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Oki, Kum: All species- and clade-specific duplications')
+
+# As above, but without faceting by sequence, which makes a certain pattern immediately clear...
+ggplot(do.call(rbind, duplications$Oki_Kum)) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Oki, Kum: All species- and clade-specific duplications')
 ```
 
-TBD
- 
+Sure, it looks like there is a pattern there. But is it statistically significant?
+
+```{r gene_duplications_pos_oki_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionStats <- function(duplication_pair, pair_name) {
+  df <- do.call(rbind, duplication_pair) |> mutate(bin=cut_width(midpoint, 100000)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
+  plot1 <- ggplot(df) + aes(y=count) + geom_boxplot() + facet_wrap(~Arm, ncol=2) + ggtitle(paste(pair_name, ", dup. by arm", sep=""))
+  plot2 <- ggplot(df) + aes(y=count) + geom_boxplot() + facet_wrap(seqnames~Arm, ncol=2) + ggtitle(paste(pair_name, ", dup. by chr/arm", sep=""))
+  plot_joined = ggarrange(plot1, plot2)
+  plot_joined
+}
+plotExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum")
+
+calcExpansionStats <- function(duplication_pair, pair_name) {
+  df <- do.call(rbind, duplication_pair) |> mutate(bin=cut_width(midpoint, 100000)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
+  # Show some numbers...
+  anova = aov(df$count ~ df$seqnames + df$Arm) |> summary() 
+  tukey = TukeyHSD(aov(df$count ~ df$seqnames + df$Arm), conf.level=0.95)
+  return(SimpleList(anova=anova, tukey=tukey))
+}
+stats <- calcExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum")
+stats$anova
+stats$tukey
 ```
-apply(head(as.data.frame(orthoBlocks$Oki_Osa),n=100), 1, function(x) table(unlist(lapply(x$orthoFlagDF, function(y) y$present_in_all_spp))))
+
+Let's inspect the other chromosomal assemblies.
+
+```{r gene_duplications_pos_osa_1}
+duplications$Osa_Aom  <- lapply(duplications$Osa_Aom, function(sp){
+  sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
+  sp
+})
+
+ggplot(duplications$Osa_Aom$Osa_Aom) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Gene family expansions: Osa-Aom')
+
+ggplot(duplications$Osa_Aom$Osa) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Species-specific gene family expansions: Osa')
+
+ggplot(duplications$Osa_Aom$Aom) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Species-specific gene family expansions: Aom')
+
+
+ggplot(do.call(rbind, duplications$Osa_Aom)) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Osa, Aom: All species- and clade-specific duplications')
+
+# As above, but without faceting by sequence, which makes a certain pattern immediately clear...
+ggplot(do.call(rbind, duplications$Osa_Aom)) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Osa, Aom: All species- and clade-specific duplications')
 ```
+
+```{r gene_duplications_pos_osa_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionStats(duplications$Osa_Aom, pair_name = "Osa-Aom")
+
+stats <- calcExpansionStats(duplications$Osa_Aom, pair_name = "Osa-Aom")
+stats$anova
+stats$tukey
+```
+
+
+```{r gene_duplications_pos_bar_1}
+duplications$Bar_Nor  <- lapply(duplications$Bar_Nor, function(sp){
+  sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
+  sp
+})
+
+ggplot(duplications$Bar_Nor$Bar_Nor) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Gene family expansions: Bar-Nor')
+
+ggplot(duplications$Bar_Nor$Bar) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Species-specific gene family expansions: Bar')
+
+ggplot(duplications$Bar_Nor$Nor) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Species-specific gene family expansions: Nor')
+
+ggplot(do.call(rbind, duplications$Bar_Nor)) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Bar, Nor: All species- and clade-specific duplications')
+
+# As above, but without faceting by sequence, which makes a certain pattern immediately clear...
+ggplot(do.call(rbind, duplications$Bar_Nor)) +
+  aes(x=midpoint) +
+  geom_histogram(binwidth=100000) +
+  facet_wrap(~Arm, scales = "free_x", ncol=2) +
+  ggtitle('Bar, Nor: All species- and clade-specific duplications')
+```
+
+```{r gene_duplications_pos_bar_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionStats(duplications$Bar_Nor, pair_name = "Bar-Nor")
+
+stats <- calcExpansionStats(duplications$Bar_Nor, pair_name = "Bar-Nor")
+stats$anova
+stats$tukey
+```
+
+TODO
+Clade-specific deletions
+------------------------
+In the same vein as the analysis above, let's examine where genes tend to be deleted. Here it is slightly easier, because we can simply look at cases where the `orthoPair` is a species-specific deletion of either the query or the target.
+
 
 # Session information
 
