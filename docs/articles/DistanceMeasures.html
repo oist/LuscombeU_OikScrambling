@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -75,6 +75,9 @@
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
     </li>
     <li>
@@ -90,6 +93,9 @@
       <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -115,7 +121,7 @@
       <h1 data-toc-skip>Distance Measures</h1>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">18 November, 2021</h4>
+            <h4 class="date">29 November, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/DistanceMeasures.Rmd"><code>vignettes/DistanceMeasures.Rmd</code></a></small>
       <div class="hidden name"><code>DistanceMeasures.Rmd</code></div>
@@ -141,14 +147,9 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8
-
-## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8</code></pre>
 <pre><code>## List of length 6
 ## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      
 ##  [7] "tra2"      "coa2"      "unmap2"    "longShort"</code></pre>
@@ -158,7 +159,7 @@
 <h1 class="hasAnchor">
 <a href="#synteny-index" class="anchor"></a>Synteny index</h1>
 <p>Ad-hoc index measuring to what extent a scaffold of the <em>target</em> genome is mostly aligned to a single scaffold in the <em>query</em> genome. See <code><a href="https://oist.github.io/GenomicBreaks/reference/synteny_index.html">?GenomicBreaks::synteny_index</a></code> for details. One limitation to the use of this index is that it requires that at least the <em>query</em> genome is a complete chromosome assembly.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pairs2table6x3</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>
@@ -214,7 +215,7 @@
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html">swap</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/synteny_index.html">synteny_index</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -261,7 +262,7 @@
 <h1 class="hasAnchor">
 <a href="#correlation" class="anchor"></a>Correlation</h1>
 <p>Ad-hoc index measuring the correlation of the coordinates of the syntenic alignments in scaffolds of a <em>target</em> genome and their best match in the <em>query</em> genome. See <code><a href="https://oist.github.io/GenomicBreaks/reference/correlation_index.html">?GenomicBreaks::correlation_index</a></code> for details. It is intended to be more robust to the presence of uncollapsed haplotypes in the <em>query</em> genome but probably needs further testing.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>,                 <span class="va">correlation_index</span>  <span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -303,7 +304,7 @@
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html">swap</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/correlation_index.html">correlation_index</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -350,7 +351,7 @@
 <h1 class="hasAnchor">
 <a href="#gene-order-conservation" class="anchor"></a>Gene Order Conservation</h1>
 <p>See <code><a href="https://oist.github.io/GenomicBreaks/reference/GOC.html">?GenomicBreaks::GOC</a></code> for details.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>,                 <span class="va">GOC</span>  <span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -392,7 +393,7 @@
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html">swap</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GOC.html">GOC</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">

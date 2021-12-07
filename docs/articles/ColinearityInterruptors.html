@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -75,6 +75,9 @@
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
     </li>
     <li>
@@ -90,6 +93,9 @@
       <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -115,7 +121,7 @@
       <h1 data-toc-skip>Regions interrupting colinearity</h1>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">18 November, 2021</h4>
+            <h4 class="date">29 November, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/ColinearityInterruptors.Rmd"><code>vignettes/ColinearityInterruptors.Rmd</code></a></small>
       <div class="hidden name"><code>ColinearityInterruptors.Rmd</code></div>
@@ -145,12 +151,7 @@
 ## 
 ##     strsplit</code></pre>
 <pre><code>## Loading required package: rtracklayer</code></pre>
-<pre><code>## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8
-
-## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8</code></pre>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
 <span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllRepeats.html">loadAllRepeats</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">transcripts</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllTranscriptsGR.html">loadAllTranscriptsGR</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
@@ -159,7 +160,7 @@
 <h1 class="hasAnchor">
 <a href="#the-problem" class="anchor"></a>The problem:</h1>
 <p>The plot below shows high colinearity between Oki and Kum, but the <code>GenomicBreaks</code> objects are still scattered in small pieces. What is interrupting colinearity?</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki – Kum"</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/parallel_chr_plots_Oki_Kum-1.png" width="700"></p>
 <p>In this vignette, we look at a couple of example regions in details. These regions helped me to decide how to process the data in <em>Load Genomic Breaks</em> (<code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> and to decide which analysis to prioritise elsewhere.</p>
@@ -167,14 +168,14 @@
 <div id="alignments-are-real-region-of-interest-1" class="section level1">
 <h1 class="hasAnchor">
 <a href="#alignments-are-real-region-of-interest-1" class="anchor"></a>Alignments are real (Region of Interest 1)</h1>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># The best Kume contig matching ot chr1 is contig_3_1</span>
 <span class="va">bestMatch</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span>, <span class="va">sum</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"chr1"</span><span class="op">)</span> |&gt; <span class="fu">bestMatch</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] "contig_3_1"</code></pre>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># contig_3_1 appears to map roughly in the 8,000,000 – 13,000,000 region</span>
 <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">filter</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_3_1"</span><span class="op">)</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -221,7 +222,7 @@
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
 <p>How about the second alignment pair, mapping 226 bases of <code>contig_3_1</code> to the short arm?</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI1</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">filter</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_3_1"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/start.html">end</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">21079</span><span class="op">)</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html">start</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span><span class="op">)</span>
@@ -239,25 +240,25 @@
 ##   [3]    long       rnd,tandem g2151.t1;g2152.t1;g2..         Tra
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"contig_3_1"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html">gb2xlim</a></span><span class="op">(</span><span class="va">ROI1</span><span class="op">[</span><span class="op">-</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"chr1 vs contig_3_1 at ROI 1"</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/re_align_a_clolinearity_breaker-1.png" width="700"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"contig_3_1"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3838658</span>, <span class="fl">3881203</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">21079</span><span class="op">)</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"chr1 matching contig_3_1 in the short arm"</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/re_align_a_clolinearity_breaker-2.png" width="700"></p>
 <p>Is the alignment convincing ?</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Good match where reported</span>
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu">GRanges</span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">3870099</span><span class="op">:</span><span class="fl">3870324</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Local PairwiseAlignmentsSingleSubject (1 of 1)
 ## pattern: [1] GGGGGCTGACCACTTTGACCAGTGTGTAATAT...GGGTTATTATATATCCTGAAGGGAGAAGGTCA
 ## subject: [1] GGGGGCTGACCACTTTGACCAGTGTGTAATAT...GGGTTATTATATATCCTGAAGGGAGAAGGTCA
 ## score: 344.5798</code></pre>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu">GRanges</span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">50</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="op">(</span><span class="fl">3870099</span> <span class="op">-</span><span class="fl">50</span><span class="op">)</span><span class="op">:</span><span class="op">(</span><span class="fl">3870324</span> <span class="op">+</span> <span class="fl">50</span><span class="op">)</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:33 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:26 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -312,14 +313,14 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># No good match between the flanking pairs.</span>
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu">GRanges</span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:+"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">8086429</span><span class="op">:</span><span class="fl">8104950</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Local PairwiseAlignmentsSingleSubject (1 of 1)
 ## pattern:   [113] TTCTGAATTTTTTCTG
 ## subject: [11595] TTCTGGATTTTTTCTG
 ## score: 23.82705</code></pre>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu">GRanges</span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">8086429</span><span class="op">:</span><span class="fl">8104950</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Local PairwiseAlignmentsSingleSubject (1 of 1)
 ## pattern:  [221] AGGTTAATTTA
@@ -331,7 +332,7 @@
 <h1 class="hasAnchor">
 <a href="#colinearity-interrupted-by-inversions-and-translocations-region-of-interest-2" class="anchor"></a>Colinearity interrupted by inversions and translocations (Region of Interest 2)</h1>
 <p>Let’s look at the area <code>chr1:8080000-12900000</code> covered by <code>contig_3_1</code>. Can we coalesce it once we only keep the paired matches? The answer is no…</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"chr1"</span>, <span class="va">start</span> <span class="op">&gt;</span> <span class="fl">8080000</span>, <span class="va">end</span> <span class="op">&lt;</span> <span class="fl">12900000</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 303 ranges and 6 metadata columns:
 ##         seqnames            ranges strand |                       query
@@ -375,7 +376,7 @@
 ##   [303]         Tra
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Even removing all but the best match on the query is not enough to collapse all</span>
 <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"chr1"</span>, <span class="va">start</span> <span class="op">&gt;</span> <span class="fl">8080000</span>, <span class="va">end</span> <span class="op">&lt;</span> <span class="fl">12900000</span><span class="op">)</span> |&gt;
@@ -408,7 +409,7 @@
 ##   [10]        &lt;NA&gt;
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"chr1"</span>, <span class="va">start</span> <span class="op">&gt;</span> <span class="fl">8080000</span>, <span class="va">end</span> <span class="op">&lt;</span> <span class="fl">12900000</span><span class="op">)</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">filter</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_3_1"</span><span class="op">)</span>|&gt;
@@ -419,7 +420,7 @@
 <div id="well-aligned-repeats-are-kept-in-the-one-to-one-graph-region-of-interest-3" class="section level1">
 <h1 class="hasAnchor">
 <a href="#well-aligned-repeats-are-kept-in-the-one-to-one-graph-region-of-interest-3" class="anchor"></a>Well-aligned repeats are kept in the one-to-one graph (Region of interest 3)</h1>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##   seqnames start   end width strand score query.seqnames query.start query.end
 ## 1     chr1  7785 15657  7873      + 43650    contig_10_1       52244     60120
@@ -427,13 +428,13 @@
 ## 1        7877            *       rnd              &lt;NA&gt; short rnd        &lt;NA&gt;
 ##   flag
 ## 1 &lt;NA&gt;</code></pre>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span><span class="op">$</span><span class="va">contig_10_1</span><span class="op">[</span><span class="fl">52244</span><span class="op">:</span><span class="fl">60120</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">7785</span><span class="op">:</span><span class="fl">15657</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Global PairwiseAlignmentsSingleSubject (1 of 1)
 ## pattern: TAATATCGATACTGCAGAAGAACATAAAAAATAA...AGATTAGCTTAGAGAATCATCCTTATCGGTATCA
 ## subject: TAATATCGATACTGCAGAAGAACATAAAAAATAA...AGATTAGCTTAGAGAATCATCCTTATCGGTATCA
 ## score: 14961.67</code></pre>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <pre><code>## GRanges object with 5 ranges and 6 metadata columns:
 ##       seqnames      ranges strand |       source       type     score     phase
@@ -460,7 +461,7 @@
 <div id="falsetrue" class="section level2">
 <h2 class="hasAnchor">
 <a href="#falsetrue" class="anchor"></a>FALSE/TRUE</h2>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalMap</span><span class="op">$</span><span class="va">Oki_Osa</span> <span class="op">-&gt;</span> <span class="va">x</span>
 <span class="va">x</span><span class="op">$</span><span class="va">Class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">rep</span>, <span class="va">anyNA</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">$</span><span class="va">rep</span>, <span class="va">anyNA</span><span class="op">)</span><span class="op">)</span>
 <span class="va">x</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
@@ -485,7 +486,7 @@
 ## 4 &lt;NA&gt; FALSE FALSE
 ## 5 &lt;NA&gt; FALSE FALSE
 ## 6 &lt;NA&gt;  TRUE FALSE</code></pre>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI4_1</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
 
 <span class="co"># Let's recover the flanking regions</span>
@@ -500,7 +501,7 @@
 ##   transcripts flag
 ## 1      g56.t1  Col
 ## 2      g56.t1  Col</code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI4_1</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 1 range and 1 metadata column:
 ##       seqnames        ranges strand |                query
@@ -508,12 +509,12 @@
 ##   [1]     chr1 551988-552647      * | Chr1:1730510-1731548
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># We confirm that unalmap regions can not be mapped</span>
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">552335</span><span class="op">:</span><span class="fl">552383</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1730795</span><span class="op">:</span><span class="fl">1731145</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:46 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:42 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -568,11 +569,11 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">552335</span><span class="op">:</span><span class="fl">552383</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1730795</span><span class="op">:</span><span class="fl">1731145</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:46 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:42 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -627,12 +628,12 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># We confirm that flanking regions map well</span>
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">551988</span><span class="op">:</span><span class="fl">552647</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1730510</span><span class="op">:</span><span class="fl">1731548</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:47 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:42 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -739,22 +740,22 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Only one hit</span>
 <span class="co">#vmatchPattern(genomes$Osa$Chr1[1730795:1731145], genomes$Osa, with.indels = TRUE, max.mismatch = 10)</span></code></pre></div>
 </div>
 <div id="falsefalse" class="section level2">
 <h2 class="hasAnchor">
 <a href="#falsefalse" class="anchor"></a>FALSE/FALSE</h2>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI4_2</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span>
 <span class="co"># As character for convenience of BLAST searching.</span>
 <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554365</span><span class="op">:</span><span class="fl">554546</span><span class="op">]</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Only one perfect BLAST hit at the NCBI, to the Oki genome.</span></code></pre></div>
 <pre><code>## [1] "AAAAGGCTGCTCTAGAATTTTTGATCAAGCGGCAATTATCATTTGCTTGAATTTTATGCCAAAACTTCCTTCTTTGCATTTCGCCGAAAACACTGATAAGAAACGTTTTCGGCAAAAGCGGAAAGTGTCAACTTCCGCGAAAGGCGCCGTTCAATTTTCTAGTGCCTTTTCGAGCCCATTAA"</code></pre>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1727927</span><span class="op">:</span><span class="fl">1728109</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># No relevant BLAST hit at the NCBI (evalues &gt;= 1e-4)</span></code></pre></div>
 <pre><code>## [1] "TCTCAGGATCGACATGCTTCTTAGAAACCACTGATTTTTCGAAGAAAGGTGCGAAATTTTAAGATCAAGAAAAATCTTAAATTCAACAATTTTTTTTGAAAATGGAAAAAAAAATTTTTGTCACAGCGCGATTGAACGCTAACCCTTCCCATTTCTTCAATCTTTTTCCGATACGAAGCATGT"</code></pre>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">vmatchPattern</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554365</span><span class="op">:</span><span class="fl">554546</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span></code></pre></div>
 <pre><code>## GRanges object with 1 range and 0 metadata columns:
 ##       seqnames        ranges strand
@@ -762,12 +763,12 @@
 ##   [1]     chr1 554365-554546      +
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># unaligned mapped region (+ / -)</span>
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554365</span><span class="op">:</span><span class="fl">554546</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1727927</span><span class="op">:</span><span class="fl">1728109</span><span class="op">]</span>                       , type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:48 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:44 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -810,11 +811,11 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554365</span><span class="op">:</span><span class="fl">554546</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1727927</span><span class="op">:</span><span class="fl">1728109</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:48 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:44 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -853,7 +854,7 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Identity of ~50% but no striking difference between strands</span>
 
 <span class="co"># unaligned mapped region with flanking colinear alignments.</span>
@@ -869,11 +870,11 @@
 ##   [2]            &lt;NA&gt;        &lt;NA&gt;         Col
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554168</span><span class="op">:</span><span class="fl">554692</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1727781</span><span class="op">:</span><span class="fl">1728321</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:49 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:44 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -948,7 +949,7 @@
 <div id="truetrue" class="section level2">
 <h2 class="hasAnchor">
 <a href="#truetrue" class="anchor"></a>TRUE/TRUE</h2>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI4_3</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="fl">12</span><span class="op">]</span>
 <span class="va">ROI4_3</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##   seqnames  start    end width strand query.seqnames query.start query.end
@@ -957,19 +958,19 @@
 ## 1         509            *       rnd g383.t2;g383.t1;g383.t3 short tandem
 ##            transcripts flag     Class
 ## 1 g57.t3;g57.t1;g57.t2 &lt;NA&gt; TRUE TRUE</code></pre>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># As character for convenience of BLAST searching.</span>
 <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561646</span><span class="op">:</span><span class="fl">562124</span><span class="op">]</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Only one perfect BLAST hit at the NCBI, to the Oki genome.</span></code></pre></div>
 <pre><code>## [1] "TATCATAGCAATCGGTATTTTGGTAGAGATTAACGAGCGAAAAGGAACATCCAGTAGCTCTTCAGTCCCTTGAATCCTTCGTGAAATGTGGTTGTTGTTGTTCCTGACGAATTTGAAGTCGTTGTCTTAGTCGTTGTTGTTGTTGAACGTGTAGTGGTTTTTTTAGTGGTTGTTGTCGATGTCAATGATAATGTGGATGTTGTTGTTTTTGTTGTTTGCGTAGACATTGTTGTTGATGATTTTGAGGGTGCTGGCGTATTGGAAATAGAACTTGTCATCTGATAAGTCGACAGATTTGTCATGTCAGTCGTCAGGGATGATTCTGCCGTTGTTAGATTGTCAACACTCGGATCGAGATCTTCATTTTTTCCAAGGCAAAGAGGAATCGTGATTCCAAGAATTGTTACTATCACTGCAGAAACTTCATTTCACACCGAAATTGTTATTCAAATATAATTCTTAAATACCTAGCGCGAATC"</code></pre>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1722712</span><span class="op">:</span><span class="fl">1723220</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># No relevant BLAST hit at the NCBI (evalues &gt;= 1e-4)</span></code></pre></div>
 <pre><code>## [1] "GCTTGTTTATGAGTTAAAAAAAACTTTTTAATATATCTTTGCTTCAAAAGCTTGAATTAAGTTACGACGATTATTATTGTTATCCTCGGATGTATCCCGGTTTTTATCGAAAAAAACAATGAAATAACCACAAACTCGACAACAATGCCTGACTCAACAACAATTATCATCACTACAACGACTGTTCCTGACTTAATACTATTGAACGAAACTCTGACAACAACAACACTGACCTCGAAATCGAGCGCCACTTTGTCAACCACTACAAAAACTATTACAACCAACGCAACAACGACTTCCGCGACTACAACGACAACAACGAGTTCAACAACAACTACAACAACATCGACAACACCAACAACAACCGCGACCGGTTCTTCTACGACTACAACTCCAACCACAACATCAACAACATTGAACACAACGTCAACGACATCAACAACAACATCAAAATGTGTTCCATTTGACGAGTACGACGATATTTGTCCGTAATTTCTGGCAATTTGTCA"</code></pre>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># unaligned mapped region (+ / -)</span>
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561646</span><span class="op">:</span><span class="fl">562124</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1722712</span><span class="op">:</span><span class="fl">1723220</span><span class="op">]</span>                       , type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:50 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:45 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -1040,11 +1041,11 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561646</span><span class="op">:</span><span class="fl">562124</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1722712</span><span class="op">:</span><span class="fl">1723220</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:50 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:45 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -1111,7 +1112,7 @@
 ## 
 ## #---------------------------------------
 ## #---------------------------------------</code></pre>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># unaligned mapped region with flanking colinear alignments.</span>
 <span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI4_3</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 2 ranges and 6 metadata columns:
@@ -1125,11 +1126,11 @@
 ##   [2]            &lt;NA&gt;        &lt;NA&gt;         Col
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561142</span><span class="op">:</span><span class="fl">563743</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1720807</span><span class="op">:</span><span class="fl">1723727</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## ########################################
-## # Program: Biostrings (version 2.60.2), a Bioconductor package
-## # Rundate: Thu Nov 18 11:23:51 2021
+## # Program: Biostrings (version 2.62.0), a Bioconductor package
+## # Rundate: Mon Nov 29 18:14:46 2021
 ## ########################################
 ## #=======================================
 ## #
@@ -1402,7 +1403,7 @@
 <h1 class="hasAnchor">
 <a href="#what-still-interrupts-colinearity-once-repeats-are-ruled-out-roi5" class="anchor"></a>What still interrupts colinearity once repeats are ruled out ? (ROI5)</h1>
 <p>We start with a random region</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html">slice</a></span><span class="op">(</span><span class="fl">200</span><span class="op">:</span><span class="fl">210</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##    seqnames   start     end width strand query.seqnames query.start query.end
 ## 1      chr1 1436172 1436279   108      +     contig_3_1     4439096   4439203
@@ -1465,7 +1466,7 @@
 ## 10                                                            &lt;NA&gt; &lt;NA&gt;
 ## 11                                                            &lt;NA&gt; &lt;NA&gt;</code></pre>
 <p>Let’s focus on alignments between chr1 and contig_27_1:</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI5.range</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[</span><span class="fl">200</span><span class="op">:</span><span class="fl">210</span><span class="op">]</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"chr1"</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_27_1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">ROI5.range</span></code></pre></div>
 <pre><code>## GBreaks object with 1 range and 1 metadata column:
@@ -1474,7 +1475,7 @@
 ##   [1]     chr1 1436544-1481440      * | contig_27_1:1409471-1458038
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI5</span> <span class="op">&lt;-</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span>, <span class="va">ROI5.range</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span>ignore.strand<span class="op">=</span><span class="cn">T</span><span class="op">)</span>
 
 <span class="co"># Let's capture all the pairs that overlap that range:</span>
@@ -1529,7 +1530,7 @@
 ## 7                                                            &lt;NA&gt; &lt;NA&gt;
 ## 8                                                        g2641.t1 &lt;NA&gt;
 ## 9                                                        g4701.t1 &lt;NA&gt;</code></pre>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI5</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##   seqnames   start     end width strand query.seqnames query.start query.end
 ## 1     chr1 1478840 1479523   684      -    contig_11_1      467930    468616
@@ -1581,11 +1582,11 @@
 ## 7                                                        g2641.t1 &lt;NA&gt;
 ## 8                                                         g321.t1  Tra
 ## 9                                                            &lt;NA&gt; &lt;NA&gt;</code></pre>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI5</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html">gb2xlim</a></span><span class="op">(</span><span class="va">ROI5.range</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI5-1.png" width="700"></p>
 <p>Very short gaps between successive ranges in ROI5</p>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/cleanGaps.html">cleanGaps</a></span><span class="op">(</span><span class="va">ROI5</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##   seqnames   start     end   width strand
 ## 1     chr1 1466355 1466358       4      *
@@ -1593,7 +1594,7 @@
 ## 3     chr1 1471260 1471275      16      *
 ## 4     chr1 1481441 2405231  923791      *
 ## 5     chr1 2405394 9897739 7492346      *</code></pre>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI5</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html">dist2next</a></span><span class="op">(</span> ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##   seqnames   start     end width strand query.seqnames query.start query.end
 ## 1     chr1 1436544 1466354 29811      +    contig_27_1     1409471   1440844
@@ -1655,7 +1656,7 @@
 ## 7  1484
 ## 8  5825
 ## 9   Inf</code></pre>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI5</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html">swap</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span>ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span>|&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html">dist2next</a></span><span class="op">(</span> ignore.strand <span class="op">=</span> <span class="cn">TRUE</span>, step <span class="op">=</span><span class="fl">2</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##      seqnames   start     end width strand          rep
 ## 1 contig_11_1  467930  468616   687      -      unknown
@@ -1698,7 +1699,7 @@
 ## 8     Inf
 ## 9     Inf</code></pre>
 <p>Can we coalesce better by removing the translocations ?</p>
-<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">removeTranslocations</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>
@@ -1711,7 +1712,7 @@
   <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html">swap</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI5_removeTranslocations-1.png" width="700"></p>
 <p>This is now implemented in the <code>coa2</code> objects, with a size treshold of 200.</p>
-<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span>, <span class="va">ROI5.range</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html">gb2xlim</a></span><span class="op">(</span><span class="va">ROI5.range</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI5_coa2-1.png" width="700"></p>
 </div>
@@ -1719,7 +1720,7 @@
 <h1 class="hasAnchor">
 <a href="#what-still-interrupts-colinearity-once-translocations-are-removed-roi6" class="anchor"></a>What still interrupts colinearity once translocations are removed ? (ROI6)</h1>
 <p>Inversions …</p>
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># We start with a broader random region</span>
 <span class="op">(</span><span class="va">ROI6</span> <span class="op">&lt;-</span> <span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice</a></span><span class="op">(</span><span class="fl">160</span><span class="op">:</span><span class="fl">200</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 41 ranges and 5 metadata columns:
@@ -1751,30 +1752,30 @@
 ##   [41]                unknown                   &lt;NA&gt;         Tra
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI6</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI6-1.png" width="700"></p>
-<div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span>chrT <span class="op">=</span> <span class="st">"chr1"</span>, chrQ <span class="op">=</span> <span class="st">"contig_27_1"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html">gb2xlim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="va">ROI6</span><span class="op">)</span><span class="op">[</span><span class="fl">7</span><span class="op">]</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Double-collapsed"</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI6-2.png" width="700"></p>
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span> <span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span>chrT <span class="op">=</span> <span class="st">"chr1"</span>, chrQ <span class="op">=</span> <span class="st">"contig_27_1"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html">gb2xlim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="va">ROI6</span><span class="op">)</span><span class="op">[</span><span class="fl">7</span><span class="op">]</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Collapsed"</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI6-3.png" width="700"></p>
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gbs</span> <span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span>chrT <span class="op">=</span> <span class="st">"chr1"</span>, chrQ <span class="op">=</span> <span class="st">"contig_27_1"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html">gb2xlim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="va">ROI6</span><span class="op">)</span><span class="op">[</span><span class="fl">7</span><span class="op">]</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Mapped"</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI6-4.png" width="700"></p>
-<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Sometimes, everything that remains is inversions</span>
 <span class="va">ROI6</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI6-5.png" width="700"></p>
-<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI6</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>strand <span class="op">=</span> <span class="st">'*'</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html">coalesce_contigs</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI6-6.png" width="700"></p>
 </div>
 <div id="multiple-inversions-in-a-row-roi7" class="section level1">
 <h1 class="hasAnchor">
 <a href="#multiple-inversions-in-a-row-roi7" class="anchor"></a>Multiple inversions in a row (ROI7)</h1>
-<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI7</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html">dist2next</a></span><span class="op">(</span>ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/showInversions.html">showInversions</a></span><span class="op">(</span><span class="va">ROI7</span><span class="op">)</span></code></pre></div>
@@ -1820,7 +1821,7 @@
 ##   8697       356
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI7</span><span class="op">[</span><span class="fl">35</span><span class="op">:</span><span class="fl">45</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##    seqnames  start    end width strand query.seqnames query.start query.end
 ## 1      chr1 736824 738412  1589      +           Chr1     2033491   2036651
@@ -1858,10 +1859,10 @@
 ## 9  tandem, ....            &lt;NA&gt; &lt;NA&gt; FALSE   250 2391465
 ## 10           NA g111.t1;g112.t1 &lt;NA&gt; FALSE  2557 1104451
 ## 11   rnd, ltr-1         g115.t1 &lt;NA&gt; FALSE   240 2506121</code></pre>
-<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI7</span><span class="op">[</span><span class="fl">37</span><span class="op">:</span><span class="fl">43</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
-<div class="sourceCode" id="cb109"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Annotations</span>
 <span class="va">ROI7.reps</span> <span class="op">&lt;-</span> <span class="va">reps</span><span class="op">$</span><span class="va">Oki</span> |&gt; <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI7</span><span class="op">[</span><span class="fl">37</span><span class="op">:</span><span class="fl">43</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="va">mids</span> <span class="op">&lt;-</span> <span class="va">ROI7.reps</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>mid <span class="op">=</span> <span class="op">(</span><span class="va">start</span> <span class="op">+</span> <span class="va">end</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">mid</span><span class="op">)</span>
@@ -1869,7 +1870,7 @@
 <span class="va">annot</span> <span class="op">&lt;-</span> <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/annotation.html">annotation</a></span><span class="op">(</span>x1<span class="op">=</span><span class="va">mids</span>, text<span class="op">=</span><span class="va">text</span>, rot<span class="op">=</span><span class="fl">30</span><span class="op">)</span>
 <span class="va">ROI7</span><span class="op">[</span><span class="fl">37</span><span class="op">:</span><span class="fl">43</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span>annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
-<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb109"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Genes</span>
 <span class="va">ROI7.genes</span> <span class="op">&lt;-</span> <span class="va">transcripts</span><span class="op">$</span><span class="va">Oki</span> |&gt; <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI7</span><span class="op">[</span><span class="fl">37</span><span class="op">:</span><span class="fl">43</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="va">mids</span> <span class="op">&lt;-</span> <span class="va">ROI7.genes</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>mid <span class="op">=</span> <span class="op">(</span><span class="va">start</span> <span class="op">+</span> <span class="va">end</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">mid</span><span class="op">)</span>
@@ -1882,10 +1883,10 @@
 <h1 class="hasAnchor">
 <a href="#double-inversions" class="anchor"></a>Double inversions</h1>
 <p>In these examples, the inversions happened on the <em>target</em> genome, therefore only in this genome the names of the ranges were changed.</p>
-<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">exampleDoubleInversion</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI8.T-1.png" width="700"></p>
-<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"T:1:+"</span>, <span class="st">"T:2:+"</span>, <span class="st">"T:3:+"</span><span class="op">)</span><span class="op">)</span>,
               query  <span class="op">=</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Q:1"</span>,   <span class="st">"Q:2"</span>,   <span class="st">"Q:3"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 
@@ -1914,10 +1915,10 @@
 <span class="va">a2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>`A+`<span class="op">=</span><span class="st">"T:10-19:+"</span>, `B+`<span class="op">=</span><span class="st">"T:20-29:-"</span>, `C+`<span class="op">=</span><span class="st">"T:30-39:-"</span><span class="op">)</span><span class="op">)</span>,
               query  <span class="op">=</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>`A+`<span class="op">=</span><span class="st">"Q:30-39"</span>,   `B-`<span class="op">=</span><span class="st">"Q:10-19"</span>,   `C-`<span class="op">=</span><span class="st">"Q:20-29"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Let’s start with a simpler example, where the inversions happen on the <em>query</em> genome.</p>
-<div class="sourceCode" id="cb113"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">exampleDoubleInversion</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI8.Q-1.png" width="700"></p>
-<div class="sourceCode" id="cb114"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb113"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Start colinear</span>
 <span class="va">z0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>A<span class="op">=</span><span class="st">"T:10-15:+"</span>, B<span class="op">=</span><span class="st">"T:20-25:+"</span>, C<span class="op">=</span><span class="st">"T:30-35:+"</span><span class="op">)</span><span class="op">)</span>,
               query  <span class="op">=</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>A<span class="op">=</span><span class="st">"Q:10-15"</span>,   B<span class="op">=</span><span class="st">"Q:20-25"</span>,   C<span class="op">=</span><span class="st">"Q:30-35"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -1942,7 +1943,7 @@
 ##   [5]     chrA   500-590      + | chrB:500-590
 ##   -------
 ##   seqinfo: 1 sequence from an unspecified genome</code></pre>
-<div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI8</span> <span class="op">&lt;-</span> <span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[</span><span class="fl">1420</span><span class="op">:</span><span class="fl">1430</span><span class="op">]</span>
 <span class="va">ROI8</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 11 ranges and 5 metadata columns:
@@ -1974,13 +1975,13 @@
 ##   [11]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb117"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI8</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI8.Q-2.png" width="700"></p>
-<div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI8</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html">reverse</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/ROI8.Q-3.png" width="700"></p>
-<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI8</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html">reverse</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 11 ranges and 5 metadata columns:
 ##        seqnames          ranges strand |                query      Arm
@@ -2016,7 +2017,7 @@
 <h1 class="hasAnchor">
 <a href="#filling-inversions-to-better-see-the-rest-roi9" class="anchor"></a>Filling inversions to better see the rest (ROI9)</h1>
 <p>We will not fill inversions in objects we analyse, because we do not want to erase their breakpoints.</p>
-<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb121"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fillInversions</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">Invs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>
   <span class="fu">strand</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">[</span><span class="va">Invs</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="fu">strand</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">[</span><span class="va">Invs</span><span class="op">]</span> <span class="op">==</span> <span class="st">"+"</span>, <span class="st">"-"</span>, <span class="st">"+"</span><span class="op">)</span>
@@ -2034,10 +2035,10 @@
 
 <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="va">ROI9</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
-<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="va">ROI9.all</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html">gb2xlim</a></span><span class="op">(</span><span class="va">ROI9.range</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/unnamed-chunk-2-2.png" width="700"></p>
-<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI9.all</span>, <span class="fu">granges</span><span class="op">(</span><span class="va">ROI9.range</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##    seqnames    start      end  width strand query.seqnames query.start
 ## 1      chr1  8831594  8904792  73199      +     contig_3_1      781316
@@ -2083,7 +2084,7 @@
 ## 19    516573         848            *    848 &lt;NA&gt;
 ## 20   2413382         359            *    358 &lt;NA&gt;
 ## 21   3316589      342748            * 339479 &lt;NA&gt;</code></pre>
-<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI9.all</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html">swap</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">ROI9.range</span><span class="op">$</span><span class="va">query</span><span class="op">)</span></code></pre></div>
 <pre><code>## GBreaks object with 11 ranges and 1 metadata column:
 ##          seqnames          ranges strand |                  query
@@ -2101,7 +2102,7 @@
 ##   [11] contig_3_1 1652225-1652940      + |    YSR:2724777-2725492
 ##   -------
 ##   seqinfo: 55 sequences from KUM-M3-7f genome</code></pre>
-<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span>
   <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagPairs.html">flagPairs</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">pairs</span><span class="op">)</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>

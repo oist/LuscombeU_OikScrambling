@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -75,6 +75,9 @@
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
     </li>
     <li>
@@ -90,6 +93,9 @@
       <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -116,7 +122,7 @@
                         <h4 class="author">Charlotte West</h4>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">18 November, 2021</h4>
+            <h4 class="date">29 November, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/OikScrambling.Rmd"><code>vignettes/OikScrambling.Rmd</code></a></small>
       <div class="hidden name"><code>OikScrambling.Rmd</code></div>
@@ -137,12 +143,15 @@
 <h2 class="hasAnchor">
 <a href="#how-to-build-this-site" class="anchor"></a>How to build this site</h2>
 <p>As some of the computations take time, I build the vignettes on <em>Deigo</em> using the <code><a href="https://pkgdown.r-lib.org/reference/build_site.html">?pkgdown::build_site</a></code> function, in a Git clone on my subdirectory on <code>/flash</code>.</p>
-<pre><code>/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e 'pkgdown::build_site(devel=TRUE, lazy=TRUE)'</code></pre>
+<pre><code>/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"</code></pre>
 <p>Sometimes it is necessary to upgrade the OikScrambling package; this is done with:</p>
 <pre><code>/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif R CMD INSTALL .</code></pre>
-<p>And to update <code>GenomicBreaks</code>:</p>
-<pre><code>/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"</code></pre>
+<p>And before, it may be needed to update <code>GenomicBreaks</code> or <code>BreakpointsData</code>:</p>
+<pre><code>/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"</code></pre>
 <p>The trick is that the <code>GenomicBreaks</code> singularity images are hardcoded to install new packages in <code>R/library/GBreaks_singularity</code>, which bypasses the the problem that the images are read-only.</p>
+<p>Command to recompute the <code>BreakPoints.Rdata</code> file</p>
+<pre><code>srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "pkgdown::build_article('LoadGenomicBreaks')"</code></pre>
 </div>
 <div id="load-pacakges" class="section level2">
 <h2 class="hasAnchor">
@@ -150,7 +159,7 @@
 <div id="core-packages-that-provide-functions-we-use-a-lot-" class="section level3">
 <h3 class="hasAnchor">
 <a href="#core-packages-that-provide-functions-we-use-a-lot-" class="anchor"></a>Core packages that provide functions we use a lot.</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/message.html">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span>
   <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://oist.github.io/GenomicBreaks">'GenomicBreaks'</a></span><span class="op">)</span>
   <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://bioconductor.org/packages/BSgenome">'BSgenome'</a></span><span class="op">)</span>
@@ -160,7 +169,7 @@
 <span class="op">}</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"rGADEM"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Loading required namespace: rGADEM</code></pre>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"ggseqlogo"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Loading required namespace: ggseqlogo</code></pre>
 </div>
@@ -171,7 +180,7 @@
 <p>Example command to install one <em>Oikopleura</em> BSgenome package if you do not yet have it:</p>
 <pre><code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages("BSgenome.Odioica.local.OKI2018.I69", repos="https://oist.github.io/plessy_oikgenomes_drat/")</a></code></pre>
 <p>The accessory function <code>OikScrambling:::loadAllGenomes()</code> attaches <code>BSgenome</code> packages in the session and outputs a <code>SimpleList</code> containing references to the <code>BSgenome</code> objects for convenience, such as easy looping, and tab-completion to show the available objects.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="va"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span></code></pre></div>
 <pre><code>## function () 
 ## {
@@ -184,21 +193,16 @@
 ##     S4Vectors::SimpleList(Oki = OKI2018_I69, Osa = OSKA2016v1.9, 
 ##         Bar = Bar2_p4, Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)
 ## }
-## &lt;bytecode: 0x557077fd09c0&gt;
+## &lt;bytecode: 0x55b97db0dd80&gt;
 ## &lt;environment: namespace:OikScrambling&gt;</code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8</code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Genome lengths</span>
+<span class="co">## Genome lengths</span>
 <span class="op">(</span><span class="va">genome.lengths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">genomes</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">seqlengths</span><span class="op">(</span><span class="fu">seqinfo</span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##      Oki      Osa      Bar      Kum      Aom      Nor 
 ## 64281565 56625162 55793437 64653574 56753784 70471451</code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Genome average AT content (multicore computation)</span>
 <span class="op">(</span><span class="va">genomes.AT</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">genomes</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html">weighted.mean</a></span><span class="op">(</span><span class="fu">letterFrequency</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html">getSeq</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu">seqlengths</span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -215,22 +219,22 @@
 <p>The annotations from <code>/bucket/LuscombeU/common/Breakpoints/Annotations</code> are distributed in the same drat repository as the alignment data.</p>
 <pre><code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')</a></code></pre>
 <p>The <code>OikScrambling:::loadAllAnnotations()</code> function returns <code>TxDB</code> objects. Be careful that they are broken each time the R session restarts, because they rely on local file storage.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">annots</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllAnnotations.html">loadAllAnnotations</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## List of length 6
-## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
+<pre><code>## List of length 8
+## names(8): Oki Osa Bar Kum Aom Nor Ply Ros</code></pre>
 <p>For vignettes that do not use information on the intron/exon structure of genes, the <code>OikScrambling:::loadAllTranscriptsGR()</code> returns a <code>SimpleList</code> of <code>GRanges</code>, which is more convenient. Bonus point: the dNdS value for conserved genes is included.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">transcripts</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllTranscriptsGR.html">loadAllTranscriptsGR</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## List of length 6
-## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
+<pre><code>## List of length 8
+## names(8): Oki Osa Bar Kum Aom Nor Ply Ros</code></pre>
 </div>
 <div id="genomicbreaks-object" class="section level3">
 <h3 class="hasAnchor">
 <a href="#genomicbreaks-object" class="anchor"></a>GenomicBreaks object</h3>
 <p>The core data is a list of <code><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html">GenomicBreaks::GBreaks()</a></code> objects that is built by a separate vignette (<code>vignette("Load genomic break data"), package="OikScrambling"</code>).</p>
 <p>The <em>query</em> genome is the one that was provided as a FASTA file and aligned to the <em>target</em> genome (the one that was indexed by the aligner). The <em>target</em> genome is the main part of the object, and the <em>query</em> genome information is contained in the metadata columns (<code>mcols</code>) of the structure.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
 <span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span></code></pre></div>
 <pre><code>## GBreaks object with 30852 ranges and 6 metadata columns:
@@ -262,7 +266,7 @@
 ##   [30852]      YSR           ltr-1        &lt;NA&gt;        &lt;NA&gt;
 ##   -------
 ##   seqinfo: 19 sequences from OKI2018_I69 genome</code></pre>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">$</span><span class="va">query</span></code></pre></div>
 <pre><code>## GRanges object with 30852 ranges and 2 metadata columns:
 ##           seqnames            ranges strand |             rep       transcripts
@@ -286,11 +290,11 @@
 <h3 class="hasAnchor">
 <a href="#long-and-short-arms" class="anchor"></a>Long and short arms</h3>
 <p>The long and short arms are annotated in the <code>GBreak</code> objects that are built by the vignette (<code>vignette("Load genomic break data")</code>), using the function <code><a href="https://oist.github.io/GenomicBreaks/reference/flagLongShort.html">GenomicBreaks::flagLongShort()</a></code>. A copy of the arms annotations is provided in the <code>longShort</code> list.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">longShort</span></code></pre></div>
 <pre><code>## List of length 3
 ## names(3): Oki Osa Bar</code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span></code></pre></div>
 <pre><code>## GRanges object with 8 ranges and 2 metadata columns:
 ##       seqnames           ranges strand |              Name        Type
@@ -309,7 +313,7 @@
 <div id="repeats" class="section level3">
 <h3 class="hasAnchor">
 <a href="#repeats" class="anchor"></a>Repeats</h3>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllRepeats.html">loadAllRepeats</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## List of length 6
 ## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
@@ -330,7 +334,7 @@
 <h1 class="hasAnchor">
 <a href="#phylogenetic-cladogram" class="anchor"></a>Phylogenetic cladogram</h1>
 <p>We assume that the <em>North Pacific</em> and the <em>Atlantic</em> species are more related to each other than to the <em>Okinawan</em> species.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"ade4"</span><span class="op">)</span>
 <span class="va">treeLeaf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">length</span><span class="op">=</span><span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
   <span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">length</span><span class="op">)</span><span class="op">)</span> <span class="va">length</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">':'</span>, <span class="va">length</span><span class="op">)</span>
@@ -374,18 +378,22 @@
 <p>The algorithm in <code><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html">GenomicBreaks::coalesce_contigs()</a></code> is used to produce a new <code>GBreaks</code> object with fewer alignment breaks by coalescing alignments separated by short (user specified) distances.</p>
 <p>The computation is done in <code>vignette("Load genomic break data")</code></p>
 <p>The resulting GRanges object has far fewer alignments and therefore far fewer alignment stops. The algorithm is an initial step in alignment stop filtering, with the goal of a reduced number of alignment stops that have a high probability of being breakpoints.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor 
 ##   30852   30841   15086   32398   30055   31322   24430   31182   15261   24497 
-## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor 
-##   32265   24851   31557   24717   15184</code></pre>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros Ply_Rob Ply_Sav Ply_Oki Rob_Ros 
+##   32265   24851   31557   24717   15184   40659   56000   68463    2127   60384 
+## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma 
+##   60205   70201    2347   47893   68750   23059    9732</code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor 
 ##    8843    8533    5424    8864    8875    8836    4081    8776    4950    5227 
-## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor 
-##    8493    4073    8529    4197    6188</code></pre>
+## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros Ply_Rob Ply_Sav Ply_Oki Rob_Ros 
+##    8493    4073    8529    4197    6188    7701    4969    4041    1306    4566 
+## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma 
+##    4812    4148    1402    5959     992    1816    2706</code></pre>
 </div>
 <div id="width-summary-plots" class="section level1">
 <h1 class="hasAnchor">
@@ -403,14 +411,14 @@
 <div id="oki-bar" class="section level2">
 <h2 class="hasAnchor">
 <a href="#oki-bar" class="anchor"></a>Oki – Bar</h2>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki – Bar"</span><span class="op">)</span></code></pre></div>
 <p><img src="OikScrambling_files/figure-html/parallel_chr_plots_Oki_Bar-1.png" width="700"></p>
 </div>
 <div id="osa-bar" class="section level2">
 <h2 class="hasAnchor">
 <a href="#osa-bar" class="anchor"></a>Osa – Bar</h2>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, main <span class="op">=</span> <span class="st">"Osa – Bar"</span><span class="op">)</span></code></pre></div>
 <p><img src="OikScrambling_files/figure-html/parallel_chr_plots_Osa_Bar-1.png" width="700"></p>
 </div>
@@ -418,11 +426,11 @@
 <h2 class="hasAnchor">
 <a href="#oki-kum" class="anchor"></a>Oki – Kum</h2>
 <p>The plot is not complete because the Kume assembly is not chromosome-scale.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki – Kum"</span><span class="op">)</span></code></pre></div>
 <p><img src="OikScrambling_files/figure-html/parallel_chr_plots_Oki_Kum-1.png" width="700"></p>
 <p>Same after double-coalescing.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki – Kum"</span><span class="op">)</span></code></pre></div>
 <p><img src="OikScrambling_files/figure-html/parallel_chr_plots_Oki_Kum_coa2-1.png" width="700"></p>
 </div>
@@ -459,7 +467,7 @@
 │ chrB:101-200 │ chrC:201-300 │ chrB:301-400 │ (Query genome)
 └──────────────┴──────────────┴──────────────┘</code></pre>
 <p>Is represented as:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">exampleTranslocation</span></code></pre></div>
 <pre><code>## GBreaks object with 3 ranges and 1 metadata column:
 ##       seqnames    ranges strand |        query

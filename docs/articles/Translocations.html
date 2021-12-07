@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -75,6 +75,9 @@
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
     </li>
     <li>
@@ -90,6 +93,9 @@
       <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -115,7 +121,7 @@
       <h1 data-toc-skip>Translocations</h1>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">18 November, 2021</h4>
+            <h4 class="date">29 November, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/Translocations.Rmd"><code>vignettes/Translocations.Rmd</code></a></small>
       <div class="hidden name"><code>Translocations.Rmd</code></div>
@@ -139,18 +145,13 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8
-
-## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8</code></pre>
 <pre><code>## List of length 6
 ## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllRepeats.html">loadAllRepeats</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## List of length 6
 ## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      
 ##  [7] "tra2"      "coa2"      "unmap2"    "longShort"</code></pre>
@@ -172,7 +173,7 @@
 <li><p>Translocations in a genomic context ressembling insertion/deletion are removed in the <code>coa2</code> objects.</p></li>
 <li><p>At the moment, the <code>flagTranslocations</code> function only searches the <em>target</em> genome.</p></li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">trans_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>
   align  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>,
   mapped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>,
@@ -193,29 +194,65 @@
 ## Bar_Osa   296    400  201
 ## Bar_Kum   368    432  225
 ## Bar_Aom   297    390  191
-## Bar_Nor  1011   1156  694</code></pre>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+## Bar_Nor  1011   1156  694
+## Ply_Ros  1581   1734  626
+## Ply_Rob   876   1011  393
+## Ply_Sav   133    227  225
+## Ply_Oki     3      4    4
+## Rob_Ros   952   1127  617
+## Rob_Ply  1106   1392  885
+## Rob_Sav   128    238  235
+## Rob_Oki     9     10   10
+## Dme_Dbu   231    316  280
+## Dme_Dsu    98    131   96
+## Dme_Dya   173    194  106
+## Dme_Dma   266    285  134</code></pre>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>  <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span>
 <span class="va">trans_summary</span><span class="op">$</span><span class="va">target</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                             align   mapped     map2
-## North \342\200\223 North  324.750  435.500 234.7500
-## Oki \342\200\223 North    397.375  475.000 262.3750
-## same_pop                 1073.333 1182.667 433.6667</code></pre>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<pre><code>##                  align   mapped     map2
+## Dme_Dbu        231.000  316.000 280.0000
+## Dme_Dma        266.000  285.000 134.0000
+## Dme_Dsu         98.000  131.000  96.0000
+## Dme_Dya        173.000  194.000 106.0000
+## Int – Int     1581.000 1734.000 626.0000
+## Int – Rob      978.000 1176.667 631.6667
+## Int/Rob – Oki    6.000    7.000   7.0000
+## Int/Rob – Sav  130.500  232.500 230.0000
+## North – North  324.750  435.500 234.7500
+## Oki – North    397.375  475.000 262.3750
+## same_pop      1073.333 1182.667 433.6667</code></pre>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                           align mapped  map2
-## North \342\200\223 North  296.5    395 196.0
-## Oki \342\200\223 North    392.0    462 248.5
-## same_pop                 1011.0   1156 355.0</code></pre>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<pre><code>##                align mapped  map2
+## Dme_Dbu        231.0  316.0 280.0
+## Dme_Dma        266.0  285.0 134.0
+## Dme_Dsu         98.0  131.0  96.0
+## Dme_Dya        173.0  194.0 106.0
+## Int – Int     1581.0 1734.0 626.0
+## Int – Rob      952.0 1127.0 617.0
+## Int/Rob – Oki    6.0    7.0   7.0
+## Int/Rob – Sav  130.5  232.5 230.0
+## North – North  296.5  395.0 196.0
+## Oki – North    392.0  462.0 248.5
+## same_pop      1011.0 1156.0 355.0</code></pre>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                              align   mapped      map2
-## North \342\200\223 North  56.83529 94.18245 100.06123
-## Oki \342\200\223 North    29.28158 42.38598  39.89607
-## same_pop                 108.83167 94.85427 231.26248</code></pre>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<pre><code>##                    align     mapped       map2
+## Dme_Dbu               NA         NA         NA
+## Dme_Dma               NA         NA         NA
+## Dme_Dsu               NA         NA         NA
+## Dme_Dya               NA         NA         NA
+## Int – Int             NA         NA         NA
+## Int – Rob     117.183617 195.295503 246.327695
+## Int/Rob – Oki   4.242641   4.242641   4.242641
+## Int/Rob – Sav   3.535534   7.778175   7.071068
+## North – North  56.835288  94.182447 100.061231
+## Oki – North    29.281576  42.385982  39.896070
+## same_pop      108.831674  94.854274 231.262477</code></pre>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">trans_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pairname</span>, pch <span class="op">=</span> <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span> <span class="op">(</span><span class="st">"Number of translocations found after different post-processings"</span><span class="op">)</span></code></pre></div>
@@ -226,7 +263,7 @@
 <a href="#small-translocations" class="anchor"></a>Small translocations</h2>
 <p>Translocations are “small” when the flanking colinear regions are longer.</p>
 <p>Small translocations are a majority. Only in same-population comparison they seem to associate strongly with repeats.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">flagSmallTranslocations</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html">flagTranslocations</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>
   <span class="va">a</span><span class="op">$</span><span class="va">w0</span>  <span class="op">&lt;-</span> <span class="fu">width</span><span class="op">(</span><span class="va">a</span><span class="op">)</span>
@@ -242,7 +279,10 @@
   map2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">flagSmallTranslocations</span><span class="op">)</span>
 <span class="op">)</span>
 
-<span class="va">countGbsMatchingRepsInStrans</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gb</span><span class="op">[</span><span class="va">gb</span><span class="op">$</span><span class="va">midSmaller</span><span class="op">]</span><span class="op">$</span><span class="va">rep</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">countGbsMatchingRepsInStrans</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
+  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">rep</span><span class="op">)</span><span class="op">)</span> <span class="va">gb</span><span class="op">$</span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="cn">NA</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gb</span><span class="op">[</span><span class="va">gb</span><span class="op">$</span><span class="va">midSmaller</span><span class="op">]</span><span class="op">$</span><span class="va">rep</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="op">}</span>
 
 <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span>
   aln <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span>,
@@ -265,16 +305,36 @@
 ## map2allTrans      304     291     258     320     325     277     167     280
 ## map2Strans        235     215     227     250     280     204     134     211
 ## map2StransRep     100      86     193     101     130      82      91      87
-##               Osa_Aom Osa_Nor Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor
-## aln             15261   24497   32265   24851   31557   24717   15184
-## alnStrans         862     292     224     223     243     224     777
-## mapTot           4950    5227    8493    4073    8529    4197    6188
-## alltrans         1279     560     472     445     481     472    1037
-## mapStrans        1036     496     349     350     361     353     986
-## map2Tot          2256    4500    7849    3373    7849    3452    4319
-## map2allTrans      268     339     256     201     250     204     502
-## map2Strans        293     324     191     160     190     154     570
-## map2StransRep     244     230      75     102      77      94     458</code></pre>
+##               Osa_Aom Osa_Nor Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros
+## aln             15261   24497   32265   24851   31557   24717   15184   40659
+## alnStrans         862     292     224     223     243     224     777    1227
+## mapTot           4950    5227    8493    4073    8529    4197    6188    7701
+## alltrans         1279     560     472     445     481     472    1037    1578
+## mapStrans        1036     496     349     350     361     353     986    1561
+## map2Tot          2256    4500    7849    3373    7849    3452    4319    4224
+## map2allTrans      268     339     256     201     250     204     502     489
+## map2Strans        293     324     191     160     190     154     570     511
+## map2StransRep     244     230      75     102      77      94     458       0
+##               Ply_Rob Ply_Sav Ply_Oki Rob_Ros Rob_Ply Rob_Sav Rob_Oki Dme_Dbu
+## aln             56000   68463    2127   60384   60205   70201    2347   47893
+## alnStrans         658      51       2     705     776      62       4     129
+## mapTot           4969    4041    1306    4566    4812    4148    1402    5959
+## alltrans          928     239       3     894     870     240       7     411
+## mapStrans         941     191       3     987    1143     208       6     291
+## map2Tot          3152    4036    1304    3076    3289    4143    1400    5877
+## map2allTrans      429     242       3     440     483     239       7     405
+## map2Strans        352     190       3     511     662     205       6     259
+## map2StransRep       0       0       0       0       0       0       0       0
+##               Dme_Dsu Dme_Dya Dme_Dma
+## aln             68750   23059    9732
+## alnStrans          72     154     215
+## mapTot            992    1816    2706
+## alltrans          145     194     281
+## mapStrans         130     186     249
+## map2Tot           878    1582    2272
+## map2allTrans      124     113     153
+## map2Strans         95     100     114
+## map2StransRep       0       0       0</code></pre>
 </div>
 </div>
   </div>

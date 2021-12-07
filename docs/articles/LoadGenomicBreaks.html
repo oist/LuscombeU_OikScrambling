@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -75,6 +75,9 @@
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
     </li>
     <li>
@@ -90,6 +93,9 @@
       <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -115,7 +121,7 @@
       <h1 data-toc-skip>Load genomic break data</h1>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">18 November, 2021</h4>
+            <h4 class="date">29 November, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/LoadGenomicBreaks.Rmd"><code>vignettes/LoadGenomicBreaks.Rmd</code></a></small>
       <div class="hidden name"><code>LoadGenomicBreaks.Rmd</code></div>
@@ -151,11 +157,6 @@
 ## 
 ##     strsplit</code></pre>
 <pre><code>## Loading required package: rtracklayer</code></pre>
-<pre><code>## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8
-
-## Warning in runHook(".onLoad", env, package.lib, package): strings not
-## representable in native encoding will be translated to UTF-8</code></pre>
 <pre><code>## List of length 6
 ## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
 </div>
@@ -166,7 +167,7 @@
 <h2 class="hasAnchor">
 <a href="#longshort-arm-information" class="anchor"></a>Long/short arm information</h2>
 <p>Short / long arm annotation will be done by the <code><a href="https://oist.github.io/GenomicBreaks/reference/flagLongShort.html">GenomicBreaks::flagLongShort()</a></code> function.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">loadLongShort</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span>, <span class="va">genome</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"extdata/Annotations/"</span>, <span class="va">file</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>
   <span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu">rtracklayer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/GFFFile-class.html">import.gff3</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span>
@@ -187,11 +188,11 @@
 <h2 class="hasAnchor">
 <a href="#repeat-regions" class="anchor"></a>Repeat regions</h2>
 <p>Load from <code>BreakpointsData</code> package via <code>OikScrambling:::loadAllRepeats()</code></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllRepeats.html">loadAllRepeats</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## List of length 6
 ## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">annotateWithReps.GRanges</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Inspired from CAGEr:::ranges2names</span>
   <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu">findOverlaps</span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span><span class="op">)</span>
@@ -232,11 +233,11 @@
 <div id="transcript-annotations" class="section level2">
 <h2 class="hasAnchor">
 <a href="#transcript-annotations" class="anchor"></a>Transcript annotations</h2>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">transcripts</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllTranscriptsGR.html">loadAllTranscriptsGR</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## List of length 6
-## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<pre><code>## List of length 8
+## names(8): Oki Osa Bar Kum Aom Nor Ply Ros</code></pre>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">annotateWithTranscripts</span> <span class="op">&lt;-</span>  <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">annotT</span>, <span class="va">annotQ</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/UseMethod.html">UseMethod</a></span><span class="op">(</span><span class="st">"annotateWithTranscripts"</span><span class="op">)</span>
 
 <span class="va">annotateWithTranscripts.GRanges</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">annotT</span>, <span class="va">annotQ</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
@@ -290,7 +291,7 @@
 <h2 class="hasAnchor">
 <a href="#mapped-alignments" class="anchor"></a>Mapped alignments</h2>
 <p>Let’s load data from genome alignments, using the copy distributed in the <code>BreakpointsData</code> package.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Local function to add extra annotation on long/short arms while loading data</span>
 <span class="va">load_genomic_breaks_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span>, <span class="va">genomeT</span>, <span class="va">genomeQ</span>, <span class="va">longShort</span><span class="op">=</span><span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"extdata/Oidioi_pairwise_v3/"</span>, <span class="va">file</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>
@@ -321,14 +322,31 @@
 <span class="va">gbs</span><span class="op">$</span><span class="va">Bar_Aom</span> <span class="op">&lt;-</span> <span class="fu">load_genomic_breaks_</span><span class="op">(</span><span class="st">"Bar2_p4__AOM-5-5f.gff.gz"</span>,             <span class="va">Bar2_p4</span>,     <span class="va">AOM_5</span>,         <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span> |&gt; <span class="fu">annotateWithReps.GBreaks</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">reps</span><span class="op">$</span><span class="va">Aom</span><span class="op">)</span>
 <span class="va">gbs</span><span class="op">$</span><span class="va">Bar_Nor</span> <span class="op">&lt;-</span> <span class="fu">load_genomic_breaks_</span><span class="op">(</span><span class="st">"Bar2_p4__OdB3.gff.gz"</span>,                 <span class="va">Bar2_p4</span>,     <span class="va">OdB3</span>,          <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span> |&gt; <span class="fu">annotateWithReps.GBreaks</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">reps</span><span class="op">$</span><span class="va">Nor</span><span class="op">)</span>
 
-<span class="va">gbs</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">gbs</span>, <span class="va">transcripts</span><span class="op">)</span>
+<span class="va">Oik_Oik</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">)</span>
+
+<span class="va">gbs</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_int_P__C_int_R.gff.gz"</span>,          package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Ply_Rob</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_int_P__C_rob_HT.gff.gz"</span>,         package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Ply_Sav</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_int_P__C_sav.gff.gz"</span>,            package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Ply_Oki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_int_P__OKI2018_I69_1.0.gff.gz"</span>,  package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="va">OKI2018_I69</span><span class="op">)</span>
+
+<span class="va">gbs</span><span class="op">$</span><span class="va">Rob_Ros</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_rob_HT__C_int_R.gff.gz"</span>,         package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Rob_Ply</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_rob_HT__C_int_P.gff.gz"</span>,         package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Rob_Sav</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_rob_HT__C_sav.gff.gz"</span>,           package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Rob_Oki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Ciona_pairwise_v3/C_rob_HT__OKI2018_I69_1.0.gff.gz"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="va">OKI2018_I69</span><span class="op">)</span>
+
+<span class="va">gbs</span><span class="op">$</span><span class="va">Dme_Dbu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Insects_pairwise_v3/Dmel__Dbus_ASM1175060v1.gff.gz"</span>,     package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Dme_Dsu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Insects_pairwise_v3/Dmel__RU_Dsub_v1.1.gff.gz"</span>,          package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Dme_Dya</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Insects_pairwise_v3/Dmel__Prin_Dyak_Tai18E2_2.0.gff.gz"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Dme_Dma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/load_genomic_breaks.html">load_genomic_breaks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/Insects_pairwise_v3/Dmel__Dmau_ASM438214v1.gff.gz"</span>,      package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span>,    <span class="cn">NULL</span>,     <span class="cn">NULL</span><span class="op">)</span>
+
+<span class="va">gbs</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">gbs</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">transcripts</span><span class="op">)</span>
 <span class="va">gbs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="unaligned-regions" class="section level2">
 <h2 class="hasAnchor">
 <a href="#unaligned-regions" class="anchor"></a>Unaligned regions</h2>
 <p>Note that the unaligned regions are strandless and unpaired by definition.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unal</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 <span class="va">unal</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">unal</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
 <span class="va">unal</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">unal</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
@@ -345,14 +363,14 @@
 <div id="coalescing-alignments" class="section level2">
 <h2 class="hasAnchor">
 <a href="#coalescing-alignments" class="anchor"></a>Coalescing alignments</h2>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">coalesce_contigs</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 <span class="va">coa</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
 <span class="va">coa</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
 <span class="va">coa</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
 
-<span class="va">coa</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">coa</span>, <span class="va">reps</span><span class="op">)</span>
-<span class="va">coa</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">coa</span>, <span class="va">transcripts</span><span class="op">)</span>
+<span class="va">coa</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">coa</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">reps</span><span class="op">)</span>
+<span class="va">coa</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">coa</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">transcripts</span><span class="op">)</span>
 
 <span class="va">coa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
@@ -360,7 +378,7 @@
 <h2 class="hasAnchor">
 <a href="#unmapped-regions" class="anchor"></a>Unmapped regions</h2>
 <p>We can not call them “uncoalesced” because this would also qualify aligned regions that were not colinear with any other region.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmap</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 
 <span class="va">unmap</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">unmap</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
@@ -379,7 +397,7 @@
 <h2 class="hasAnchor">
 <a href="#mapped-unaligned-regions" class="anchor"></a>Mapped unaligned regions</h2>
 <p>We can pair the unaligned regions that are between two colinearly aligned regions.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">filterMappedUnaligned</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">colinearRegions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterColinearRegions.html">filterColinearRegions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagColinearAlignments.html">flagColinearAlignments</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>, rename <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
   <span class="co"># Turning the sequence of [(TRUE)n, FALSE]n into indices.</span>
@@ -402,15 +420,15 @@
 <span class="va">unalMap</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">unalMap</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
 <span class="va">unalMap</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">unalMap</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
 
-<span class="va">unalMap</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">unalMap</span>, <span class="va">reps</span><span class="op">)</span>
-<span class="va">unalMap</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">unalMap</span>, <span class="va">transcripts</span><span class="op">)</span>
-<span class="va">unalMap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">unalMap</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">unalMap</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">unalMap</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">reps</span><span class="op">)</span>
+<span class="va">unalMap</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">unalMap</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">transcripts</span><span class="op">)</span>
+<span class="va">unalMap</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">unalMap</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="translocated-regions" class="section level2">
 <h2 class="hasAnchor">
 <a href="#translocated-regions" class="anchor"></a>Translocated regions</h2>
 <p>Here we compute new <code>GBreaks</code> objects representing the intervals between two regions that would be colinear if there would not be a translocation separating them.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">removeTranslocations</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>
     <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">]</span>
@@ -439,20 +457,21 @@
 <span class="va">tra</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">tra</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
 <span class="va">tra</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">tra</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
 
-<span class="va">tra</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">tra</span>, <span class="va">reps</span><span class="op">)</span>
-<span class="va">tra</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">tra</span>, <span class="va">transcripts</span><span class="op">)</span>
+<span class="va">tra</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">tra</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">reps</span><span class="op">)</span>
+<span class="va">tra</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">tra</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">transcripts</span><span class="op">)</span>
 <span class="va">tra</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">tra</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="coalesce-again" class="section level2">
 <h2 class="hasAnchor">
 <a href="#coalesce-again" class="anchor"></a>Coalesce again</h2>
 <p>We remove the translocated regions that interrupt colinearity, where one of the colinear pairs is closer than 200 bp.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">removeTranslocationsOnTargetGenome</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html">dist2next</a></span><span class="op">(</span><span class="va">gb</span>, step <span class="op">=</span> <span class="fl">2</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
   <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span> <span class="va">gb</span><span class="op">$</span><span class="va">tra</span> <span class="op">&amp;</span> <span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">tdist</span> <span class="op">&lt;</span> <span class="fl">200</span> <span class="op">|</span> <span class="va">gb</span><span class="op">$</span><span class="va">qdist</span> <span class="op">&lt;</span> <span class="fl">200</span><span class="op">)</span> <span class="op">)</span>
-  <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="op">-</span><span class="va">idx</span><span class="op">]</span>
+  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">idx</span><span class="op">)</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span>
+    <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="op">-</span><span class="va">idx</span><span class="op">]</span>
   <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html">coalesce_contigs</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="va">removeTranslocationsOnBothGenomes</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
@@ -467,15 +486,15 @@
 <span class="va">coa2</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
 <span class="va">coa2</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
 
-<span class="va">coa2</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">coa2</span>, <span class="va">reps</span><span class="op">)</span>
-<span class="va">coa2</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">coa2</span>, <span class="va">transcripts</span><span class="op">)</span>
+<span class="va">coa2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">coa2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">reps</span><span class="op">)</span>
+<span class="va">coa2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">coa2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">transcripts</span><span class="op">)</span>
 <span class="va">coa2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="unmapped-regions-2" class="section level2">
 <h2 class="hasAnchor">
 <a href="#unmapped-regions-2" class="anchor"></a>Unmapped regions 2</h2>
 <p>The intervals between double-coalesced regions.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmap2</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 
 <span class="va">unmap2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">unmap2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
@@ -494,22 +513,22 @@
 <h2 class="hasAnchor">
 <a href="#translocated-regions-2" class="anchor"></a>Translocated regions 2</h2>
 <p>To check that we really removed the small ones as intented.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tra2</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">traGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html">as</a></span><span class="op">(</span><span class="st">"SimpleList"</span><span class="op">)</span>
 
 <span class="va">tra2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">tra2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
 <span class="va">tra2</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">tra2</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
 <span class="va">tra2</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html">bplapply</a></span><span class="op">(</span><span class="va">tra2</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>
 
-<span class="va">tra2</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">tra2</span>, <span class="va">reps</span><span class="op">)</span>
-<span class="va">tra2</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">tra2</span>, <span class="va">transcripts</span><span class="op">)</span>
+<span class="va">tra2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithReps.GBreaksSimpleList</span><span class="op">(</span><span class="va">tra2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">reps</span><span class="op">)</span>
+<span class="va">tra2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">annotateWithTranscripts</span><span class="op">(</span><span class="va">tra2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">transcripts</span><span class="op">)</span>
 
 <span class="va">tra2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">tra2</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="numbers-of-blocks" class="section level2">
 <h2 class="hasAnchor">
 <a href="#numbers-of-blocks" class="anchor"></a>Numbers of blocks</h2>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">bp_summary</span> <span class="op">&lt;-</span> 
   <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span>
     gbs     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span>,
@@ -524,39 +543,162 @@
   <span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">bp_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">bp_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                               gbs     unal      coa    unmap   unmap2   unalMap
-## North \342\200\223 North 24623.75 24125.25 4394.500 4333.000 3630.250 20229.250
-## Oki \342\200\223 North   31309.00 31115.50 8718.625 8700.875 8033.875 22590.375
-## same_pop                 15177.00 12652.67 5520.667 4465.333 2446.333  9656.333
-##                              tra     tra2     coa2
-## North \342\200\223 North  469.50 227.7500 3670.750
-## Oki \342\200\223 North    510.25 287.8750 8046.500
-## same_pop                 1297.00 342.6667 2733.333</code></pre>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<pre><code>##                    gbs     unal      coa    unmap   unmap2   unalMap       tra
+## Dme_Dbu       47893.00 47867.00 5959.000 5951.000 5869.000 41934.000  411.0000
+## Dme_Dma        9732.00  9138.00 2706.000 2616.000 2215.000  7026.000  281.0000
+## Dme_Dsu       68750.00 68626.00  992.000  984.000  870.000 67758.000  145.0000
+## Dme_Dya       23059.00 22743.00 1816.000 1776.000 1553.000 21243.000  194.0000
+## Int – Int     40659.00 36133.00 7701.000 6304.000 3727.000 32958.000 1578.0000
+## Int – Rob     58863.00 56141.33 4782.333 4432.667 2975.333 54080.667  897.3333
+## Int/Rob – Oki  2237.00  2221.50 1354.000 1339.500 1337.500   883.000    5.0000
+## Int/Rob – Sav 69332.00 69275.00 4094.500 4068.500 4063.500 65237.500  239.5000
+## North – North 24623.75 24125.25 4394.500 4333.000 3630.250 20229.250  469.5000
+## Oki – North   31309.00 31115.50 8718.625 8700.875 8033.875 22590.375  510.2500
+## same_pop      15177.00 12652.67 5520.667 4465.333 2446.333  9656.333 1297.0000
+##                   tra2     coa2
+## Dme_Dbu       405.0000 5877.000
+## Dme_Dma       153.0000 2272.000
+## Dme_Dsu       124.0000  878.000
+## Dme_Dya       113.0000 1582.000
+## Int – Int     489.0000 4224.000
+## Int – Rob     450.6667 3172.333
+## Int/Rob – Oki   5.0000 1352.000
+## Int/Rob – Sav 240.5000 4089.500
+## North – North 227.7500 3670.750
+## Oki – North   287.8750 8046.500
+## same_pop      342.6667 2733.333</code></pre>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">bp_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">bp_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                            gbs    unal  coa  unmap unmap2 unalMap    tra  tra2
-## North \342\200\223 North 24607 24103.5 4139 4081.5 3369.0 20434.5  458.5 202.5
-## Oki \342\200\223 North   31252 31041.5 8806 8785.0 8090.5 22446.0  501.5 285.5
-## same_pop                 15184 12425.0 5424 4119.0 2042.0  9662.0 1279.0 268.0
-##                            coa2
-## North \342\200\223 North 3412.5
-## Oki \342\200\223 North   8105.0
-## same_pop                 2256.0</code></pre>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<pre><code>##                 gbs    unal    coa  unmap unmap2 unalMap    tra  tra2   coa2
+## Dme_Dbu       47893 47867.0 5959.0 5951.0 5869.0 41934.0  411.0 405.0 5877.0
+## Dme_Dma        9732  9138.0 2706.0 2616.0 2215.0  7026.0  281.0 153.0 2272.0
+## Dme_Dsu       68750 68626.0  992.0  984.0  870.0 67758.0  145.0 124.0  878.0
+## Dme_Dya       23059 22743.0 1816.0 1776.0 1553.0 21243.0  194.0 113.0 1582.0
+## Int – Int     40659 36133.0 7701.0 6304.0 3727.0 32958.0 1578.0 489.0 4224.0
+## Int – Rob     60205 57513.0 4812.0 4431.0 3006.0 55393.0  894.0 440.0 3152.0
+## Int/Rob – Oki  2237  2221.5 1354.0 1339.5 1337.5   883.0    5.0   5.0 1352.0
+## Int/Rob – Sav 69332 69275.0 4094.5 4068.5 4063.5 65237.5  239.5 240.5 4089.5
+## North – North 24607 24103.5 4139.0 4081.5 3369.0 20434.5  458.5 202.5 3412.5
+## Oki – North   31252 31041.5 8806.0 8785.0 8090.5 22446.0  501.5 285.5 8105.0
+## same_pop      15184 12425.0 5424.0 4119.0 2042.0  9662.0 1279.0 268.0 2256.0</code></pre>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">bp_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">bp_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                                gbs     unal      coa    unmap    unmap2
-## North \342\200\223 North 194.88693 114.1034 557.8850 554.4445  549.0036
-## Oki \342\200\223 North   772.56974 758.8316 168.7965 165.4478  164.1380
-## same_pop                  87.70975 428.5491 624.6354 648.9687 1252.4457
-##                           unalMap       tra      tra2      coa2
-## North \342\200\223 North 663.3658  67.05470  76.04111  554.3689
-## Oki \342\200\223 North   839.2139  32.67918  27.54444  166.2606
-## same_pop                 657.5183 269.45129 138.07727 1409.0047</code></pre>
+<pre><code>##                      gbs      unal       coa     unmap     unmap2    unalMap
+## Dme_Dbu               NA        NA        NA        NA         NA         NA
+## Dme_Dma               NA        NA        NA        NA         NA         NA
+## Dme_Dsu               NA        NA        NA        NA         NA         NA
+## Dme_Dya               NA        NA        NA        NA         NA         NA
+## Int – Int             NA        NA        NA        NA         NA         NA
+## Int – Rob     2481.04555 2535.0468 203.13132 234.50444   97.67975 2649.62381
+## Int/Rob – Oki  155.56349  154.8564  67.88225  67.17514   67.17514   87.68124
+## Int/Rob – Sav 1228.95159 1210.5668  75.66043  58.68986   58.68986 1153.29116
+## North – North  194.88693  114.1034 557.88499 554.44447  549.00357  663.36585
+## Oki – North    772.56974  758.8316 168.79653 165.44782  164.13795  839.21391
+## same_pop        87.70975  428.5491 624.63536 648.96867 1252.44574  657.51831
+##                       tra       tra2       coa2
+## Dme_Dbu                NA         NA         NA
+## Dme_Dma                NA         NA         NA
+## Dme_Dsu                NA         NA         NA
+## Dme_Dya                NA         NA         NA
+## Int – Int              NA         NA         NA
+## Int – Rob      29.1433240  28.536526  107.94597
+## Int/Rob – Oki   2.8284271   2.828427   67.88225
+## Int/Rob – Sav   0.7071068   2.121320   75.66043
+## North – North  67.0547040  76.041107  554.36894
+## Oki – North    32.6791764  27.544445  166.26055
+## same_pop      269.4512943 138.077273 1409.00473</code></pre>
+</div>
+<div id="fraction-of-the-genome-aligned-or-mapped" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fraction-of-the-genome-aligned-or-mapped" class="anchor"></a>Fraction of the genome aligned or mapped</h2>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R">  <span class="va">aligned_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">mapped_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">mapped2_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa2</span>,  \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">unaligned_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">unal</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">unmapped_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">unmap</span>,  \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">unmapped2_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">unmap2</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
+<span class="op">(</span><span class="va">align_summary</span> <span class="op">&lt;-</span> <span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>
+  align_frac <span class="op">=</span> <span class="va">aligned_tot</span> <span class="op">/</span> <span class="op">(</span> <span class="va">aligned_tot</span> <span class="op">+</span> <span class="va">unaligned_tot</span> <span class="op">)</span>,
+  map_frac   <span class="op">=</span> <span class="va">mapped_tot</span>  <span class="op">/</span> <span class="op">(</span> <span class="va">mapped_tot</span>  <span class="op">+</span> <span class="va">unmapped_tot</span> <span class="op">)</span>,
+  map2_frac  <span class="op">=</span> <span class="va">mapped2_tot</span> <span class="op">/</span> <span class="op">(</span> <span class="va">mapped2_tot</span> <span class="op">+</span> <span class="va">unmapped2_tot</span><span class="op">)</span>
+ <span class="op">)</span>|&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>##         align_frac  map_frac map2_frac
+## Oki_Osa 52.0159495 72.064774 72.591841
+## Oki_Bar 50.2331439 71.873745 72.439411
+## Oki_Kum 83.7160367 92.765000 94.480041
+## Oki_Aom 50.6089555 72.114976 72.741460
+## Oki_Nor 47.1467623 68.537624 69.073404
+## Osa_Oki 58.3631347 77.105711 77.170651
+## Osa_Bar 71.1871466 85.560773 86.174793
+## Osa_Kum 58.4606442 77.300551 77.474092
+## Osa_Aom 86.4673469 92.945330 94.144071
+## Osa_Nor 68.8797738 83.812429 84.344633
+## Bar_Oki 55.7960607 74.409334 74.396050
+## Bar_Osa 70.9620899 82.982915 83.029837
+## Bar_Kum 56.6319075 74.633503 74.605171
+## Bar_Aom 71.3391619 83.174402 83.438869
+## Bar_Nor 82.0574520 88.611295 89.137858
+## Ply_Ros 81.3622209 91.050237 92.176488
+## Ply_Rob 70.3529758 87.498052 88.962676
+## Ply_Sav 13.1367749 67.169476 67.181135
+## Ply_Oki  0.6063520  1.897941  1.897793
+## Rob_Ros 73.6319134 90.562151 91.221000
+## Rob_Ply 73.0152650 89.704745 90.321434
+## Rob_Sav 14.5141690 70.474445 70.494999
+## Rob_Oki  0.6696567  2.112460  2.112311
+## Dme_Dbu 21.7446598 71.124298 71.647394
+## Dme_Dsu 59.8730476 76.684629 76.712764
+## Dme_Dya 76.9451636 84.778190 84.900306
+## Dme_Dma 80.9637966 85.833201 86.001342</code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               align_frac map_frac map2_frac
+## Dme_Dbu             21.7     71.1      71.6
+## Dme_Dma             81.0     85.8      86.0
+## Dme_Dsu             59.9     76.7      76.7
+## Dme_Dya             76.9     84.8      84.9
+## Int – Int           81.4     91.1      92.2
+## Int – Rob           72.3     89.3      90.2
+## Int/Rob – Oki        0.6      2.0       2.0
+## Int/Rob – Sav       13.8     68.8      68.8
+## North – North       70.6     83.9      84.2
+## Oki – North         53.7     73.5      73.8
+## same_pop            84.1     91.4      92.6</code></pre>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               align_frac map_frac map2_frac
+## Dme_Dbu             21.7     71.1      71.6
+## Dme_Dma             81.0     85.8      86.0
+## Dme_Dsu             59.9     76.7      76.7
+## Dme_Dya             76.9     84.8      84.9
+## Int – Int           81.4     91.1      92.2
+## Int – Rob           73.0     89.7      90.3
+## Int/Rob – Oki        0.6      2.0       2.0
+## Int/Rob – Sav       13.8     68.8      68.8
+## North – North       71.1     83.5      83.9
+## Oki – North         53.9     73.3      73.6
+## same_pop            83.7     92.8      94.1</code></pre>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span>     |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code>##               align_frac map_frac map2_frac
+## Dme_Dbu               NA       NA        NA
+## Dme_Dma               NA       NA        NA
+## Dme_Dsu               NA       NA        NA
+## Dme_Dya               NA       NA        NA
+## Int – Int             NA       NA        NA
+## Int – Rob            1.7      1.6       1.1
+## Int/Rob – Oki        0.0      0.2       0.2
+## Int/Rob – Sav        1.0      2.3       2.3
+## North – North        1.2      1.2       1.4
+## Oki – North          4.2      2.9       2.7
+## same_pop             2.2      2.5       3.0</code></pre>
 </div>
 <div id="summary" class="section level2">
 <h2 class="hasAnchor">
 <a href="#summary" class="anchor"></a>Summary</h2>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>
   gbs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span>,
   coa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">length</span><span class="op">)</span>,
@@ -572,12 +714,157 @@
   <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Cumulative plot (gbs ⊃ coa ⊃ coa2) of the computed genomic regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/summary-1.png" width="700"></p>
+<p>NOTE: how does that compare with ANI (Average Nucleotide Identity) ?</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>`Bar2_p4__AOM-5-5f` <span class="op">=</span> <span class="fl">87.489</span>, Bar2_p4__Bar2_p4 <span class="op">=</span> <span class="fl">100</span>, `Bar2_p4__KUM-M3-7f` <span class="op">=</span> <span class="fl">78.45822</span>, 
+Bar2_p4__O_alb <span class="op">=</span> <span class="fl">69.79983</span>, Bar2_p4__O_lon <span class="op">=</span> <span class="fl">66.11535</span>, Bar2_p4__O_van <span class="op">=</span> <span class="fl">69.29796</span>, 
+Bar2_p4__OdB3 <span class="op">=</span> <span class="fl">97.7499</span>, Bar2_p4__OKI2018_I69_1.0 <span class="op">=</span> <span class="fl">78.68358</span>, 
+Bar2_p4__OSKA2016v1.9 <span class="op">=</span> <span class="fl">87.46913</span>, C_int_P__C_int_P <span class="op">=</span> <span class="fl">100</span>, C_int_P__C_int_R <span class="op">=</span> <span class="fl">96.16641</span>, 
+C_int_P__C_rob_HT <span class="op">=</span> <span class="fl">90.49159</span>, C_int_P__C_sav <span class="op">=</span> <span class="fl">73.27976</span>, C_int_P__OKI2018_I69_1.0 <span class="op">=</span> <span class="fl">65.14351</span>, 
+C_int_P__OSKA2016v1.9 <span class="op">=</span> <span class="fl">64.71592</span>, C_int_P__St_cla <span class="op">=</span> <span class="fl">68.16588</span>, 
+C_rob_HT__C_int_P <span class="op">=</span> <span class="fl">90.41795</span>, C_rob_HT__C_int_R <span class="op">=</span> <span class="fl">90.4192</span>, C_rob_HT__C_rob_HT <span class="op">=</span> <span class="fl">100</span>, 
+C_rob_HT__C_sav <span class="op">=</span> <span class="fl">73.16812</span>, C_rob_HT__OKI2018_I69_1.0 <span class="op">=</span> <span class="fl">65.53052</span>, 
+C_rob_HT__OSKA2016v1.9 <span class="op">=</span> <span class="fl">65.09903</span>, C_rob_HT__St_cla <span class="op">=</span> <span class="fl">68.30626</span>, 
+Dalb__AaegL5.0 <span class="op">=</span> <span class="fl">65.6799</span>, Dalb__AalbS3_pri_1.0 <span class="op">=</span> <span class="fl">68.17702</span>, Dalb__Cfrigida_v1.1 <span class="op">=</span> <span class="fl">72.42817</span>, 
+`Dalb__Dalb_15112-1751.03v1` <span class="op">=</span> <span class="fl">100</span>, Dalb__Dath_EB_1.0 <span class="op">=</span> <span class="fl">80.60732</span>, 
+Dalb__Dbif_1.0 <span class="op">=</span> <span class="fl">81.08233</span>, Dalb__Dbus_ASM1175060v1 <span class="op">=</span> <span class="fl">85.11277</span>, 
+Dalb__Dinn_ASM435438v2 <span class="op">=</span> <span class="fl">87.86721</span>, Dalb__Dlow_1.0 <span class="op">=</span> <span class="fl">81.1923</span>, 
+Dalb__Dmau_ASM438214v1 <span class="op">=</span> <span class="fl">81.65325</span>, Dalb__Dmel_BDGP6 <span class="op">=</span> <span class="fl">81.14</span>, 
+Dalb__Dmir_PacBio2.1 <span class="op">=</span> <span class="fl">81.76273</span>, Dalb__Dpse_MV25 <span class="op">=</span> <span class="fl">81.20186</span>, 
+Dalb__Eten_idEriTena2.1 <span class="op">=</span> <span class="fl">70.77767</span>, Dalb__Paka_ASM1839793v1 <span class="op">=</span> <span class="fl">66.22446</span>, 
+Dalb__Prin_Dyak_Tai18E2_2.0 <span class="op">=</span> <span class="fl">81.21401</span>, Dalb__RU_Dsub_v1.1 <span class="op">=</span> <span class="fl">82.53274</span>, 
+Dalb__RU_Dtri_1.1 <span class="op">=</span> <span class="fl">81.93057</span>, Dath__AaegL5.0 <span class="op">=</span> <span class="fl">66.28782</span>, Dath__AalbS3_pri_1.0 <span class="op">=</span> <span class="fl">69.08501</span>, 
+Dath__Cfrigida_v1.1 <span class="op">=</span> <span class="fl">72.40521</span>, `Dath__Dalb_15112-1751.03v1` <span class="op">=</span> <span class="fl">81.90288</span>, 
+Dath__Dath_EB_1.0 <span class="op">=</span> <span class="fl">100</span>, Dath__Dbif_1.0 <span class="op">=</span> <span class="fl">90.09103</span>, Dath__Dbus_ASM1175060v1 <span class="op">=</span> <span class="fl">81.89253</span>, 
+Dath__Dinn_ASM435438v2 <span class="op">=</span> <span class="fl">82.2395</span>, Dath__Dlow_1.0 <span class="op">=</span> <span class="fl">92.30271</span>, 
+Dath__Dmau_ASM438214v1 <span class="op">=</span> <span class="fl">85.84368</span>, Dath__Dmel_BDGP6 <span class="op">=</span> <span class="fl">85.72521</span>, 
+Dath__Dmir_PacBio2.1 <span class="op">=</span> <span class="fl">91.84388</span>, Dath__Dpse_MV25 <span class="op">=</span> <span class="fl">91.87636</span>, 
+Dath__Eten_idEriTena2.1 <span class="op">=</span> <span class="fl">71.32619</span>, Dath__Paka_ASM1839793v1 <span class="op">=</span> <span class="fl">65.05051</span>, 
+Dath__Prin_Dyak_Tai18E2_2.0 <span class="op">=</span> <span class="fl">85.03599</span>, Dath__RU_Dsub_v1.1 <span class="op">=</span> <span class="fl">86.28124</span>, 
+Dath__RU_Dtri_1.1 <span class="op">=</span> <span class="fl">86.45957</span>, Dinn__AaegL5.0 <span class="op">=</span> <span class="fl">66.17064</span>, Dinn__AalbS3_pri_1.0 <span class="op">=</span> <span class="fl">67.58017</span>, 
+DDinn__Cfrigida_v1.1 <span class="op">=</span> <span class="fl">71.83029</span>, `Dinn__Dalb_15112-1751.03v1` <span class="op">=</span> <span class="fl">87.04083</span>, 
+Dinn__Dath_EB_1.0 <span class="op">=</span> <span class="fl">79.57953</span>, Dinn__Dbif_1.0 <span class="op">=</span> <span class="fl">80.19957</span>, Dinn__Dbus_ASM1175060v1 <span class="op">=</span> <span class="fl">84.28436</span>, 
+Dinn__Dinn_ASM435438v2 <span class="op">=</span> <span class="fl">100</span>, Dinn__Dlow_1.0 <span class="op">=</span> <span class="fl">80.67069</span>, Dinn__Dmau_ASM438214v1 <span class="op">=</span> <span class="fl">81.0131</span>, 
+Dinn__Dmel_BDGP6 <span class="op">=</span> <span class="fl">80.77358</span>, Dinn__Dmir_PacBio2.1 <span class="op">=</span> <span class="fl">80.56467</span>, 
+Dinn__Dpse_MV25 <span class="op">=</span> <span class="fl">79.94521</span>, Dinn__Eten_idEriTena2.1 <span class="op">=</span> <span class="fl">69.06343</span>, 
+Dinn__Paka_ASM1839793v1 <span class="op">=</span> <span class="fl">66.33035</span>, Dinn__Prin_Dyak_Tai18E2_2.0 <span class="op">=</span> <span class="fl">80.57511</span>, 
+Dinn__RU_Dsub_v1.1 <span class="op">=</span> <span class="fl">81.50381</span>, Dinn__RU_Dtri_1.1 <span class="op">=</span> <span class="fl">81.46686</span>, 
+Dmel__AaegL5.0 <span class="op">=</span> <span class="fl">66.80427</span>, Dmel__AalbS3_pri_1.0 <span class="op">=</span> <span class="fl">68.20054</span>, Dmel__Cfrigida_v1.1 <span class="op">=</span> <span class="fl">72.50621</span>, 
+`Dmel__Dalb_15112-1751.03v1` <span class="op">=</span> <span class="fl">80.26274</span>, Dmel__Dath_EB_1.0 <span class="op">=</span> <span class="fl">83.20431</span>, 
+Dmel__Dbif_1.0 <span class="op">=</span> <span class="fl">82.25649</span>, Dmel__Dbus_ASM1175060v1 <span class="op">=</span> <span class="fl">80.08149</span>, 
+Dmel__Dinn_ASM435438v2 <span class="op">=</span> <span class="fl">80.79603</span>, Dmel__Dlow_1.0 <span class="op">=</span> <span class="fl">83.56816</span>, 
+Dmel__Dmau_ASM438214v1 <span class="op">=</span> <span class="fl">95.36722</span>, Dmel__Dmel_BDGP6 <span class="op">=</span> <span class="fl">100</span>, Dmel__Dmir_PacBio2.1 <span class="op">=</span> <span class="fl">84.10367</span>, 
+Dmel__Dpse_MV25 <span class="op">=</span> <span class="fl">83.27086</span>, Dmel__Eten_idEriTena2.1 <span class="op">=</span> <span class="fl">70.18941</span>, 
+Dmel__Paka_ASM1839793v1 <span class="op">=</span> <span class="fl">65.26859</span>, Dmel__Prin_Dyak_Tai18E2_2.0 <span class="op">=</span> <span class="fl">91.33685</span>, 
+Dmel__RU_Dsub_v1.1 <span class="op">=</span> <span class="fl">88.09201</span>, Dmel__RU_Dtri_1.1 <span class="op">=</span> <span class="fl">86.06675</span>, 
+Dpse__AaegL5.0 <span class="op">=</span> <span class="fl">67.05445</span>, Dpse__AalbS3_pri_1.0 <span class="op">=</span> <span class="fl">68.72562</span>, Dpse__Cfrigida_v1.1 <span class="op">=</span> <span class="fl">72.71335</span>, 
+`Dpse__Dalb_15112-1751.03v1` <span class="op">=</span> <span class="fl">81.69273</span>, Dpse__Dath_EB_1.0 <span class="op">=</span> <span class="fl">91.50727</span>, 
+Dpse__Dbif_1.0 <span class="op">=</span> <span class="fl">90.07924</span>, Dpse__Dbus_ASM1175060v1 <span class="op">=</span> <span class="fl">81.28797</span>, 
+Dpse__Dinn_ASM435438v2 <span class="op">=</span> <span class="fl">81.96187</span>, Dpse__Dlow_1.0 <span class="op">=</span> <span class="fl">95.02922</span>, 
+Dpse__Dmau_ASM438214v1 <span class="op">=</span> <span class="fl">85.43473</span>, Dpse__Dmel_BDGP6 <span class="op">=</span> <span class="fl">85.32083</span>, 
+Dpse__Dmir_PacBio2.1 <span class="op">=</span> <span class="fl">97.38482</span>, Dpse__Dpse_MV25 <span class="op">=</span> <span class="fl">100</span>, Dpse__Eten_idEriTena2.1 <span class="op">=</span> <span class="fl">69.74893</span>, 
+Dpse__Paka_ASM1839793v1 <span class="op">=</span> <span class="fl">64.9258</span>, Dpse__Prin_Dyak_Tai18E2_2.0 <span class="op">=</span> <span class="fl">84.58586</span>, 
+Dpse__RU_Dsub_v1.1 <span class="op">=</span> <span class="fl">86.0418</span>, Dpse__RU_Dtri_1.1 <span class="op">=</span> <span class="fl">85.93798</span>, Dsub__AaegL5.0 <span class="op">=</span> <span class="fl">66.08828</span>, 
+Dsub__AalbS3_pri_1.0 <span class="op">=</span> <span class="fl">68.42965</span>, Dsub__Cfrigida_v1.1 <span class="op">=</span> <span class="fl">71.28905</span>, 
+`Dsub__Dalb_15112-1751.03v1` <span class="op">=</span> <span class="fl">80.48788</span>, Dsub__Dath_EB_1.0 <span class="op">=</span> <span class="fl">82.75689</span>, 
+Dsub__Dbif_1.0 <span class="op">=</span> <span class="fl">83.14488</span>, Dsub__Dbus_ASM1175060v1 <span class="op">=</span> <span class="fl">80.4126</span>, 
+Dsub__Dinn_ASM435438v2 <span class="op">=</span> <span class="fl">81.50499</span>, Dsub__Dlow_1.0 <span class="op">=</span> <span class="fl">84.02854</span>, 
+Dsub__Dmau_ASM438214v1 <span class="op">=</span> <span class="fl">88.26478</span>, Dsub__Dmel_BDGP6 <span class="op">=</span> <span class="fl">87.81593</span>, 
+Dsub__Dmir_PacBio2.1 <span class="op">=</span> <span class="fl">84.50135</span>, Dsub__Dpse_MV25 <span class="op">=</span> <span class="fl">82.88658</span>, 
+Dsub__Eten_idEriTena2.1 <span class="op">=</span> <span class="fl">69.00946</span>, Dsub__Paka_ASM1839793v1 <span class="op">=</span> <span class="fl">64.88739</span>, 
+Dsub__Prin_Dyak_Tai18E2_2.0 <span class="op">=</span> <span class="fl">87.79101</span>, Dsub__RU_Dsub_v1.1 <span class="op">=</span> <span class="fl">100</span>, 
+Dsub__RU_Dtri_1.1 <span class="op">=</span> <span class="fl">87.23365</span>, Dyak__AaegL5.0 <span class="op">=</span> <span class="fl">65.96956</span>, Dyak__AalbS3_pri_1.0 <span class="op">=</span> <span class="fl">68.30608</span>, 
+Dyak__Cfrigida_v1.1 <span class="op">=</span> <span class="fl">72.36378</span>, `Dyak__Dalb_15112-1751.03v1` <span class="op">=</span> <span class="fl">80.31928</span>, 
+Dyak__Dath_EB_1.0 <span class="op">=</span> <span class="fl">82.77286</span>, Dyak__Dbif_1.0 <span class="op">=</span> <span class="fl">82.36289</span>, Dyak__Dbus_ASM1175060v1 <span class="op">=</span> <span class="fl">79.76272</span>, 
+Dyak__Dinn_ASM435438v2 <span class="op">=</span> <span class="fl">80.83953</span>, Dyak__Dlow_1.0 <span class="op">=</span> <span class="fl">83.68068</span>, 
+Dyak__Dmau_ASM438214v1 <span class="op">=</span> <span class="fl">91.8662</span>, Dyak__Dmel_BDGP6 <span class="op">=</span> <span class="fl">91.52635</span>, 
+Dyak__Dmir_PacBio2.1 <span class="op">=</span> <span class="fl">84.21573</span>, Dyak__Dpse_MV25 <span class="op">=</span> <span class="fl">83.25226</span>, 
+Dyak__Eten_idEriTena2.1 <span class="op">=</span> <span class="fl">70.75961</span>, Dyak__Paka_ASM1839793v1 <span class="op">=</span> <span class="fl">65.18495</span>, 
+Dyak__Prin_Dyak_Tai18E2_2.0 <span class="op">=</span> <span class="fl">100</span>, Dyak__RU_Dsub_v1.1 <span class="op">=</span> <span class="fl">88.18683</span>, 
+Dyak__RU_Dtri_1.1 <span class="op">=</span> <span class="fl">86.18934</span>, `OKI2018_I69_1.0__AOM-5-5f` <span class="op">=</span> <span class="fl">79.19197</span>, 
+OKI2018_I69_1.0__Bar2_p4 <span class="op">=</span> <span class="fl">78.97216</span>, `OKI2018_I69_1.0__KUM-M3-7f` <span class="op">=</span> <span class="fl">96.6692</span>, 
+OKI2018_I69_1.0__O_alb <span class="op">=</span> <span class="fl">69.58952</span>, OKI2018_I69_1.0__O_lon <span class="op">=</span> <span class="fl">65.9365</span>, 
+OKI2018_I69_1.0__O_van <span class="op">=</span> <span class="fl">69.21153</span>, OKI2018_I69_1.0__OdB3 <span class="op">=</span> <span class="fl">78.80925</span>, 
+OKI2018_I69_1.0__OKI2018_I69_1.0 <span class="op">=</span> <span class="fl">100</span>, OKI2018_I69_1.0__OSKA2016v1.9 <span class="op">=</span> <span class="fl">78.82942</span>, 
+`OSKA2016v1.9__AOM-5-5f` <span class="op">=</span> <span class="fl">97.14968</span>, OSKA2016v1.9__Bar2_p4 <span class="op">=</span> <span class="fl">87.56705</span>, 
+`OSKA2016v1.9__KUM-M3-7f` <span class="op">=</span> <span class="fl">78.52209</span>, OSKA2016v1.9__O_alb <span class="op">=</span> <span class="fl">68.88416</span>, 
+OSKA2016v1.9__O_lon <span class="op">=</span> <span class="fl">66.94376</span>, OSKA2016v1.9__O_van <span class="op">=</span> <span class="fl">68.66089</span>, 
+OSKA2016v1.9__OdB3 <span class="op">=</span> <span class="fl">87.51462</span>, OSKA2016v1.9__OKI2018_I69_1.0 <span class="op">=</span> <span class="fl">78.52812</span>, 
+OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>
+
+<span class="va">align_summary</span><span class="op">$</span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="va">sim</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>
+  <span class="st">"OKI2018_I69_1.0__OSKA2016v1.9"</span>,
+  <span class="st">"OKI2018_I69_1.0__Bar2_p4"</span>,
+  <span class="st">"OKI2018_I69_1.0__KUM-M3-7f"</span>,
+  <span class="st">"OKI2018_I69_1.0__AOM-5-5f"</span>,
+  <span class="st">"OKI2018_I69_1.0__OdB3"</span>,
+  <span class="st">"OSKA2016v1.9__OKI2018_I69_1.0"</span>,
+  <span class="st">"OSKA2016v1.9__Bar2_p4"</span>,
+  <span class="st">"OSKA2016v1.9__KUM-M3-7f"</span>,
+  <span class="st">"OSKA2016v1.9__AOM-5-5f"</span>,
+  <span class="st">"OSKA2016v1.9__OdB3"</span>,
+  <span class="st">"Bar2_p4__OKI2018_I69_1.0"</span>,
+  <span class="st">"Bar2_p4__OSKA2016v1.9"</span>,
+  <span class="st">"Bar2_p4__KUM-M3-7f"</span>,
+  <span class="st">"Bar2_p4__AOM-5-5f"</span>,
+  <span class="st">"Bar2_p4__OdB3"</span>,
+  <span class="st">"C_int_P__C_int_R"</span>,
+  <span class="st">"C_int_P__C_rob_HT"</span>,
+  <span class="st">"C_int_P__C_sav"</span>,
+  <span class="st">"C_int_P__OKI2018_I69_1.0"</span>,
+  <span class="st">"C_rob_HT__C_int_R"</span>,
+  <span class="st">"C_rob_HT__C_int_P"</span>,
+  <span class="st">"C_rob_HT__C_sav"</span>,
+  <span class="st">"C_rob_HT__OKI2018_I69_1.0"</span>,
+  <span class="st">"Dmel__Dbus_ASM1175060v1"</span>,
+  <span class="st">"Dmel__RU_Dsub_v1.1"</span>,
+  <span class="st">"Dmel__Prin_Dyak_Tai18E2_2.0"</span>,
+  <span class="st">"Dmel__Dmau_ASM438214v1"</span>
+<span class="op">)</span><span class="op">]</span>
+
+<span class="va">align_summary</span><span class="op">[</span><span class="st">"Hum_Mou"</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">10.3264</span>, <span class="fl">54.39799</span>, <span class="cn">NA</span>, <span class="fl">75.20007</span><span class="op">)</span>
+
+<span class="va">align_summary</span><span class="op">$</span><span class="va">pairname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span>
+<span class="va">align_summary</span><span class="op">$</span><span class="va">dist</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">$</span><span class="va">pairname</span><span class="op">)</span>
+<span class="va">align_summary</span><span class="op">$</span><span class="va">genus</span> <span class="op">&lt;-</span> <span class="st">"Oikopleura"</span>
+<span class="va">align_summary</span><span class="op">$</span><span class="va">genus</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Int"</span>, <span class="va">align_summary</span><span class="op">$</span><span class="va">dist</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"Ciona"</span>
+<span class="va">align_summary</span><span class="op">$</span><span class="va">genus</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Dme"</span>, <span class="va">align_summary</span><span class="op">$</span><span class="va">dist</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"Drosophila"</span>
+<span class="va">align_summary</span><span class="op">$</span><span class="va">genus</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Hum"</span>, <span class="va">align_summary</span><span class="op">$</span><span class="va">dist</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"Mammalian"</span>
+
+<span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span><span class="va">align_summary</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align_frac"</span>, <span class="st">"map_frac"</span>, <span class="st">"map2_frac"</span>, <span class="st">"sim"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">df</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"– Oki"</span>, <span class="va">df</span><span class="op">$</span><span class="va">dist</span><span class="op">)</span>,<span class="op">]</span>
+
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
+
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">name</span>, col<span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scale <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">align_summary</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"– Oki"</span>, <span class="va">dist</span><span class="op">)</span><span class="op">)</span> |&gt;
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">align_frac</span>, <span class="va">sim</span>, col<span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">align_summary</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"– Oki"</span>, <span class="va">dist</span><span class="op">)</span><span class="op">)</span> |&gt;
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">map_frac</span>, <span class="va">sim</span>, col<span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-1-3.png" width="700"></p>
 </div>
 </div>
 <div id="save-data" class="section level1">
 <h1 class="hasAnchor">
 <a href="#save-data" class="anchor"></a>Save data</h1>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">unal</span>, <span class="va">coa</span>, <span class="va">unmap</span>, <span class="va">unalMap</span>, <span class="va">tra</span>, <span class="va">tra2</span>, <span class="va">coa2</span>, <span class="va">unmap2</span>, <span class="va">longShort</span>, file <span class="op">=</span> <span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.html">system</a></span><span class="op">(</span><span class="st">"echo '9f273f099ecbfa44899b6c343d1382f1  BreakPoints.Rdata' | md5sum -c"</span>, intern <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code>## Warning in system("echo '9f273f099ecbfa44899b6c343d1382f1 BreakPoints.Rdata'
@@ -590,9 +877,9 @@
 <div id="session-information" class="section level1">
 <h1 class="hasAnchor">
 <a href="#session-information" class="anchor"></a>Session information</h1>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## R version 4.1.1 (2021-08-10)
+<pre><code>## R version 4.1.2 (2021-11-01)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
 ## Running under: Debian GNU/Linux bookworm/sid
 ## 
@@ -601,11 +888,16 @@
 ## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
 ## 
 ## locale:
-## [1] C
+##  [1] LC_CTYPE=en_GB.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_GB.UTF-8        LC_COLLATE=en_GB.UTF-8    
+##  [5] LC_MONETARY=en_GB.UTF-8    LC_MESSAGES=en_GB.UTF-8   
+##  [7] LC_PAPER=en_GB.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_GB.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## attached base packages:
-## [1] parallel  stats4    stats     graphics  grDevices utils     datasets 
-## [8] methods   base     
+## [1] stats4    stats     graphics  grDevices utils     datasets  methods  
+## [8] base     
 ## 
 ## other attached packages:
 ##  [1] BSgenome.Odioica.local.Odioica.reference.v3.0_1.0.1
@@ -614,28 +906,28 @@
 ##  [4] BSgenome.Odioica.local.Bar2.p4_1.0.0               
 ##  [5] BSgenome.Odioica.local.OSKA2016v1.9_1.0.0          
 ##  [6] BSgenome.Odioica.local.OKI2018.I69_1.0.0           
-##  [7] BSgenome_1.60.0                                    
-##  [8] rtracklayer_1.52.1                                 
-##  [9] Biostrings_2.60.2                                  
-## [10] XVector_0.32.0                                     
-## [11] BreakpointsData_3.5.0                              
+##  [7] BSgenome_1.62.0                                    
+##  [8] rtracklayer_1.54.0                                 
+##  [9] Biostrings_2.62.0                                  
+## [10] XVector_0.34.0                                     
+## [11] BreakpointsData_3.8.0                              
 ## [12] ggplot2_3.3.5                                      
-## [13] GenomicBreaks_0.10.0                               
-## [14] GenomicRanges_1.44.0                               
-## [15] GenomeInfoDb_1.28.4                                
-## [16] IRanges_2.26.0                                     
-## [17] S4Vectors_0.30.2                                   
-## [18] BiocGenerics_0.38.0                                
+## [13] GenomicBreaks_0.11.0                               
+## [14] GenomicRanges_1.46.1                               
+## [15] GenomeInfoDb_1.30.0                                
+## [16] IRanges_2.28.0                                     
+## [17] S4Vectors_0.32.3                                   
+## [18] BiocGenerics_0.40.0                                
 ## 
 ## loaded via a namespace (and not attached):
-##   [1] backports_1.3.0             Hmisc_4.6-0                
-##   [3] BiocFileCache_2.0.0         systemfonts_1.0.3          
-##   [5] plyr_1.8.6                  splines_4.1.1              
-##   [7] BiocParallel_1.26.2         digest_0.6.28              
+##   [1] backports_1.4.0             Hmisc_4.6-0                
+##   [3] BiocFileCache_2.2.0         systemfonts_1.0.3          
+##   [5] plyr_1.8.6                  splines_4.1.2              
+##   [7] BiocParallel_1.28.2         digest_0.6.28              
 ##   [9] htmltools_0.5.2             tiff_0.1-10                
-##  [11] GO.db_3.13.0                gdata_2.18.0               
+##  [11] GO.db_3.14.0                gdata_2.18.0               
 ##  [13] fansi_0.5.0                 magrittr_2.0.1             
-##  [15] checkmate_2.0.0             memoise_2.0.0              
+##  [15] checkmate_2.0.0             memoise_2.0.1              
 ##  [17] cluster_2.1.2               tzdb_0.2.0                 
 ##  [19] readr_2.1.0                 annotate_1.72.0            
 ##  [21] matrixStats_0.61.0          R.utils_2.11.0             
@@ -646,8 +938,8 @@
 ##  [31] dplyr_1.0.7                 crayon_1.4.2               
 ##  [33] RCurl_1.98-1.5              lme4_1.1-27.1              
 ##  [35] survival_3.2-13             glue_1.5.0                 
-##  [37] gtable_0.3.0                zlibbioc_1.38.0            
-##  [39] DelayedArray_0.18.0         weights_1.0.4              
+##  [37] gtable_0.3.0                zlibbioc_1.40.0            
+##  [39] DelayedArray_0.20.0         weights_1.0.4              
 ##  [41] abind_1.4-5                 scales_1.1.1               
 ##  [43] DBI_1.1.1                   Rcpp_1.0.7                 
 ##  [45] plotrix_3.8-2               progress_1.2.2             
@@ -656,49 +948,49 @@
 ##  [51] bit_4.0.4                   Formula_1.2-4              
 ##  [53] htmlwidgets_1.5.4           httr_1.4.2                 
 ##  [55] RColorBrewer_1.1-2          ellipsis_0.3.2             
-##  [57] mice_3.13.0                 farver_2.1.0               
+##  [57] mice_3.14.0                 farver_2.1.0               
 ##  [59] pkgconfig_2.0.3             XML_3.99-0.8               
 ##  [61] R.methodsS3_1.8.1           dbplyr_2.1.1               
 ##  [63] nnet_7.3-16                 locfit_1.5-9.4             
 ##  [65] utf8_1.2.2                  labeling_0.4.2             
 ##  [67] tidyselect_1.1.1            rlang_0.4.12               
-##  [69] reshape2_1.4.4              AnnotationDbi_1.56.1       
-##  [71] munsell_0.5.0               tools_4.1.1                
+##  [69] reshape2_1.4.4              AnnotationDbi_1.56.2       
+##  [71] munsell_0.5.0               tools_4.1.2                
 ##  [73] cachem_1.0.6                generics_0.1.1             
 ##  [75] RSQLite_2.2.8               ade4_1.7-18                
 ##  [77] broom_0.7.10                evaluate_0.14              
-##  [79] stringr_1.4.0               OikScrambling_0.3.0        
+##  [79] stringr_1.4.0               OikScrambling_0.5.0        
 ##  [81] fastmap_1.1.0               fftwtools_0.9-11           
 ##  [83] yaml_2.2.1                  ragg_1.1.3                 
 ##  [85] knitr_1.36                  bit64_4.0.5                
 ##  [87] fs_1.5.0                    purrr_0.3.4                
-##  [89] heatmaps_1.16.0             KEGGREST_1.34.0            
+##  [89] heatmaps_1.18.0             KEGGREST_1.34.0            
 ##  [91] nlme_3.1-153                R.oo_1.24.0                
 ##  [93] poweRlaw_0.70.6             xml2_1.3.2                 
-##  [95] pracma_2.3.3                biomaRt_2.48.3             
-##  [97] compiler_4.1.1              rstudioapi_0.13            
+##  [95] pracma_2.3.3                biomaRt_2.50.1             
+##  [97] compiler_4.1.2              rstudioapi_0.13            
 ##  [99] filelock_1.0.2              curl_4.3.2                 
 ## [101] png_0.1-7                   tibble_3.1.6               
 ## [103] stringi_1.7.5               highr_0.9                  
-## [105] GenomicFeatures_1.44.2      desc_1.4.0                 
-## [107] lattice_0.20-45             CNEr_1.28.0                
+## [105] GenomicFeatures_1.46.1      desc_1.4.0                 
+## [107] lattice_0.20-45             CNEr_1.30.0                
 ## [109] Matrix_1.3-4                nloptr_1.2.2.3             
 ## [111] vctrs_0.3.8                 pillar_1.6.4               
 ## [113] lifecycle_1.0.1             data.table_1.14.2          
 ## [115] bitops_1.0-7                R6_2.5.1                   
-## [117] BiocIO_1.2.0                latticeExtra_0.6-29        
+## [117] BiocIO_1.4.0                latticeExtra_0.6-29        
 ## [119] KernSmooth_2.23-20          gridExtra_2.3              
-## [121] codetools_0.2-18            boot_1.3-28                
-## [123] MASS_7.3-54                 gtools_3.9.2               
-## [125] assertthat_0.2.1            SummarizedExperiment_1.22.0
-## [127] rprojroot_2.0.2             rjson_0.2.20               
-## [129] withr_2.4.2                 GenomicAlignments_1.28.0   
-## [131] Rsamtools_2.8.0             GenomeInfoDbData_1.2.6     
-## [133] hms_1.1.1                   EBImage_4.34.0             
-## [135] grid_4.1.1                  rpart_4.1-15               
+## [121] boot_1.3-28                 MASS_7.3-54                
+## [123] gtools_3.9.2                assertthat_0.2.1           
+## [125] SummarizedExperiment_1.24.0 rprojroot_2.0.2            
+## [127] rjson_0.2.20                withr_2.4.2                
+## [129] GenomicAlignments_1.30.0    Rsamtools_2.10.0           
+## [131] GenomeInfoDbData_1.2.7      parallel_4.1.2             
+## [133] hms_1.1.1                   EBImage_4.36.0             
+## [135] grid_4.1.2                  rpart_4.1-15               
 ## [137] tidyr_1.1.4                 minqa_1.2.4                
-## [139] rmarkdown_2.11              MatrixGenerics_1.4.3       
-## [141] Biobase_2.52.0              base64enc_0.1-3            
+## [139] rmarkdown_2.11              MatrixGenerics_1.6.0       
+## [141] Biobase_2.54.0              base64enc_0.1-3            
 ## [143] restfulr_0.0.13</code></pre>
 </div>
   </div>
