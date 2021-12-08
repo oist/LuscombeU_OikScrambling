@@ -97,9 +97,9 @@ cutoff_coas_tables$LargestSegmentName <-
 
 # Write a little function to relate a pair of species (A_B) to their genome size.
 # named list of genome sizes (name=species, content=genome size).
-genome_sizes=list(Aom=sum(lengths(genomes$Aom)), Bar=sum(lengths(genomes$Bar)),
-                  Oki=sum(lengths(genomes$Oki)), Osa=sum(lengths(genomes$Osa)),
-                  Kum=sum(lengths(genomes$Kum)), Nor=sum(lengths(genomes$Nor)),
+genome_sizes=list(Aom=sum(seqlengths(genomes$Aom)), Bar=sum(seqlengths(genomes$Bar)),
+                  Oki=sum(seqlengths(genomes$Oki)), Osa=sum(seqlengths(genomes$Osa)),
+                  Kum=sum(seqlengths(genomes$Kum)), Nor=sum(seqlengths(genomes$Nor)),
                   Ply=175288331, Ros=275796282, Sav=177003750, Rob=115226814
                   )
 match_pair_with_sizes = function(pair, genome_sizes) {
@@ -120,7 +120,7 @@ cutoff_coas_tables$PercentGenomeCovered <- as.data.frame(do.call(rbind, lapply(c
     gb <- cutoff[[pair]]
     pair_sizes <- match_pair_with_sizes(pair, genome_sizes=genome_sizes)
     mean_genome_size <- mean(unlist(pair_sizes))
-    covered <- (sum(lengths(gb))/mean_genome_size)*100
+    covered <- (sum(width(gb))/mean_genome_size)*100
     covered
   })
   cut_gb
