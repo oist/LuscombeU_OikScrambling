@@ -178,7 +178,7 @@ In order to get these orthogroup annotations into the `GBreaks` object later, we
 
 Since the indices of `orthoflags` are HOG IDs and not transcripts, we transmute the data a little to get a data frame indexed by a transcript ID. This format makes it easy to glom onto the transcripts file with `addMetadataToGRanges()`.
 
-```{r flagging_orthogroups_3}
+```{r flagging_orthogroups}
 # The indices of the orthoflag matrix are HOG identifiers. So, relate the HOGs to transcripts and transfer
 # the orthoflags to them.
 rowData(se)$orthoFlags <- apply(orthoflags, 1, function(flags) flags)
@@ -212,9 +212,9 @@ make_transcript_df <- function(SummarizedExperiment, species) {
       species_df
     }
   })
-  tdf = do.call(rbind, tdf)
+  tdf <- do.call(rbind, tdf)
   # Make sure that the columns aren't themselves lists.
-  tdf = apply(tdf, 2, unlist)
+  tdf <- apply(tdf, 2, unlist)
   tdf <- as.data.frame(tdf)
   tdf$orthoFlagDF <- apply(tdf, 1, function(row) as.data.frame(as.list(row[5:20])))
   tdf
@@ -383,7 +383,7 @@ coalOrtho <- function(gb) {
 }
 
 orthoBlocks <- sapply(orthoPairsFiltered[1:15], coalOrtho) |> SimpleList()
-#orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
+# orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
 orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
 orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
 orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
@@ -753,7 +753,13 @@ In the following section, I attempt to identify species- and clade-specific gene
 2. Species-specific duplications in the target genome (referred to as `sp2` in the code below)
 3. Clade-specific duplications common to the query and target
 
-Note that this step uses a concatenate of the two species names to extract a specific column from the `orthoFlagsDF` (`expansion_clade_X_Y`). Ensure that the clade names line up precisely with the species names.
+N.B. Note that this step uses a concatenate of the two species names to extract a specific column from the `orthoFlagsDF` (`expansion_clade_X_Y`). Ensure that the clade names line up precisely with the species names.
+
+In order to identify these events in the coordinate system of the query (chromosomal) assembly, it is necessary to formulate some objects similar to `orthoPairs`. Because these genes can be species-specific, there may not be a region that corresponds to that gene at all in the other. How the following function deals with this:
+
+* Clade-specific genes: These are shared between the query and target, so these are present within the `orthoPairs` already.
+* Query-specific genes: Generate a new `orthoPairs`-like object starting from the query genome transcript coordinates. Query coordinates and features become NA
+* Target-specific genes: The `collectCladeExpansions()` function checks whether the genes flanking the target-specific gene are encoded on the same contig in the target genome. If they are, it checks whether both of those genes are in `orthoPairs`. If they are, and the corresponding query genes are encoded on the same query chromosome, then the target-specific gene is inferred as being between the query's genes.
 
 ```{r gene_duplications_1}
 # Find midpoints of a GRanges.
@@ -767,7 +773,7 @@ grMidpoint <- function(gr) {
 # Given a chromosome-scale assembly (sp1) and a second species of a clade (sp2),
 # plot coordinates of clade-specific gene expansions (common to sp1+sp2) and
 # species-specific expansions.
-collect_clade_expansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
+collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
   result <- SimpleList()
   orthopair <- orthopairs[[paste(sp1, sp2, sep="_")]]
   orthopair$midpoint <- grMidpoint(orthopair)
@@ -778,13 +784,14 @@ collect_clade_expansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
   # Get some data we will need later. The Clade-specific data frame is easiest because it just needs to be subset from the pair by flag.
   dat_clade <- orthopair[as.logical(unlist(lapply(orthopair$orthoFlagDF, function(x) x[[paste("expansion_clade_", sp1, "_", sp2, sep="")]] )))==TRUE,] |> as.data.frame()
   result[[paste(sp1, sp2, sep="_")]] <- dat_clade
-  
+
   # sp1-specific expansion
   # sp1 must be the chromosomal assembly. We transfer the coordinates of its species-specific gene family
   # expansions into a dummy orthoPairs object to facilitate rbind'ing later.
   df_sp1 <- as.data.frame(transcripts[[sp1]])
   df_sp1 <- subset(df_sp1, df_sp1$seqnames %in% big_chr) # Subset to only chromosome-scale scaffolds
   df_sp1 <- df_sp1[which(unlist(lapply(df_sp1$orthoFlagDF, function(x) x$expansion_species_specific ))==sp1),] # Subset to species-specific expansions
+
   # Add a bunch of empty columns to make the object look like an orthoPair
   df_sp1 <- cbind(df_sp1, query.seqnames=NA, query.start=NA, query.end=NA, query.width=NA, query.strand=NA, query.tx_id=NA, query.tx_name=NA, query.dNdS_GUIDANCE2=NA, query.dNdS_HmmCleaner=NA, query.dNdS_PRANK=NA, query.orthoFlagDF=df_sp1$orthoFlagDF)
   df_sp1 <- flagLongShort(GRanges(df_sp1), longShort) |> as.data.frame() # Add back in long-short arm information
@@ -817,49 +824,67 @@ collect_clade_expansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
   #    relative to the reference genome.
   # 3. Look for previous and next gene within orthopairs. If both within orthopairs, then the position of
   #    the species-specific expanded gene is inferred to be between the start/end of the reference genome.
+  # This returns a list, one element per gene in the target-specific genes.
   df_sp2_specific <- lapply(1:nrow(df_sp2), function(gene){
     cur_gene <- df_sp2[gene,]
     prev_gene <- transcripts_sp2[which(transcripts_sp2$tx_name == cur_gene$tx_name)-1,]
     next_gene <- transcripts_sp2[which(transcripts_sp2$tx_name == cur_gene$tx_name)+1,]
     if(nrow(prev_gene)!=0 & nrow(next_gene)!=0) {
-      contig_names <- c(as.character(cur_gene$seqnames), as.character(prev_gene$seqnames),  as.character(next_gene$seqnames))
-      # If all genes on same contig...
-      if(length(unique(contig_names)) == 1) { 
+      target_seqnames <- c(as.character(cur_gene$seqnames), as.character(prev_gene$seqnames),  as.character(next_gene$seqnames))
+      # If all genes on same contig in the target genome...
+      if(length(unique(target_seqnames)) == 1) { 
         # If previous and next genes in an orthopair...
         if(prev_gene$tx_name %in% orthopair$query.tx_name & next_gene$tx_name %in% orthopair$query.tx_name){
-          # Return a new orthopair that does NOT exist in sp1 query genome.
-          # The range is somewhere between the start and end sites of the surrounding genes.
           prev_orthopair <- orthopair[orthopair$query.tx_name == prev_gene$tx_name,]
           next_orthopair <- orthopair[orthopair$query.tx_name == next_gene$tx_name,]
-          mod_orthopair <- prev_orthopair
-          mod_orthopair$start   <- prev_orthopair$end+1
-          mod_orthopair$end     <- next_orthopair$start-1
-          mod_orthopair$width   <- next_orthopair$start - prev_orthopair$end
-          mod_orthopair$tx_id   <- NA # A gene specific to sp2 cannot have a tx_id in the reference.
-          mod_orthopair$tx_name <- NA
-          mod_orthopair$dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value, because
-          mod_orthopair$dNdS_HmmCleaner <- NA # they are only computed on one-to-one genes.
-          mod_orthopair$dNdS_PRANK      <- NA
-          mod_orthopair$orthoFlagDF <- cur_gene$orthoFlagDF
-          mod_orthopair$query.start <- cur_gene$start
-          mod_orthopair$query.end   <- cur_gene$end
-          mod_orthopair$query.width <- cur_gene$end - cur_gene$start
-          mod_orthopair$query.tx_id <- cur_gene$tx_id
-          mod_orthopair$query.dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value, because
-          mod_orthopair$query.dNdS_HmmCleaner <- NA # they are only computed on one-to-one genes.
-          mod_orthopair$query.dNdS_PRANK      <- NA
-          mod_orthopair$orthoFlagDF       <- cur_gene$orthoFlagDF # I make both orthoFlagDFs the same for convenience.
-          mod_orthopair$query.orthoFlagDF <- cur_gene$orthoFlagDF
-          mod_orthopair$midpoint <- cur_gene$midpoint
-          rownames(mod_orthopair) <- NULL
-          return(mod_orthopair)
+          query_seqnames <- c(as.character(prev_orthopair$seqnames), as.character(next_orthopair$seqnames))
+          # If all members of this orthopair are on the same chromosome in the query genome...
+          if(length(unique(query_seqnames)) == 1) {
+            # Make sure that the query and target's genes are neighbours
+            query_prev_prev_gene <- orthopair[which(orthopair$query.tx_name == prev_gene$tx_name)-1,]$tx_name
+            query_prev_next_gene <- orthopair[which(orthopair$query.tx_name == prev_gene$tx_name)+1,]$tx_name
+            query_next_prev_gene <- orthopair[which(orthopair$query.tx_name == next_gene$tx_name)-1,]$tx_name
+            query_next_prev_gene <- orthopair[which(orthopair$query.tx_name == next_gene$tx_name)+1,]$tx_name
+            if(query_prev_next_gene == next_orthopair$tx_name & query_next_prev_gene == prev_orthopair$tx_name) {
+              mod_orthopair  <- prev_orthopair
+              mod_orthopair$start   <- prev_orthopair$end+1   # Create a fake locus start immediately after the preceding gene 
+              mod_orthopair$end     <- next_orthopair$start-1 # Create a fake locus end immediately before the next gene 
+              mod_orthopair$width   <- mod_orthopair$end - mod_orthopair$start
+              mod_orthopair$tx_id   <- NA # A gene specific to sp2 cannot have a tx_id in the reference.
+              mod_orthopair$tx_name <- NA
+              mod_orthopair$dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value, because
+              mod_orthopair$dNdS_HmmCleaner <- NA # they are only computed on one-to-one genes.
+              mod_orthopair$dNdS_PRANK      <- NA
+              mod_orthopair$orthoFlagDF <- cur_gene$orthoFlagDF
+              mod_orthopair$query.start <- cur_gene$start
+              mod_orthopair$query.end   <- cur_gene$end
+              mod_orthopair$query.width <- cur_gene$end - cur_gene$start
+              mod_orthopair$query.tx_id <- cur_gene$tx_id
+              mod_orthopair$query.dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value, because
+              mod_orthopair$query.dNdS_HmmCleaner <- NA # they are only computed on one-to-one genes.
+              mod_orthopair$query.dNdS_PRANK      <- NA
+              mod_orthopair$orthoFlagDF       <- cur_gene$orthoFlagDF # I make both orthoFlagDFs the same for convenience.
+              mod_orthopair$query.orthoFlagDF <- cur_gene$orthoFlagDF
+              mod_orthopair$midpoint <- cur_gene$midpoint
+              rownames(mod_orthopair) <- NULL
+              return(mod_orthopair)
+            } else {
+              warning_message = paste("sp2-specific gene ", cur_gene$tx_name, " is flanked by query genome orthopairs ", paste(prev_orthopair$tx_name, prev_orthopair$seqnames, prev_orthopair$start, prev_orthopair$end, collapse=','), " and ", paste(next_orthopair$tx_name, next_orthopair$seqnames, next_orthopair$start, next_orthopair$end, collapse=','), ", but they are not collinear. Can't infer position of target species-specific gene unless it can be placed between two collinear orthopairs in the reference genome.", sep="")
+              warning(warning_message)
+              return(NULL)
+            }
+          } else {
+            warning_message = paste("sp2-specific gene ", cur_gene$tx_name, " is flanked by orthopairs from ", prev_orthopair$seqnames, " and ", next_orthopair$seqnames, " in the query genome. Can't infer position of target species-specific gene unless it can be placed between two collinear orthopairs in the reference genome.", sep="")
+            warning(warning_message)
+            return(NULL)
+          }
         } else {
           warning_message = paste("sp2-specific gene ", cur_gene$tx_name, "'s next gene ", next_gene$tx_name, " and previous gene ", prev_gene$tx_name, " are not in orthopairs. Can't infer position of a species-specific gene unless it can be placed on the reference genome.", sep="")
           warning(warning_message)
           return(NULL)
         }
       } else {
-        warning_message = paste("sp2-specific gene ", cur_gene$tx_name, "'s next gene ", next_gene$tx_name, " and previous gene ", prev_gene$tx_name, " are not on the same contig. Contig names: ", paste(contig_names, collapse=","), "\n Can't infer position of a species-specific gene unless neighbouring genes are on same contig.",  sep="")
+        warning_message = paste("sp2-specific gene ", cur_gene$tx_name, "'s next gene ", next_gene$tx_name, " and previous gene ", prev_gene$tx_name, " are not on the same contig. seqnames: ", paste(target_seqnames, collapse=","), "\n Can't infer position of a species-specific gene unless neighbouring genes are on same contig.",  sep="")
         warning(warning_message)
         return(NULL)
       }
@@ -876,42 +901,59 @@ collect_clade_expansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
 
 big_chr <- c("chr1","chr2","PAR","XSR","YSR")
 duplications <- SimpleList()
-duplications$Oki_Kum <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Oki", sp2="Kum", bigChr=big_chr, longShort=longShort$Oki)
+duplications$Oki_Kum <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Oki", sp2="Kum", bigChr=big_chr, longShort=longShort$Oki)
 big_chr <- c("Chr1","Chr2","PAR","XSR","YSR")
-duplications$Osa_Aom <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Osa", sp2="Aom", bigChr=big_chr, longShort=longShort$Osa)
-duplications$Bar_Nor <- collect_clade_expansions(orthopairs=orthoPairs, sp1="Bar", sp2="Nor", bigChr=big_chr, longShort=longShort$Bar)
+duplications$Osa_Aom <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Osa", sp2="Aom", bigChr=big_chr, longShort=longShort$Osa)
+duplications$Bar_Nor <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Bar", sp2="Nor", bigChr=big_chr, longShort=longShort$Bar)
 ```
+
+N.B. The function `collectCladeExpansions()` tries to warn you when something funny happens with respect to the target-specific genes. Funny occurrences include:
+1. The target's genes immediately up- and down-stream of a target-specific gene are not encoded on the same contig
+2. The target's genes immediately up- and down-stream of a target-specific gene are encoded on the same contig, but are not found within an orthoPair 
+3. The target's genes immediately up- and down-stream of a target-specific gene are found within an orthoPair, but those orthoPairs are found on different chromosomes in the query genome
+4. The target's genes immediately up- and down-stream of a target-specific gene are found within an orthoPair, and those orthoPairs are on the same chromosome, but they are not collinear
+
+You can inspect these with `warnings()`, although there will be more than 50 such warnings. You can increase this by using `options(nwarnings=10000)` before running the `collectCladeExpansions()` function. To save you some time, this is the result using the version `0.5.0` of the `BreakPointsData`:
+
+Warning | Oki-Kum | Osa-Aom | Bar-Nor
+------- | ------- | ------- | -------
+1 (diff. target contigs) | 11 | 1 | 100
+2 (neighbours not in orthoPairs) |  919 | 733 | 1842
+3 (neighbour orthologues not same chr. in query) | 4 | 2 | 4
+3 (neighbour orthologues not collinear in query) | 763 | 510 | 165
 
 Quickly check where these gene expansions are located:
 ```{r gene_duplications_2}
-lapply(duplications, function(pair) {
-  sapply(pair, function(dup_tb) table(dup_tb$seqnames))
+# Make sure factor levels are in alphabetical order and exclude chromosomes that were already snipped out.
+# It makes the later faceting look ugly if they are not sorted properly.
+duplications <- lapply(duplications, function(pair){
+  lapply(pair, function(sp){
+    sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
+    sp
+  })
 })
+
+(lapply(duplications, function(pair) {
+  sapply(pair, function(dup_tb) table(dup_tb$seqnames))
+}))
 ```
 
 The `duplications` object contains data frames that add up the number of clade- and species-specific genomes. Where do duplications fall in the genome?
 
 ```{r gene_duplications_pos_oki_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
-# Make sure factor levels are in alphabetical order and exclude chromosomes that were already snipped out.
-# It makes the later faceting look ugly if they are not sorted properly.
-duplications$Oki_Kum  <- lapply(duplications$Oki_Kum, function(sp){
-  sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
-  sp
-})
-
 # Plot distribution of clade-specific duplications across the genome.
 ggplot(duplications$Oki_Kum$Oki_Kum) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Gene family expansions: Oki-Kum')
+  ggtitle('Oki-Kum: Clade-specific gene family expansions')
 
 # Oki-specific.
 ggplot(duplications$Oki_Kum$Oki) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Species-specific gene family expansions: Oki')
+  ggtitle('Oki: Species-specific gene family expansions')
 
 # Kum-specific.
 ggplot(duplications$Oki_Kum$Kum) +
@@ -920,21 +962,23 @@ ggplot(duplications$Oki_Kum$Kum) +
   geom_histogram(binwidth=100000) +
   #geom_boxplot(stat='count') + 
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Species-specific gene family expansions: Kum')
+  ggtitle('Kum: Species-specific gene family expansions')
 
 # All gene expansions: Oki-specific, Kum-specific, and Oki+Kum-specific.
+joinedDup <- as.data.frame(do.call(rbind, duplications$Oki_Kum))
+joinedDup$Arm <- flagLongShort(GRanges(joinedDup), longShort$Oki) |> as.data.frame()
 ggplot(do.call(rbind, duplications$Oki_Kum)) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Oki, Kum: All species- and clade-specific duplications')
+  ggtitle('Oki-Kum: All species- and clade-specific duplications')
 
 # As above, but without faceting by sequence, which makes a certain pattern immediately clear...
 ggplot(do.call(rbind, duplications$Oki_Kum)) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Oki, Kum: All species- and clade-specific duplications')
+  ggtitle('Oki-Kum: All species- and clade-specific duplications')
 ```
 
 Sure, it looks like there is a pattern there. But is it statistically significant?
@@ -949,57 +993,52 @@ plotExpansionStats <- function(duplication_pair, pair_name) {
 }
 plotExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum")
 
-calcExpansionStats <- function(duplication_pair, pair_name) {
+calcExpansionStats <- function(duplication_pair, pair_name, conf.level=0.95) {
   df <- do.call(rbind, duplication_pair) |> mutate(bin=cut_width(midpoint, 100000)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
   # Show some numbers...
   anova = aov(df$count ~ df$seqnames + df$Arm) |> summary() 
-  tukey = TukeyHSD(aov(df$count ~ df$seqnames + df$Arm), conf.level=0.95)
+  tukey = TukeyHSD(aov(df$count ~ df$seqnames + df$Arm), conf.level=conf.level)
   return(SimpleList(anova=anova, tukey=tukey))
 }
-stats <- calcExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum")
-stats$anova
-stats$tukey
+expansionStats <- calcExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum", conf.level=0.95)
+(expansionStats$anova)
+(expansionStats$tukey)
 ```
 
 Let's inspect the other chromosomal assemblies.
 
 ```{r gene_duplications_pos_osa_1}
-duplications$Osa_Aom  <- lapply(duplications$Osa_Aom, function(sp){
-  sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
-  sp
-})
-
 ggplot(duplications$Osa_Aom$Osa_Aom) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Gene family expansions: Osa-Aom')
+  ggtitle('Osa-Aom: Clade-specific gene family expansions')
 
 ggplot(duplications$Osa_Aom$Osa) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Species-specific gene family expansions: Osa')
+  ggtitle('Osa: Species-specific gene family expansions')
 
 ggplot(duplications$Osa_Aom$Aom) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Species-specific gene family expansions: Aom')
+  ggtitle('Aom: Species-specific gene family expansions')
 
 
 ggplot(do.call(rbind, duplications$Osa_Aom)) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Osa, Aom: All species- and clade-specific duplications')
+  ggtitle('Osa-Aom: All species- and clade-specific duplications')
 
 # As above, but without faceting by sequence, which makes a certain pattern immediately clear...
 ggplot(do.call(rbind, duplications$Osa_Aom)) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
   facet_wrap(~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Osa, Aom: All species- and clade-specific duplications')
+  ggtitle('Osa-Aom: All species- and clade-specific duplications')
 ```
 
 ```{r gene_duplications_pos_osa_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
@@ -1012,11 +1051,6 @@ stats$tukey
 
 
 ```{r gene_duplications_pos_bar_1}
-duplications$Bar_Nor  <- lapply(duplications$Bar_Nor, function(sp){
-  sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
-  sp
-})
-
 ggplot(duplications$Bar_Nor$Bar_Nor) +
   aes(x=midpoint) +
   geom_histogram(binwidth=100000) +
