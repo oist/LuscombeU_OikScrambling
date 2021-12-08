@@ -34,12 +34,15 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
+library('dplyr')
 library('ggplot2')
 library('pheatmap')
+library('purrr')
 library('viridis') |> suppressPackageStartupMessages()
 (genomes <- OikScrambling:::loadAllGenomes())
 (load("BreakPoints.Rdata"))
 ```
+
 ### Generating coalesced alignments
 
 The function `coalesce_contigs()` is the primary driver of our synteny analysis. It accepts an argument, `minwidth`, which controls the minimum width of segments to be considered for synteny analyses.
@@ -63,56 +66,34 @@ syntenic regions are, and so on.
 ```{r coa_cutoffs_2}
 # You can then make a simple table that tabulates the number of segments at a number of cutoffs.
 cutoff_coas_tables = SimpleList()
+
 # Count number of segments. We make 0-count cells to NA to make them more obvious in the heatmap later.
-cutoff_coas_tables$NumSegments <- do.call(rbind, lapply(cutoff_coas, function(cutoff) {
-  sapply(cutoff, function(gb) {
-    num_segments = as.integer(length(gb))
-    if(num_segments==0){
-      num_segments = NA
-    }
-    num_segments
-    })
-  })
-) |> as.data.frame()
+cutoff_coas_tables$NumSegments <-
+  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
+  purrr::map(cutoff |> as("list"), length)
+  ) |> dplyr::mutate_all(na_if, 0)
+
 # Show how many total bases are left after coalescing.
 # Divide by 1,000,000 to convert it to Mbp. 0-counts are converted to NA.
-cutoff_coas_tables$TotalAligned <- do.call(rbind, lapply(cutoff_coas, function(cutoff) {
-  cut_gb <- sapply(cutoff, function(gb) {
-    total <- sum(width(gb))/1000000
-    if(total==0){
-      total=NA
-    }
-    total
-  })
-  cut_gb
-})) |> as.data.frame()
+cutoff_coas_tables$TotalAligned <-
+  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
+  purrr::map(cutoff |> as("list"), \(gr) sum(width(gr)/1000000))
+  ) |> dplyr::mutate_all(na_if, 0)
+  
 # Show largest segment. Combine it with the query name to see which chromosome segment is biggest.
-cutoff_coas_tables$LargestSegment <- as.data.frame(do.call(rbind, lapply(cutoff_coas, function(cutoff) {
-  cut_gb <- sapply(names(cutoff), function(sp_pair) {
-    gb <- cutoff[[sp_pair]]
-    biggest_segment <- max(width(gb))/1000000
-    if(is.infinite(biggest_segment)){
-      biggest_segment = NA
-    } 
-    biggest_segment
-  })
-  cut_gb
-}))) |> suppressWarnings()
-# Get name of largest segment, which can change based on the cutoffs.
-cutoff_coas_tables$LargestSegmentName <- as.data.frame(do.call(rbind, lapply(cutoff_coas, function(cutoff) {
-  cut_gb <- sapply(names(cutoff), function(sp_pair) {
-    gb <- cutoff[[sp_pair]]
-    biggest_segment <- max(width(gb))
-    if(is.infinite(biggest_segment)){
-      biggest_segment_name = NA
-    } else {
-      biggest_segment_name <- as.character(seqnames(gb)[which.max(width(gb))])
-    }
-    biggest_segment_name
-  })
-  cut_gb
-}))) |> suppressWarnings()
+cutoff_coas_tables$LargestSegment <-
+  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
+  purrr::map(cutoff |> as("list"), \(gr) max(width(gr)))
+  ) |> dplyr::mutate_all(na_if, -Inf)  |> suppressWarnings()
 
+# Get name of largest segment, which can change based on the cutoffs.
+cutoff_coas_tables$LargestSegmentName <-
+  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
+  purrr::map(cutoff |> as("list"), \(gb) {
+    if (length(gb) == 0) return(NA)
+    as.character(seqnames(gb)[which.max(width(gb))])
+  })
+)
 
 # Write a little function to relate a pair of species (A_B) to their genome size.
 # named list of genome sizes (name=species, content=genome size).
