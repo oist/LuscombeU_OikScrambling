@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
       </span>
     </div>
 
@@ -73,6 +73,9 @@
     </li>
     <li>
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
+    </li>
+    <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
@@ -118,7 +121,7 @@
       <h1 data-toc-skip>Width of the aligned and mapped regions.</h1>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">24 November, 2021</h4>
+            <h4 class="date">08 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/RegionWidths.Rmd"><code>vignettes/RegionWidths.Rmd</code></a></small>
       <div class="hidden name"><code>RegionWidths.Rmd</code></div>
@@ -434,9 +437,9 @@
   transpo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>    <span class="va">tra.w2s</span><span class="op">$</span><span class="va">target.rep</span>,     <span class="va">tra.w2s</span><span class="op">$</span><span class="va">query.rep</span><span class="op">)</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
 <pre><code>##         FALSE FALSE FALSE TRUE TRUE FALSE TRUE TRUE
-## aligned      638349      58995      22808     34732
-## unalMap      415681      84463      82180     35726
-## transpo        6695       1973       2926      3016</code></pre>
+## aligned      787783      58995      22808     34732
+## unalMap      553642      84463      82180     35726
+## transpo        7726       1973       2926      3016</code></pre>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ggPlotW2W</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tibble</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">tibble</span><span class="op">)</span> <span class="op">+</span>
@@ -514,8 +517,17 @@
 <pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
 <pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
 <pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-3.png" width="700"></p>
-<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb121"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">gbs.w2w</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query aligned regions"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
@@ -527,38 +539,53 @@
 <pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
 <pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
 <pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-4.png" width="700"></p>
-<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb140"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">unalMap.w2s</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">pair</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query mapped unaligned regions"</span><span class="op">)</span></code></pre></div>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning: stat_contour(): Zero contours were generated</code></pre>
+<pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-5.png" width="700"></p>
-<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb147"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">pair</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-6.png" width="700"></p>
-<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb148"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-7.png" width="700"></p>
-<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb149"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra2.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">pair</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-8.png" width="700"></p>
-<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb150"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra2.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-9.png" width="700"></p>
-<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb151"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">gbs.w2w</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">query.rep</span> <span class="op">+</span> <span class="va">target.rep</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query aligned regions, matching or not matching repeats"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-10.png" width="700"></p>
-<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb152"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">unalMap.w2s</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">query.rep</span> <span class="op">+</span> <span class="va">target.rep</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query mapped unaligned regions, matching or not matching repeats"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-11.png" width="700"></p>
-<div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb153"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra.w2s</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span> <span class="op">+</span> <span class="va">query.rep</span> <span class="op">+</span> <span class="va">target.rep</span>, nrow <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions, matching or not matching repeats"</span><span class="op">)</span></code></pre></div>
@@ -566,7 +593,7 @@
 <pre><code>## Warning in min(x): no non-missing arguments to min; returning Inf</code></pre>
 <pre><code>## Warning in max(x): no non-missing arguments to max; returning -Inf</code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-12.png" width="700"></p>
-<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb157"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">unalMap.w2s</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">target</span> <span class="op">/</span> <span class="va">query</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">target.rep</span>, <span class="va">query.rep</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -584,7 +611,7 @@
 <a href="#width-of-inverted-regions" class="anchor"></a>Width of inverted regions</h2>
 <p>We know that we can detect more inversions after coalescing and removing translocations (<code><a href="../articles/Inversions.html">vignette("Inversions", package = "OikScrambling")</a></code>).</p>
 <p>Many inversions are shorter than 1 kbp. Size may differ slightly between long and short arms.</p>
-<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb159"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">invs.gbs</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterInversions.html">filterInversions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 <span class="va">invs.coa</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterInversions.html">filterInversions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 <span class="va">invs.coa2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterInversions.html">filterInversions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
@@ -594,25 +621,25 @@
 ##     614     604      89     608     541     613     241     620      56     212 
 ## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros Ply_Rob Ply_Sav Ply_Oki Rob_Ros 
 ##     597     237     608     237      19      42      58      16       0      50 
-## Rob_Ply Rob_Sav Rob_Oki 
-##      58      14       0</code></pre>
-<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
+## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma 
+##      58      14       0     697      20      13      12</code></pre>
+<div class="sourceCode" id="cb161"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs.coa</span>,  <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor 
 ##     670     675     105     665     591     671     321     678      73     275 
 ## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros Ply_Rob Ply_Sav Ply_Oki Rob_Ros 
 ##     667     319     686     319      24      51      71      92       0      65 
-## Rob_Ply Rob_Sav Rob_Oki 
-##      70      92       0</code></pre>
-<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
+## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma 
+##      70      92       0    1003      44      21      16</code></pre>
+<div class="sourceCode" id="cb163"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs.coa2</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code>## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor 
 ##     704     705     122     695     611     706     330     708      79     279 
 ## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros Ply_Rob Ply_Sav Ply_Oki Rob_Ros 
 ##     695     327     711     335      27      55      76      92       0      71 
-## Rob_Ply Rob_Sav Rob_Oki 
-##      77      92       0</code></pre>
-<div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
+## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma 
+##      77      92       0    1003      45      23      16</code></pre>
+<div class="sourceCode" id="cb165"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Sanity check that we detect inversions on both strands</span>
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs.coa2</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu">decode</span><span class="op">(</span><span class="fu">strand</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">}</span><span class="op">)</span></code></pre></div>
 <pre><code>##   Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom
@@ -623,11 +650,11 @@
 ## +     147     354     182     365     164       7       2       6      51
 ## -     132     341     145     346     171      20      53      70      41
 ## *       0       0       0       0       0       0       0       0       0
-##   Ply_Oki Rob_Ros Rob_Ply Rob_Sav Rob_Oki
-## +       0       5       5      52       0
-## -       0      66      72      40       0
-## *       0       0       0       0       0</code></pre>
-<div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
+##   Ply_Oki Rob_Ros Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma
+## +       0       5       5      52       0     470      29      11       3
+## -       0      66      72      40       0     533      16      12      13
+## *       0       0       0       0       0       0       0       0       0</code></pre>
+<div class="sourceCode" id="cb167"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">invs.gbs</span>  <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">invs.gbs</span><span class="op">)</span>  |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">widths</span><span class="op">$</span><span class="va">invs.coa</span>  <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">invs.coa</span><span class="op">)</span>  |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">widths</span><span class="op">$</span><span class="va">invs.coa2</span> <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">invs.coa2</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
@@ -638,21 +665,21 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></code></pre></div>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_inversions-1.png" width="700"></p>
-<div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb169"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using mapped regions, split by arm."</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></code></pre></div>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_inversions-2.png" width="700"></p>
-<div class="sourceCode" id="cb147"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb171"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm."</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></code></pre></div>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_inversions-3.png" width="700"></p>
-<div class="sourceCode" id="cb149"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb173"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scale<span class="op">=</span><span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using doublemapped regions, split by comparison"</span><span class="op">)</span> <span class="op">+</span>
@@ -663,7 +690,7 @@
 <div id="width-of-gaps-next-to-the-inverted-regions" class="section level2">
 <h2 class="hasAnchor">
 <a href="#width-of-gaps-next-to-the-inverted-regions" class="anchor"></a>Width of gaps next to the inverted regions</h2>
-<div class="sourceCode" id="cb151"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb175"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">inv.lgaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">leftInversionGaps</span><span class="op">)</span> |&gt; <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span>
 <span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
 <span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
@@ -673,9 +700,9 @@
 ##     669     675      96     665     591     669     319     678      69     274 
 ## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros Ply_Rob Ply_Sav Ply_Oki Rob_Ros 
 ##     666     315     685     315      22      46      65      92       0      61 
-## Rob_Ply Rob_Sav Rob_Oki 
-##      67      92       0</code></pre>
-<div class="sourceCode" id="cb153"><pre class="downlit sourceCode r">
+## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma 
+##      67      92       0    1003      44      21      14</code></pre>
+<div class="sourceCode" id="cb177"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">invs.lgaps</span> <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.lgaps</span><span class="op">)</span> <span class="op">+</span>

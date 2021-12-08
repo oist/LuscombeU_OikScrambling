@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
       </span>
     </div>
 
@@ -73,6 +73,9 @@
     </li>
     <li>
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
+    </li>
+    <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
@@ -118,7 +121,7 @@
       <h1 data-toc-skip>Translocations</h1>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">24 November, 2021</h4>
+            <h4 class="date">08 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/Translocations.Rmd"><code>vignettes/Translocations.Rmd</code></a></small>
       <div class="hidden name"><code>Translocations.Rmd</code></div>
@@ -199,13 +202,21 @@
 ## Rob_Ros   952   1127  617
 ## Rob_Ply  1106   1392  885
 ## Rob_Sav   128    238  235
-## Rob_Oki     9     10   10</code></pre>
+## Rob_Oki     9     10   10
+## Dme_Dbu   231    316  280
+## Dme_Dsu    98    131   96
+## Dme_Dya   173    194  106
+## Dme_Dma   266    285  134</code></pre>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>  <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span>
 <span class="va">trans_summary</span><span class="op">$</span><span class="va">target</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##                  align   mapped     map2
+## Dme_Dbu        231.000  316.000 280.0000
+## Dme_Dma        266.000  285.000 134.0000
+## Dme_Dsu         98.000  131.000  96.0000
+## Dme_Dya        173.000  194.000 106.0000
 ## Int – Int     1581.000 1734.000 626.0000
 ## Int – Rob      978.000 1176.667 631.6667
 ## Int/Rob – Oki    6.000    7.000   7.0000
@@ -216,6 +227,10 @@
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##                align mapped  map2
+## Dme_Dbu        231.0  316.0 280.0
+## Dme_Dma        266.0  285.0 134.0
+## Dme_Dsu         98.0  131.0  96.0
+## Dme_Dya        173.0  194.0 106.0
 ## Int – Int     1581.0 1734.0 626.0
 ## Int – Rob      952.0 1127.0 617.0
 ## Int/Rob – Oki    6.0    7.0   7.0
@@ -226,6 +241,10 @@
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##                    align     mapped       map2
+## Dme_Dbu               NA         NA         NA
+## Dme_Dma               NA         NA         NA
+## Dme_Dsu               NA         NA         NA
+## Dme_Dya               NA         NA         NA
 ## Int – Int             NA         NA         NA
 ## Int – Rob     117.183617 195.295503 246.327695
 ## Int/Rob – Oki   4.242641   4.242641   4.242641
@@ -296,16 +315,26 @@
 ## map2allTrans      268     339     256     201     250     204     502     489
 ## map2Strans        293     324     191     160     190     154     570     511
 ## map2StransRep     244     230      75     102      77      94     458       0
-##               Ply_Rob Ply_Sav Ply_Oki Rob_Ros Rob_Ply Rob_Sav Rob_Oki
-## aln             56000   68463    2127   60384   60205   70201    2347
-## alnStrans         658      51       2     705     776      62       4
-## mapTot           4969    4041    1306    4566    4812    4148    1402
-## alltrans          928     239       3     894     870     240       7
-## mapStrans         941     191       3     987    1143     208       6
-## map2Tot          3152    4036    1304    3076    3289    4143    1400
-## map2allTrans      429     242       3     440     483     239       7
-## map2Strans        352     190       3     511     662     205       6
-## map2StransRep       0       0       0       0       0       0       0</code></pre>
+##               Ply_Rob Ply_Sav Ply_Oki Rob_Ros Rob_Ply Rob_Sav Rob_Oki Dme_Dbu
+## aln             56000   68463    2127   60384   60205   70201    2347   47893
+## alnStrans         658      51       2     705     776      62       4     129
+## mapTot           4969    4041    1306    4566    4812    4148    1402    5959
+## alltrans          928     239       3     894     870     240       7     411
+## mapStrans         941     191       3     987    1143     208       6     291
+## map2Tot          3152    4036    1304    3076    3289    4143    1400    5877
+## map2allTrans      429     242       3     440     483     239       7     405
+## map2Strans        352     190       3     511     662     205       6     259
+## map2StransRep       0       0       0       0       0       0       0       0
+##               Dme_Dsu Dme_Dya Dme_Dma
+## aln             68750   23059    9732
+## alnStrans          72     154     215
+## mapTot            992    1816    2706
+## alltrans          145     194     281
+## mapStrans         130     186     249
+## map2Tot           878    1582    2272
+## map2allTrans      124     113     153
+## map2Strans         95     100     114
+## map2StransRep       0       0       0</code></pre>
 </div>
 </div>
   </div>

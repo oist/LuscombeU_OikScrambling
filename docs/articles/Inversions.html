@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
       </span>
     </div>
 
@@ -73,6 +73,9 @@
     </li>
     <li>
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
+    </li>
+    <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
@@ -118,7 +121,7 @@
       <h1 data-toc-skip>Inversions</h1>
                         <h4 class="author">Charles Plessy</h4>
             
-            <h4 class="date">24 November, 2021</h4>
+            <h4 class="date">08 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/Inversions.Rmd"><code>vignettes/Inversions.Rmd</code></a></small>
       <div class="hidden name"><code>Inversions.Rmd</code></div>
@@ -196,30 +199,46 @@
 ## Rob_Ros    50     65   71
 ## Rob_Ply    58     70   77
 ## Rob_Sav    14     92   92
-## Rob_Oki     0      0    0</code></pre>
+## Rob_Oki     0      0    0
+## Dme_Dbu   697   1003 1003
+## Dme_Dsu    20     44   45
+## Dme_Dya    13     21   23
+## Dme_Dma    12     16   16</code></pre>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                   align    mapped      map2
-## Int – Int      42.00000  51.00000  55.00000
-## Int – Rob      55.33333  68.66667  74.66667
-## Int/Rob – Oki   0.00000   0.00000   0.00000
-## Int/Rob – Sav  15.00000  92.00000  92.00000
-## North – North 231.75000 308.50000 317.75000
-## Oki – North   600.62500 662.87500 691.87500
-## same_pop       54.66667  67.33333  76.00000</code></pre>
+<pre><code>##                   align     mapped       map2
+## Dme_Dbu       697.00000 1003.00000 1003.00000
+## Dme_Dma        12.00000   16.00000   16.00000
+## Dme_Dsu        20.00000   44.00000   45.00000
+## Dme_Dya        13.00000   21.00000   23.00000
+## Int – Int      42.00000   51.00000   55.00000
+## Int – Rob      55.33333   68.66667   74.66667
+## Int/Rob – Oki   0.00000    0.00000    0.00000
+## Int/Rob – Sav  15.00000   92.00000   92.00000
+## North – North 231.75000  308.50000  317.75000
+## Oki – North   600.62500  662.87500  691.87500
+## same_pop       54.66667   67.33333   76.00000</code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##               align mapped  map2
-## Int – Int        42   51.0  55.0
-## Int – Rob        58   70.0  76.0
-## Int/Rob – Oki     0    0.0   0.0
-## Int/Rob – Sav    15   92.0  92.0
-## North – North   237  319.0 328.5
-## Oki – North     608  670.5 704.5
-## same_pop         56   73.0  79.0</code></pre>
+<pre><code>##               align mapped   map2
+## Dme_Dbu         697 1003.0 1003.0
+## Dme_Dma          12   16.0   16.0
+## Dme_Dsu          20   44.0   45.0
+## Dme_Dya          13   21.0   23.0
+## Int – Int        42   51.0   55.0
+## Int – Rob        58   70.0   76.0
+## Int/Rob – Oki     0    0.0    0.0
+## Int/Rob – Sav    15   92.0   92.0
+## North – North   237  319.0  328.5
+## Oki – North     608  670.5  704.5
+## same_pop         56   73.0   79.0</code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##                   align   mapped     map2
+## Dme_Dbu              NA       NA       NA
+## Dme_Dma              NA       NA       NA
+## Dme_Dsu              NA       NA       NA
+## Dme_Dya              NA       NA       NA
 ## Int – Int            NA       NA       NA
 ## Int – Rob      4.618802  3.21455  3.21455
 ## Int/Rob – Oki  0.000000  0.00000  0.00000
