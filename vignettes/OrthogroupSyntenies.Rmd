@@ -87,9 +87,21 @@ Flagging orthogroups by inferred homology class
 -----------------------------------------------
 While single-copy orthologues are arguably the most important component of the genome for between-species comparisons, it is also useful to know - or at least guess - at the other kinds of homologous relations that may exist within a gene family. This can identify, for example, clade-specific gene family expansions or clade-specific gene family deletions.
 
-In the following section, I flag different types of homology by inferring them from OrthoFinder hierarchical orthogroup (HOG) counts.
+Here is an explanation of the orthogroup flags. Every HOG is annotated with a number of flags that are normally `TRUE` or `FALSE`. Clade-specific flags return either the name of the clade or `NA`. Details:
 
-To flag orthogroups, we need a count matrix. Extract this from the `SummarizedExperiment` object `se` with `assay()`.
+1. `present_in_all_spp`: All species in HOG have > 0 genes within the HOG
+2. `one_to_one`: All species in HOG have exactly 1 gene within the HOG
+3. `common_gene_duplication`: All species in HOG have > 0 genes within the HOG AND one or more species has > 1 gene
+4. `expansion_species_specific`: One species has more than every other species, e.g. `c(sp1=1, sp2=1, sp3=3, sp4=2)`. Returns species name if true or `NA` if false
+5. `expansion_clade_N`: One column for every clade. `TRUE` when ALL species in a clade are greater than ALL species outside the clade, e.g. `c(sp1=1, sp2=1, sp3=3, sp4=2)` is `TRUE` if `sp3+sp4` constitutes a clade
+6. `expansion_reconciled`: An attempt to reconcile multiple clade-specific expansion flags. Clades can be nested (`clade1=c("sp1","sp2"), clade2=c("sp1","sp2","sp3","sp4")` and more than one clade-specific expansion can be `TRUE`. I attempt to resolve this as a single flag by assigning the flag as the clade with the most species (`flagAllPHO( ... , expansion_reconciliation="largest_clade"`, the default), but it can resolve to the clade with the highest mean count (`flagAllPHO( ... , expansion_reconciliation="mean_count"`)
+7. `deletion_species_specific`: One species has 0 while all others have >0. Returns species name if true or `NA` if false
+8. `deletion_clade_N`: Similar to `expansion_clade_N`, but different in that it does not care what the counts for other clades are. `TRUE` if all members of a clade have exactly 0 and `FALSE` if any species has >0
+9. `deletion_reconciled`: Similar to `expansion_reconciled` and uses the same `largest_clade` tie breaking. `mean_count` does not work here because the mean count must be 0 for all species in a clade-specific deletion
+
+Note that these flags are not mutually exclusive and can also be the inverse of one another. In our data, a clade-specific gene expansion may or may not correspond to a clade-specific deletion in other clades. E.g., `c(sp1=0, sp2=0, sp3=2, sp4=4)` could be a `sp1+sp2` deletion AND `sp3+sp4` expansion.
+
+To flag orthogroups, we need a count matrix. Extract this from the `SummarizedExperiment` object `se` with `assay()` in the first part, then set up clades.
 
 ```{r orthoflagging}
 se_m <- assay(se, 'txCount')
@@ -117,7 +129,7 @@ orthoflags <- OikScrambling:::flagAllPHO(se_m, clade_list=clades, expansion_reco
 You can then summarize the flags as follows:
 
 ```{r summarizing_orthoflags}
-apply(orthoflags, 2, function(x) table(unlist(x)))
+(apply(orthoflags, 2, function(x) table(unlist(x))))
 ```
 
 The `orthoflags` object yields a matrix with one row per orthogroup, the count columns of the HOG table, and most importantly, a set of orthogroup annotations based on the counts of every species and clade. 
@@ -125,7 +137,7 @@ The `orthoflags` object yields a matrix with one row per orthogroup, the count c
 These annotations are not mutually exclusive. Consider the following:
 
 ```{r summarizing_orthoflags_2}
-assays(se)$txCount[15,]
+(assays(se)$txCount[15,])
 (orthoflags[15,])
 ```
 
@@ -383,7 +395,7 @@ orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
 # orthoBlocks_core[11:15] <- sapply(orthoBlocks_core[11:15],  flagLongShort, longShort$Bar)
 
 sapply(orthoBlocks, length)
-sapply(orthoBlocks_core, length)
+#sapply(orthoBlocks_core, length)
 
 ```
 
@@ -448,24 +460,24 @@ pan-tunicate orthogroup set, which makes the comparison difficult between
 Oikopleura and Ciona…
 
 ```{r fraction_aligned_core}
-uncov  <- BiocParallel::bplapply(orthoPairsFiltered_core, cleanGaps) |> SimpleList()
-unsyn  <- BiocParallel::bplapply(orthoBlocks_core,        cleanGaps) |> SimpleList()
-
-  covered_tot    <- sapply(orthoPairsFiltered_core,   \(x) sum(width(x)))
-  syntenic_tot   <- sapply(orthoBlocks_core,          \(x) sum(width(x)))
-uncovered_tot    <- sapply(uncov,                     \(x) sum(width(x)))
-unsyntenic_tot   <- sapply(unsyn,                     \(x) sum(width(x)))
-
-(syn_summary_core <- cbind(
-  covered_frac   = covered_tot   / ( covered_tot   + uncovered_tot ) * 100,
-  orthogenes_n   = sapply(orthoPairsFiltered_core, length),
-  syntenic_frac  = syntenic_tot  / ( syntenic_tot  + unsyntenic_tot ) * 100,
-  syntenic_reg   = sapply(orthoBlocks_core, length)
- )|> as.data.frame())
-
-sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), mean))   |> round(1)
-sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), median)) |> round(1)
-sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), sd))     |> round(1)
+# uncov  <- BiocParallel::bplapply(orthoPairsFiltered_core, cleanGaps) |> SimpleList()
+# unsyn  <- BiocParallel::bplapply(orthoBlocks_core,        cleanGaps) |> SimpleList()
+# 
+#   covered_tot    <- sapply(orthoPairsFiltered_core,   \(x) sum(width(x)))
+#   syntenic_tot   <- sapply(orthoBlocks_core,          \(x) sum(width(x)))
+# uncovered_tot    <- sapply(uncov,                     \(x) sum(width(x)))
+# unsyntenic_tot   <- sapply(unsyn,                     \(x) sum(width(x)))
+# 
+# (syn_summary_core <- cbind(
+#   covered_frac   = covered_tot   / ( covered_tot   + uncovered_tot ) * 100,
+#   orthogenes_n   = sapply(orthoPairsFiltered_core, length),
+#   syntenic_frac  = syntenic_tot  / ( syntenic_tot  + unsyntenic_tot ) * 100,
+#   syntenic_reg   = sapply(orthoBlocks_core, length)
+#  )|> as.data.frame())
+# 
+# sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), mean))   |> round(1)
+# sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), median)) |> round(1)
+# sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), sd))     |> round(1)
 ```
 
 Agreement with nucleotide alignments
@@ -574,8 +586,8 @@ simple_plot <- ggplot( dat ) +
 simple_plot
 ```
 
-Patterns of gene family expansion and contraction
--------------------------------------------------
+Genomic locations of HOGs found in all species
+----------------------------------------------
 Genes that are found in all species are found where in the genome?
 
 ```{r basic_flags_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
@@ -652,7 +664,12 @@ complex_plot
 
 Taken together: in general, a greater fraction of genes on long arms can be found in all species. Let us continue this logic further.
 
-Where are one-to-one orthologues found?
+Genomic locations of one-to-one HOGs
+------------------------------------
+
+A HOG is either one-to-one (exactly one HOG constituent from every species) or not. Not-one-one-one gene means either one or more species has >1 gene in the same HOG without being resolved as a clade-specific HOG, or else the gene is missing in one or more species. Both can be true at once (e.g., counts of 6, 1, 1, 1, 3, 0)
+
+Where are one-to-one orthologues located in the genome?
 
 ```{r basic_flags_4, fig.height=4, fig.width=6, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
@@ -726,13 +743,17 @@ complex_plot <- ggplot( dat ) +
 complex_plot
 ```
 
-As a point of clarification, a HOG is either exactly one-to-one (exactly one HOG participant from every species) or not (meaning a gene has been duplicated somewhere and has not been fully resolved into clade-specific HOGs, or else the gene is missing in one or more species).
-
 Thus, it seems that whether or not a gene participates in a one-to-one HOG also depends on where the gene is encoded. Long chromosome arms are more often host to one-to-ones, and this is also true for the XSR, which always has the highest proportion of one-to-one genes across all species pairs.
 
-Species- and clade-specific duplications across genome
-------------------------------------------------------
-Genes that are found in all species, and which have seemingly been duplicated (>1 in any species), occur where across the genome?
+Genomic locations of species- and clade-specific HOG expansions
+---------------------------------------------------------------
+In the following section, I attempt to identify species- and clade-specific gene duplications using counts from HOG counts. For a given `query`-`target` combination, the `collect_clade_expansions()` function extracts from a `GBreaks` object 3 different data frames:
+
+1. Species-specific duplications in the query genome (referred to as `sp1` in the code below)
+2. Species-specific duplications in the target genome (referred to as `sp2` in the code below)
+3. Clade-specific duplications common to the query and target
+
+Note that this step uses a concatenate of the two species names to extract a specific column from the `orthoFlagsDF` (`expansion_clade_X_Y`). Ensure that the clade names line up precisely with the species names.
 
 ```{r gene_duplications_1}
 # Find midpoints of a GRanges.
@@ -773,8 +794,8 @@ collect_clade_expansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
 
   # sp2 is trickier.
   # Its species-specific expansions cannot be part of the orthoPairs, by definition.
-  # So what you can do is guess where that transcript corresponds to on the reference
-  # genome based on its transcript coordinates, but this is tricky...
+  # So what you can do is guess where the sp2 transcript corresponds to on the reference
+  # genome based on its transcript coordinates.
   transcripts_sp2 <- as.data.frame(transcripts[[sp2]])
   transcripts_sp2$midpoint <- grMidpoint(transcripts[[sp2]])
   # Subset transcripts to only the longest per gene...
@@ -868,11 +889,11 @@ lapply(duplications, function(pair) {
 })
 ```
 
-
-Now we have data frames that count up the number of clade- and species-specific genomes. Where do duplications fall in the genome?
+The `duplications` object contains data frames that add up the number of clade- and species-specific genomes. Where do duplications fall in the genome?
 
 ```{r gene_duplications_pos_oki_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
-# Make sure factor levels are in alphabetical order. Otherwise the faceting looks ugly.
+# Make sure factor levels are in alphabetical order and exclude chromosomes that were already snipped out.
+# It makes the later faceting look ugly if they are not sorted properly.
 duplications$Oki_Kum  <- lapply(duplications$Oki_Kum, function(sp){
   sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
   sp
