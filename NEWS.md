@@ -1,3 +1,7 @@
+# OikScrambling 0.6.0
+
+* Adding _Drosophila_ data for a plot on CP's MBSJ2021 poster.
+
 # OikScrambling 0.5.0
 
 * `load_one_to_ones()` function moved from _GenomicBreaks_ to this package.
