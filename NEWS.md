@@ -1,3 +1,7 @@
+# OikScrambling 0.6.1
+
+* Add Mike's vignette on coalescing cutoffs.
+
 # OikScrambling 0.6.0
 
 * Adding _Drosophila_ data for a plot on CP's MBSJ2021 poster.
