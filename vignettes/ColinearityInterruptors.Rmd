@@ -385,3 +385,95 @@ x <- rbind(
 
 
 ```
+
+# ROI 10: small unaligned inversion in Oki-Kum alignment
+
+## The small unaligned inversion
+
+Martin reported a small unaligned inversion at PAR:80769-81032 in the Oki – Kum
+alignment (version 3).  Note that it will not be visible on the plot if this
+vignette is rebuilt with an alignment updated to include these inversions.
+
+```{r ROI10}
+ROI10 <- GRanges("PAR:80769-81032:-")
+ROI10_inv <- subsetByOverlaps(gbs$Oki_Kum, ROI10 + 1e2)
+
+ROI10_inv |> plotApairOfChrs(main = "A short unaligned region that is actually an inversion within the inversion.")
+ROI10_inv       |> cleanGaps() |> as.character()
+ROI10_inv$query |> cleanGaps() |> as.character()
+```
+
+Interestingly, this small inversion is flanked by an inverted repeat.
+
+```{r ROI10_pairwise}
+pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:80780-81022"        ) + 200 ),
+                  getSeq(genomes$Kum, GRanges("contig_57_1:58108-58350") + 200)) |> writePairwiseAlignments()
+
+pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:80780-81022")         + 200 ),
+                  getSeq(genomes$Kum, GRanges("contig_57_1:58108-58350") + 200) |> reverseComplement()) |> writePairwiseAlignments()
+
+pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:80500-80900")),
+                  getSeq(genomes$Oki, GRanges("PAR:81000-81400")) |> reverseComplement()) |> writePairwiseAlignments()
+
+getSeq(genomes$Oki, GRanges("PAR:80500-80900")) |> as.character()
+```
+
+The repeat sequence might be related to LTRs.
+
+```
+>ITR
+TTAAGGGTAATGGTATACATCGGCGCGGCGCTGCTCTCTCGATCCGCGCTCCGCCAGAAC
+CTATTTCTCACGAGGCCGTAAAATCTGAACGGATAAAGATTTTTTCAAAATTCAAAAAGA
+TTCTGAATAATTAAAGTCTTTTCTACTAACACAGCAAAATTGGTAATGATTGTCAAAGAG
+GAACTATCTGAAAATTGCCAGTTTCCTTCAAATGACATTTTCTTCAACATTTCTCATGCA
+AAATTTTTGAAAATTACACTGTCTTGTAGAGAATCGTCAGTTCTACAAATCCTGTTTTTC
+AGATTTTTGTTTGAGGCTTTCATTAATTTTACATCGCAATTTGTAAAGAGCGCTACTTTT
+TCTCGCGCCTCTCCGCTC
+```
+
+## Other interesting things in the area
+
+Expanding the area broader, there is this interesting pattern where there is
+only one gap on the _Oki_ side and two gaps on the _Kum_ side.  This is because
+the alignments on the _Oki_ side are directly contacting each other.
+
+```{r ROI10_insertion}
+ROI10_ins <- subsetByOverlaps(gbs$Oki_Kum, ROI10 + 3e3)
+ROI10_ins |> plotApairOfChrs()
+ROI10_ins |> as.data.frame()
+ROI10_ins |> cleanGaps() |> as.data.frame()
+ROI10_ins$query |> cleanGaps() |> as.data.frame()
+
+tail(ROI10_ins, 2) |> plotApairOfChrs(main = "An insertion in the Kume genome")
+tail(ROI10_ins, 2) |> swap() |> cleanGaps()
+
+# Left side
+pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:83350-83550")),
+                  getSeq(genomes$Kum, GRanges("contig_57_1:55548-55748")) |> reverseComplement(),
+                  type = "global") |> writePairwiseAlignments()
+
+# Right side
+pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:83351-83551")),
+                  getSeq(genomes$Kum, GRanges("contig_57_1:55236-55436")) |> reverseComplement(),
+                  type = "global") |> writePairwiseAlignments()
+
+# Both sides
+pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:83350-83551")),
+                  getSeq(genomes$Kum, GRanges("contig_57_1:55236-55748")) |> reverseComplement(),
+                  type = "global") |> writePairwiseAlignments()
+
+getSeq(genomes$Kum, GRanges("contig_57_1:55337-55647:+")) |> as.character()
+```
+
+Exemplar from the Okinawa genome (found by BLASTing the sequence output by
+`getSeq` above).
+
+```
+>RepeatInsertion
+AAgggggggCGGGCGGCCACGGTACAAAAGTGGAATTTGTACCGCGGGTACAAATTTTGT
+ACCGCCGGTACAAAAAATCGCAATTGTTTTGACAATAAAAACCGATTTCTACCCATTATA
+ATGCTCACTTTTGAACAGAACTCCACCTCAGCTATACCAGTAAGGAGTTTCCATCAATTC
+TAGCGCGAAGCGCACACTTTTTCCTTGATTCTATTTTTGTCTTGTACCGGCGGTACAAAA
+ATTTTTGTACCGGCGTTACAAATTTGTACCGCCGTTACAAATTTGTACCGTCGCCGCCCT
+ACACCC
+```
