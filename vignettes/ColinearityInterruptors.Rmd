@@ -82,6 +82,8 @@ Is the alignment convincing ?
 ```{r pairwise_seq_alignments}
 # Good match where reported
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-")), genomes$Oki$chr1[3870099:3870324], type="local")
+
+# 50 bp of flanking regions added to contrast
 pairwiseAlignment(getSeq(genomes$Kum, GRanges("contig_3_1:16561-16812:-") + 50), genomes$Oki$chr1[(3870099 -50):(3870324 + 50)], type="global") |> writePairwiseAlignments()
 
 # No good match between the flanking pairs.
