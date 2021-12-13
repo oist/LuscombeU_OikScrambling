@@ -316,7 +316,7 @@ XSR plot
 
 Ugly...
 
-```{r XSR plot}
+```{r XSR_plot}
 XSR_HOGs <- sapply(orthoPairs_one2oneInOiks, \(gb) {
   gb <- gb[seqnames(gb) == "XSR"]
   # Keep biggest match only
@@ -380,11 +380,11 @@ genome.
 
 ```{r Hox4}
 sapply(orthoPairs[1:15], \(gb) {
-  x <- gb |> dplyr::filter(HOG == "N19.HOG0000192")
+  x <- gb |> plyranges::filter(HOG == "N19.HOG0000192")
   if (length(x) == 0) return(NULL)
   x})
 
-Hox4 <- orthoPairs$Oki_Osa |> dplyr::filter(HOG == "N19.HOG0000192")
+Hox4 <- orthoPairs$Oki_Osa |> plyranges::filter(HOG == "N19.HOG0000192")
 Hox4_1e4 <- GBreaks(target = granges(Hox4) + 1e4, query = Hox4$query + 1e4)
 Hox4_4e4 <- GBreaks(target = granges(Hox4) + 4e4, query = Hox4$query + 4e4)
 Hox4_1e5 <- GBreaks(target = granges(Hox4) + 1e5, query = Hox4$query + 1e5)
@@ -407,11 +407,11 @@ HOG `N19.HOG0000193`.
 
 ```{r Hox1}
 sapply(orthoPairs[1:15], \(gb) {
-  x <- gb |> dplyr::filter(HOG == "N19.HOG0000193")
+  x <- gb |> plyranges::filter(HOG == "N19.HOG0000193")
   if (length(x) == 0) return(NULL)
   x})
 
-Hox1 <- orthoPairs$Oki_Osa |> dplyr::filter(HOG == "N19.HOG0000193")
+Hox1 <- orthoPairs$Oki_Osa |> plyranges::filter(HOG == "N19.HOG0000193")
 Hox1_1e4 <- GBreaks(target = granges(Hox1) + 1e4, query = Hox1$query + 1e4)
 Hox1_4e4 <- GBreaks(target = granges(Hox1) + 4e4, query = Hox1$query + 4e4)
 Hox1_1e5 <- GBreaks(target = granges(Hox1) + 1e5, query = Hox1$query + 1e5)
