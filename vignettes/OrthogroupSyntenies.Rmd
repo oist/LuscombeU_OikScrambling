@@ -66,6 +66,8 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOG
   gb       <- IDs2GRanges(HOGs[,name1], annot1)
   gb$query <- IDs2GRanges(HOGs[,name2], annot2)
   gb <- GenomicBreaks:::GBreaks(gb)
+  gb$HOG <- HOGs$HOG
+  gb$OG  <- HOGs$OG
   sort(gb)
 }
 
