@@ -1,3 +1,11 @@
+# OikScrambling 0.6.3
+
+* Add Hox regions of interest for Figure 1
+
+# OikScrambling 0.6.2
+
+* Add 10-Mbp dot plots for Figure 1
+
 # OikScrambling 0.6.1
 
 * Add Mike's vignette on coalescing cutoffs.
