@@ -371,6 +371,62 @@ seqlevels(XSR_toPlot$Bar_Nor$query) <- "XSR_06_Nor"
 makeOxfordPlots(unlist(XSR_toPlot))
 ```
 
+# HOX genes
+
+## Hox 4
+
+Appears to be duplicated in Bar so missing from HOG `N19.HOG0000192` in that
+genome.
+
+```{r Hox4}
+sapply(orthoPairs[1:15], \(gb) {
+  x <- gb |> dplyr::filter(HOG == "N19.HOG0000192")
+  if (length(x) == 0) return(NULL)
+  x})
+
+Hox4 <- orthoPairs$Oki_Osa |> dplyr::filter(HOG == "N19.HOG0000192")
+Hox4_1e4 <- GBreaks(target = granges(Hox4) + 1e4, query = Hox4$query + 1e4)
+Hox4_4e4 <- GBreaks(target = granges(Hox4) + 4e4, query = Hox4$query + 4e4)
+Hox4_1e5 <- GBreaks(target = granges(Hox4) + 1e5, query = Hox4$query + 1e5)
+
+subsetByOverlaps(coa$Oki_Osa, Hox4_1e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_1e4))
+subsetByOverlaps(coa$Oki_Osa, Hox4_4e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_4e4))
+subsetByOverlaps(coa$Oki_Osa, Hox4_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_1e5))
+
+## Genes
+Hox4_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox4_4e4 |> range())
+mids <- Hox4_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- Hox4_4e4.genes$tx_name |> as.character()
+annot <- genoPlotR::annotation(x1=start(Hox4_4e4.genes), x2=end(Hox4_4e4.genes), text=text, rot=30)
+gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_4e4), annotations = annot)
+```
+
+## Hox 1
+
+HOG `N19.HOG0000193`.
+
+```{r Hox1}
+sapply(orthoPairs[1:15], \(gb) {
+  x <- gb |> dplyr::filter(HOG == "N19.HOG0000193")
+  if (length(x) == 0) return(NULL)
+  x})
+
+Hox1 <- orthoPairs$Oki_Osa |> dplyr::filter(HOG == "N19.HOG0000193")
+Hox1_1e4 <- GBreaks(target = granges(Hox1) + 1e4, query = Hox1$query + 1e4)
+Hox1_4e4 <- GBreaks(target = granges(Hox1) + 4e4, query = Hox1$query + 4e4)
+Hox1_1e5 <- GBreaks(target = granges(Hox1) + 1e5, query = Hox1$query + 1e5)
+
+subsetByOverlaps(coa$Oki_Osa, Hox1_1e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_1e4))
+subsetByOverlaps(coa$Oki_Osa, Hox1_4e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4))
+subsetByOverlaps(coa$Oki_Osa, Hox1_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_1e5))
+
+## Genes
+Hox1_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox1_4e4 |> range())
+mids <- Hox1_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- Hox1_4e4.genes$tx_name |> as.character()
+annot <- genoPlotR::annotation(x1=start(Hox1_4e4.genes), x2=end(Hox1_4e4.genes), text=text, rot=30)
+gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4), annotations = annot)
+```
 
 # Session information
 
