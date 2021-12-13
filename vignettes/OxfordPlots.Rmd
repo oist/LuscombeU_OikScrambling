@@ -1,0 +1,275 @@
+---
+title: "Whole-genome dot-plots"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Whole-genome dot-plots}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+In this vignette I dot-plot pairs of genomes in parallel to illustrate
+differences in the extend of scrambling in Oikopleura compared to equivalent
+pairs in other genera.
+
+The core functions used here are maintained in our _GenomicBreaks_ R package,
+which is fully documented at: <https://oist.github.io/GenomicBreaks>.
+
+See `vignette("ParallelPlots", package = "OikScrambling")` for parallel
+comparisons of homologous chromosomes in more than one species.
+
+## Load pacakges
+
+# Load R pacakges and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling:::loadAllGenomes())
+(load("BreakPoints.Rdata"))
+```
+
+# Oikopleura
+
+## Oki vs Bar
+
+```{r Oki_Bar_all}
+makeOxfordPlots(coa$Oki_Bar, diag = FALSE)
+```
+
+```{r mkOxPlotWindow_function}
+mkOxPlotWindow <- function(gb, win = 5e6) {
+  if (all(is.na(seqlengths(gb))))
+    seqlengths(gb) <- tapply(end(gb), seqnames(gb), max) |> as.vector()
+  if (all(is.na(seqlengths(gb$query))))
+    seqlengths(gb$query) <- tapply(end(gb$query), seqnames(gb$query), max) |> as.vector()
+  longest_target_seq <- seqlengths(gb) |> sort() |> tail(1) |> names()
+  target_centre <- round(seqlengths(gb)[longest_target_seq] / 2)
+  best_query_match   <- gb[seqnames(gb) == longest_target_seq]$query |> seqnames() |> table() |> sort() |> tail(1) |> names()
+  query_centre <- round(seqlengths(gb$query)[best_query_match] / 2)
+  gb |> plyranges::filter(
+    seqnames == longest_target_seq,
+    seqnames(query) == best_query_match,
+    start > target_centre - win,
+    end < target_centre + win,
+    start(query) > query_centre - win,
+    end(query) < query_centre + win
+  ) |>
+    makeOxfordPlots(type = "l") +
+    theme_bw() +
+    theme(legend.position="none")
+}
+```
+
+```{r Oki_Bar_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Oki_Bar)
+```
+
+## Osa vs Bar
+
+```{r Osa_bar}
+makeOxfordPlots(coa$Osa_Bar, diag = FALSE)
+```
+
+```{r Osa_Bar_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Osa_Bar)
+```
+
+## Oki vs Kum
+
+```{r Oki_Kum}
+makeOxfordPlots(coa$Oki_Kum)
+```
+
+```{r Oki_Kum_win_prepare}
+Oki_Kum_PAR <- gbs$Oki_Kum |> plyranges::filter(seqnames == "PAR")
+seqlevels(Oki_Kum_PAR)       <- seqlevelsInUse(Oki_Kum_PAR)
+seqlevels(Oki_Kum_PAR$query) <- seqlevelsInUse(Oki_Kum_PAR$query)
+
+makeOxfordPlots(Oki_Kum_PAR)
+
+# Let's remove the contigs that have their main match elsewhere.
+QTcoverage <- function(gb) {
+  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
+  stopifnot (!any(is.na(seqlengths(gb$query))))
+  grl <- split(gb, seqnames(gb$query))
+  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
+}
+Oki_Kum_PAR[seqnames(Oki_Kum_PAR$query) %in% seqlevels(Oki_Kum_PAR$query)[QTcoverage(Oki_Kum_PAR) < 0.5]] <- NULL
+seqlevels(Oki_Kum_PAR$query) <- seqlevelsInUse(Oki_Kum_PAR$query)
+makeOxfordPlots(Oki_Kum_PAR)
+
+# Let's remove the smallest ones that barely display on one pixel
+seqlengths(Oki_Kum_PAR$query)
+Oki_Kum_PAR[seqnames(Oki_Kum_PAR$query) %in% seqlevels(Oki_Kum_PAR$query)[seqlengths(Oki_Kum_PAR$query) < 2e4]] <- NULL
+seqlevels(Oki_Kum_PAR$query) <- seqlevelsInUse(Oki_Kum_PAR$query)
+makeOxfordPlots(Oki_Kum_PAR)
+
+# And now let's flip by hand the ones that need
+grl <- split(Oki_Kum_PAR, seqnames(Oki_Kum_PAR$query))
+grl[["contig_12_1"]] <- reverse(grl[["contig_12_1"]], query = TRUE)
+grl[["contig_43_1"]] <- reverse(grl[["contig_43_1"]], query = TRUE)
+Oki_Kum_PAR <- unlist(grl)
+makeOxfordPlots(Oki_Kum_PAR)
+
+# Finally, let's reorder and merge remaining seqlevels
+seqlevels(Oki_Kum_PAR$query) <- seqlevels(Oki_Kum_PAR$query)[orderQuerySeqLevels(Oki_Kum_PAR)]
+Oki_Kum_PAR$query <- mergeSeqLevels(Oki_Kum_PAR$query, seqlevels(Oki_Kum_PAR$query), "PAR")
+```
+
+```{r Osa_Kum_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(Oki_Kum_PAR)
+```
+
+# Ciona
+
+## _Ciona intestinalis_ (Plymouth vs Roscoff)
+
+```{r Ply_Ros}
+makeOxfordPlots(coa$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+```
+
+```{r Ply_Ros_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+```
+
+## _Ciona intestinalis_ (Plymouth) vs _Ciona robusta_
+
+```{r Ply_Rob}
+makeOxfordPlots(coa$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+```
+
+```{r Ply_Rob_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+```
+
+## Troubleshoot of grid pattern
+
+We see horizontal patterns what are they?  I think they may be pericentromeric
+regions.
+
+
+```{r Ply_Rob_point_plot}
+makeOxfordPlots(coa$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+```
+
+```{r Ply_Rob_subset}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000010.1", "BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1", "BJTB01000014.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000005.1", "BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1", "BNJZ01000009.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000012.1 and BNJZ01000007.1")
+```
+
+```{r Ply_Rob_subset2}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000012.1 and BNJZ01000007.1")
+```
+
+```{r Ply_Rob_subset3}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000002.1", "BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1", "BJTB01000006.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000010.1", "BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1", "BNJZ01000014.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000004.1 and BNJZ01000012.1")
+```
+
+```{r Ply_Rob_subset4}
+coa$Ply_Rob |>
+  plyranges::filter(seqnames(query) %in% c("BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1")) |>
+  plyranges::filter(seqnames        %in% c("BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1")) |>
+  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000004.1 and BNJZ01000012.1")
+```
+
+## _Ciona intestinalis_ (Plymouth) vs _Ciona savignyi_
+
+```{r Ply_Sav}
+makeOxfordPlots(coa$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+```
+
+```{r Ply_Sav_win_prepare}
+Ply_Sav_chr1 <- gbs$Ply_Sav |> plyranges::filter(seqnames == "BNJZ01000001.1")
+seqlevels(Ply_Sav_chr1)       <- seqlevelsInUse(Ply_Sav_chr1)
+seqlevels(Ply_Sav_chr1$query) <- seqlevelsInUse(Ply_Sav_chr1$query)
+Ply_Sav_chr1$query <- forceSeqLengths(Ply_Sav_chr1$query)
+
+makeOxfordPlots(Ply_Sav_chr1)
+
+# Let's remove the contigs that have their main match elsewhere.
+QTcoverage <- function(gb) {
+  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
+  stopifnot (!any(is.na(seqlengths(gb$query))))
+  grl <- split(gb, seqnames(gb$query))
+  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
+}
+Ply_Sav_chr1[seqnames(Ply_Sav_chr1$query) %in% seqlevels(Ply_Sav_chr1$query)[QTcoverage(Ply_Sav_chr1) < 0.05]] <- NULL
+seqlevels(Ply_Sav_chr1$query) <- seqlevelsInUse(Ply_Sav_chr1$query)
+makeOxfordPlots(Ply_Sav_chr1)
+
+# Let's remove the smallest ones that barely display on one pixel
+seqlengths(Ply_Sav_chr1$query)
+Ply_Sav_chr1[seqnames(Ply_Sav_chr1$query) %in% seqlevels(Ply_Sav_chr1$query)[seqlengths(Ply_Sav_chr1$query) < 2e4]] <- NULL
+seqlevels(Ply_Sav_chr1$query) <- seqlevelsInUse(Ply_Sav_chr1$query)
+makeOxfordPlots(Ply_Sav_chr1)
+
+# Finally, let's reorder and merge remaining seqlevels
+seqlevels(Ply_Sav_chr1$query) <- seqlevels(Ply_Sav_chr1$query)[orderQuerySeqLevels(Ply_Sav_chr1)]
+Ply_Sav_chr1$query <- mergeSeqLevels(Ply_Sav_chr1$query, seqlevels(Ply_Sav_chr1$query), "Merged matching contigs")
+makeOxfordPlots(Ply_Sav_chr1)
+```
+
+```{r Ply_Sav_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(Ply_Sav_chr1) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+```
+
+# Drosophila
+
+## vs Drosophila mauritania
+
+```{r Dmel_Dmau}
+makeOxfordPlots(coa$Dme_Dma) + ggtitle("Dmel vs Dmau")
+```
+
+```{r Dmel_Dmau_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dma) + ggtitle("Drosophila melanogaster vs Drosophila mauritania")
+```
+
+## vs Drosophila yakuba
+
+```{r Dmel_Dyak}
+makeOxfordPlots(coa$Dme_Dya) + ggtitle("Dmel vs Dyak")
+```
+
+```{r Dmel_Dyak_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dya) + ggtitle("Drosophila melanogaster vs Drosophila yakuba")
+```
+
+## vs Drosophila subpulchrella
+
+```{r Dmel_Dsub}
+makeOxfordPlots(coa$Dme_Dsu) + ggtitle("Dmel vs Dsub")
+```
+
+```{r Dmel_Dsub_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dsu) + ggtitle("Drosophila melanogaster vs Drosophila subpulchrella")
+```
+
+## vs Drosophila buskii
+
+```{r Dmel_Dbus}
+makeOxfordPlots(coa$Dme_Dbu) + ggtitle("Dmel vs Dbus")
+```
+
+
+```{r Dmel_Dbus_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dbu) + ggtitle("Drosophila melanogaster vs Drosophila buskii")
+```

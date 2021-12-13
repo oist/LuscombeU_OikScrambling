@@ -242,11 +242,20 @@ transcripts <- sapply(names(transcripts), function(sp){
 Prepare GBreak objects
 ======================
 
+<<<<<<< HEAD
 ```{r creating_gbreaks}
 orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19") {
   orthoPairs <- OikScrambling:::load_one_to_ones(
     system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
     c(name1, name2))
+=======
+```{r orthoPairs_object}
+orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOGs=NULL) {
+  if(is.null(HOGs))
+    HOGs <- OikScrambling:::load_one_to_ones(
+      system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
+      c(name1, name2))
+>>>>>>> e8282ffc0fb1a8a4b7efbc8792454884dac1041c
 
   IDs2GRanges <- function (IDs, annot) {
     prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
@@ -260,31 +269,31 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19") {
     gr                                                # Return the object
   }
   
-  gb       <- IDs2GRanges(orthoPairs[,name1], annot1)
-  gb$query <- IDs2GRanges(orthoPairs[,name2], annot2)
+  gb       <- IDs2GRanges(HOGs[,name1], annot1)
+  gb$query <- IDs2GRanges(HOGs[,name2], annot2)
   gb <- GenomicBreaks:::GBreaks(gb)
   sort(gb)
 }
 
-orthoPairToGBreaks_all_Oiks <- function(treeName) {
+orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
   orthoPairs <- SimpleList()
-  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Oki, transcripts$Osa, treeName)
-  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Oki, transcripts$Bar, treeName)
-  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$Oki, transcripts$Kum, treeName)
-  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$Oki, transcripts$Aom, treeName)
-  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Oki, transcripts$Nor, treeName)
+  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Oki, transcripts$Osa, treeName, HOGs)
+  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Oki, transcripts$Bar, treeName, HOGs)
+  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$Oki, transcripts$Kum, treeName, HOGs)
+  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$Oki, transcripts$Aom, treeName, HOGs)
+  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Oki, transcripts$Nor, treeName, HOGs)
   
-  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Osa, transcripts$Bar, treeName)
-  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Osa, transcripts$Oki, treeName)
-  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Osa, transcripts$Kum, treeName)
-  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Osa, transcripts$Aom, treeName)
-  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Osa, transcripts$Nor, treeName)
+  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Osa, transcripts$Bar, treeName, HOGs)
+  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Osa, transcripts$Oki, treeName, HOGs)
+  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Osa, transcripts$Kum, treeName, HOGs)
+  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Osa, transcripts$Aom, treeName, HOGs)
+  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Osa, transcripts$Nor, treeName, HOGs)
   
-  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar, transcripts$Osa, treeName)
-  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar, transcripts$Oki, treeName)
-  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar, transcripts$Kum, treeName)
-  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar, transcripts$Aom, treeName)
-  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar, transcripts$Nor, treeName)
+  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar, transcripts$Osa, treeName, HOGs)
+  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar, transcripts$Oki, treeName, HOGs)
+  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar, transcripts$Kum, treeName, HOGs)
+  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar, transcripts$Aom, treeName, HOGs)
+  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar, transcripts$Nor, treeName, HOGs)
   
   orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
   orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
@@ -302,8 +311,19 @@ orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
 #orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
 #                                             , transcripts$Ply, transcripts$Ros, treeName="N3")
 
+orthoPairs_one2oneInOiks <-
+  orthoPairToGBreaks_all_Oiks(treeName = NULL,
+                              HOGs = OikScrambling:::load_one_to_ones(
+                                       system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")))
+
+
 sapply(orthoPairs, length)
+<<<<<<< HEAD
 #sapply(orthoPairs_core, length)
+=======
+sapply(orthoPairs_core, length)
+sapply(orthoPairs_one2oneInOiks, length)
+>>>>>>> e8282ffc0fb1a8a4b7efbc8792454884dac1041c
 ```
 
 Problem: some annotations overlap
@@ -504,6 +524,7 @@ sum(width(valid))
 Question: what does interrupt the colinearity of nucleotide regions in gene-centric
 colinear regions ?
 
+<<<<<<< HEAD
 Genes per syntenic block
 ------------------------
 ```{r genes_per_block_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
@@ -1129,6 +1150,68 @@ Clade-specific deletions
 ------------------------
 In the same vein as the analysis above, let's examine where genes tend to be deleted. Here it is slightly easier, because we can simply look at cases where the `orthoPair` is a species-specific deletion of either the query or the target.
 
+=======
+XSR plot
+--------
+
+Ugly...
+
+```{r XSR plot}
+XSR_HOGs <- sapply(orthoPairs_one2oneInOiks, \(gb) {
+  gb <- gb[seqnames(gb) == "XSR"]
+  # Keep biggest match only
+  chrQ <- tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
+  gb <- gb[seqnames(gb$query) == chrQ]
+  seqlevels(gb) <- seqlevelsInUse(gb)
+  seqlevels(gb$query) <- seqlevelsInUse(gb$query)
+  gb
+})
+
+removeSeqInfoGR <- function(gr) 
+  GRanges(seqnames = seqnames(gr), ranges = ranges(gr), strand = strand(gr))
+
+removeSeqInfoGB <- function(gb)
+  GBreaks(target = removeSeqInfoGR(gb), query = removeSeqInfoGR(gb$query))
+
+XSR_toPlot <- sapply(XSR_HOGs, removeSeqInfoGB)
+XSR_toPlot <- as(XSR_toPlot, "GRangesList")
+seqlevels(XSR_toPlot$Oki_Osa)       <- "XSR_01_Oki"
+seqlevels(XSR_toPlot$Oki_Osa$query) <- "XSR_03_Osa"
+seqlevels(XSR_toPlot$Oki_Bar)       <- "XSR_01_Oki"
+seqlevels(XSR_toPlot$Oki_Bar$query) <- "XSR_06_Bar"
+seqlevels(XSR_toPlot$Oki_Kum)       <- "XSR_01_Oki"
+seqlevels(XSR_toPlot$Oki_Kum$query) <- "XSR_02_Kum"
+seqlevels(XSR_toPlot$Oki_Aom)       <- "XSR_01_Oki"
+seqlevels(XSR_toPlot$Oki_Aom$query) <- "XSR_04_Aom"
+seqlevels(XSR_toPlot$Oki_Nor)       <- "XSR_01_Oki"
+seqlevels(XSR_toPlot$Oki_Nor$query) <- "XSR_06_Nor"
+
+seqlevels(XSR_toPlot$Osa_Oki)       <- "XSR_03_Osa"
+seqlevels(XSR_toPlot$Osa_Oki$query) <- "XSR_01_Oki"
+seqlevels(XSR_toPlot$Osa_Bar)       <- "XSR_03_Osa"
+seqlevels(XSR_toPlot$Osa_Bar$query) <- "XSR_06_Bar"
+seqlevels(XSR_toPlot$Osa_Kum)       <- "XSR_03_Osa"
+seqlevels(XSR_toPlot$Osa_Kum$query) <- "XSR_02_Kum"
+seqlevels(XSR_toPlot$Osa_Aom)       <- "XSR_03_Osa"
+seqlevels(XSR_toPlot$Osa_Aom$query) <- "XSR_04_Aom"
+seqlevels(XSR_toPlot$Osa_Nor)       <- "XSR_03_Osa"
+seqlevels(XSR_toPlot$Osa_Nor$query) <- "XSR_06_Nor"
+
+seqlevels(XSR_toPlot$Bar_Osa)       <- "XSR_06_Bar"
+seqlevels(XSR_toPlot$Bar_Osa$query) <- "XSR_03_Osa"
+seqlevels(XSR_toPlot$Bar_Oki)       <- "XSR_06_Bar"
+seqlevels(XSR_toPlot$Bar_Oki$query) <- "XSR_01_Oki"
+seqlevels(XSR_toPlot$Bar_Kum)       <- "XSR_06_Bar"
+seqlevels(XSR_toPlot$Bar_Kum$query) <- "XSR_02_Kum"
+seqlevels(XSR_toPlot$Bar_Aom)       <- "XSR_06_Bar"
+seqlevels(XSR_toPlot$Bar_Aom$query) <- "XSR_04_Aom"
+seqlevels(XSR_toPlot$Bar_Nor)       <- "XSR_06_Bar"
+seqlevels(XSR_toPlot$Bar_Nor$query) <- "XSR_06_Nor"
+
+makeOxfordPlots(unlist(XSR_toPlot))
+```
+
+>>>>>>> e8282ffc0fb1a8a4b7efbc8792454884dac1041c
 
 # Session information
 

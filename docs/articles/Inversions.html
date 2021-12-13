@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../articles/OikScrambling.html">Get started</a>
 </li>
@@ -57,6 +53,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
+    </li>
+    <li>
       <a href="../articles/ColinearityInterruptors.html">Regions interrupting colinearity</a>
     </li>
     <li>
@@ -73,6 +72,9 @@
     </li>
     <li>
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
+    </li>
+    <li>
+      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif finding and analysis</a>
@@ -97,7 +99,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/oist/LuscombeU_OikScrambling/">
+  <a href="https://github.com/oist/LuscombeU_OikScrambling/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -112,15 +114,15 @@
 
       
 
-      </header><script src="Inversions_files/header-attrs-2.11/header-attrs.js"></script><script src="Inversions_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="Inversions_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Inversions</h1>
-                        <h4 class="author">Charles Plessy</h4>
+                        <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 class="date">24 November, 2021</h4>
+            <h4 data-toc-skip class="date">13 December, 2021</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/master/vignettes/Inversions.Rmd"><code>vignettes/Inversions.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/Inversions.Rmd" class="external-link"><code>vignettes/Inversions.Rmd</code></a></small>
       <div class="hidden name"><code>Inversions.Rmd</code></div>
 
     </div>
@@ -128,120 +130,136 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<div class="section level1">
+<h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h1>
 <p>After coalescing colinear alignments, removing translocations of repeat-containing sequences and re-coalescing, colinearity is still broken hundreds of time.</p>
 <p>Here we explore the role of inversions in scrambling <em>Oikopleura</em> genomes.</p>
 </div>
-<div id="load-r-pacakges-and-data" class="section level1">
-<h1 class="hasAnchor">
-<a href="#load-r-pacakges-and-data" class="anchor"></a>Load R pacakges and data</h1>
+<div class="section level1">
+<h1 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
+</h1>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## List of length 6
-## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
+<pre><code><span class="co">## List of length 6</span>
+<span class="co">## names(6): Oki Osa Bar Kum Aom Nor</span></code></pre>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllRepeats.html">loadAllRepeats</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>## List of length 6
-## names(6): Oki Osa Bar Kum Aom Nor</code></pre>
+<pre><code><span class="co">## List of length 6</span>
+<span class="co">## names(6): Oki Osa Bar Kum Aom Nor</span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      
-##  [7] "tra2"      "coa2"      "unmap2"    "longShort"</code></pre>
+<code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      </span>
+<span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "longShort"</span></code></pre>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are prepared.</p>
 </div>
-<div id="trivial-inversions" class="section level1">
-<h1 class="hasAnchor">
-<a href="#trivial-inversions" class="anchor"></a>Trivial inversions</h1>
-<div id="documentation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#documentation" class="anchor"></a>Documentation</h2>
-<p>Details can be found in <code><a href="https://oist.github.io/GenomicBreaks/articles/GenomicBreaks.html">vignette("GenomicBreaks", package = "GenomicBreaks")</a></code>, in <code><a href="https://oist.github.io/GenomicBreaks/articles/StructuralVariants.html">vignette("StructuralVariants", package = "GenomicBreaks")</a></code>, and <code><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">?GenomicBreaks::flagInversions</a></code></p>
+<div class="section level1">
+<h1 id="trivial-inversions">Trivial inversions<a class="anchor" aria-label="anchor" href="#trivial-inversions"></a>
+</h1>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>Details can be found in <code><a href="https://oist.github.io/GenomicBreaks/articles/GenomicBreaks.html" class="external-link">vignette("GenomicBreaks", package = "GenomicBreaks")</a></code>, in <code><a href="https://oist.github.io/GenomicBreaks/articles/StructuralVariants.html" class="external-link">vignette("StructuralVariants", package = "GenomicBreaks")</a></code>, and <code><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">?GenomicBreaks::flagInversions</a></code></p>
 </div>
-<div id="number-of-trivial-inversions" class="section level2">
-<h2 class="hasAnchor">
-<a href="#number-of-trivial-inversions" class="anchor"></a>Number of trivial inversions</h2>
+<div class="section level2">
+<h2 id="number-of-trivial-inversions">Number of trivial inversions<a class="anchor" aria-label="anchor" href="#number-of-trivial-inversions"></a>
+</h2>
 <p>More inversions are found after coalescing colinear blocks because of situations where <code>+ - +</code> was <code>+ - - +</code> before collapsing.</p>
 <p>The number of detected inversions is further increased after double-coalescing.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="va">invs_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>
-  align  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
-  mapped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
-  map2   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="op">(</span><span class="va">invs_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
+  align  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
+  mapped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
+  map2   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>
 <span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##         align mapped map2
-## Oki_Osa   614    670  704
-## Oki_Bar   604    675  705
-## Oki_Kum    89    105  122
-## Oki_Aom   608    665  695
-## Oki_Nor   541    591  611
-## Osa_Oki   613    671  706
-## Osa_Bar   241    321  330
-## Osa_Kum   620    678  708
-## Osa_Aom    56     73   79
-## Osa_Nor   212    275  279
-## Bar_Oki   597    667  695
-## Bar_Osa   237    319  327
-## Bar_Kum   608    686  711
-## Bar_Aom   237    319  335
-## Bar_Nor    19     24   27
-## Ply_Ros    42     51   55
-## Ply_Rob    58     71   76
-## Ply_Sav    16     92   92
-## Ply_Oki     0      0    0
-## Rob_Ros    50     65   71
-## Rob_Ply    58     70   77
-## Rob_Sav    14     92   92
-## Rob_Oki     0      0    0</code></pre>
+<pre><code><span class="co">##         align mapped map2</span>
+<span class="co">## Oki_Osa   614    670  704</span>
+<span class="co">## Oki_Bar   604    675  705</span>
+<span class="co">## Oki_Kum    89    105  122</span>
+<span class="co">## Oki_Aom   608    665  695</span>
+<span class="co">## Oki_Nor   541    591  611</span>
+<span class="co">## Osa_Oki   613    671  706</span>
+<span class="co">## Osa_Bar   241    321  330</span>
+<span class="co">## Osa_Kum   620    678  708</span>
+<span class="co">## Osa_Aom    56     73   79</span>
+<span class="co">## Osa_Nor   212    275  279</span>
+<span class="co">## Bar_Oki   597    667  695</span>
+<span class="co">## Bar_Osa   237    319  327</span>
+<span class="co">## Bar_Kum   608    686  711</span>
+<span class="co">## Bar_Aom   237    319  335</span>
+<span class="co">## Bar_Nor    19     24   27</span>
+<span class="co">## Ply_Ros    42     51   55</span>
+<span class="co">## Ply_Rob    58     71   76</span>
+<span class="co">## Ply_Sav    16     92   92</span>
+<span class="co">## Ply_Oki     0      0    0</span>
+<span class="co">## Rob_Ros    50     65   71</span>
+<span class="co">## Rob_Ply    58     70   77</span>
+<span class="co">## Rob_Sav    14     92   92</span>
+<span class="co">## Rob_Oki     0      0    0</span>
+<span class="co">## Dme_Dbu   697   1003 1003</span>
+<span class="co">## Dme_Dsu    20     44   45</span>
+<span class="co">## Dme_Dya    13     21   23</span>
+<span class="co">## Dme_Dma    12     16   16</span></code></pre>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                   align    mapped      map2
-## Int – Int      42.00000  51.00000  55.00000
-## Int – Rob      55.33333  68.66667  74.66667
-## Int/Rob – Oki   0.00000   0.00000   0.00000
-## Int/Rob – Sav  15.00000  92.00000  92.00000
-## North – North 231.75000 308.50000 317.75000
-## Oki – North   600.62500 662.87500 691.87500
-## same_pop       54.66667  67.33333  76.00000</code></pre>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##                   align     mapped       map2</span>
+<span class="co">## Dme_Dbu       697.00000 1003.00000 1003.00000</span>
+<span class="co">## Dme_Dma        12.00000   16.00000   16.00000</span>
+<span class="co">## Dme_Dsu        20.00000   44.00000   45.00000</span>
+<span class="co">## Dme_Dya        13.00000   21.00000   23.00000</span>
+<span class="co">## Int – Int      42.00000   51.00000   55.00000</span>
+<span class="co">## Int – Rob      55.33333   68.66667   74.66667</span>
+<span class="co">## Int/Rob – Oki   0.00000    0.00000    0.00000</span>
+<span class="co">## Int/Rob – Sav  15.00000   92.00000   92.00000</span>
+<span class="co">## North – North 231.75000  308.50000  317.75000</span>
+<span class="co">## Oki – North   600.62500  662.87500  691.87500</span>
+<span class="co">## same_pop       54.66667   67.33333   76.00000</span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##               align mapped  map2
-## Int – Int        42   51.0  55.0
-## Int – Rob        58   70.0  76.0
-## Int/Rob – Oki     0    0.0   0.0
-## Int/Rob – Sav    15   92.0  92.0
-## North – North   237  319.0 328.5
-## Oki – North     608  670.5 704.5
-## same_pop         56   73.0  79.0</code></pre>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##               align mapped   map2</span>
+<span class="co">## Dme_Dbu         697 1003.0 1003.0</span>
+<span class="co">## Dme_Dma          12   16.0   16.0</span>
+<span class="co">## Dme_Dsu          20   44.0   45.0</span>
+<span class="co">## Dme_Dya          13   21.0   23.0</span>
+<span class="co">## Int – Int        42   51.0   55.0</span>
+<span class="co">## Int – Rob        58   70.0   76.0</span>
+<span class="co">## Int/Rob – Oki     0    0.0    0.0</span>
+<span class="co">## Int/Rob – Sav    15   92.0   92.0</span>
+<span class="co">## North – North   237  319.0  328.5</span>
+<span class="co">## Oki – North     608  670.5  704.5</span>
+<span class="co">## same_pop         56   73.0   79.0</span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                   align   mapped     map2
-## Int – Int            NA       NA       NA
-## Int – Rob      4.618802  3.21455  3.21455
-## Int/Rob – Oki  0.000000  0.00000  0.00000
-## Int/Rob – Sav  1.414214  0.00000  0.00000
-## North – North 13.301002 22.35322 26.04323
-## Oki – North   25.059572 29.79663 33.17675
-## same_pop      35.019042 40.79624 47.57100</code></pre>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invs_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##                   align   mapped     map2</span>
+<span class="co">## Dme_Dbu              NA       NA       NA</span>
+<span class="co">## Dme_Dma              NA       NA       NA</span>
+<span class="co">## Dme_Dsu              NA       NA       NA</span>
+<span class="co">## Dme_Dya              NA       NA       NA</span>
+<span class="co">## Int – Int            NA       NA       NA</span>
+<span class="co">## Int – Rob      4.618802  3.21455  3.21455</span>
+<span class="co">## Int/Rob – Oki  0.000000  0.00000  0.00000</span>
+<span class="co">## Int/Rob – Sav  1.414214  0.00000  0.00000</span>
+<span class="co">## North – North 13.301002 22.35322 26.04323</span>
+<span class="co">## Oki – North   25.059572 29.79663 33.17675</span>
+<span class="co">## same_pop      35.019042 40.79624 47.57100</span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">invs_summary</span><span class="op">$</span><span class="va">pairname</span>  <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span><span class="op">)</span>
-<span class="va">invs_summary</span><span class="op">$</span><span class="va">target</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">invs_summary</span><span class="op">$</span><span class="va">pairname</span>  <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span><span class="op">)</span>
+<span class="va">invs_summary</span><span class="op">$</span><span class="va">target</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">invs_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pairname</span>, pch <span class="op">=</span> <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span> <span class="op">(</span><span class="st">"Number of inversions found after different post-processings"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">invs_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pairname</span>, pch <span class="op">=</span> <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span> <span class="op">(</span><span class="st">"Number of inversions found after different post-processings"</span><span class="op">)</span></code></pre></div>
 <p><img src="Inversions_files/figure-html/detect_trivial_invertions-1.png" width="700"></p>
 </div>
-<div id="motif-search" class="section level2">
-<h2 class="hasAnchor">
-<a href="#motif-search" class="anchor"></a>Motif search</h2>
+<div class="section level2">
+<h2 id="motif-search">Motif search<a class="anchor" aria-label="anchor" href="#motif-search"></a>
+</h2>
 <p>Enrichment for motifs is being searched in <code><a href="../articles/PWM.html">vignette("PWM", package = "OikScrambling")</a></code>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">gadems.invLeftGap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"gadems.invLeftGap.Rda"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">gadems.invLeftGap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"gadems.invLeftGap.Rda"</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
   </div>
@@ -257,11 +275,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Charles Plessy.</p>
+  <p></p>
+<p>Developed by Charles Plessy.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -269,6 +289,8 @@
 
   
 
+
+  
 
   </body>
 </html>

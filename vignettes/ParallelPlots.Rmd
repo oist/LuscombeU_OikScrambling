@@ -20,7 +20,7 @@ knitr::opts_knit$set(verbose = TRUE)
 # Introduction
 
 In this vignette I plot whole chromosomes in parallel to reflect synteny and
-the differences between short and long arms.
+the difference of scrambling between short and long arms.
 
 The core functions used here are maintained in our _GenomicBreaks_ R package,
 which is fully documented at: <https://oist.github.io/GenomicBreaks>.
@@ -40,7 +40,7 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 We assume that the _North Pacific_ and the _Atlantic_ species are more related
 to each other than to the _Okinawan_ species.
 
-```{r phylogenetic_tree, fig.height=4, fig.width=6, dev="svg"}
+```{r phylogenetic_tree, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 requireNamespace("ade4")
 treeLeaf <- function(name, length=NULL) {
   if(!is.null(length)) length <- paste0(':', length)
@@ -79,22 +79,25 @@ plot(ade4::newick2phylog(tree))
 
 ## Genome plots with genoPlotR
 
+### Pairs of chromosome 1s.
+
 ```{r Oki_Bar_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Oki_Bar, "chr1")
+plotApairOfChrs(coa$Oki_Bar, "chr1", main = "Oki vs Bar")
 ```
 ```{r Oki_Osa_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Oki_Osa, "chr1")
+plotApairOfChrs(coa$Oki_Osa, "chr1", main = "Oki vs Osa")
 ```
 ```{r Osa_Oki_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Osa_Oki, "Chr1")
+plotApairOfChrs(coa$Osa_Oki, "Chr1", main = "Osa vs Oki")
 ```
 ```{r Osa_Bar_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Osa_Bar, "Chr1")
+plotApairOfChrs(coa$Osa_Bar, "Chr1", main = "Osa vs Bar")
 ```
 ```{r Oki_Bar_chr1_coa2, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa2$Osa_Bar, "Chr1")
+plotApairOfChrs(coa2$Osa_Bar, "Chr1", main = "Osa vs Bar (double-collapsed")
 ```
 
+Kume's `chr1` is mostly comprised of 4 large contigs.
 
 ```{r coa_based, fig.width=15}
 x <- coa$Oki_Kum
@@ -102,7 +105,7 @@ x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$quer
 x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
 
 x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "new_scaffold")
-plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE)
+plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE, main = "Oki vs Kum")
 ```
 
 ```{r coa2_based2, fig.width=15}
@@ -111,7 +114,7 @@ x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$quer
 x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
 
 x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "new_scaffold")
-plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE)
+plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE, main = "Oki vs Kum (double-collapsed")
 ```
 
 ## Plot chr1 in three species
@@ -134,9 +137,35 @@ compList <- list(
     Osa_Bar = doubleSubset(coa$Osa_Bar, "Chr1", "Chr1") |> gb2comp()
   )
 
-genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick2phylog(addRoot(treeNode("OKI", treeNode("OSA", "BAR")))))
+genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick2phylog(addRoot(treeNode("OKI", treeNode("OSA", "BAR")))),
+                         main = "Chromosome 1 in three Oikopleura genome assemblies")
 ```
 
+## Plot chr1 in four species (double-collapsed)
+
+```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+KumChr1 <-coa2$Oki_Kum
+KumChr1[seqnames(KumChr1$query) == "contig_90_1"] <- reverse(query = TRUE, KumChr1[seqnames(KumChr1$query) == "contig_90_1"])
+KumChr1[seqnames(KumChr1$query) == "contig_88_1"] <- reverse(query = TRUE, KumChr1[seqnames(KumChr1$query) == "contig_88_1"])
+KumChr1$query <- mergeSeqLevels(KumChr1$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "Chr1")
+
+dsList <- list(
+    KUM = doubleSubset(KumChr1,     "chr1", "Chr1") |> gr2dna_seg(),
+    OKI = doubleSubset(coa2$Oki_Osa, "chr1", "Chr1") |> gr2dna_seg(),
+    OSA = doubleSubset(coa2$Osa_Bar, "Chr1", "Chr1") |> gr2dna_seg(),
+    BAR = doubleSubset(coa2$Bar_Osa, "Chr1", "Chr1") |> gr2dna_seg()
+)
+
+compList <- list(
+    Oki_Kum = doubleSubset(KumChr1,     "chr1", "Chr1") |> gb2comp(),
+    Oki_Osa = doubleSubset(coa2$Oki_Osa, "chr1", "Chr1") |> gb2comp(),
+    Osa_Bar = doubleSubset(coa2$Osa_Bar, "Chr1", "Chr1") |> gb2comp()
+  )
+
+genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale = TRUE,
+                         tree = ade4::newick2phylog(addRoot(treeNode(treeNode("OKI", "KUM"), treeNode("OSA", "BAR")))),
+                         main = "Chromosome 1 in four Oikopleura genome assemblies")
+```
 
 ## Region that is conserved between Osaka and Barcelona
 
@@ -170,6 +199,23 @@ genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE)
 
 ```
 
+# Other species
+
+## Ciona
+
+```{r Ciona_Ply_Ros_chr1}
+plotApairOfChrs(coa2$Ply_Ros, "BNJZ01000001.1", main = "Ciona intestinalis Plymouth vs Roscoff")
+```
+
+```{r Ciona_Ply_Rob_chr1}
+plotApairOfChrs(coa2$Ply_Rob, "BNJZ01000001.1", main = "Ciona intestinalis Plymouth vs Ciona robusta")
+```
+
+Unfortunately, _C. savignyi_'s genome assembly is too fragmented.  Here is a plot with the largest fragment.
+
+```{r Ciona_Ply_Sav_chr1}
+plotApairOfChrs(coa2$Ply_Sav, "BNJZ01000001.1", main = "Ciona intestinalis Plymouth vs Ciona savigny")
+```
 
 # Session information
 
