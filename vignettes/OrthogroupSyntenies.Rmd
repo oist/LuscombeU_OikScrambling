@@ -5,7 +5,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{Orthogroup syntenies}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
@@ -36,7 +36,7 @@ See `news(package = "BreakpointsData")` for inspecting changes in more details.
 ```{r load_one_to_ones}
 # Note that for now, I am only worried about Oikopleura. Subset the transcripts to include only oiks.
 transcripts = subset(transcripts, names(transcripts) %in% c('Oki', 'Osa', 'Bar', 'Nor', 'Aom', 'Kum'))
-# Create a data frame that maps the original species names in the OrthoFinder 
+# Create a data frame that maps the original species names in the OrthoFinder
 # output to a set of new names that are easier to read.
 species_name_map = data.frame(
   old_names=c("AOM-5-5f.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1", "OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo"),
@@ -46,15 +46,15 @@ species_name_map = data.frame(
 load_one_to_ones_SE <- function(file, species_name_map) {
   # Read table
   pho <- read.delim(file, check.names = FALSE)
-  
+
   # Remove all-NA columns
   pho <- pho[,sapply(pho, \(col) ! all(is.na(col)))]
-  
+
   # Use the species name map to rename columns here.
   old_names <- colnames(pho)[4:ncol(pho)]
   new_names <- species_name_map[match(old_names, species_name_map$old_names),]$new_names
   colnames(pho)[4:ncol(pho)] <- new_names
-  
+
   # Convert to SummarizedExperiment
   se <- SummarizedExperiment::SummarizedExperiment(
     assays = list(txs = pho[,-(1:3)]),
@@ -112,7 +112,7 @@ rownames(se_m) <- rowData(se)$HOG
 clades=list("Oki_Kum"=c("Oki","Kum"), "Osa_Aom"=c("Osa","Aom"), "Bar_Nor"=c("Bar","Nor"), "Northern"=c("Osa","Aom","Bar","Nor"))
 
 # clade_list: a named list where each list contains a vector of species.
-# expansion_reconciliation: How to reconcile situations where more than 1 clade shows an expansion. 
+# expansion_reconciliation: How to reconcile situations where more than 1 clade shows an expansion.
 #                           There are only two options: "largest_clade" and "mean_count".
 #                           "largest_clade" flags it to the clade with the most species
 #                           "mean_count" flags it to the clade with the highest mean count
@@ -132,7 +132,7 @@ You can then summarize the flags as follows:
 (apply(orthoflags, 2, function(x) table(unlist(x))))
 ```
 
-The `orthoflags` object yields a matrix with one row per orthogroup, the count columns of the HOG table, and most importantly, a set of orthogroup annotations based on the counts of every species and clade. 
+The `orthoflags` object yields a matrix with one row per orthogroup, the count columns of the HOG table, and most importantly, a set of orthogroup annotations based on the counts of every species and clade.
 
 These annotations are not mutually exclusive. Consider the following:
 
@@ -146,7 +146,7 @@ In this example, there is a species-specific expansion (i.e., Okinawa) at the sa
 In the following plots, I summarize some of the features of the `orthoflags` object.
 
 ```{r summarizing_orthoflags_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
-# Take a look at the distribution of different species flags. 
+# Take a look at the distribution of different species flags.
 ggplot(orthoflags) +
   aes(x=reorder(unlist(expansion_reconciled), unlist(expansion_reconciled), function(x) length(x))) + geom_bar(stat="count", position="dodge") +
   facet_wrap(~ present_in_all_spp, scales = 'free') +
@@ -174,7 +174,7 @@ ggplot(orthoflags) +
   ggtitle("Orthogroups by species-specific HOG deletions")
 ```
 
-In order to get these orthogroup annotations into the `GBreaks` object later, we add them as metadata columns to the `transcripts` object from above. 
+In order to get these orthogroup annotations into the `GBreaks` object later, we add them as metadata columns to the `transcripts` object from above.
 
 Since the indices of `orthoflags` are HOG IDs and not transcripts, we transmute the data a little to get a data frame indexed by a transcript ID. This format makes it easy to glom onto the transcripts file with `addMetadataToGRanges()`.
 
@@ -240,20 +240,12 @@ transcripts <- sapply(names(transcripts), function(sp){
 Prepare GBreak objects
 ======================
 
-<<<<<<< HEAD
-```{r creating_gbreaks}
-orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19") {
-  orthoPairs <- OikScrambling:::load_one_to_ones(
-    system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
-    c(name1, name2))
-=======
 ```{r orthoPairs_object}
 orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOGs=NULL) {
   if(is.null(HOGs))
     HOGs <- OikScrambling:::load_one_to_ones(
       system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
       c(name1, name2))
->>>>>>> e8282ffc0fb1a8a4b7efbc8792454884dac1041c
 
   IDs2GRanges <- function (IDs, annot) {
     prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
@@ -266,10 +258,12 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOG
     strand(gr) <- "*"                                 # Make strandless
     gr                                                # Return the object
   }
-  
+
   gb       <- IDs2GRanges(HOGs[,name1], annot1)
   gb$query <- IDs2GRanges(HOGs[,name2], annot2)
   gb <- GenomicBreaks:::GBreaks(gb)
+  gb$HOG <- HOGs$HOG
+  gb$OG  <- HOGs$OG
   sort(gb)
 }
 
@@ -280,23 +274,23 @@ orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
   orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$Oki, transcripts$Kum, treeName, HOGs)
   orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$Oki, transcripts$Aom, treeName, HOGs)
   orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Oki, transcripts$Nor, treeName, HOGs)
-  
+
   orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Osa, transcripts$Bar, treeName, HOGs)
   orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Osa, transcripts$Oki, treeName, HOGs)
   orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Osa, transcripts$Kum, treeName, HOGs)
   orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Osa, transcripts$Aom, treeName, HOGs)
   orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Osa, transcripts$Nor, treeName, HOGs)
-  
+
   orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar, transcripts$Osa, treeName, HOGs)
   orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar, transcripts$Oki, treeName, HOGs)
   orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar, transcripts$Kum, treeName, HOGs)
   orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar, transcripts$Aom, treeName, HOGs)
   orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar, transcripts$Nor, treeName, HOGs)
-  
+
   orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
   orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
   orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
-  
+
   orthoPairs
 }
 
@@ -316,12 +310,8 @@ orthoPairs_one2oneInOiks <-
 
 
 sapply(orthoPairs, length)
-<<<<<<< HEAD
-#sapply(orthoPairs_core, length)
-=======
 sapply(orthoPairs_core, length)
 sapply(orthoPairs_one2oneInOiks, length)
->>>>>>> e8282ffc0fb1a8a4b7efbc8792454884dac1041c
 ```
 
 Problem: some annotations overlap
@@ -374,15 +364,15 @@ Coalesce syntenic blocks and annotate them
 coalOrtho <- function(gb) {
   # Coalesce
   coal <- coalesce_contigs(gb)
-  
+
   # Map annotations to the coalesced blocks
   ov <- findOverlaps(coal, gb)
-  
+
   # Extract gene names mapped to each blocks
   coal$geneNames <- CharacterList(split(names(gb)[subjectHits(ov)], queryHits(ov))) |> unname()
   # We can use the `ov` object for query ranges as well because of the way `coal` was constructed.
   coal$query$geneNames <- CharacterList(split(names(gb$query)[subjectHits(ov)], queryHits(ov))) |> unname()
-  
+
   # Extract dNdS values
   coal$dNdS_GUIDANCE2  <- NumericList(split(gb$dNdS_GUIDANCE2 [subjectHits(ov)], queryHits(ov)))
   coal$dNdS_HmmCleaner <- NumericList(split(gb$dNdS_HmmCleaner[subjectHits(ov)], queryHits(ov)))
@@ -391,14 +381,14 @@ coalOrtho <- function(gb) {
   coal$query$dNdS_GUIDANCE2  <- coal$dNdS_GUIDANCE2
   coal$query$dNdS_HmmCleaner <- coal$dNdS_HmmCleaner
   coal$query$dNdS_PRANK      <- coal$dNdS_PRANK
-  
+
   # Add orthoflags. Since the flags are assigned to orthogroups, the flags are the same
   # for all single-copy orthologues.
   coal$orthoFlagDF <- split(gb$orthoFlagDF [subjectHits(ov)], queryHits(ov)) |> unname()
 
   # Count genes per syntenic block
   coal$geneNumber <- sapply(coal$geneNames, length)
-  
+
   coal
 }
 
@@ -448,7 +438,7 @@ df <- sapply(orthoBlocks_LSnoNA,
 apply(df, 2, \(x) {
   tst <- t.test(x[c(1,3,5)], x[c(2,4,6)])
   c(pval=tst$p.value, mx=tst$estimate[1], my=tst$estimate[2])
-}) 
+})
 ```
 
 Fraction of the genome covered or syntenic
@@ -482,19 +472,19 @@ Oikopleura and Ciona…
 ```{r fraction_aligned_core}
 # uncov  <- BiocParallel::bplapply(orthoPairsFiltered_core, cleanGaps) |> SimpleList()
 # unsyn  <- BiocParallel::bplapply(orthoBlocks_core,        cleanGaps) |> SimpleList()
-# 
+#
 #   covered_tot    <- sapply(orthoPairsFiltered_core,   \(x) sum(width(x)))
 #   syntenic_tot   <- sapply(orthoBlocks_core,          \(x) sum(width(x)))
 # uncovered_tot    <- sapply(uncov,                     \(x) sum(width(x)))
 # unsyntenic_tot   <- sapply(unsyn,                     \(x) sum(width(x)))
-# 
+#
 # (syn_summary_core <- cbind(
 #   covered_frac   = covered_tot   / ( covered_tot   + uncovered_tot ) * 100,
 #   orthogenes_n   = sapply(orthoPairsFiltered_core, length),
 #   syntenic_frac  = syntenic_tot  / ( syntenic_tot  + unsyntenic_tot ) * 100,
 #   syntenic_reg   = sapply(orthoBlocks_core, length)
 #  )|> as.data.frame())
-# 
+#
 # sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), mean))   |> round(1)
 # sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), median)) |> round(1)
 # sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScrambling:::compDistance(), sd))     |> round(1)
@@ -522,7 +512,6 @@ sum(width(valid))
 Question: what does interrupt the colinearity of nucleotide regions in gene-centric
 colinear regions ?
 
-<<<<<<< HEAD
 Genes per syntenic block
 ------------------------
 ```{r genes_per_block_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
@@ -853,7 +842,7 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
     if(nrow(prev_gene)!=0 & nrow(next_gene)!=0) {
       target_seqnames <- c(as.character(cur_gene$seqnames), as.character(prev_gene$seqnames),  as.character(next_gene$seqnames))
       # If all genes on same contig in the target genome...
-      if(length(unique(target_seqnames)) == 1) { 
+      if(length(unique(target_seqnames)) == 1) {
         # If previous and next genes in an orthopair...
         if(prev_gene$tx_name %in% orthopair$query.tx_name & next_gene$tx_name %in% orthopair$query.tx_name){
           prev_orthopair <- orthopair[orthopair$query.tx_name == prev_gene$tx_name,]
@@ -868,8 +857,8 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
             query_next_prev_gene <- orthopair[which(orthopair$query.tx_name == next_gene$tx_name)+1,]$tx_name
             if(query_prev_next_gene == next_orthopair$tx_name & query_next_prev_gene == prev_orthopair$tx_name) {
               mod_orthopair  <- prev_orthopair
-              mod_orthopair$start   <- prev_orthopair$end+1   # Create a fake locus start immediately after the preceding gene 
-              mod_orthopair$end     <- next_orthopair$start-1 # Create a fake locus end immediately before the next gene 
+              mod_orthopair$start   <- prev_orthopair$end+1   # Create a fake locus start immediately after the preceding gene
+              mod_orthopair$end     <- next_orthopair$start-1 # Create a fake locus end immediately before the next gene
               mod_orthopair$width   <- mod_orthopair$end - mod_orthopair$start
               mod_orthopair$tx_id   <- NA # A gene specific to sp2 cannot have a tx_id in the reference.
               mod_orthopair$tx_name <- NA
@@ -930,7 +919,7 @@ duplications$Bar_Nor <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Bar",
 
 N.B. The function `collectCladeExpansions()` tries to warn you when something funny happens with respect to the target-specific genes. Funny occurrences include:
 1. The target's genes immediately up- and down-stream of a target-specific gene are not encoded on the same contig
-2. The target's genes immediately up- and down-stream of a target-specific gene are encoded on the same contig, but are not found within an orthoPair 
+2. The target's genes immediately up- and down-stream of a target-specific gene are encoded on the same contig, but are not found within an orthoPair
 3. The target's genes immediately up- and down-stream of a target-specific gene are found within an orthoPair, but those orthoPairs are found on different chromosomes in the query genome
 4. The target's genes immediately up- and down-stream of a target-specific gene are found within an orthoPair, and those orthoPairs are on the same chromosome, but they are not collinear
 
@@ -979,9 +968,9 @@ ggplot(duplications$Oki_Kum$Oki) +
 # Kum-specific.
 ggplot(duplications$Oki_Kum$Kum) +
   aes(x=midpoint) +
-  #geom_density() + 
+  #geom_density() +
   geom_histogram(binwidth=100000) +
-  #geom_boxplot(stat='count') + 
+  #geom_boxplot(stat='count') +
   facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
   ggtitle('Kum: Species-specific gene family expansions')
 
@@ -1017,7 +1006,7 @@ plotExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum")
 calcExpansionStats <- function(duplication_pair, pair_name, conf.level=0.95) {
   df <- do.call(rbind, duplication_pair) |> mutate(bin=cut_width(midpoint, 100000)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
   # Show some numbers...
-  anova = aov(df$count ~ df$seqnames + df$Arm) |> summary() 
+  anova = aov(df$count ~ df$seqnames + df$Arm) |> summary()
   tukey = TukeyHSD(aov(df$count ~ df$seqnames + df$Arm), conf.level=conf.level)
   return(SimpleList(anova=anova, tukey=tukey))
 }
@@ -1118,67 +1107,62 @@ Clade-specific deletions
 In the same vein as the analysis above, let's examine where genes tend to be deleted. Here it is slightly easier, because we can simply look at cases where the `orthoPair` is a species-specific deletion of either the query or the target.
 
 =======
-XSR plot
---------
+# HOX genes
 
-Ugly...
+## Hox 4
 
-```{r XSR plot}
-XSR_HOGs <- sapply(orthoPairs_one2oneInOiks, \(gb) {
-  gb <- gb[seqnames(gb) == "XSR"]
-  # Keep biggest match only
-  chrQ <- tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
-  gb <- gb[seqnames(gb$query) == chrQ]
-  seqlevels(gb) <- seqlevelsInUse(gb)
-  seqlevels(gb$query) <- seqlevelsInUse(gb$query)
-  gb
-})
+Appears to be duplicated in Bar so missing from HOG `N19.HOG0000192` in that
+genome.
 
-removeSeqInfoGR <- function(gr) 
-  GRanges(seqnames = seqnames(gr), ranges = ranges(gr), strand = strand(gr))
+```{r Hox4}
+sapply(orthoPairs[1:15], \(gb) {
+  x <- gb |> plyranges::filter(HOG == "N19.HOG0000192")
+  if (length(x) == 0) return(NULL)
+  x})
 
-removeSeqInfoGB <- function(gb)
-  GBreaks(target = removeSeqInfoGR(gb), query = removeSeqInfoGR(gb$query))
+Hox4 <- orthoPairs$Oki_Osa |> plyranges::filter(HOG == "N19.HOG0000192")
+Hox4_1e4 <- GBreaks(target = granges(Hox4) + 1e4, query = Hox4$query + 1e4)
+Hox4_4e4 <- GBreaks(target = granges(Hox4) + 4e4, query = Hox4$query + 4e4)
+Hox4_1e5 <- GBreaks(target = granges(Hox4) + 1e5, query = Hox4$query + 1e5)
 
-XSR_toPlot <- sapply(XSR_HOGs, removeSeqInfoGB)
-XSR_toPlot <- as(XSR_toPlot, "GRangesList")
-seqlevels(XSR_toPlot$Oki_Osa)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Osa$query) <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Oki_Bar)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Bar$query) <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Oki_Kum)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Kum$query) <- "XSR_02_Kum"
-seqlevels(XSR_toPlot$Oki_Aom)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Aom$query) <- "XSR_04_Aom"
-seqlevels(XSR_toPlot$Oki_Nor)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Nor$query) <- "XSR_06_Nor"
+subsetByOverlaps(coa$Oki_Osa, Hox4_1e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_1e4))
+subsetByOverlaps(coa$Oki_Osa, Hox4_4e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_4e4))
+subsetByOverlaps(coa$Oki_Osa, Hox4_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_1e5))
 
-seqlevels(XSR_toPlot$Osa_Oki)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Oki$query) <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Osa_Bar)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Bar$query) <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Osa_Kum)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Kum$query) <- "XSR_02_Kum"
-seqlevels(XSR_toPlot$Osa_Aom)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Aom$query) <- "XSR_04_Aom"
-seqlevels(XSR_toPlot$Osa_Nor)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Nor$query) <- "XSR_06_Nor"
-
-seqlevels(XSR_toPlot$Bar_Osa)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Osa$query) <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Bar_Oki)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Oki$query) <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Bar_Kum)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Kum$query) <- "XSR_02_Kum"
-seqlevels(XSR_toPlot$Bar_Aom)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Aom$query) <- "XSR_04_Aom"
-seqlevels(XSR_toPlot$Bar_Nor)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Nor$query) <- "XSR_06_Nor"
-
-makeOxfordPlots(unlist(XSR_toPlot))
+## Genes
+Hox4_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox4_4e4 |> range())
+mids <- Hox4_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- Hox4_4e4.genes$tx_name |> as.character()
+annot <- genoPlotR::annotation(x1=start(Hox4_4e4.genes), x2=end(Hox4_4e4.genes), text=text, rot=30)
+gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_4e4), annotations = annot)
 ```
 
->>>>>>> e8282ffc0fb1a8a4b7efbc8792454884dac1041c
+## Hox 1
+
+HOG `N19.HOG0000193`.
+
+```{r Hox1}
+sapply(orthoPairs[1:15], \(gb) {
+  x <- gb |> plyranges::filter(HOG == "N19.HOG0000193")
+  if (length(x) == 0) return(NULL)
+  x})
+
+Hox1 <- orthoPairs$Oki_Osa |> plyranges::filter(HOG == "N19.HOG0000193")
+Hox1_1e4 <- GBreaks(target = granges(Hox1) + 1e4, query = Hox1$query + 1e4)
+Hox1_4e4 <- GBreaks(target = granges(Hox1) + 4e4, query = Hox1$query + 4e4)
+Hox1_1e5 <- GBreaks(target = granges(Hox1) + 1e5, query = Hox1$query + 1e5)
+
+subsetByOverlaps(coa$Oki_Osa, Hox1_1e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_1e4))
+subsetByOverlaps(coa$Oki_Osa, Hox1_4e4) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4))
+subsetByOverlaps(coa$Oki_Osa, Hox1_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_1e5))
+
+## Genes
+Hox1_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox1_4e4 |> range())
+mids <- Hox1_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- Hox1_4e4.genes$tx_name |> as.character()
+annot <- genoPlotR::annotation(x1=start(Hox1_4e4.genes), x2=end(Hox1_4e4.genes), text=text, rot=30)
+gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4), annotations = annot)
+```
 
 # Session information
 
