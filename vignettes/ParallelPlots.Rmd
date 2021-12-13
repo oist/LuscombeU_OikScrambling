@@ -40,7 +40,7 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 We assume that the _North Pacific_ and the _Atlantic_ species are more related
 to each other than to the _Okinawan_ species.
 
-```{r phylogenetic_tree, fig.height=4, fig.width=6, dev="svg"}
+```{r phylogenetic_tree, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 requireNamespace("ade4")
 treeLeaf <- function(name, length=NULL) {
   if(!is.null(length)) length <- paste0(':', length)
@@ -143,7 +143,7 @@ genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick
 
 ## Plot chr1 in four species (double-collapsed)
 
-```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev=c("svg", "png")}
+```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
 KumChr1 <-coa2$Oki_Kum
 KumChr1[seqnames(KumChr1$query) == "contig_90_1"] <- reverse(query = TRUE, KumChr1[seqnames(KumChr1$query) == "contig_90_1"])
 KumChr1[seqnames(KumChr1$query) == "contig_88_1"] <- reverse(query = TRUE, KumChr1[seqnames(KumChr1$query) == "contig_88_1"])

@@ -141,29 +141,29 @@ Note the names of the largest segments.
 
 ### Plotting features at different cutoffs
 ##### Number of segments
-```{r coa_cutoff_numSegs, fig.height=6, fig.width=8, dev="svg"}
+```{r coa_cutoff_numSegs, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
 # Number of segments
 pheatmap(cutoff_coas_tables$NumSegments, col=magma(100), cluster_cols=F, cluster_row=F, gaps_col=c(15,23), angle_col = 90, main='Number of alignments (uncoalesced) or syntenic regions (coalesced)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
 ```
 ##### Total aligned
-```{r coa_cutoff_totAli, fig.height=6, fig.width=8, dev="svg"}
+```{r coa_cutoff_totAli, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
 pheatmap(cutoff_coas_tables$TotalAligned, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Sum of all alignment widths (Mbp)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
 ```
 
 ##### Largest segment
-```{r coa_cutoff_lrgstSeg, fig.height=6, fig.width=8, dev="svg"}
+```{r coa_cutoff_lrgstSeg, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
 pheatmap(cutoff_coas_tables$LargestSegment, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Size of largest segment (Mbp)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
 ```
 
 ##### Percent of genome covered by alignments
 Note the denominator here is the mean of the query and target genome sizes.
-```{r coa_cutoff_pctGen, fig.height=6, fig.width=8, dev="svg"}
+```{r coa_cutoff_pctGen, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
 pheatmap(cutoff_coas_tables$PercentGenomeCovered, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Percentage of query/target genomes covered (%)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
 ```
 
 ##### Percent of total aligned positions represented in alignments
 Note the denominator here is the mean of the query and target genome sizes.
-```{r coa_cutoff_pctOrig, fig.height=6, fig.width=8, dev="svg"}
+```{r coa_cutoff_pctOrig, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
 pheatmap(cutoff_coas_tables$PercentOriginalAlignment, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Percentage of originally-aligned positions covered (%)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
 ```
 
@@ -172,13 +172,13 @@ pheatmap(cutoff_coas_tables$PercentOriginalAlignment, col=magma(100), cluster_co
 
 Now let's make some chromosome plots. Here are the original Okinawa-Osaka alignments, with no coalescing.
 
-```{r coa_cutoff_chrPlot_1, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_1, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$uncoalesced$Oki_Osa, 'chr1')
 ```
 
 You can see many details here, including the huge number of small alignments. Many of these are removed by coalescing:
 
-```{r coa_cutoff_chrPlot_2, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_2, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_0$Oki_Osa, 'chr1')
 ```
 
@@ -186,13 +186,13 @@ However, many small alignments persist after coalescing. As seen above, applying
 
 Here is the result of removing alignments below 250bp - a fairly conservative threshold:
 
-```{r coa_cutoff_chrPlot_3, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_3, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_250$Oki_Osa, 'chr1')
 ```
 
 And if we go too far, we lose too much information for it to be useful:
 
-```{r coa_cutoff_chrPlot_4, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_4, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_10000$Oki_Osa, 'chr1')
 ```
 
@@ -200,42 +200,42 @@ plotApairOfChrs(cutoff_coas$coa_minWidth_10000$Oki_Osa, 'chr1')
 For the following plots, I use my own arbitrary choices to select a cutoff for each pair that balances retaining as much information as possible with the largest possible synteny. I select the cutoff that maximizes the total coverage of the pair - the maximum "Sum of all alignment widths" cell from the heatmap above.
 
 ###### Okinawa-Osaka
-```{r coa_cutoff_chrPlot_5, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_5, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_250$Oki_Osa, 'chr1')
 ```
-```{r coa_cutoff_chrPlot_6, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_6, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_250$Oki_Osa, 'chr2')
 ```
-```{r coa_cutoff_chrPlot_7, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_7, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_250$Oki_Osa, 'PAR')
 ```
 
 ###### Okinawa-Barcelona
-```{r coa_cutoff_chrPlot_8, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_8, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_100$Oki_Bar, 'chr1')
 ```
-```{r coa_cutoff_chrPlot_9, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_9, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_100$Oki_Bar, 'chr2')
 ```
-```{r coa_cutoff_chrPlot_10, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_10, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_100$Oki_Bar, 'PAR')
 ```
 
 ###### Osaka-Barcelona
-```{r coa_cutoff_chrPlot_11, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_11, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_250$Osa_Bar, 'Chr1')
 ```
-```{r coa_cutoff_chrPlot_12, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_12, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_250$Osa_Bar, 'Chr2')
 ```
-```{r coa_cutoff_chrPlot_13, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_13, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 plotApairOfChrs(cutoff_coas$coa_minWidth_250$Osa_Bar, 'PAR')
 ```
 
 ###### Okinawa-Kume
 The following is taken from the `vignette("ParallelPlots", package = "OikScrambling")` vignette. It is invoked here to allow later plots between Okinawa and Kume.
 
-```{r setting_up_functions, fig.height=4, fig.width=6, dev="svg"}
+```{r setting_up_functions, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 requireNamespace("ade4")
 treeLeaf <- function(name, length=NULL) {
   if(!is.null(length)) length <- paste0(':', length)
@@ -272,7 +272,7 @@ tree <-
 
 The optimal Okinawa-Kume plot:
 
-```{r coa_cutoff_chrPlot_14, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_14, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 # Note that this uses the cutoff coalesced object and not the translocation-removed coa2 object.
 x <- cutoff_coas$coa_minWidth_2000$Oki_Kum
 x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
@@ -284,7 +284,7 @@ plotApairOfChrs(x, 'chr1', dna_seg_scale = TRUE)
 
 Note that when you try to increase this further, you begin losing many regions:
 
-```{r coa_cutoff_chrPlot_15, fig.height=4, fig.width=6, dev="svg"}
+```{r coa_cutoff_chrPlot_15, fig.height=4, fig.width=6, dev="svg", fig.ext="svg"}
 x <- cutoff_coas$coa_minWidth_10000$Oki_Kum
 x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
 x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
