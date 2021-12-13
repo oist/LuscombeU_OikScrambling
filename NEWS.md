@@ -1,3 +1,7 @@
+# OikScrambling 0.6.4
+
+* Add regions of interest with repeat flipping and insertion.
+
 # OikScrambling 0.6.3
 
 * Add Hox regions of interest for Figure 1
