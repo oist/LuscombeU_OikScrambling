@@ -757,11 +757,11 @@ Thus, it seems that whether or not a gene participates in a one-to-one HOG also 
 
 Genomic locations of species- and clade-specific HOG expansions
 ---------------------------------------------------------------
-In the following section, I attempt to identify species- and clade-specific gene duplications using counts from HOG counts. For a given `query`-`target` combination, the `collect_clade_expansions()` function extracts from a `GBreaks` object 3 different data frames:
+In the following section, I attempt to identify species- and clade-specific gene family expansions using counts from HOG counts. For a given `query`-`target` combination, the `collect_clade_expansions()` function extracts from a `GBreaks` object 3 different data frames:
 
-1. Species-specific duplications in the query genome (referred to as `sp1` in the code below)
-2. Species-specific duplications in the target genome (referred to as `sp2` in the code below)
-3. Clade-specific duplications common to the query and target
+1. Species-specific expansions in the query genome (referred to as `sp1` in the code below)
+2. Species-specific expansions in the target genome (referred to as `sp2` in the code below)
+3. Clade-specific expansions common to the query and target
 
 N.B. Note that this step uses a concatenate of the two species names to extract a specific column from the `orthoFlagsDF` (`expansion_clade_X_Y`). Ensure that the clade names line up precisely with the species names.
 
@@ -771,7 +771,7 @@ In order to identify these events in the coordinate system of the query (chromos
 * Query-specific genes: Generate a new `orthoPairs`-like object starting from the query genome transcript coordinates. Query coordinates and features become NA
 * Target-specific genes: The `collectCladeExpansions()` function checks whether the genes flanking the target-specific gene are encoded on the same contig in the target genome. If they are, it checks whether both of those genes are in `orthoPairs`. If they are, and the corresponding query genes are encoded on the same query chromosome, then the target-specific gene is inferred as being between the query's genes.
 
-```{r gene_duplications_1}
+```{r gene_expansions_1}
 # Find midpoints of a GRanges.
 grMidpoint <- function(gr) {
   starts <- as.data.frame(ranges(gr))$start
@@ -797,7 +797,7 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
   result[[paste(sp1, sp2, sep="_")]] <- dat_clade
 
   # sp1-specific expansion
-  # sp1, the chromosomal assembly, is somewhat easy to indicate positions of species-specific duplications.
+  # sp1, the chromosomal assembly, is somewhat easy to indicate positions of species-specific expansions.
   # Since species-specific expansions are not in orthoPairs, we must make a fake one out of transcript coordinates.
   # We also need sp1's longest transcripts per gene to coordinate with sp2 later, so start with that.
   transcripts_sp1 <- transcripts[[sp1]]
@@ -833,7 +833,11 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
   transcripts_sp2 <- as.data.frame(transcripts[[sp2]])
   transcripts_sp2$midpoint <- grMidpoint(transcripts[[sp2]])
   # Subset transcripts to include only the longest per gene: split by gene ID, sort by longest, glue back together
-  transcripts_sp2$geneid <- unname(sapply(transcripts_sp2$tx_name, function(s) unlist(strsplit(s, "\\.t"))[1] ))
+  if(sp2 == "Nor") { # catch Norway exception
+    transcripts_sp2$geneid <- unname(sapply(transcripts_sp2$tx_name, function(s) s ))
+  } else {
+    transcripts_sp2$geneid <- unname(sapply(transcripts_sp2$tx_name, function(s) unlist(strsplit(s, "\\.t"))[1] ))
+  }
   transcripts_sp2 <- split(transcripts_sp2, transcripts_sp2$geneid) # split
   transcripts_sp2 <- lapply(transcripts_sp2, function(geneid) { # sort by longest
     biggest_gene = geneid[which.max(geneid$width),]
@@ -877,6 +881,7 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
             target_next_gene_index = which(transcripts_sp1$tx_name == next_orthopair$tx_name)
             if( (target_next_gene_index-target_prev_gene_index)==2) { # If target's genes are collinear...
               mod_orthopair <- prev_orthopair
+              mod_orthopair <- mod_orthopair[,!grepl("OG" , colnames(mod_orthopair))] # Drop HOG and OG columns to facilitate rbinding
               mod_orthopair$start   <- prev_orthopair$end+1   # Create a fake locus start point after its preceding gene
               mod_orthopair$end     <- next_orthopair$start-1 # Create a fake locus end point before its next gene
               mod_orthopair$width   <- mod_orthopair$end - mod_orthopair$start
@@ -922,18 +927,17 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
     }
   })
   dat_sp2 <- do.call(rbind, df_sp2_specific) |> as.data.frame()
-  # bind rows back into a data.frame
   result[[sp2]] <- dat_sp2
 
   result
 }
 
 big_chr <- c("chr1","chr2","PAR","XSR","YSR")
-duplications <- SimpleList()
-duplications$Oki_Kum <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Oki", sp2="Kum", bigChr=big_chr, longShort=longShort$Oki)
+expansions <- SimpleList()
+expansions$Oki_Kum <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Oki", sp2="Kum", bigChr=big_chr, longShort=longShort$Oki)
 big_chr <- c("Chr1","Chr2","PAR","XSR","YSR")
-duplications$Osa_Aom <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Osa", sp2="Aom", bigChr=big_chr, longShort=longShort$Osa)
-duplications$Bar_Nor <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Bar", sp2="Nor", bigChr=big_chr, longShort=longShort$Bar)
+expansions$Osa_Aom <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Osa", sp2="Aom", bigChr=big_chr, longShort=longShort$Osa)
+expansions$Bar_Nor <- collectCladeExpansions(orthopairs=orthoPairs, sp1="Bar", sp2="Nor", bigChr=big_chr, longShort=longShort$Bar)
 ```
 
 N.B. The function `collectCladeExpansions()` tries to warn you when something funny happens with respect to the target-specific genes. Funny occurrences include:
@@ -946,178 +950,201 @@ You can inspect these with `warnings()`, although there will be more than 50 suc
 
 Warning | Oki-Kum | Osa-Aom | Bar-Nor
 ------- | ------- | ------- | -------
-1 (diff. target contigs) | 11 | 1 | 100
-2 (orthologue neighbours not in orthoPairs) | 919 | 733 | 1842
-3 (orthologue neighbours not on same query chr.) | 26 | 17 | 64
-3 (orthologue neighbours not collinear on query chr.) | 286 | 307 | 490
+1 (ends of query contigs) | 11 | 1 | 100
+2 (query genome orthologue neighbours not in orthoPairs) | 919 | 733 | 1842
+3 (query genome orthologue neighbours not on same query chr.) | 26 | 17 | 64
+3 (query genome orthologue neighbours not collinear on query chr.) | 286 | 307 | 490
 
 Quickly check where these gene expansions are located:
-```{r gene_duplications_2}
+```{r gene_expansions_2}
 # Make sure factor levels are in alphabetical order and exclude chromosomes that were already snipped out.
 # It makes the later faceting look ugly if they are not sorted properly.
-duplications <- lapply(duplications, function(pair){
+expansions <- lapply(expansions, function(pair){
   lapply(pair, function(sp){
     sp$seqnames <- droplevels(factor(sp$seqnames, levels=sort(as.character(unique(sp$seqnames)))))
     sp
   })
 })
 
-(lapply(duplications, function(pair) {
+(lapply(expansions, function(pair) {
   sapply(pair, function(dup_tb) table(dup_tb$seqnames))
 }))
 ```
 
-The `duplications` object contains data frames that add up the number of clade- and species-specific genomes. Where do duplications fall in the genome?
+The `expansions` object contains data frames that tabulate the number of clade- and species-specific HOG expansions. So, given this, where do the species-specific HOG expansions land across the chromosome?
 
-```{r gene_duplications_pos_oki_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
-# Plot distribution of clade-specific duplications across the genome.
-ggplot(duplications$Oki_Kum$Oki_Kum) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Oki-Kum: Clade-specific gene family expansions')
+Gene family expansions: Okinawa-Kume
+------------------------------------
 
-# Oki-specific.
-ggplot(duplications$Oki_Kum$Oki) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Oki: Species-specific gene family expansions')
+```{r gene_expansions_pos_oki_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionsHist <- function(expansionsDF, facet.by="seqnames~Arm", binWidth=100000) {
+  ggplot(expansionsDF) +
+    aes(x=midpoint) +
+    geom_histogram(binwidth=binWidth) +
+    facet_wrap(facet.by, scales = "free_x", ncol=2) 
+}
 
-# Kum-specific.
-ggplot(duplications$Oki_Kum$Kum) +
-  aes(x=midpoint) +
-  #geom_density() +
-  geom_histogram(binwidth=100000) +
-  #geom_boxplot(stat='count') +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Kum: Species-specific gene family expansions')
+binWidth=100000
+# Oki-specific gene family expansions
+plotExpansionsHist(expansions$Oki_Kum$Oki, facet.by="seqnames~Arm", binWidth=binWidth) +
+  ggtitle("Oki: Species-specific gene family expansions")
+plotExpansionsHist(expansions$Oki_Kum$Oki, facet.by="~Arm", binWidth = binWidth) +
+  ggtitle("Oki: Species-specific gene family expansions")
 
-# All gene expansions: Oki-specific, Kum-specific, and Oki+Kum-specific.
-joinedDup <- as.data.frame(do.call(rbind, duplications$Oki_Kum))
-joinedDup$Arm <- flagLongShort(GRanges(joinedDup), longShort$Oki) |> as.data.frame()
-ggplot(do.call(rbind, duplications$Oki_Kum)) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Oki-Kum: All species- and clade-specific duplications')
-
-# As above, but without faceting by sequence, which makes a certain pattern immediately clear...
-ggplot(do.call(rbind, duplications$Oki_Kum)) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Oki-Kum: All species- and clade-specific duplications')
+# Kum-specific gene family expansions
+plotExpansionsHist(expansions$Oki_Kum$Kum, facet.by="seqnames~Arm", binWidth=binWidth) +
+  ggtitle("Kum: Species-specific gene family expansions")
+plotExpansionsHist(expansions$Oki_Kum$Kum, facet.by="~Arm", binWidth = binWidth) +
+  ggtitle("Kum: Species-specific gene family expansions")
 ```
 
-Sure, it looks like there is a pattern there. But is it statistically significant?
-
-```{r gene_duplications_pos_oki_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
-plotExpansionStats <- function(duplication_pair, pair_name) {
-  df <- do.call(rbind, duplication_pair) |> mutate(bin=cut_width(midpoint, 100000)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
-  plot1 <- ggplot(df) + aes(y=count) + geom_boxplot() + facet_wrap(~Arm, ncol=2) + ggtitle(paste(pair_name, ", dup. by arm", sep=""))
-  plot2 <- ggplot(df) + aes(y=count) + geom_boxplot() + facet_wrap(seqnames~Arm, ncol=2) + ggtitle(paste(pair_name, ", dup. by chr/arm", sep=""))
-  plot_joined = ggarrange(plot1, plot2)
-  plot_joined
+```{r gene_expansions_pos_oki_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionsBox <- function(duplicationDF, facet.by="seqnames~Arm", binWidth=100000) {
+  df <- duplicationDF |> mutate(bin=cut_width(midpoint, binWidth)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
+  ggplot(df) + 
+    aes(y=count) +
+    geom_boxplot() +
+    facet_wrap(facet.by, ncol=2)
 }
-plotExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum")
 
-calcExpansionStats <- function(duplication_pair, pair_name, conf.level=0.95) {
-  df <- do.call(rbind, duplication_pair) |> mutate(bin=cut_width(midpoint, 100000)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
-  # Show some numbers...
+# Oki-specific
+plotExpansionsBox(expansions$Oki_Kum$Oki, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Oki: Species-specific gene family expansions")
+plotExpansionsBox(expansions$Oki_Kum$Oki, facet.by='~Arm', binWidth=binWidth) + ggtitle("Oki: Species-specific gene family expansions")
+# Kum-specific
+plotExpansionsBox(expansions$Oki_Kum$Kum, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Kum: Species-specific gene family expansions")
+plotExpansionsBox(expansions$Oki_Kum$Kum, facet.by='~Arm', binWidth=binWidth) + ggtitle("Kum: Species-specific gene family expansions")
+```
+
+It seems there _might_ be some relationship between gene duplication and chromosomes or chromosome arms. But this is not made clear by the histograms or boxplots.
+
+The question is, are there statistically significant differences in the occurrence of gene expansions between chromosomes and chromosome arms?
+
+```{r gene_expansions_pos_oki_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+calcExpansionStats <- function(duplicationDF, binWidth=100000, conf.level=0.95) {
+  df <- duplicationDF |> mutate(bin=cut_width(midpoint, binWidth)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
   anova = aov(df$count ~ df$seqnames + df$Arm) |> summary()
   tukey = TukeyHSD(aov(df$count ~ df$seqnames + df$Arm), conf.level=conf.level)
   return(SimpleList(anova=anova, tukey=tukey))
 }
-expansionStats <- calcExpansionStats(duplications$Oki_Kum, pair_name = "Oki-Kum", conf.level=0.95)
-(expansionStats$anova)
-(expansionStats$tukey)
+
+(calcExpansionStats(expansions$Oki_Kum$Oki, conf.level=0.95, binWidth=binWidth)$anova)
+(calcExpansionStats(expansions$Oki_Kum$Kum, conf.level=0.95, binWidth=binWidth)$anova)
 ```
 
-Let's inspect the other chromosomal assemblies.
+And the answer is - at least for specific-specific genes between Okinawa and Kume - maybe?
 
-```{r gene_duplications_pos_osa_1}
-ggplot(duplications$Osa_Aom$Osa_Aom) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Osa-Aom: Clade-specific gene family expansions')
+We can ask the same questions about clade-specific expansions (shared by Oki AND Kum) or the sum of species-specific expansions (Oki OR Kum).
 
-ggplot(duplications$Osa_Aom$Osa) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Osa: Species-specific gene family expansions')
-
-ggplot(duplications$Osa_Aom$Aom) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Aom: Species-specific gene family expansions')
-
-
-ggplot(do.call(rbind, duplications$Osa_Aom)) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Osa-Aom: All species- and clade-specific duplications')
-
-# As above, but without faceting by sequence, which makes a certain pattern immediately clear...
-ggplot(do.call(rbind, duplications$Osa_Aom)) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Osa-Aom: All species- and clade-specific duplications')
+```{r gene_expansions_pos_oki_4, fig.height=6, fig.width=4, dev=c("svg", "png")}
+# Oki-specific gene family expansions
+plotExpansionsHist(expansions$Oki_Kum$Oki_Kum, facet.by="seqnames~Arm", binWidth=binWidth) + ggtitle('Oki-Kum: Clade-specific gene family expansions')
+plotExpansionsHist(expansions$Oki_Kum$Oki_Kum, facet.by="~Arm", binWidth=binWidth) + ggtitle('Oki-Kum: Clade-specific gene family expansions')
+plotExpansionsBox(expansions$Oki_Kum$Oki_Kum, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Oki-Kum: Clade-specific gene family expansions")
+plotExpansionsBox(expansions$Oki_Kum$Oki_Kum, facet.by='~Arm', binWidth=binWidth) + ggtitle("Oki-Kum: Clade-specific gene family expansions")
+(calcExpansionStats(expansions$Oki_Kum$Oki_Kum, conf.level=0.95, binWidth=binWidth)$anova)
 ```
 
-```{r gene_duplications_pos_osa_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
-plotExpansionStats(duplications$Osa_Aom, pair_name = "Osa-Aom")
-
-stats <- calcExpansionStats(duplications$Osa_Aom, pair_name = "Osa-Aom")
-stats$anova
-stats$tukey
+```{r gene_expansions_pos_oki_5, fig.height=6, fig.width=4, dev=c("svg", "png")}
+# Oki-specific gene family expansions
+plotExpansionsHist(rbind(expansions$Oki_Kum$Oki, expansions$Oki_Kum$Kum), facet.by="seqnames~Arm", binWidth=binWidth) + ggtitle('Oki OR Kum: Species-specific gene family expansions')
+plotExpansionsHist(rbind(expansions$Oki_Kum$Oki, expansions$Oki_Kum$Kum), facet.by="~Arm", binWidth=binWidth) + ggtitle('Oki OR Kum: Species-specific gene family expansions')
+plotExpansionsBox(rbind(expansions$Oki_Kum$Oki, expansions$Oki_Kum$Kum), facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Oki OR Kum: Species-specific gene family expansions")
+plotExpansionsBox(rbind(expansions$Oki_Kum$Oki, expansions$Oki_Kum$Kum), facet.by='~Arm', binWidth=binWidth) + ggtitle("Oki OR Kum: Species-specific gene family expansions")
+(calcExpansionStats(rbind(expansions$Oki_Kum$Oki, expansions$Oki_Kum$Kum), conf.level=0.95, binWidth=binWidth)$anova)
 ```
 
+Gene family expansions: Osaka-Aomori
+------------------------------------
 
-```{r gene_duplications_pos_bar_1}
-ggplot(duplications$Bar_Nor$Bar_Nor) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Gene family expansions: Bar-Nor')
+```{r gene_expansions_pos_Osa_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionsHist(expansions$Osa_Aom$Osa, facet.by="seqnames~Arm", binWidth=binWidth) +
+  ggtitle("Osa: Species-specific gene family expansions")
+plotExpansionsHist(expansions$Osa_Aom$Osa, facet.by="~Arm", binWidth = binWidth) +
+  ggtitle("Osa: Species-specific gene family expansions")
 
-ggplot(duplications$Bar_Nor$Bar) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Species-specific gene family expansions: Bar')
-
-ggplot(duplications$Bar_Nor$Nor) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Species-specific gene family expansions: Nor')
-
-ggplot(do.call(rbind, duplications$Bar_Nor)) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(seqnames~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Bar, Nor: All species- and clade-specific duplications')
-
-# As above, but without faceting by sequence, which makes a certain pattern immediately clear...
-ggplot(do.call(rbind, duplications$Bar_Nor)) +
-  aes(x=midpoint) +
-  geom_histogram(binwidth=100000) +
-  facet_wrap(~Arm, scales = "free_x", ncol=2) +
-  ggtitle('Bar, Nor: All species- and clade-specific duplications')
+plotExpansionsHist(expansions$Osa_Aom$Aom, facet.by="seqnames~Arm", binWidth=binWidth) +
+  ggtitle("Aom: Species-specific gene family expansions")
+plotExpansionsHist(expansions$Osa_Aom$Aom, facet.by="~Arm", binWidth = binWidth) +
+  ggtitle("Aom: Species-specific gene family expansions")
 ```
 
-```{r gene_duplications_pos_bar_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
-plotExpansionStats(duplications$Bar_Nor, pair_name = "Bar-Nor")
+```{r gene_expansions_pos_Osa_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionsBox(expansions$Osa_Aom$Osa, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Osa: Species-specific gene family expansions")
+plotExpansionsBox(expansions$Osa_Aom$Osa, facet.by='~Arm', binWidth=binWidth) + ggtitle("Osa: Species-specific gene family expansions")
 
-stats <- calcExpansionStats(duplications$Bar_Nor, pair_name = "Bar-Nor")
-stats$anova
-stats$tukey
+plotExpansionsBox(expansions$Osa_Aom$Aom, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Aom: Species-specific gene family expansions")
+plotExpansionsBox(expansions$Osa_Aom$Aom, facet.by='~Arm', binWidth=binWidth) + ggtitle("Aom: Species-specific gene family expansions")
+```
+
+```{r gene_expansions_pos_Osa_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+(calcExpansionStats(expansions$Osa_Aom$Osa, conf.level=0.95, binWidth=binWidth)$anova)
+(calcExpansionStats(expansions$Osa_Aom$Aom, conf.level=0.95, binWidth=binWidth)$anova)
+```
+
+```{r gene_expansions_pos_Osa_4, fig.height=6, fig.width=4, dev=c("svg", "png")}
+plotExpansionsHist(expansions$Osa_Aom$Osa_Aom, facet.by="seqnames~Arm", binWidth=binWidth) + ggtitle('Osa-Aom: Clade-specific gene family expansions')
+plotExpansionsHist(expansions$Osa_Aom$Osa_Aom, facet.by="~Arm", binWidth=binWidth) + ggtitle('Osa-Aom: Clade-specific gene family expansions')
+
+plotExpansionsBox(expansions$Osa_Aom$Osa_Aom, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Osa-Aom: Clade-specific gene family expansions")
+plotExpansionsBox(expansions$Osa_Aom$Osa_Aom, facet.by='~Arm', binWidth=binWidth) + ggtitle("Osa-Aom: Clade-specific gene family expansions")
+(calcExpansionStats(expansions$Osa_Aom$Osa_Aom, conf.level=0.95, binWidth=binWidth)$anova)
+```
+
+```{r gene_expansions_pos_Osa_5, fig.height=6, fig.width=4, dev=c("svg", "png")}
+plotExpansionsHist(rbind(expansions$Osa_Aom$Osa, expansions$Osa_Aom$Aom), facet.by="seqnames~Arm", binWidth=binWidth) + ggtitle('Osa OR Aom: Species-specific gene family expansions')
+plotExpansionsHist(rbind(expansions$Osa_Aom$Osa, expansions$Osa_Aom$Aom), facet.by="~Arm", binWidth=binWidth) + ggtitle('Osa OR Aom: Species-specific gene family expansions')
+
+plotExpansionsBox(rbind(expansions$Osa_Aom$Osa, expansions$Osa_Aom$Aom), facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Osa OR Aom: Species-specific gene family expansions")
+plotExpansionsBox(rbind(expansions$Osa_Aom$Osa, expansions$Osa_Aom$Aom), facet.by='~Arm', binWidth=binWidth) + ggtitle("Osa OR Aom: Species-specific gene family expansions")
+
+(calcExpansionStats(rbind(expansions$Osa_Aom$Osa, expansions$Osa_Aom$Aom), conf.level=0.95, binWidth=binWidth)$anova)
+```
+
+Gene family expansions: Barcelona-Norway
+----------------------------------------
+
+```{r gene_expansions_pos_Bar_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionsHist(expansions$Bar_Nor$Bar, facet.by="seqnames~Arm", binWidth=binWidth) +
+  ggtitle("Bar: Species-specific gene family expansions")
+plotExpansionsHist(expansions$Bar_Nor$Bar, facet.by="~Arm", binWidth = binWidth) +
+  ggtitle("Bar: Species-specific gene family expansions")
+
+plotExpansionsHist(expansions$Bar_Nor$Nor, facet.by="seqnames~Arm", binWidth=binWidth) +
+  ggtitle("Nor: Species-specific gene family expansions")
+plotExpansionsHist(expansions$Bar_Nor$Nor, facet.by="~Arm", binWidth = binWidth) +
+  ggtitle("Nor: Species-specific gene family expansions")
+```
+
+```{r gene_expansions_pos_Bar_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotExpansionsBox(expansions$Bar_Nor$Bar, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Bar: Species-specific gene family expansions")
+plotExpansionsBox(expansions$Bar_Nor$Bar, facet.by='~Arm', binWidth=binWidth) + ggtitle("Bar: Species-specific gene family expansions")
+
+plotExpansionsBox(expansions$Bar_Nor$Nor, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Nor: Species-specific gene family expansions")
+plotExpansionsBox(expansions$Bar_Nor$Nor, facet.by='~Arm', binWidth=binWidth) + ggtitle("Nor: Species-specific gene family expansions")
+```
+
+```{r gene_expansions_pos_Bar_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+(calcExpansionStats(expansions$Bar_Nor$Bar, conf.level=0.95, binWidth=binWidth)$anova)
+(calcExpansionStats(expansions$Bar_Nor$Nor, conf.level=0.95, binWidth=binWidth)$anova)
+```
+
+```{r gene_expansions_pos_Bar_4, fig.height=6, fig.width=4, dev=c("svg", "png")}
+plotExpansionsHist(expansions$Bar_Nor$Bar_Nor, facet.by="seqnames~Arm", binWidth=binWidth) + ggtitle('Bar-Nor: Clade-specific gene family expansions')
+plotExpansionsHist(expansions$Bar_Nor$Bar_Nor, facet.by="~Arm", binWidth=binWidth) + ggtitle('Bar-Nor: Clade-specific gene family expansions')
+
+plotExpansionsBox(expansions$Bar_Nor$Bar_Nor, facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Bar-Nor: Clade-specific gene family expansions")
+plotExpansionsBox(expansions$Bar_Nor$Bar_Nor, facet.by='~Arm', binWidth=binWidth) + ggtitle("Bar-Nor: Clade-specific gene family expansions")
+(calcExpansionStats(expansions$Bar_Nor$Bar_Nor, conf.level=0.95, binWidth=binWidth)$anova)
+```
+
+```{r gene_expansions_pos_Bar_5, fig.height=6, fig.width=4, dev=c("svg", "png")}
+plotExpansionsHist(rbind(expansions$Bar_Nor$Bar, expansions$Bar_Nor$Nor), facet.by="seqnames~Arm", binWidth=binWidth) + ggtitle('Bar OR Nor: Species-specific gene family expansions')
+plotExpansionsHist(rbind(expansions$Bar_Nor$Bar, expansions$Bar_Nor$Nor), facet.by="~Arm", binWidth=binWidth) + ggtitle('Bar OR Nor: Species-specific gene family expansions')
+
+plotExpansionsBox(rbind(expansions$Bar_Nor$Bar, expansions$Bar_Nor$Nor), facet.by='seqnames~Arm', binWidth=binWidth) + ggtitle("Bar OR Nor: Species-specific gene family expansions")
+plotExpansionsBox(rbind(expansions$Bar_Nor$Bar, expansions$Bar_Nor$Nor), facet.by='~Arm', binWidth=binWidth) + ggtitle("Bar OR Nor: Species-specific gene family expansions")
+
+(calcExpansionStats(rbind(expansions$Bar_Nor$Bar, expansions$Bar_Nor$Nor), conf.level=0.95, binWidth=binWidth)$anova)
 ```
 
 TODO
