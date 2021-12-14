@@ -215,17 +215,20 @@ sortQ <- function(gb) {
 
 ## O9
 
-```{r}
-O95f.c  <- longestMatchesInTarget(O95f)
-O95f.cc <- queryStrandNames(O95f.c)
+Converting alignments into kind of chains.
+See `?longestMatchesInTarget` and `?strandNames` for details.
 
-O96f.c <- longestMatchesInTarget(O96f)
-O96f.cc <- queryStrandNames(O96f.c)
+```{r}
+# O95f.c  <- longestMatchesInTarget(O95f)
+# O95f.cc <- queryStrandNames(O95f.c)
+# 
+# O96f.c <- longestMatchesInTarget(O96f)
+# O96f.cc <- queryStrandNames(O96f.c)
 
 O97f.c <- longestMatchesInTarget(O97f)
-O97f.cc <- queryStrandNames(O97f.c)
+O97f.cc <- strandNames(O97f.c, query = TRUE)
 names(O97f.cc) <- paste("O97f", names(O97f.cc), sep = "_")
-O97f.all <-  longestMatchesInTarget(O97f, min.width = 0, min.matches = 1) %>% queryStrandNames()
+O97f.all <-  longestMatchesInTarget(O97f, min.width = 0, min.matches = 1) |> strandNames(q=T)
 ```
 
 
