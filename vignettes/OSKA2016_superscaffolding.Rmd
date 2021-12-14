@@ -1,16 +1,39 @@
 ---
 title: "OSKA2016 superscaffolding"
-output: html_notebook
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{OSKA2016 superscaffolding}
+  %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
 
+# Load pacakges and data
+
+See the `vignette("OikScrambling", package = "OikScrambling")` for general
+details on package and data load.
+
+See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different `GBreaks` objects are prepared.
+
+```{r load_pacakges_and_data}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  library('ggplot2')
+  library("BreakpointsData")
+})
+genomes <- OikScrambling:::loadAllGenomes()
+load("BreakPoints.Rdata")
+library("BSgenome.Odioica.local.OSKA2016")
+```
+
 # First, let's superscaffold O9 with O3
 
 ```{r}
-library("magrittr")
-library("BSgenome.Odioica.local.OSKA2016")
-library(GenomicBreaks)
 O95f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-5f/OSKA2016__O9-5f.gff3", target_bsgenome = OSKA2016, type = "match")
 genome(O95f$query) <- "O95f"
 O96f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-6f/OSKA2016__O9-6f.gff3", target_bsgenome = OSKA2016, type = "match")
