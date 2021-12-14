@@ -2,6 +2,7 @@
 title: "OSKA2016 superscaffolding"
 author: 
  - "Charles Plessy"
+ - "Jan Grašič"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -30,6 +31,36 @@ genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
 library("BSgenome.Odioica.local.OSKA2016")
 ```
+
+# Prior information
+
+Jan and me inspected by eye the dotplots of different genome alignments to
+OSKA2016 and came to the conclusion that the following scaffolds belong to the
+following chromosomes (or chromosome regions).
+
+```{r old versions}
+
+chr1.old <- c("S6+", "S36+", "S28+", "S51+", "S31+", "S38+", "S37+",
+          "S3+", "S5+", "S7-")
+
+chr2.old <- c("S16+", "S17-", "S41-", "S50+", "S15+", "S20+",
+          "S30+", "S4+", "S19-", "S24+", "S75+", "S27-",
+          "S40-", "S72+", "S46-", "S35-", "S22+", "S14+")
+
+PAR.old <- c("S25+", "S11+", "S54+", "S53-", "S21+", "S12+", "S29+", "S49-",
+             "S33+", "S80-", "S93+", "S13+", "S70+", "S52+", "S23-", "S73+",
+             "S18-", "S2+")
+
+YSR.old <- c("S68-", "S48-", "S42-",  "S65-", "S55-", "S87+", "S63-", "S86+", "S62+", "S39+", "S47+")
+```
+
+The purpose of this computational analysis is to validate and extend our findings
+in a systematic manner.
+
+We rely on the largest scaffolds of the multiple other assemblies to support the
+superscaffolding of OSKA2016.  In this anlysis, all support assemblies have
+been mapped to OSKA2016, which means that they are in the _query_ slot of the
+`GenomicBreaks` objects.
 
 # First, let's superscaffold O9 with O3
 
@@ -79,60 +110,6 @@ longTandems <- function(file) {
   tantan[tantan$motifLength > 50 & tantan$motifLength < 60 & score(tantan) > 1000]
 }
 ```
-
-# Prior information
-
-We inspected by eye the dotplots of different genome alignments to OSKA2016
-and came to the conclusion that the following scaffolds belong to the following
-chromosomes (or chromosome regions).
-
-```{r}
-XSR <- c( # High confidence
-          "S10+", "S9+", "S32+", "S84-", "S59+", "S8-", "S1+", "S66-")
-
-YSR <- c( # High confidence
-          "S63-", "S71-", "S68-", "S48-", "S55+", "S42-", "S65-", "S87+", "S86+", "S78+", "S110+", "S62+", "S39+", "S26+", "S47+", "S64-")
-
-PAR <- c( # Short arm – low confidence
-  "S29+", "S49-", "S33+", "S80-", "S119+", "S93+", "S43+", "S128+", "S83+", "S57-", "S56+", "S45+", "S117-", "S88+", "S92-", "S21+", "S12+", "S79+", "S89+", "S53+", "S54-", "S11-", "S74+", "S25-",
-          # Long arm – higher confidence
-          "S2-", "S18+", "S73-", "S23+", "S52-", "S70-", "S13-")
-
-chr1 <- c( # Short arm – high confidence until S37
-           "S31-", "S51-", "S38-", "S85+", "S61-", "S44-", "S109+", "S37-", "S28+", "S36+", "S76+", "S58+",
-           # Long arm – low confidence
-           "S6+", "S3+", "S5+", "S7-")
-
-chr2 <- c( # Short arm – good confidence
-           "S82-", "S30+", "S15-", "S50-", "S41+", "S17+", "S16-", "S20+",
-           # Long arm – high confidence
-          "S60-", "S14-", "S90-", "S22-", "S35+", "S118+", "S46+", "S102-", "S72-", "S104+", "S40+", "S27+", "S75-", "S24-", "S19+", "S101+", "S4-")
-```
-
-```{r old versions}
-
-chr1.old <- c("S6+", "S36+", "S28+", "S51+", "S31+", "S38+", "S37+",
-          "S3+", "S5+", "S7-")
-
-chr2.old <- c("S16+", "S17-", "S41-", "S50+", "S15+", "S20+",
-          "S30+", "S4+", "S19-", "S24+", "S75+", "S27-",
-          "S40-", "S72+", "S46-", "S35-", "S22+", "S14+")
-
-PAR.old <- c("S25+", "S11+", "S54+", "S53-", "S21+", "S12+", "S29+", "S49-",
-             "S33+", "S80-", "S93+", "S13+", "S70+", "S52+", "S23-", "S73+",
-             "S18-", "S2+")
-
-YSR.old <- c("S68-", "S48-", "S42-",  "S65-", "S55-", "S87+", "S63-", "S86+", "S62+", "S39+", "S47+")
-```
-
-The purpose of this computational analysis is to validate and extend our findings
-in a systematic manner.
-
-We rely on the largest scaffolds of the multiple other assemblies to support the
-superscaffolding of OSKA2016.  In this anlysis, all support assemblies have
-been mapped to OSKA2016, which means that they are in the _query_ slot of the
-`GenomicBreaks` objects.  We do not prepare _BSgenome_ packages for these
-assemblies, so we need to identify the longest scaffolds by ourselves.
 
 
 # Chains
@@ -773,4 +750,29 @@ O97f %>% subset(seqnames(query) == "contig_524" & width > 1000) %>% sortQ %>% as
 OSK421f %>% subset(seqnames == "S99" & width > 100)
 OSK421f %>% subset(seqnames(query) == "contig_98" & width > 1000) %>% sortQ %>% as.data.frame()
 OSK421f %>% subset(seqnames(query) == "contig_3" & width > 1000) %>% sortQ %>% as.data.frame()
+```
+
+# Summary
+
+```{r}
+XSR <- c( # High confidence
+          "S10+", "S9+", "S32+", "S84-", "S59+", "S8-", "S1+", "S66-")
+
+YSR <- c( # High confidence
+          "S63-", "S71-", "S68-", "S48-", "S55+", "S42-", "S65-", "S87+", "S86+", "S78+", "S110+", "S62+", "S39+", "S26+", "S47+", "S64-")
+
+PAR <- c( # Short arm – low confidence
+  "S29+", "S49-", "S33+", "S80-", "S119+", "S93+", "S43+", "S128+", "S83+", "S57-", "S56+", "S45+", "S117-", "S88+", "S92-", "S21+", "S12+", "S79+", "S89+", "S53+", "S54-", "S11-", "S74+", "S25-",
+          # Long arm – higher confidence
+          "S2-", "S18+", "S73-", "S23+", "S52-", "S70-", "S13-")
+
+chr1 <- c( # Short arm – high confidence until S37
+           "S31-", "S51-", "S38-", "S85+", "S61-", "S44-", "S109+", "S37-", "S28+", "S36+", "S76+", "S58+",
+           # Long arm – low confidence
+           "S6+", "S3+", "S5+", "S7-")
+
+chr2 <- c( # Short arm – good confidence
+           "S82-", "S30+", "S15-", "S50-", "S41+", "S17+", "S16-", "S20+",
+           # Long arm – high confidence
+          "S60-", "S14-", "S90-", "S22-", "S35+", "S118+", "S46+", "S102-", "S72-", "S104+", "S40+", "S27+", "S75-", "S24-", "S19+", "S101+", "S4-")
 ```
