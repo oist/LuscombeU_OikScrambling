@@ -82,28 +82,28 @@ grepByContigName <- function (l, name) {
 # First, let's superscaffold O9 with O3
 
 ```{r}
-O95f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-5f/OSKA2016__O9-5f.gff3", target_bsgenome = OSKA2016, type = "match")
-genome(O95f$query) <- "O95f"
-O96f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-6f/OSKA2016__O9-6f.gff3", target_bsgenome = OSKA2016, type = "match")
-genome(O96f$query) <- "O96f"
-O97f <- load_genomic_breaks("~/FromSango/O9-7f/pair_align/align/O9__ref_genome.filtered.gff3", query_bsgenome = OSKA2016, type = "match")
-genome(O97f) <- "O97f"
-O97f <- sort(ignore.strand = TRUE, swap(O97f))
+# O95f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-5f/OSKA2016__O9-5f.gff3", target_bsgenome = OSKA2016, type = "match")
+# genome(O95f$query) <- "O95f"
+# O96f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-6f/OSKA2016__O9-6f.gff3", target_bsgenome = OSKA2016, type = "match")
+# genome(O96f$query) <- "O96f"
 
-O33f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-3f/OSKA2016__O3-3f.gff3", target_bsgenome = OSKA2016, type = "match")
-genome(O33f$query) <- "O33f"
-O34f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-4f/OSKA2016__O3-4f.gff3", target_bsgenome = OSKA2016, type = "match")
-genome(O34f$query) <- "O34f"
-O35f <- load_genomic_breaks("~/FromSango/O3-5f/pair_align/align/O3__ref_genome.filtered.gff3", query_bsgenome = OSKA2016, type = "match")
+# As maf-convert was not run with -J for these genomes, `type="match"` is needed.
+O97f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-7f.gff.gz", target_bsgenome = OSKA2016, type = "match")
+genome(O97f$query) <- "O97f"
+
+# O33f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-3f/OSKA2016__O3-3f.gff3", target_bsgenome = OSKA2016, type = "match")
+# genome(O33f$query) <- "O33f"
+# O34f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-4f/OSKA2016__O3-4f.gff3", target_bsgenome = OSKA2016, type = "match")
+# genome(O34f$query) <- "O34f"
+O35f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-5f.gff.gz", target_bsgenome = OSKA2016, type = "match")
 genome(O35f) <- "O35f"
-O35f <- sort(ignore.strand = TRUE, swap(O35f))
 
-OSK421f <- load_genomic_breaks("~/FromSango/OSKA2016__OSK42-1f/OSKA2016__OSK42-1f.gff3", target_bsgenome = OSKA2016, type = "match")
+OSK421f <- load_genomic_breaks("~/FromSango/OSKA2016__OSK42-2f.gff.gz", target_bsgenome = OSKA2016, type = "match")
 genome(OSK421f$query) <- "OSK421f"
 
-AOM5.4f <- load_genomic_breaks("~/FromSango/AOM-5-4f/pair_align/align/AOM5__ref_genome.gff3", query_bsgenome = OSKA2016, type = "match")
-genome(AOM5.4f) <- "AOM5.4f"
-AOM5.4f <- sort(ignore.strand = TRUE, swap(AOM5.4f))
+AOM5.5f  <- load_genomic_breaks("~/FromSango/OSKA2016__AOM-5-5f.gff.gz", target_bsgenome = OSKA2016, query_bsgenome = BSgenome.Odioica.local.AOM.5, type = "match")
+AOM10.2f <- load_genomic_breaks("~/FromSango/OSKA2016__AOM-10-2f.gff.gz", target_bsgenome = OSKA2016, type = "match")
+genome(AOM10.2f$query) <- "AOM10.2f"
 ```
 
 # Telomeres
