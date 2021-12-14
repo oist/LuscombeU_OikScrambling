@@ -236,44 +236,44 @@ O97f.all <-  longestMatchesInTarget(O97f, min.width = 0, min.matches = 1) |> str
 
 ```{r}
 O35f.c  <- longestMatchesInTarget(O35f)
-O35f.cc <- queryStrandNames(O35f.c)
+O35f.cc <- strandNames(O35f.c, query = TRUE)
 names(O35f.cc) <- paste("O35f", names(O35f.cc), sep = "_")
-O35f.all  <- longestMatchesInTarget(O35f, min.width = 0, min.matches = 0) %>% queryStrandNames()
-
-O33f.pc <- O33f
-O33f.pc %<>% split(seqnames(O33f.pc)) 
-normRanges <- function(x, s) {
-  newStart <- round(start(x) * 100 / s)
-  newEnd <- round(end(x) * 100 / s)
-  ranges(x) <- IRanges(newStart, newEnd)
-  x
-}
-O33f.pc <- mendoapply(normRanges, O33f.pc, seqlengths(OSKA2016)[names(O33f.pc)])
-O33f.pc %<>% unlist %>% sort
-
-O33f.1000 <- O33f[width(O33f) > 1000]
-O33f.c  <- longestMatchesInTarget(O33f)
-O33f.cc <- queryStrandNames(O33f.c)
-names(O33f.cc) <- paste("O33f", names(O33f.cc), sep = "_")
-O33f.all  <- longestMatchesInTarget(O33f, min.width = 0, min.matches = 0) %>% queryStrandNames()
-
-
-
-O33f.tel <- possibleTelomeres("~/FromSango/O3-3f.tantan.gff3")
-O33f.tel %>% as.data.frame()
-O33f.telnames  <- O35f.tel %>% seqnames() %>% unique() %>% as.character()
-O33f.telnames2 <- O35f.tel %>% seqnames() %>% unique() %>% paste0("O35f_", .)
-
-O33f.all[O33f.telnames %>% Filter (function(X) X %in% names(O33f.all), .)]
-O33f.cc[O33f.telnames2 %>% Filter (function(X) X %in% names(O33f.cc), .)]
-
-O35f.tel <- possibleTelomeres("~/projects/GenomicBreaks/inst/extdata/O3-5f.tantan.gff3")
-O35f.tel %>% as.data.frame()
-O35f.telnames  <- O35f.tel %>% seqnames() %>% unique() %>% as.character()
-O35f.telnames2 <- O35f.tel %>% seqnames() %>% unique() %>% paste0("O35f_", .)
-
-O35f.all[O35f.telnames %>% Filter (function(X) X %in% names(O35f.all), .)]
-O35f.cc[O35f.telnames2 %>% Filter (function(X) X %in% names(O35f.cc), .)]
+# O35f.all  <- longestMatchesInTarget(O35f, min.width = 0, min.matches = 0) |> strandNames(q=T)
+# 
+# O33f.pc <- O33f
+# O33f.pc %<>% split(seqnames(O33f.pc)) 
+# normRanges <- function(x, s) {
+#   newStart <- round(start(x) * 100 / s)
+#   newEnd <- round(end(x) * 100 / s)
+#   ranges(x) <- IRanges(newStart, newEnd)
+#   x
+# }
+# O33f.pc <- mendoapply(normRanges, O33f.pc, seqlengths(OSKA2016)[names(O33f.pc)])
+# O33f.pc %<>% unlist %>% sort
+# 
+# O33f.1000 <- O33f[width(O33f) > 1000]
+# O33f.c  <- longestMatchesInTarget(O33f)
+# O33f.cc <- queryStrandNames(O33f.c)
+# names(O33f.cc) <- paste("O33f", names(O33f.cc), sep = "_")
+# O33f.all  <- longestMatchesInTarget(O33f, min.width = 0, min.matches = 0) %>% queryStrandNames()
+# 
+# 
+# 
+# O33f.tel <- possibleTelomeres("~/FromSango/O3-3f.tantan.gff3")
+# O33f.tel %>% as.data.frame()
+# O33f.telnames  <- O35f.tel %>% seqnames() %>% unique() %>% as.character()
+# O33f.telnames2 <- O35f.tel %>% seqnames() %>% unique() %>% paste0("O35f_", .)
+# 
+# O33f.all[O33f.telnames %>% Filter (function(X) X %in% names(O33f.all), .)]
+# O33f.cc[O33f.telnames2 %>% Filter (function(X) X %in% names(O33f.cc), .)]
+# 
+# O35f.tel <- possibleTelomeres("~/projects/GenomicBreaks/inst/extdata/O3-5f.tantan.gff3")
+# O35f.tel %>% as.data.frame()
+# O35f.telnames  <- O35f.tel %>% seqnames() %>% unique() %>% as.character()
+# O35f.telnames2 <- O35f.tel %>% seqnames() %>% unique() %>% paste0("O35f_", .)
+# 
+# O35f.all[O35f.telnames %>% Filter (function(X) X %in% names(O35f.all), .)]
+# O35f.cc[O35f.telnames2 %>% Filter (function(X) X %in% names(O35f.cc), .)]
 ```
 
 ## OSK42
