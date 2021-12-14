@@ -354,8 +354,8 @@ sapply(orthoPairs, length) - sapply(orthoPairsFiltered, length)
 #sapply(orthoPairs_core, length) - sapply(orthoPairsFiltered_core, length)
 ```
 
-Exploring patterns in the pairwise objects
-------------------------------------------
+Patterns in pairwise gene alignments
+====================================
 
 Coalesce syntenic blocks and annotate them
 ------------------------------------------
@@ -600,7 +600,7 @@ Genomic locations of HOGs found in all species
 ----------------------------------------------
 Genes that are found in all species are found where in the genome?
 
-```{r basic_flags_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_1, fig.height=6, fig.width=4, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Osa), as.data.frame(orthoPairs$Oki_Osa)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -624,7 +624,7 @@ complex_plot <- ggplot( dat ) +
 complex_plot
 ```
 
-```{r basic_flags_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_2, fig.height=6, fig.width=4, dev=c("svg", "png")}
 big_chr = c("chr1","chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Oki_Bar), as.data.frame(orthoPairs$Oki_Bar)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -648,7 +648,7 @@ complex_plot <- ggplot( dat ) +
 complex_plot
 ```
 
-```{r basic_flags_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+```{r basic_flags_3, fig.height=6, fig.width=4, dev=c("svg", "png")}
 big_chr = c("Chr1","Chr2","PAR","XSR","YSR")
 dat = subset(as.data.frame(orthoPairs$Osa_Bar), as.data.frame(orthoPairs$Osa_Bar)$seqnames %in% big_chr)
 simple_plot <- ggplot( dat ) +
@@ -790,51 +790,68 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
   orthopair <- as.data.frame(orthopair)
   orthopair <- subset(orthopair, orthopair$seqnames %in% big_chr)
 
-  # Identify clade-specific expansions
-  # Get some data we will need later. The Clade-specific data frame is easiest because it just needs to be subset from the pair by flag.
+  # Clade-specific expansions
+  # The clade-specific data frame is easiest. This is the subset of the orthoPair where expansion_clade_X is TRUE.
   dat_clade <- orthopair[as.logical(unlist(lapply(orthopair$orthoFlagDF, function(x) x[[paste("expansion_clade_", sp1, "_", sp2, sep="")]] )))==TRUE,] |> as.data.frame()
+  dat_clade <- dat_clade[,!grepl("OG" , colnames(dat_clade))] # Drop HOG and OG columns to facilitate rbinding
   result[[paste(sp1, sp2, sep="_")]] <- dat_clade
 
   # sp1-specific expansion
-  # sp1 must be the chromosomal assembly. We transfer the coordinates of its species-specific gene family
-  # expansions into a dummy orthoPairs object to facilitate rbind'ing later.
-  df_sp1 <- as.data.frame(transcripts[[sp1]])
-  df_sp1 <- subset(df_sp1, df_sp1$seqnames %in% big_chr) # Subset to only chromosome-scale scaffolds
+  # sp1, the chromosomal assembly, is somewhat easy to indicate positions of species-specific duplications.
+  # Since species-specific expansions are not in orthoPairs, we must make a fake one out of transcript coordinates.
+  # We also need sp1's longest transcripts per gene to coordinate with sp2 later, so start with that.
+  transcripts_sp1 <- transcripts[[sp1]]
+  transcripts_sp1 <- as.data.frame(transcripts_sp1)
+  # Subset transcripts to include only the longest per gene: split by gene ID, sort by longest, glue back together
+  transcripts_sp1$geneid <- unname(sapply(transcripts_sp1$tx_name, function(s) unlist(strsplit(s, "\\.t"))[1] ))
+  transcripts_sp1 <- split(transcripts_sp1, transcripts_sp1$geneid) # split
+  transcripts_sp1 <- lapply(transcripts_sp1, function(geneid) { # sort by longest
+    biggest_gene = geneid[which.max(geneid$width),]
+    biggest_gene
+  })
+  transcripts_sp1 <- do.call(rbind, transcripts_sp1) |> as.data.frame() # glue
+  transcripts_sp1 <- transcripts_sp1[order(transcripts_sp1$seqnames, transcripts_sp1$start),]
+  
+  # sp1-specific genes
+  df_sp1 <- transcripts[[sp1]] |> as.data.frame()
+  df_sp1 <- subset(df_sp1, df_sp1$seqnames %in% big_chr) # Include only chromosome-scale scaffolds
   df_sp1 <- df_sp1[which(unlist(lapply(df_sp1$orthoFlagDF, function(x) x$expansion_species_specific ))==sp1),] # Subset to species-specific expansions
-
   # Add a bunch of empty columns to make the object look like an orthoPair
   df_sp1 <- cbind(df_sp1, query.seqnames=NA, query.start=NA, query.end=NA, query.width=NA, query.strand=NA, query.tx_id=NA, query.tx_name=NA, query.dNdS_GUIDANCE2=NA, query.dNdS_HmmCleaner=NA, query.dNdS_PRANK=NA, query.orthoFlagDF=df_sp1$orthoFlagDF)
   df_sp1 <- flagLongShort(GRanges(df_sp1), longShort) |> as.data.frame() # Add back in long-short arm information
   df_sp1$midpoint <- grMidpoint(GRanges(df_sp1)) # Add in gene midpoints
   dat_sp1 <- df_sp1
-  result[[sp1]] <- dat_sp1
+  result[[sp1]] <- dat_sp1 # add to result list
 
-  # sp2 is trickier.
-  # Its species-specific expansions cannot be part of the orthoPairs, by definition.
-  # So what you can do is guess where the sp2 transcript corresponds to on the reference
-  # genome based on its transcript coordinates.
+  # sp2-specific genes
+  # As with sp1, sp2-specific expansions cannot be part of the orthoPairs, by definition.
+  # However, there is an additional problem that sp2's genes do not exist on sp1 - so how
+  # can we position them on the sp1 chromosomal assembly?
+  # If the sp2-specific gene's neighbours are in orthoGroups with sp1 genes, and those genes
+  # are collinear in sp1, then the position of that expansion is inferred to be between those
+  # two orthoPairs in sp1.
   transcripts_sp2 <- as.data.frame(transcripts[[sp2]])
   transcripts_sp2$midpoint <- grMidpoint(transcripts[[sp2]])
-  # Subset transcripts to only the longest per gene...
+  # Subset transcripts to include only the longest per gene: split by gene ID, sort by longest, glue back together
   transcripts_sp2$geneid <- unname(sapply(transcripts_sp2$tx_name, function(s) unlist(strsplit(s, "\\.t"))[1] ))
-  # Split by geneID, select the largest transcript, then glue back together
-  transcripts_sp2 <- split(transcripts_sp2, transcripts_sp2$geneid)
-  transcripts_sp2 <- lapply(transcripts_sp2, function(geneid) {
+  transcripts_sp2 <- split(transcripts_sp2, transcripts_sp2$geneid) # split
+  transcripts_sp2 <- lapply(transcripts_sp2, function(geneid) { # sort by longest
     biggest_gene = geneid[which.max(geneid$width),]
     biggest_gene
   })
-  transcripts_sp2 <- do.call(rbind, transcripts_sp2) |> as.data.frame()
+  transcripts_sp2 <- do.call(rbind, transcripts_sp2) |> as.data.frame() # glue
   transcripts_sp2 <- transcripts_sp2[order(transcripts_sp2$seqnames, transcripts_sp2$start),]
-  df_sp2 <- subset(transcripts_sp2, transcripts_sp2$seqnames %in% unique(unlist(orthopair$query.seqnames))) # Subset to only contigs that can be found within chr-scale scaffolds
+  df_sp2 <- subset(transcripts_sp2, transcripts_sp2$seqnames %in% unique(unlist(orthopair$query.seqnames))) # Subset to only contigs that correspond to sp1's chr-scale scaffolds
   df_sp2 <- df_sp2[which(unlist(lapply(df_sp2$orthoFlagDF, function(x) x$expansion_species_specific ))==sp2),] # Subset to species-specific expansions
 
-  # Now is where things get, uh, gross.
-  # 1. Look for the genes immediately previous and next to every species-specific gene in sp2.
-  # 2. If previous and next on same contig, then the position of the species-specific gene can be guesstimated
-  #    relative to the reference genome.
-  # 3. Look for previous and next gene within orthopairs. If both within orthopairs, then the position of
-  #    the species-specific expanded gene is inferred to be between the start/end of the reference genome.
-  # This returns a list, one element per gene in the target-specific genes.
+  # This is where the wheels fall off a bit, so to speak. It is complicated, but this is the logic:
+  #     1. If sp2-specific gene has adjacent genes;
+  #     2. If adjacent genes on same contig in sp2;
+  #     3. If adjacent genes in orthoPair with sp1;
+  #     4. If sp1's genes both on the same contig in sp1;
+  #     5. If the sp1's orthoPair'ed genes are collinear with no intervening genes in sp1;
+  #     6. Then the position of the sp2-specific gene is inferred by the edges of the
+  #        adjacent genes. We generate a orthoPairs-like object from this inference.
   df_sp2_specific <- lapply(1:nrow(df_sp2), function(gene){
     cur_gene <- df_sp2[gene,]
     prev_gene <- transcripts_sp2[which(transcripts_sp2$tx_name == cur_gene$tx_name)-1,]
@@ -843,39 +860,41 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
       target_seqnames <- c(as.character(cur_gene$seqnames), as.character(prev_gene$seqnames),  as.character(next_gene$seqnames))
       # If all genes on same contig in the target genome...
       if(length(unique(target_seqnames)) == 1) {
-        # If previous and next genes in an orthopair...
-        if(prev_gene$tx_name %in% orthopair$query.tx_name & next_gene$tx_name %in% orthopair$query.tx_name){
+        # If previous and next genes in an orthopair (and make sure they actually exist)
+        if(prev_gene$tx_name %in% orthopair$query.tx_name & next_gene$tx_name %in% orthopair$query.tx_name & nrow(orthopair[orthopair$query.tx_name == prev_gene$tx_name,])!=0 & nrow(orthopair[orthopair$query.tx_name == next_gene$tx_name,]) != 0 ) {
           prev_orthopair <- orthopair[orthopair$query.tx_name == prev_gene$tx_name,]
           next_orthopair <- orthopair[orthopair$query.tx_name == next_gene$tx_name,]
           query_seqnames <- c(as.character(prev_orthopair$seqnames), as.character(next_orthopair$seqnames))
-          # If all members of this orthopair are on the same chromosome in the query genome...
-          if(length(unique(query_seqnames)) == 1) {
-            # Make sure that the query and target's genes are neighbours
-            query_prev_prev_gene <- orthopair[which(orthopair$query.tx_name == prev_gene$tx_name)-1,]$tx_name
-            query_prev_next_gene <- orthopair[which(orthopair$query.tx_name == prev_gene$tx_name)+1,]$tx_name
-            query_next_prev_gene <- orthopair[which(orthopair$query.tx_name == next_gene$tx_name)-1,]$tx_name
-            query_next_prev_gene <- orthopair[which(orthopair$query.tx_name == next_gene$tx_name)+1,]$tx_name
-            if(query_prev_next_gene == next_orthopair$tx_name & query_next_prev_gene == prev_orthopair$tx_name) {
-              mod_orthopair  <- prev_orthopair
-              mod_orthopair$start   <- prev_orthopair$end+1   # Create a fake locus start immediately after the preceding gene
-              mod_orthopair$end     <- next_orthopair$start-1 # Create a fake locus end immediately before the next gene
+          target_prev_gene <- transcripts_sp1[which(transcripts_sp1$tx_name == prev_orthopair$tx_name),]
+          target_next_gene <- transcripts_sp1[which(transcripts_sp1$tx_name == next_orthopair$tx_name),]
+          # If all members of this orthopair are on the same chromosome in the target genome
+          # and the target's previous and next genes actually exist
+          if(length(unique(query_seqnames)) == 1 & nrow(target_prev_gene)!=0 & nrow(target_next_gene)!=0 ) {
+            # If the sp2 gene's neighbours are both in orthoPairs, check if they immediately neighbour one another in sp1
+            # If they do, then the difference between their indices is exactly 2
+            # (because the "next gene" is 2 rows ahead of the "previous gene")
+            target_prev_gene_index = which(transcripts_sp1$tx_name == prev_orthopair$tx_name)
+            target_next_gene_index = which(transcripts_sp1$tx_name == next_orthopair$tx_name)
+            if( (target_next_gene_index-target_prev_gene_index)==2) { # If target's genes are collinear...
+              mod_orthopair <- prev_orthopair
+              mod_orthopair$start   <- prev_orthopair$end+1   # Create a fake locus start point after its preceding gene
+              mod_orthopair$end     <- next_orthopair$start-1 # Create a fake locus end point before its next gene
               mod_orthopair$width   <- mod_orthopair$end - mod_orthopair$start
-              mod_orthopair$tx_id   <- NA # A gene specific to sp2 cannot have a tx_id in the reference.
-              mod_orthopair$tx_name <- NA
-              mod_orthopair$dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value, because
-              mod_orthopair$dNdS_HmmCleaner <- NA # they are only computed on one-to-one genes.
-              mod_orthopair$dNdS_PRANK      <- NA
-              mod_orthopair$orthoFlagDF <- cur_gene$orthoFlagDF
+              mod_orthopair$tx_id   <- NA # A gene specific to sp2 cannot have a tx_id in the reference
+              mod_orthopair$tx_name <- NA # ""
+              mod_orthopair$dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value because I only use 1-to-1s
+              mod_orthopair$dNdS_HmmCleaner <- NA # ""
+              mod_orthopair$dNdS_PRANK      <- NA # ""
+              mod_orthopair$orthoFlagDF <- cur_gene$orthoFlagDF # orthoFlags can be transferred for simplicity's sake
               mod_orthopair$query.start <- cur_gene$start
               mod_orthopair$query.end   <- cur_gene$end
               mod_orthopair$query.width <- cur_gene$end - cur_gene$start
               mod_orthopair$query.tx_id <- cur_gene$tx_id
-              mod_orthopair$query.dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value, because
-              mod_orthopair$query.dNdS_HmmCleaner <- NA # they are only computed on one-to-one genes.
-              mod_orthopair$query.dNdS_PRANK      <- NA
-              mod_orthopair$orthoFlagDF       <- cur_gene$orthoFlagDF # I make both orthoFlagDFs the same for convenience.
+              mod_orthopair$query.dNdS_GUIDANCE2  <- NA # A species-specific gene cannot have a dN/dS value because I only use 1-to-1s
+              mod_orthopair$query.dNdS_HmmCleaner <- NA # ""
+              mod_orthopair$query.dNdS_PRANK      <- NA # ""
               mod_orthopair$query.orthoFlagDF <- cur_gene$orthoFlagDF
-              mod_orthopair$midpoint <- cur_gene$midpoint
+              mod_orthopair$midpoint <- (next_orthopair$start-1-prev_orthopair$end+1)/2
               rownames(mod_orthopair) <- NULL
               return(mod_orthopair)
             } else {
@@ -885,17 +904,17 @@ collectCladeExpansions <- function(orthopairs, sp1, sp2, bigChr, longShort) {
             }
           } else {
             warning_message = paste("sp2-specific gene ", cur_gene$tx_name, " is flanked by orthopairs from ", prev_orthopair$seqnames, " and ", next_orthopair$seqnames, " in the query genome. Can't infer position of target species-specific gene unless it can be placed between two collinear orthopairs in the reference genome.", sep="")
-            warning(warning_message)
+            #warning(warning_message)
             return(NULL)
           }
         } else {
           warning_message = paste("sp2-specific gene ", cur_gene$tx_name, "'s next gene ", next_gene$tx_name, " and previous gene ", prev_gene$tx_name, " are not in orthopairs. Can't infer position of a species-specific gene unless it can be placed on the reference genome.", sep="")
-          warning(warning_message)
+          #warning(warning_message)
           return(NULL)
         }
       } else {
         warning_message = paste("sp2-specific gene ", cur_gene$tx_name, "'s next gene ", next_gene$tx_name, " and previous gene ", prev_gene$tx_name, " are not on the same contig. seqnames: ", paste(target_seqnames, collapse=","), "\n Can't infer position of a species-specific gene unless neighbouring genes are on same contig.",  sep="")
-        warning(warning_message)
+        #warning(warning_message)
         return(NULL)
       }
     } else {
@@ -928,9 +947,9 @@ You can inspect these with `warnings()`, although there will be more than 50 suc
 Warning | Oki-Kum | Osa-Aom | Bar-Nor
 ------- | ------- | ------- | -------
 1 (diff. target contigs) | 11 | 1 | 100
-2 (neighbours not in orthoPairs) |  919 | 733 | 1842
-3 (neighbour orthologues not same chr. in query) | 4 | 2 | 4
-3 (neighbour orthologues not collinear in query) | 763 | 510 | 165
+2 (orthologue neighbours not in orthoPairs) | 919 | 733 | 1842
+3 (orthologue neighbours not on same query chr.) | 26 | 17 | 64
+3 (orthologue neighbours not collinear on query chr.) | 286 | 307 | 490
 
 Quickly check where these gene expansions are located:
 ```{r gene_duplications_2}
