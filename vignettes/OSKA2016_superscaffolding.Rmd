@@ -51,6 +51,8 @@ PAR.old <- c("S25+", "S11+", "S54+", "S53-", "S21+", "S12+", "S29+", "S49-",
              "S33+", "S80-", "S93+", "S13+", "S70+", "S52+", "S23-", "S73+",
              "S18-", "S2+")
 
+XSR.old <- c("S10+", "S9+", "S32+", "S84-", "S59+", "S8-", "S1+")
+
 YSR.old <- c("S68-", "S48-", "S42-",  "S65-", "S55-", "S87+", "S63-", "S86+", "S62+", "S39+", "S47+")
 ```
 
@@ -302,13 +304,74 @@ superScafByName(AOM5.4f,"contig_178", 1e4) %>% shortNames()
 #[1] "S25+" "S11-" "S29-"
 ```
 
+# Superscaffolding chromosome arms and sex-specific regions
+
 ## XSR
 
+This region is easy to assemble with Nanopore sequences from males as they have
+only a single copy of it.
+
+Pairwise alignments to assemblies of the O9, O3, OSK42 and AOM-5 support
+the following arrangement until S1.  S66- is added after S1 after more
+detailed inspection (support in at least O3-3f.
+
+    XSR: S10+, S9+, S32+, S84-, S59+, S8-, S1+, S66-
+
+Some assemblies have telomeric sequences at the beginning of their XSR contig
+before the matches with S10.
+
+Inspection of the assembly graph suggest that the other end of the XSR contigs
+in Flye assemblies is followed by the rDNA region, which we know is at the
+beginning of the pseudo-autosomal region on the short arm of the pseudo-autosomal
+chromosome.
+
+Attempts to incorporate smaller OSKA2016 scaffolds only leads to discrepancies
+of support from Flye assembly.
+
+Thus, the XSR superscaffold above appears to be the best we can produce, and is
+properly oriented.
+
+
 ```{r}
-XSR
+XSR.old
+```
+
+In O9-7f, the XSR contig is `contig_48`.  It is not entirely complete, and it
+continues into S2, maybe because of a misassembly of pericentromeric regions.
+
+```{r XSR_O97}
+O97f.cc |> flipStrandNames() |> grepByContigName("S9+")
+O97f |> plyranges::filter(seqnames(query) == "contig_48")|> coalesce_contigs(minwidth = 2000) |> swap() |> sort(i=T) |> swap() |> as.data.frame()
+O97f |> plotApairOfChrs(chrQ = "contig_48")
+O97f |> plotApairOfChrs(chrT= "S9", chrQ = "contig_48")
+O97f |> plotApairOfChrs(chrT= "S32", chrQ = "contig_48")
+O97f |> plotApairOfChrs(chrT= "S84", chrQ = "contig_48")
+O97f |> plotApairOfChrs(chrT= "S59", chrQ = "contig_48")
+O97f |> plotApairOfChrs(chrT= "S8", chrQ = "contig_48")
+O97f |> plotApairOfChrs(chrT= "S1", chrQ = "contig_48")
+O97f |> plotApairOfChrs(chrT= "S2", chrQ = "contig_48")
+
+O97f |> plyranges::filter(seqnames %in% c("S10", "S9", "S32", "S84", "S59", "S8", "S1", "S2")) |> makeOxfordPlots()
+```
+
+
+```{r XSR_O35f}
+O35f.cc |> grepByContigName("S9+")
+O35f |> plyranges::filter(seqnames(query) == "contig_45")|> coalesce_contigs(minwidth = 2000) |> swap() |> sort(i=T) |> swap() |> as.data.frame()
+O35f |> plotApairOfChrs(chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrT= "S9", chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrT= "S32", chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrT= "S84", chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrT= "S59", chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrT= "S8", chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrT= "S1", chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrT= "S2", chrQ = "contig_48")
+
+O35f |> plyranges::filter(seqnames %in% c("S10", "S9", "S32", "S84", "S59", "S8", "S1", "S2")) |> makeOxfordPlots()
+
+
 OSK421f.cc %>% flipStrandNames() %>% grepByContigName(name = "S10+")
 AOM5.4f.cc %>% grepByContigName(name = "S10+")
-O97f.cc %>% flipStrandNames %>% grepByContigName("S9+")
 O35f.cc %>% grepByContigName("S9+")
 O35f.cc %>% grepByContigName("S1+")
 
@@ -320,18 +383,26 @@ O35f.all %>% grepByContigName("S9+")
 O35f.all %>% flipStrandNames %>% grepByContigName("S10+")
 O35f.all %>% grepByContigName("S1+")
 
+# Sanity check
+sort(XSR)
+longestMatchesInTarget(OKI, min.width = 1000, min.matches = 1)["XSR"] |> strandNames(q=T) |> unlist() |> sort()
+longestMatchesInTarget(BAR, min.width = 1000, min.matches = 1)["XSR"] |> strandNames(q=T) |> unlist() |> sort()
+
 
 #S66
 O33f %>% subset(seqnames == "S66" & width > 100)%>% as.data.frame()
 O33f %>% subset(seqnames(query) == "scaffold_16" & width > 1000) %>% sortQ %>% as.data.frame()   %>% tail
 ```
 
+Summary:
+
 ```
-XSR         "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"          "S66-"
+XSR.old     "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"
 OSK421f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8+"  "S1+" 
 AOM5.4f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+" 
 O97f.cc            "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"  "S18+"
 O35f.cc            "S9+"  "S32+" "S84-" "S59+"
+XSR         "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"          "S66-"
 ```
 
 Are we missing important pieces matches between the scaffolds above ?  No, the
