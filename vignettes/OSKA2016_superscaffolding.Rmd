@@ -62,6 +62,23 @@ superscaffolding of OSKA2016.  In this anlysis, all support assemblies have
 been mapped to OSKA2016, which means that they are in the _query_ slot of the
 `GenomicBreaks` objects.
 
+# Accessory functions
+
+Custom functions that I use for exploring the data.
+
+```{r accessory_functions}
+grepByContigName <- function (l, name) {
+  name <- sub(pat="\\+", rep="\\\\+", name)
+  idx <- grep(name, l)
+  if (length(idx) != 1) {
+    name <- paste0(name, "[+-]")
+      idx <- grep(name, l)
+  }
+  if (length(idx) != 1) return(paste("found", length(idx) ,"matches."))
+  l[idx]
+}
+```
+
 # First, let's superscaffold O9 with O3
 
 ```{r}
@@ -273,17 +290,6 @@ superScafByName(AOM5.4f,"contig_178", 1e4) %>% shortNames()
 ## XSR
 
 ```{r}
-grepByContigName <- function (l, name) {
-  name <- sub(pat="\\+", rep="\\\\+", name)
-  idx <- grep(name, l)
-  if (length(idx) != 1) {
-    name <- paste0(name, "[+-]")
-      idx <- grep(name, l)
-  }
-  if (length(idx) != 1) return(paste("found", length(idx) ,"matches."))
-  l[idx]
-}
-
 XSR
 OSK421f.cc %>% flipStrandNames() %>% grepByContigName(name = "S10+")
 AOM5.4f.cc %>% grepByContigName(name = "S10+")
