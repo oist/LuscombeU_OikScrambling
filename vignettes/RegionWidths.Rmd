@@ -160,6 +160,9 @@ gg_freq_poly(widths$gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ## Unaligned regions
 
+Unaligned regions show no difference of width between arms, except perhaps at
+the “same population” level.
+
 ```{r widths_unaligned}
 gg_freq_poly(widths$unal) +
   aes(col=Arm) +
@@ -170,6 +173,13 @@ gg_freq_poly(widths$unal |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
   ggtitle("Distribution of unaligned regions width on chr1 before collapsing, split by genome pair")
+
+gg_freq_poly(widths$unal |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of unaligned region widths before collapsing, split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ## Mapped (coalesced) regions
