@@ -151,6 +151,11 @@ gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
   ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
+
+gg_freq_poly(widths$gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths before collapsing, split by distance group")
 ```
 
 ## Unaligned regions
