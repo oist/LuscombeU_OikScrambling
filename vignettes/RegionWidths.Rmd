@@ -17,10 +17,6 @@ knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
-# Introduction
-
-TBW
-
 # Load R pacakges and data
 
 ```{r load_packages_and_data}
@@ -35,7 +31,7 @@ different GBreaks objects are prepared.
 
 # Precompute widths
 
-```{r pre_compute_widths_object}
+```{r pre_compute_widths_object, dependson="load_packages_and_data"}
 widths <- SimpleList()
 makeWidthsDF <- function (objList) {
   lapply(names(objList), \(name) {
@@ -49,13 +45,22 @@ makeWidthsDF <- function (objList) {
       sub(pat = "BNJZ.*", rep = "Ply")    |>
       sub(pat = "BNKA.*", rep = "Ros")    |>
       sub(pat = "BJTB.*", rep = "Rob")    |>
-      sub(pat = "^R.*", rep = "Sav")
+      sub(pat = "^R.*",   rep = "Sav")    |>
+      sub(pat = "^2L$",   rep = "Dro")    |>
+      sub(pat = "^2R$",   rep = "Dro")    |>
+      sub(pat = "^3L$",   rep = "Dro")    |>
+      sub(pat = "^3R$",   rep = "Dro")    |>
+      sub(pat = "^4$",    rep = "Dro")    |>
+      sub(pat = "^X$",    rep = "Dro")    |>
+      sub(pat = "^Y$",    rep = "Dro")   
+
     DF$query <- DF$score <- DF$rep <- DF$transcripts <- NULL
     DF$dist  <- OikScrambling:::compDistance(DF$name)
     DF
   }) |> do.call(what=rbind)
 }
 
+# Remove flags from objects so that dataframe conversion yields equal number of columns
 unal  <- sapply(unal,  \(gb) {gb$flag <- NA; gb}) |> SimpleList()
 unmap <- sapply(unmap, \(gb) {gb$flag <- NA; gb}) |> SimpleList()
 unalMap<-sapply(unalMap,\(gb){gb$flag <- NA; gb}) |> SimpleList()
@@ -78,7 +83,7 @@ The distribution of alignment widths takes a bimodal appearance after
 collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
 answer is _no_.
 
-```{r width_after_coalescing}
+```{r width_after_processing_steps, dependson="pre_compute_widths_object", fig.width=12, fig.height=8}
 gg_freq_poly <- function(tibble) {
     ggplot(tibble) +
     aes(width) +
@@ -86,6 +91,7 @@ gg_freq_poly <- function(tibble) {
     scale_x_log10()
 }
 
+p <-
 gg_freq_poly(rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
                    widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
                    widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
@@ -93,10 +99,35 @@ gg_freq_poly(rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "ali
                    widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
                    widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))) +
   aes(col = what) +
-  geom_freqpoly() +
-  scale_x_log10() +
-  facet_wrap(~name, scales = "free_y") +
   ggtitle("Distribution of alignment width before and after collapsing")
+
+# Showing all individual distributions, to demonstrate we can pool some.
+p + facet_wrap(~dist + name, scales = "free_y")
+```
+
+```{r width_after_processing_steps2, dependson="width_after_processing_steps", fig.width=12}
+# Aggregating by distance class
+p + facet_wrap(~dist, scales = "free_y")
+```
+
+```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.width=8}
+gg_freq_poly(widths$gbs) +
+  facet_wrap(~name, scales = "free_y") +
+  ggtitle("Distribution of alignment widths before collapsing")
+
+gg_freq_poly(widths$gbs |> dplyr::filter(dist %in% c("Oki – North", "North – North", "same_pop"))) +
+  aes(col=name) +
+  facet_wrap(~dist, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
+```
+
+```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+
+gg_freq_poly(widths$gbs |> dplyr::mutate(dist = dist |> sub(pat = "Int.*", rep = "Ciona") |>
+                                                        sub(pat = "Dm.*", rep = "Drosophila"))) +
+  aes(width, after_stat(density), col=name) +
+  facet_wrap(~dist, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
 ```
 
 First, the distribution of widths is not the same on long and short arms.
