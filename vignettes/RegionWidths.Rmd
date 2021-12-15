@@ -75,13 +75,10 @@ widths$tra2    <- makeWidthsDF(tra2)    |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
 ```
 
-# Width distribution of aligned and mapped regions
+# Plot all width distributions
 
-_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
-
-The distribution of alignment widths takes a bimodal appearance after
-collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
-answer is _no_.
+This is useful to verify by eye that collections of distributions in the same
+distance group ressemble each other.
 
 ```{r width_after_processing_steps, dependson="pre_compute_widths_object", fig.width=12, fig.height=8}
 gg_freq_poly <- function(tibble) {
@@ -110,6 +107,16 @@ p + facet_wrap(~dist + name, scales = "free_y")
 p + facet_wrap(~dist, scales = "free_y")
 ```
 
+# Width distribution of aligned and mapped regions
+
+## Aligned regions
+
+_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
+
+The distribution of alignment widths takes a bimodal appearance after
+collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
+answer is _no_.
+
 ```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.width=8}
 gg_freq_poly(widths$gbs) +
   facet_wrap(~name, scales = "free_y") +
@@ -133,8 +140,6 @@ gg_freq_poly(widths$gbs |> dplyr::mutate(dist = dist |> sub(pat = "Int.*", rep =
 First, the distribution of widths is not the same on long and short arms.
 For this reason, it would be unwise to filter by width on some operations such
 as coalescing.
-
-## Aligned regions
 
 ```{r widths_gbs}
 gg_freq_poly(widths$gbs) +
