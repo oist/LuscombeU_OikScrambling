@@ -493,26 +493,63 @@ sapply(invs.coa2, \(x) {summary(decode(strand(x)))})
 widths$invs.gbs  <- makeWidthsDF(invs.gbs)  |> tibble::as_tibble()
 widths$invs.coa  <- makeWidthsDF(invs.coa)  |> tibble::as_tibble()
 widths$invs.coa2 <- makeWidthsDF(invs.coa2) |> tibble::as_tibble()
+```
+
+```{r inversion_width_aligned, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$invs.gbs) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by arm.")
 
 gg_freq_poly(widths$invs.gbs) +
   aes(col=Arm) +
-  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by arm.") +
-  geom_vline(xintercept = 1000)
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by genome pair")
+
+gg_freq_poly(widths$invs.gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by distance group") +
+  geom_vline(xintercept = 500) +
+  scale_x_log10("Width (vertical bar at 500 bp)")
+```
+
+```{r inversion_width_mapped, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$invs.coa) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by arm.")
 
 gg_freq_poly(widths$invs.coa) +
   aes(col=Arm) +
-  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by arm.") +
-  geom_vline(xintercept = 1000)
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by genome pair")
+
+gg_freq_poly(widths$invs.coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by distance group") +
+  geom_vline(xintercept = 500) +
+  scale_x_log10("Width (vertical bar at 500 bp)")
+```
+
+```{r inversion_width_doublemapped, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$invs.coa2) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm.")
 
 gg_freq_poly(widths$invs.coa2) +
   aes(col=Arm) +
-  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm.") +
-  geom_vline(xintercept = 1000)
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by genome pair")
 
-gg_freq_poly(widths$invs.coa2) +
-  facet_wrap(~dist, scale="free") + 
-  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by comparison") +
-  geom_vline(xintercept = 1000)
+gg_freq_poly(widths$invs.coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by distance group") +
+  geom_vline(xintercept = 500) +
+  scale_x_log10("Width (vertical bar at 500 bp)")
 ```
 
 ## Width of gaps next to the inverted regions
