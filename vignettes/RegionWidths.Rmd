@@ -19,7 +19,7 @@ knitr::opts_knit$set(verbose = TRUE)
 
 # Load R pacakges and data
 
-```{r load_packages_and_data}
+```{r load_packages_and_data, dependson="setup"}
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('ggplot2')
 (genomes <- OikScrambling:::loadAllGenomes())
@@ -141,7 +141,7 @@ First, the distribution of widths is not the same on long and short arms.
 For this reason, it would be unwise to filter by width on some operations such
 as coalescing.
 
-```{r widths_gbs}
+```{r widths_gbs, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$gbs) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -163,7 +163,7 @@ gg_freq_poly(widths$gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 Unaligned regions show no difference of width between arms, except perhaps at
 the “same population” level.
 
-```{r widths_unaligned}
+```{r widths_unaligned, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$unal) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -197,7 +197,7 @@ gg_freq_poly(widths$coa |> dplyr::mutate(dist = dist |> sub(pat = "Int.*", rep =
   ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
 ```
 
-```{r width_after_coalescing2}
+```{r width_after_coalescing2, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$coa) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -249,7 +249,7 @@ gg_freq_poly(widths$unmap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 Note the short peak when comparing pairs within the same population.
 
-```{r width_of_unAlmapped_regions}
+```{r width_of_unAlmapped_regions, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$unalMap) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -275,7 +275,7 @@ gg_freq_poly(widths$unalMap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 Reminder: here we measure the distance between the two colinear pairs that are
 separated by the translocated pair.
 
-```{r width_of_translocated_regions}
+```{r width_of_translocated_regions, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$tra) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -301,7 +301,7 @@ Small peak in _“same pop”_ disapears by design.  Total number in the main pe
 also decreases, because they may pass the size filter on the _query_ genome.
 
 
-```{r width_of_translocated_regions}
+```{r width_of_translocated_regions, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$tra2) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -322,7 +322,7 @@ gg_freq_poly(widths$tra2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ### Aligned, before removal
 
-```{r width_of_translocated_regions_coa_aligned}
+```{r width_of_translocated_regions_coa_aligned, dependson="pre_compute_widths_object"}
 widths$tra_coa_aln   <- makeWidthsDF(sapply(coa, \(gb) gb |> flagTranslocations() |> filterTranslocations())) |> tibble::as_tibble()
 
 gg_freq_poly(widths$tra_coa_aln) +
@@ -345,7 +345,7 @@ gg_freq_poly(widths$tra_coa_aln |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ### Aligned, after removal
 
-```{r width_of_translocated_regions_coa2_aligned}
+```{r width_of_translocated_regions_coa2_aligned, dependson="pre_compute_widths_object"}
 widths$tra_coa2_aln   <- makeWidthsDF(sapply(coa2, \(gb) gb |> flagTranslocations() |> filterTranslocations())) |> tibble::as_tibble()
 
 gg_freq_poly(widths$tra_coa2_aln) +
@@ -368,7 +368,7 @@ gg_freq_poly(widths$tra_coa2_aln |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ## Double-coalesced regions
 
-```{r re_coalesce}
+```{r re_coalesce, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$coa2) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
