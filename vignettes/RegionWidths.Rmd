@@ -203,6 +203,11 @@ gg_freq_poly(widths$coa) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of alignment widths after collapsing, split by arm.")
 
+gg_freq_poly(widths$coa) +
+  aes(col=flag) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths after collapsing, split by flag.")
+
 gg_freq_poly(widths$coa ) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
@@ -212,6 +217,11 @@ gg_freq_poly(widths$coa ) +
 gg_freq_poly(widths$coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of alignment widths after collapsing, split by distance group")
+
+gg_freq_poly(widths$coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=flag) +
+  facet_wrap(~dist + flag, scales = "free_y") +
   ggtitle("Distribution of alignment widths after collapsing, split by distance group")
 ```
 
