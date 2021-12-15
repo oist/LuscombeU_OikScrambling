@@ -117,7 +117,7 @@ The distribution of alignment widths takes a bimodal appearance after
 collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
 answer is _no_.
 
-```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.width=8}
+```{r width_before_coalescing, dependson="pre_compute_widths_object", fig.width=8}
 gg_freq_poly(widths$gbs) +
   facet_wrap(~name, scales = "free_y") +
   ggtitle("Distribution of alignment widths before collapsing")
@@ -128,7 +128,7 @@ gg_freq_poly(widths$gbs |> dplyr::filter(dist %in% c("Oki – North", "North –
   ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
 ```
 
-```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
 
 gg_freq_poly(widths$gbs |> dplyr::mutate(dist = dist |> sub(pat = "Int.*", rep = "Ciona") |>
                                                         sub(pat = "Dm.*", rep = "Drosophila"))) +
@@ -189,37 +189,60 @@ chromosome and arm type.  There is a small peak under 500 bp, found on all arms
 except YSR.  The second peak shows two different distributions for long and
 short arms.
 
-```{r width_of_coalesced_regions}
+```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+gg_freq_poly(widths$coa |> dplyr::mutate(dist = dist |> sub(pat = "Int.*", rep = "Ciona") |>
+                                                        sub(pat = "Dm.*", rep = "Drosophila"))) +
+  aes(width, after_stat(density), col=name) +
+  facet_wrap(~dist, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
+```
+
+```{r width_after_coalescing2}
 gg_freq_poly(widths$coa) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of alignment widths after collapsing, split by arm.")
 
-gg_freq_poly(widths$coa |> subset(chr == "chr1")) +
+gg_freq_poly(widths$coa ) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of alignment widths on chr1 after collapsing, split by genome pair") +
+  ggtitle("Distribution of alignment widths on chr1 after collapsing, split by genome pair")+
   geom_vline(xintercept = 500)
+
+gg_freq_poly(widths$coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of alignment widths after collapsing, split by distance group")
 ```
 
-Therefore, if the first peak represents events that we do not want to consider
+Therefore, if the first peak represented events that we do not want to consider
 breaking synteny (either alignment artefacts or insertion/transpositions of
-short mobile elements), we can re-coalesce once after removing the shortest
-intervals.
+short mobile elements), we could re-coalesce once after removing the shortest
+intervals.  We tried some width cutoffs on the coalescing step, but at 500 bp,
+the coverage of the genome by the resulting mapped regions is already decreasing
+(`vignette("CoalescingCutoffs", package = "OikScrambling")`).
 
 ## Unmapped regions
+
+Unmapped regions are a bit longer on the short arm in Oki – North comparisons…
 
 ```{r width_of_unmapped_regions}
 gg_freq_poly(widths$unmap) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of widths of ummapped regions, split by arm.")
+  ggtitle("Distribution of unmapped regions width after collapsing, split by arm.")
 
-gg_freq_poly(widths$unmap |> subset(chr == "chr1")) +
+gg_freq_poly(widths$unmap) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of widths of unmapped regions on chr1 after collapsing, split by genome pair") +
-  geom_vline(xintercept = 500)
+  ggtitle("Distribution of unmapped regions width after collapsing, split by genome pair")
+
+gg_freq_poly(widths$unmap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of unmapped region widths after collapsing, split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ## Mapped unaligned regions
