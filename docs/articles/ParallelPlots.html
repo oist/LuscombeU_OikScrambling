@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.5</span>
       </span>
     </div>
 
@@ -120,7 +120,7 @@
       <h1 data-toc-skip>Whole-chromosome parallel plots</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">13 December, 2021</h4>
+            <h4 data-toc-skip class="date">15 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/ParallelPlots.Rmd" class="external-link"><code>vignettes/ParallelPlots.Rmd</code></a></small>
       <div class="hidden name"><code>ParallelPlots.Rmd</code></div>
@@ -292,8 +292,8 @@
 </h2>
 <p>Since Okinawa is the outgroup, let’s look for regions of it that are aligned on both the Osaka and the Barcelona genomes.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
-<span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
+<span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">findOverlapPairs</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Pairs object with 4 pairs and 0 metadata columns:</span>
 <span class="co">##                          first                   second</span>
@@ -303,7 +303,7 @@
 <span class="co">##   [3]  PAR:15193293-15358116:-  PAR:15193294-15358116:-</span>
 <span class="co">##   [4]  XSR:10090052-10210973:-  XSR:10090052-10210972:-</span></code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">gaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">gaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 16 ranges and 5 metadata columns:</span>
 <span class="co">##        seqnames            ranges strand |                  query      Arm</span>
 <span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;factor&gt;</span>
@@ -405,7 +405,7 @@
 <span class="co">##  [4] BSgenome.Odioica.local.Bar2.p4_1.0.0               </span>
 <span class="co">##  [5] BSgenome.Odioica.local.OSKA2016v1.9_1.0.0          </span>
 <span class="co">##  [6] BSgenome.Odioica.local.OKI2018.I69_1.0.0           </span>
-<span class="co">##  [7] OikScrambling_0.6.2                                </span>
+<span class="co">##  [7] OikScrambling_0.5.0                                </span>
 <span class="co">##  [8] ggplot2_3.3.5                                      </span>
 <span class="co">##  [9] GenomicBreaks_0.12.0                               </span>
 <span class="co">## [10] BSgenome_1.62.0                                    </span>
@@ -502,7 +502,7 @@
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Charles Plessy.</p>
+<p>Developed by Aleksandra Bliznina, Michael Mansfield, Charles Plessy.</p>
 </div>
 
 <div class="pkgdown">

@@ -1,3 +1,7 @@
+# OikScrambling 0.6.5
+
+* Identify the flipped repeat as MITE and search for other copies.
+
 # OikScrambling 0.6.4
 
 * Add regions of interest with repeat flipping and insertion.
