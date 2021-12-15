@@ -414,23 +414,18 @@ pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:80780-81022"        ) + 200 )
 pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:80780-81022")         + 200 ),
                   getSeq(genomes$Kum, GRanges("contig_57_1:58108-58350") + 200) |> reverseComplement()) |> writePairwiseAlignments()
 
-pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:80500-80900")),
-                  getSeq(genomes$Oki, GRanges("PAR:81000-81400")) |> reverseComplement()) |> writePairwiseAlignments()
+# (Adjusted by hand)
+pairwiseAlignment(getSeq(genomes$Oki, GRanges("PAR:80523-80834")),
+                  getSeq(genomes$Oki, GRanges("PAR:80968-81279")) |> reverseComplement()) |> writePairwiseAlignments()
 
-getSeq(genomes$Oki, GRanges("PAR:80500-80900")) |> as.character()
+getSeq(genomes$Oki, GRanges("PAR:80523-80834")) |> as.character()
 ```
 
-The repeat sequence might be related to LTRs.
+This sequence matches `MITE_oki2018_i69_4_20065_S1_MITE#DNA/MITE` in Sasha's
+repeat annotation.
 
-```
->ITR
-TTAAGGGTAATGGTATACATCGGCGCGGCGCTGCTCTCTCGATCCGCGCTCCGCCAGAAC
-CTATTTCTCACGAGGCCGTAAAATCTGAACGGATAAAGATTTTTTCAAAATTCAAAAAGA
-TTCTGAATAATTAAAGTCTTTTCTACTAACACAGCAAAATTGGTAATGATTGTCAAAGAG
-GAACTATCTGAAAATTGCCAGTTTCCTTCAAATGACATTTTCTTCAACATTTCTCATGCA
-AAATTTTTGAAAATTACACTGTCTTGTAGAGAATCGTCAGTTCTACAAATCCTGTTTTTC
-AGATTTTTGTTTGAGGCTTTCATTAATTTTACATCGCAATTTGTAAAGAGCGCTACTTTT
-TCTCGCGCCTCTCCGCTC
+```{r search_MITE}
+vmatchPattern(genomes$Oki$PAR[80523:80834], genomes$Oki, with.indels = TRUE, max.mismatch = 20) |> sort(ignore.strand = TRUE) |> as.data.frame()
 ```
 
 ## Other interesting things in the area
