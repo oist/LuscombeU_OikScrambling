@@ -29,9 +29,9 @@ Here we explore the role of inversions in scrambling _Oikopleura_ genomes.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(reps <- OikScrambling:::loadAllRepeats())
-(load("BreakPoints.Rdata"))
+genomes <- OikScrambling:::loadAllGenomes()
+reps <- OikScrambling:::loadAllRepeats()
+load("BreakPoints.Rdata")
 ```
 
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
@@ -63,20 +63,21 @@ sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::c
 sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::compDistance(), median))
 sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::compDistance(), sd))
 
-invs_summary$pairname  <- OikScrambling:::compDistance(rownames(invs_summary))
+invs_summary$pairname  <- OikScrambling:::compDistance(rownames(invs_summary)) |>
+  sub(pat = "^Dme_.*", rep = "Droso")
 invs_summary$target    <- sub("_.*", "", rownames(invs_summary))
+invs_summary <- invs_summary |> dplyr::filter(pairname != "Int/Rob – Oki")
 
-ggplot(invs_summary |> tidyr::pivot_longer(c("align", "mapped", "map2"))) +
-  aes(value, name) + geom_point(aes(col = pairname, pch = target)) +
-  ggtitle ("Number of inversions found after different post-processings")
+ggplot(invs_summary  |>
+         dplyr::filter(pairname != "Int/Rob – Oki") |>
+         tidyr::pivot_longer("mapped")) +
+  aes(value, pairname) + geom_point(aes(col = target)) +
+  ggtitle ("Number of inversions found after different post-processings") +
+  scale_x_log10("Number of trivial inversions (log scale)") + facet_grid(pairname ~ .,scales= "free")
 ```
 
 ## Motif search
 
 Enrichment for motifs is being searched in
 `vignette("PWM", package = "OikScrambling")`.
-
-```{r load_PWMs}
-gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
-```
 
