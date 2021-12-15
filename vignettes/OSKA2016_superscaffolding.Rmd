@@ -290,18 +290,18 @@ OSK421f.all  <- longestMatchesInTarget(OSK421f, min.width = 0, min.matches = 1) 
 ## AOM5
 
 ```{r}
-AOM5.4f.c  <- longestMatchesInTarget(AOM5.4f)
-AOM5.4f.cc <- queryStrandNames(AOM5.4f.c)
-names(AOM5.4f.cc) <- paste("AOM5.4f", names(AOM5.4f.cc), sep = "_")
-AOM5.4f.all  <- longestMatchesInTarget(AOM5.4f, min.width = 0, min.matches = 1) %>% queryStrandNames()
-
-
-shortNamesList(AOM5.4f, 20, min = 1e4)
-
-
-# Contains telomere ?
-superScafByName(AOM5.4f,"contig_178", 1e4) %>% shortNames()
-#[1] "S25+" "S11-" "S29-"
+AOM5.5f.c  <- longestMatchesInTarget(AOM5.5f)
+AOM5.5f.cc <- strandNames(AOM5.5f.c, query = TRUE)
+names(AOM5.5f.cc) <- paste("AOM5.5f", names(AOM5.5f.cc), sep = "_")
+AOM5.5f.all  <- longestMatchesInTarget(AOM5.5f, min.width = 0, min.matches = 1) %>% strandNames(q=T)
+# 
+# 
+# shortNamesList(AOM5.5f, 20, min = 1e4)
+# 
+# 
+# # Contains telomere ?
+# superScafByName(AOM5.5f,"contig_178", 1e4) %>% shortNames()
+# #[1] "S25+" "S11-" "S29-"
 ```
 
 # Superscaffolding chromosome arms and sex-specific regions
@@ -371,13 +371,18 @@ O35f |> plyranges::filter(seqnames %in% c("S10", "S9", "S32", "S84", "S59", "S8"
 
 
 OSK421f.cc %>% flipStrandNames() %>% grepByContigName(name = "S10+")
-AOM5.4f.cc %>% grepByContigName(name = "S10+")
+```
+
+
+
+```{r XSR_AOM5}
+AOM5.5f.cc |> grepByContigName(name = "S10+")
 O35f.cc %>% grepByContigName("S9+")
 O35f.cc %>% grepByContigName("S1+")
 
 XSR
 OSK421f.all %>% flipStrandNames() %>% grepByContigName(name = "S10+")
-AOM5.4f.all %>% grepByContigName(name = "S10+")
+AOM5.5f.all %>% grepByContigName(name = "S10+")
 O97f.all %>% flipStrandNames %>% grepByContigName("S9+")
 O35f.all %>% grepByContigName("S9+")
 O35f.all %>% flipStrandNames %>% grepByContigName("S10+")
@@ -399,7 +404,7 @@ Summary:
 ```
 XSR.old     "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"
 OSK421f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8+"  "S1+" 
-AOM5.4f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+" 
+AOM5.5f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+" 
 O97f.cc            "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"  "S18+"
 O35f.cc            "S9+"  "S32+" "S84-" "S59+"
 XSR         "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"          "S66-"
@@ -414,7 +419,7 @@ The table below is made with "longest matches" only.
 ```
 XSR                          "S10+"          "S9+"           "S32+"          "S84-"         "S59+"          "S8-"                           "S1+" 
 OSK421f.all                  "S10+"  "S246+" "S9+"           "S32+"  "S195+" "S84-"         "S59+"  "S494+" "S8+"           "S477+"         "S1+"   "S462-" "S510+" "S564-" "S391+"
-AOM5.4f.all  "S307-" "S273-" "S10+"  "S176-" "S9+"           "S32+"          "S84-"         "S59+"          "S8-"   "S366-" "S477+" "S478-" "S1+"   "S517-" "S510+" "S491+" "S66-"  "S481+" "S154+"
+AOM5.5f.all  "S307-" "S273-" "S10+"  "S176-" "S9+"           "S32+"          "S84-"         "S59+"          "S8-"   "S366-" "S477+" "S478-" "S1+"   "S517-" "S510+" "S491+" "S66-"  "S481+" "S154+"
 O97f.all                                     "S9+"   "S116-" "S32+"  "S494-" "S84-"         "S59+"  "S477+" "S8-"                           "S1+"           "S510+" "S395+" "S346-" "S542-" "S528-" "S456+" "S509-" "S507-" "S236-" "S417-" "S18+" 
 O35f.all                             "S246+" "S9+"           "S32+"          "S84-" "S494-" "S59+" 
 O35f.all                                                                            "S564-" "S565+" "S477+" "S8-"                   "S443+" "S1+"   "S278+" "S510+"
@@ -436,7 +441,7 @@ O35f.cc %>% grepByContigName("S37")
 O97f.cc %>% flipStrandNames() %>% grepByContigName("S37")
 O97f.cc %>% grepByContigName("S38")
 
-AOM5.4f.cc %>% grepByContigName("S31")
+AOM5.5f.cc %>% grepByContigName("S31")
 O97f.cc %>% grepByContigName("S31")
 O33f.cc %>% grepByContigName("S31")
 O35f.cc %>% grepByContigName("S31")
@@ -445,7 +450,7 @@ OSK421f.cc %>% grepByContigName("S31")
 O35f.cc %>% grepByContigName("S31")
 O97f.cc %>% grepByContigName("S31")
 O97f.cc %>% flipStrandNames %>% grepByContigName("S44")
-AOM5.4f.cc %>% grepByContigName("S37")
+AOM5.5f.cc %>% grepByContigName("S37")
 
 # On dotplots, S28 does not align neatly.  Maybe there is residual heterozygocity in the Nanopore assemblies.
 O35f %>% subset(seqnames == "S28" & width > 2000)
@@ -465,7 +470,7 @@ O97f %>% subset(seqnames(query) == "contig_102" & width > 1000) %>% sortQ %>% as
 O35f.all %>% grepByContigName("S3")
 O97f.cc %>% grepByContigName("S7")
 O97f.cc %>% flipStrandNames %>% grepByContigName("S7")
-AOM5.4f.cc %>% grepByContigName("S7")
+AOM5.5f.cc %>% grepByContigName("S7")
 
 # S7+ -- S5-
 O33f.10000[seqnames(O33f.10000$query) == "contig_353"] %>% swap() %>% sort %>% as.data.frame() 
@@ -492,7 +497,7 @@ O97f,13, 1e4                                                    "S3-" "S5+"
 ```{r}
 chr2
 
-AOM5.4f.cc %>% grepByContigName("S82")
+AOM5.5f.cc %>% grepByContigName("S82")
 O97f.cc %>% grepByContigName("S82")
 O35f.cc %>% flipStrandNames %>% grepByContigName("S82")
 O33f.cc %>% grepByContigName("S82")
@@ -561,13 +566,13 @@ O33f %>% subset(seqnames(query) == "scaffold_2" & width > 1000) %>% sortQ %>% as
 
 OSK421f.cc %>% grepByContigName("S82")
 
-AOM5.4f.cc %>% grepByContigName("S17")
+AOM5.5f.cc %>% grepByContigName("S17")
 O97f.cc %>% grepByContigName("S17")
 O35f.cc %>% grepByContigName("S17")
 OSK421f.cc %>% grepByContigName("S17")
 
 
-AOM5.4f.cc %>% grepByContigName("S4+")
+AOM5.5f.cc %>% grepByContigName("S4+")
 O97f.cc %>% grepByContigName("S4+")
 O35f.cc %>% grepByContigName("S4+")
 ```
@@ -581,13 +586,13 @@ $O35f_contig_2
 [1] "S82-" "S30+"
                                                                      
 chr2                  "S16+" "S17-" "S41-" "S50+" "S15+" "S20+" "S30+" "S4+"          "S19-" "S24+" "S75+" "S27-" "S40-"         "S72+"          "S46-"          "S35-"  "S22+"          "S14+"
-AOM5.4f.cc                                                             "S4+"  "S101-" "S19-" 
+AOM5.5f.cc                                                             "S4+"  "S101-" "S19-" 
 O97f.cc                                                                "S4+"  "S101-" "S19-" "S24+" "S75+" "S27-" "S40-" "S114-" "S72+"  "S102+" "S46-"  "S118-" "S35-"  "S22+"  "S90+"  "S14+" 
 O35f.cc                                                                "S4+"  "S101-" "S19-" "S24+" "S75+" "S27-" "S40-" "S104-" "S72+"          "S46-"  "S118-" "S35-"  "S22+"  "S90+"  "S14+" 
 
 
 O97f,4, 1e4)                 "S17-" "S41-" "S50+" "S15+"        "S30-" "S82+"
-AOM5.4f,4, 1e4)                                                        "S4+"   "S101-" "S19-" 
+AOM5.5f,4, 1e4)                                                        "S4+"   "S101-" "S19-" 
 O97f,2, 1e4                                                            "S4+"   "S101-" "S19-" "S24+"  "S75+"  "S27-"  "S40-"  "S114-" "S72+"  "S102+" "S46-"  "S118-" "S35-"  "S22+"  "S90+"  "S22+"  "S14+"
 O97f,14, 1e4  "S20-" "S16+"
 O35f,2, 5e4                                                            "S4+"           "S19-" "S24+"        "S27-" "S40-"             "S35-" "S22+" "S14+"  (S101+  "S72+"  "S46-" are there at lower thresholds)
@@ -599,7 +604,7 @@ O35f,2, 5e4                                                            "S4+"    
 ### Short arm
 
 ```{r}
-AOM5.4f.cc %>% grepByContigName("S11")
+AOM5.5f.cc %>% grepByContigName("S11")
 OSK421f.cc %>% grepByContigName("S33")
 O97f.cc %>% grepByContigName("S33")
 O35f.cc %>% grepByContigName("S33")
@@ -612,7 +617,7 @@ O35f.cc %>% grepByContigName("S29")
 This suggests S11 comes before S33
 
 ```
-AOM5.4f_contig_866]  "S11+"                  "S33+"
+AOM5.5f_contig_866]  "S11+"                  "S33+"
 O97f_contig_40                               "S33+"          "S119+" "S93+"  "S43+"  "S128+" "S83+"  "S57-"  "S56+"  "S45+"          "S88+"  "S92-" 
 O35f_contig_35                       "S49-"  "S33+"  "S80-"  "S119+" "S93+"  "S43+"  "S128+" "S83+"  "S57-"  "S56+"  "S45+"          "S88+"  "S92-" 
 $O33f_contig_26                                      "S80-"  "S119+" "S93+"  "S43+"  "S128+" "S83+"  "S57-"  "S56+"  "S45+"  "S117-" "S88+" 
@@ -629,7 +634,7 @@ O33f %>% subset(seqnames(query) == "contig_13" & width > 5000) %>% sortQ %>% as.
 O33f %>% subset(seqnames == "S25" & width > 10000)
 O33f %>% subset(seqnames(query) == "contig_13" & width > 1000) %>% sortQ
 
-AOM5.4f.cc %>% grepByContigName("S25")
+AOM5.5f.cc %>% grepByContigName("S25")
 OSK421f.cc %>% grepByContigName("S25")
 O97f.cc %>% grepByContigName("S25")
 O35f.cc %>% grepByContigName("S25")
@@ -676,7 +681,7 @@ O35f %>% subset(seqnames == "S54" & width > 100) %>% as.data.frame()
 ```
 
 ```
-AOM5.4f_contig_866]  "S11+"                  "S33+"
+AOM5.5f_contig_866]  "S11+"                  "S33+"
 O97f_contig_40                               "S33+"          "S119+" "S93+"  ...  "S45+"          "S88+"  "S92-" 
 O35f_contig_35                       "S49-"  "S33+"  "S80-"  "S119+" "S93+"  ...  "S45+"          "S88+"  "S92-" 
 $O33f_contig_26                                      "S80-"  "S119+" "S93+"  ...  "S45+"  "S117-" "S88+" 
@@ -722,7 +727,7 @@ O33f.pc %>% subset(seqnames == "S13" & width > 10)
 O33f.pc %>% subset(seqnames(query) == "contig_67" & width > 5) %>% sortQ
 O33f.pc %>% subset(seqnames == "S52" & width > 1)
 O97f.cc %>% flipStrandNames %>% grepByContigName("S13")
-AOM5.4f.cc %>% grepByContigName("S13")
+AOM5.5f.cc %>% grepByContigName("S13")
 OSK421f.cc %>% grepByContigName("S13")
 
 # Search connections with S52
@@ -756,7 +761,7 @@ O97f %>% subset(seqnames(query) == "contig_58" & width > 10000) %>% sortQ %>% st
 #Is S2 on the short arm ???  Not according to the alignment to OKI
 #Or could there be a misassembly in S2 ?
 
-AOM5.4f.cc %>% grepByContigName("S18")
+AOM5.5f.cc %>% grepByContigName("S18")
 OSK421f.cc %>% grepByContigName("S23")
 O97f.cc %>% grepByContigName("S18")
 O35f.cc %>% grepByContigName("S18")
@@ -764,7 +769,7 @@ O35f.cc %>% grepByContigName("S23")
 
 O33f.pc %>% subset(seqnames == "S52" & width > 1)
 O97f.cc %>% flipStrandNames %>% grepByContigName("S13")
-AOM5.4f.cc %>% grepByContigName("S13")
+AOM5.5f.cc %>% grepByContigName("S13")
 OSK421f.cc %>% grepByContigName("S13")
 
 ```
@@ -779,7 +784,7 @@ YSR has changed too much outside Osaka lab strain…
 YSR
 O33f.cc$O35f_contig_4  # Published in OSKA2016 paper.
 OSK421f.cc %>%  flipStrandNames %>% grepByContigName("S26")
-AOM5.4f.cc %>% flipStrandNames %>% grepByContigName("S26")
+AOM5.5f.cc %>% flipStrandNames %>% grepByContigName("S26")
 O97f.cc %>% flipStrandNames %>% grepByContigName("S26")
 O35f.cc %>% grepByContigName("S26")
 
@@ -791,7 +796,7 @@ O33f.cc$O35f_contig_4         "S63-"  "S71-"  "S68-"  "S48-"  "S55+"  "S42-" "S6
 O35f.cc                       "S63-"  "S71-"  "S68-"  "S48-"  "S55+"  "S42-" "S65-"        "S87+"        "S86+"  "S78+"  "S110+" "S62+"          "S39+"  "S26+"  "S47+"  "S64-" 
 O97f.cc                                                                                    "S87+"        "S86+"  "S78+"  "S110+" "S62+"  "S65-"  "S39+"  "S26+"  "S47+"  "S64-" 
 OSKA42                                                        "S55+"         "S65-"                                                                      "S26+"                  "S71-"
-AOM5.4f.cc                                             "S48-" "S55+"                                                                       "S71-" "S47+" "S26+"          "S64-"
+AOM5.5f.cc                                             "S48-" "S55+"                                                                       "S71-" "S47+" "S26+"          "S64-"
 ```
 
 ### Where is S51 ?
