@@ -636,6 +636,47 @@ align_summary |>
   theme_bw()
 ```
 
+```{r breakpoints_per_Mb}
+genome_sizes=list(Aom=sum(seqlengths(genomes$Aom)), Bar=sum(seqlengths(genomes$Bar)),
+                  Oki=sum(seqlengths(genomes$Oki)), Osa=sum(seqlengths(genomes$Osa)),
+                  Kum=sum(seqlengths(genomes$Kum)), Nor=sum(seqlengths(genomes$Nor)),
+                  Ply=128639392, Ros=134327879, Sav=177003750, Rob=117529544,
+                  Dme=137547960, Dbu=110837441, Dsu=130045071, Dya=136883712
+                  ) |> unlist()
+
+genome_sizes[names(coa) |> sub(pat = "_.*", rep = "")]
+dens <- tibble::tibble(
+  nbreak   = sapply(coa, length),
+  nbreak2  = sapply(coa2, length),
+  gsize    = genome_sizes[names(coa) |> sub(pat = "_.*", rep = "")],
+  density  = nbreak  / gsize * 1e6,
+  density2 = nbreak2 / gsize * 1e6,
+  pairname = names(coa),
+  dist     = OikScrambling:::compDistance(pairname),
+  genus    = dist |>
+              sub(pat = "Dme_.*", rep="Drosophila") |>
+              sub(pat = "Int.*",  rep="Ciona") |>
+              sub(pat = ".*[_–].*",  rep="Oikopleura")
+    
+)
+
+set.seed(1664)
+ggplot(dens) +
+  aes(density, genus, col = dist, pch = genus) +
+  geom_point(size = 5) +
+  scale_x_continuous("Density (breakpoints / megabase)") +
+  ggtitle("Density of breakpoints in paired comparisons, arranged per genus") +
+  scale_colour_manual(values=rainbow(11, s=.6, v=.9)[sample(1:11,11)])
+
+set.seed(1664)
+ggplot(dens) +
+  aes(density2, genus, col = dist, pch = genus) +
+  geom_point(size = 5) +
+  scale_x_continuous("Density (breakpoints / megabase)") +
+  ggtitle("Density of breakpoints (double-coalesced) in paired comparisons, arranged per genus") +
+  scale_colour_manual(values=rainbow(11, s=.6, v=.9)[sample(1:11,11)])
+```
+
 Save data
 =========
 
