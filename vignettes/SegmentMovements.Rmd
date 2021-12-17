@@ -30,10 +30,7 @@ suppressPackageStartupMessages({
   library('ggplot2')
   library("BreakpointsData")
 })
-genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
-reps <- OikScrambling:::loadAllRepeats()
-transcripts <- OikScrambling:::loadAllTranscriptsGR()
 ```
 
 # Segment movement distances
@@ -107,7 +104,7 @@ segDists$Osa_Bar <- chromDist(gbs$Osa_Bar, chromosomePairing = chromosomePairing
 plotSegDists <- function(segDist, facet.by='seqnames~Arm', binWidth=100000) {
   ggplot(as.data.frame(segDist)) +
     aes(x=distance) +
-    geom_histogram(binwidth = 100000) +
+    geom_histogram(binwidth = binWidth) +
     facet_wrap(facet.by, scales="free_x", ncol=2)
 }
 plotSegDists(segDists$Oki_Osa, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Oki-Osa: segment movement distances (uncoalesced)")
@@ -117,7 +114,7 @@ plotSegDists(segDists$Oki_Osa, facet.by='seqnames~Arm', binWidth=100000) + ggtit
 plotSegDists(segDists$Oki_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Oki-Bar: segment movement distances (uncoalesced)")
 ```
 
-```{r plot_movement_distances_oki_bar, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+```{r plot_movement_distances_osa_bar, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
 plotSegDists(segDists$Osa_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Osa-Bar: segment movement distances (uncoalesced)")
 ```
 
@@ -139,7 +136,7 @@ plotSegDists(segDistsCoa$Oki_Osa, facet.by='seqnames~Arm', binWidth=100000) + gg
 plotSegDists(segDistsCoa$Oki_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Oki-Bar: segment movement distances (coalesced)")
 ```
 
-```{r plot_movement_distances_oki_bar_coa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+```{r plot_movement_distances_osa_bar_coa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
 plotSegDists(segDistsCoa$Osa_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Osa-Bar: segment movement distances (coalesced)")
 ```
 
