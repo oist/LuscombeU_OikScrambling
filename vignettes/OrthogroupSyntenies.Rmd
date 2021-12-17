@@ -1147,10 +1147,119 @@ plotExpansionsBox(rbind(expansions$Bar_Nor$Bar, expansions$Bar_Nor$Nor), facet.b
 (calcExpansionStats(rbind(expansions$Bar_Nor$Bar, expansions$Bar_Nor$Nor), conf.level=0.95, binWidth=binWidth)$anova)
 ```
 
-TODO
+Species-specific genes
+----------------------
+The code above has to do with identifying gene families that have expanded specifically in one species or one clade. However, what might sometimes be interesting is to see
+
+```{r species_specific_genes_oki}
+speciesSpecificHOGPlot <- function(sp, bigChr, facet.by='seqnames~Arm') {
+  speciesSpecificHOGs <- rownames(subset(as.data.frame(se_m), as.data.frame(se_m)$Oki > 0 & apply(as.data.frame(se_m)[,-4], 1, function(x) sum(x)==0)))
+  speciesSpecificHOGsTranscripts <- rowData(se)[match(speciesSpecificHOGs, rowData(se)$HOG),]
+  speciesSpecificHOGsTranscripts <- unlist(as.data.frame(speciesSpecificHOGsTranscripts$txLists)$Oki)
+  speciesSpecificHOGsTranscripts <- lapply(speciesSpecificHOGsTranscripts, function(x) unlist(strsplit(x, '.v2.'))[2] ) |> unlist()
+  df <- flagLongShort(transcripts$Oki, annot = longShort$Oki) 
+  df$midpoint <- grMidpoint(df)
+  df <- as.data.frame(df)
+  df <- subset(df, df$tx_name %in% speciesSpecificHOGsTranscripts & df$seqnames %in% big_chr)
+  ggplot(df) + 
+    aes(x=midpoint) +
+    geom_histogram() +
+    facet_wrap(seqnames~Arm, scales="free_x", ncol=2)
+}
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+
+```
+
+
+
 Clade-specific deletions
 ------------------------
-In the same vein as the analysis above, let's examine where genes tend to be deleted. Here it is slightly easier, because we can simply look at cases where the `orthoPair` is a species-specific deletion of either the query or the target.
+This has some trickiness involved. 
+
+```{r gene_oki_kum_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotOrthopairDeletionsBox <- function(orthoPair, facet.by="seqnames~Arm", bigChr=NULL, binWidth=100000) {
+  orthoPair$midpoint <- grMidpoint(orthoPair)
+  df <- as.data.frame(orthoPair)
+  df <- subset(df, df$seqnames %in% bigChr)
+  df <- df[which(!is.na(unlist(lapply(df$orthoFlagDF, function(x) x$deletion_species_specific)))),]
+  df <- df |> mutate(bin=cut_width(midpoint, binWidth)) |> dplyr::group_by(seqnames, Arm, bin) |> dplyr::summarise(count=dplyr::n())
+  ggplot(df) + 
+    aes(y=count) +
+    geom_boxplot() +
+    facet_wrap(facet.by, ncol=2)
+}
+
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+plotOrthopairDeletionsBox(orthoPairs$Oki_Kum, bigChr=big_chr)
+```
+
+```{r gene_oki_kum_2, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotOrthopairDeletionsHist <- function(orthoPair, facet.by="seqnames~Arm", bigChr=NULL, binWidth=100000) {
+  orthoPair$midpoint <- grMidpoint(orthoPair)
+  df <- as.data.frame(orthoPair)
+  df <- subset(df, df$seqnames %in% bigChr)
+  df <- df[which(!is.na(unlist(lapply(df$orthoFlagDF, function(x) x$deletion_species_specific)))),]
+  ggplot(df) +
+    aes(x=midpoint) +
+    geom_histogram(binwidth=binWidth) +
+    facet_wrap(facet.by, scales = "free_x", ncol=2) 
+}
+
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+plotOrthopairDeletionsHist(orthoPairs$Oki_Kum, bigChr=big_chr)
+```
+
+```{r gene_oki_kum_3, fig.height=4, fig.width=6, dev=c("svg", "png")}
+plotPartnerDeletionsHist <- function(sp1, sp2, count_matrix=NULL, facet.by="seqnames~Arm", bigChr=NULL, binWidth=100000) {
+  # Process transcripts: add midpoint, subset to big chromosomes only, subset to only biggest genes
+  transcripts_sp1 <- flagLongShort(transcripts[[sp1]], annot=longShort)
+  transcripts_sp1$midpoint <- grMidpoint(transcripts_sp1)
+  transcripts_sp1 <- subset(transcripts_sp1, transcripts_sp1$seqnames %in% bigChr)
+  if(sp1 == "Nor") { # catch Norway exception
+    transcripts_sp1$geneid <- unname(sapply(transcripts_sp1$tx_name, function(s) s ))
+  } else {
+    transcripts_sp1$geneid <- unname(sapply(transcripts_sp1$tx_name, function(s) unlist(strsplit(s, "\\.t"))[1] ))
+  }
+  
+  if(sp2 == "Nor") { # catch Norway exception
+    transcripts_sp2$geneid <- unname(sapply(transcripts_sp2$tx_name, function(s) s ))
+  } else {
+    transcripts_sp2$geneid <- unname(sapply(transcripts_sp2$tx_name, function(s) unlist(strsplit(s, "\\.t"))[1] ))
+  }
+  
+  # subset to cases where sp1 != 0 and sp2 = 0
+  transcripts_sp1 <- lapply(transcripts_sp1, function(geneid) { # sort by longest
+    biggest_gene = geneid[which.max(geneid$width),]
+    biggest_gene
+  })
+  ggplot(df) +
+    aes(x=midpoint) +
+    geom_histogram(binwidth=binWidth) +
+    facet_wrap(facet.by, scales = "free_x", ncol=2) 
+}
+
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+plotPartnerDeletionsHist(transcripts_sp1=transcripts$Oki, transcripts_sp1= bigChr=big_chr)
+```
+
+```{r gene_oki_kum_1, fig.height=4, fig.width=6, dev=c("svg", "png")}
+# Given a pair of chromosome-scale orthopairs, 
+plotValidationSpDeletions <- function(orthoPair, orthoFlag="deletion_species_specific", flag=NULL, facet.by="seqnames~Arm", bigChr=NULL, binWidth=100000) {
+  orthoPair$midpoint <- grMidpoint(orthoPair)
+  df <- as.data.frame(orthoPair)
+  df <- subset(df, df$seqnames %in% bigChr)
+  df <- df[which(unlist(lapply(df$orthoFlagDF, function(x) x[[orthoFlag]])) == flag),]
+
+  ggplot(df) + 
+    aes(x=midpoint) +
+    geom_histogram() +
+    facet_wrap(facet.by, scales="free_x", ncol=2)
+}
+
+big_chr = c("chr1","chr2","PAR","XSR","YSR")
+plotValidationSpDeletions(orthoPairs$Oki_Osa, orthoFlag="deletion_species_specific", flag="Kum", facet.by="~Arm", bigChr=big_chr, binWidth=100000)
+```
+
 
 =======
 # HOX genes
