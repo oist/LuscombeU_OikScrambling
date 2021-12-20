@@ -64,17 +64,18 @@ compGenus <- function(x) {
 #' @return A vector of "`same_pop"`, `"close"`, `"intermediate"`, and `distant`.
 
 compDistClass <- function(x) {
-  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor")]                       <- "same_pop"
+  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor")]                       <- "same_or_sister"
   x[x %in% c("Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor",
              "Osa_Oki", "Osa_Kum", "Bar_Oki", "Bar_Kum")]            <- "distant"
   x[x %in% c("Osa_Bar", "Osa_Aom", "Osa_Nor",
              "Bar_Osa", "Bar_Aom", "Bar_Nor")]                       <- "intermediate"
   x[x %in% c("Rob_Sav", "Ply_Sav")]                                  <- "distant"
   x[x %in% c("Ply_Rob", "Rob_Ros", "Rob_Ply")]                       <- "close"
-  x[x %in% c("Rob_Oki", "Ply_Oki")]                                  <- "Int/Rob – Oki"
-  x[x %in% c("Ply_Ros")]                                             <- "same_pop"
-  x[x %in% c("Dme_Dya", "Dme_Dma")]                                  <- "close"
+  x[x %in% c("Rob_Oki", "Ply_Oki")]                                  <- "different_genus"
+  x[x %in% c("Ply_Ros")]                                             <- "same_or_sister"
+  x[x %in% c("Dme_Dma")]                                             <- "same_or_sister"
+  x[x %in% c("Dme_Dya")]                                             <- "close"
   x[x %in% c("Dme_Dsu")]                                             <- "intermediate"
   x[x %in% c("Dme_Dbu")]                                             <- "distant"
-  x
+  factor(x, levels = c("same_or_sister", "close", "intermediate", "distant", "different_genus"))
 }
