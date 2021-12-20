@@ -147,18 +147,16 @@ gg_freq_poly(widths$gbs) +
   facet_wrap(~name, scales = "free_y") +
   ggtitle("Distribution of alignment widths before collapsing")
 
-gg_freq_poly(widths$gbs |> dplyr::filter(dist %in% c("Oki – North", "North – North", "same_pop"))) +
+gg_freq_poly(widths$gbs |> dplyr::filter(genus == "Oikopleura")) +
   aes(col=name) +
   facet_wrap(~dist, scales = "free_y", ncol = 1) +
   ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
 ```
 
 ```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
-
-gg_freq_poly(widths$gbs |> dplyr::mutate(dist = dist |> sub(pat = "Int.*", rep = "Ciona") |>
-                                                        sub(pat = "Dm.*", rep = "Drosophila"))) +
+gg_freq_poly(widths$gbs) +
   aes(width, after_stat(density), col=name) +
-  facet_wrap(~dist, scales = "free_y", ncol = 1) +
+  facet_wrap(~distS, scales = "free_y", ncol = 1) +
   ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
 ```
 
@@ -215,10 +213,17 @@ except YSR.  The second peak shows two different distributions for long and
 short arms.
 
 ```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
-gg_freq_poly(widths$coa |> dplyr::mutate(dist = dist |> sub(pat = "Int.*", rep = "Ciona") |>
-                                                        sub(pat = "Dm.*", rep = "Drosophila"))) +
+gg_freq_poly(widths$coa) +
   aes(width, after_stat(density), col=name) +
-  facet_wrap(~dist, scales = "free_y", ncol = 1) +
+  facet_wrap(~distS, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
+```
+
+
+```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+gg_freq_poly(widths$coa) +
+  aes(width, after_stat(density), col=genus) +
+  facet_wrap(~class, scales = "free_y", ncol = 1) +
   ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
 ```
 
@@ -246,7 +251,7 @@ gg_freq_poly(widths$coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 gg_freq_poly(widths$coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=flag) +
-  facet_wrap(~dist + flag, scales = "free_y") +
+  facet_wrap(~class + flag, scales = "free_y") +
   ggtitle("Distribution of alignment widths after collapsing, split by distance group")
 ```
 
