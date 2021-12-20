@@ -223,6 +223,23 @@ gg_freq_poly(widths$coa) +
 ggplot(widths$coa) + aes(width, col = genus) + stat_ecdf() + scale_x_log10(limits = c(50,5e6)) + facet_wrap(~class)
 ggplot(widths$coa) + aes(width, col = class) + stat_ecdf() + scale_x_log10(limits = c(50,5e6)) + facet_wrap(~genus)
 ```
+
+Note: there is a bug: the lines jump between replicates instead of plotting them separately
+
+```{r width_after_coalescing_cumsum, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
+widths$coa |>
+  dplyr::arrange(name, width) |>
+  dplyr::group_by(name) |>
+  dplyr::mutate(cumsum = cumsum(width)) |>
+  ggplot() + facet_wrap(~class) + aes(x = width, y = cumsum, col = genus) + geom_line() + scale_x_log10() + scale_y_log10()
+
+widths$coa |>
+  dplyr::arrange(name, width) |>
+  dplyr::group_by(name) |>
+  dplyr::mutate(cumsum = cumsum(width)) |>
+  ggplot() + facet_wrap(~genus) + aes(x = width, y = cumsum, col = class) + geom_line() + scale_x_log10() + scale_y_log10()
+```
+
 Why is North / North ("intermediate") not bimodal?
 
 ```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
