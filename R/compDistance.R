@@ -27,6 +27,32 @@ compDistance <- function(x, short = FALSE) {
   x
 }
 
+#' Transform pair name into genus name.
+#'
+#' We compare genomes within 3 genera: _Oikopleura_, _Ciona_, and _Drosophila_.
+#' To ease plotting this function transforms the names of pairwise comparisons
+#' in one of these three names, or `NA` for comparisons between genera.
+#'
+#' The levels are sorted so that _Oikopleura_ is at the top in default `ggplot`
+#' figures, followed by _Ciona_ as both are tunicates.
+#'
+#' @param x A vector of pair names such as `Oki_Kum`, `Osa_Nor`, etc
+#'
+#' @return A factor of `Oikopleura`, `Ciona`, and `Drosophila`, or `NA`.
+
+compGenus <- function(x) {
+  x[x %in% c("Oki_Kum", "Osa_Aom", "Bar_Nor",
+             "Oki_Osa", "Oki_Bar", "Oki_Kum", "Oki_Aom", "Oki_Nor",
+             "Osa_Oki", "Osa_Kum", "Bar_Oki", "Bar_Kum",
+             "Osa_Bar", "Osa_Aom", "Osa_Nor",
+             "Bar_Osa", "Bar_Aom", "Bar_Nor")]                       <- "Oikopleura"
+  x[x %in% c("Ply_Sav", "Ply_Ros", "Ply_Rob",
+             "Rob_Sav", "Rob_Ros", "Rob_Ply")]                       <- "Ciona"
+  x[x %in% c("Rob_Oki", "Ply_Oki")]                                  <- NA
+  x[x %in% c("Dme_Dya", "Dme_Dma", "Dme_Dsu", "Dme_Dbu")]            <- "Drosophila"
+  factor(x, levels = c("Drosophila", "Ciona", "Oikopleura"))
+}
+
 #' Transform pair name into distance class.
 #'
 #' We have 4 main evolutionary distances: _same population_, _close_,
