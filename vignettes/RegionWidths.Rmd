@@ -22,6 +22,7 @@ knitr::opts_knit$set(verbose = TRUE)
 ```{r load_packages_and_data, dependson="setup"}
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('ggplot2')
+requireNamespace('patchwork')
 (genomes <- OikScrambling:::loadAllGenomes())
 (load("BreakPoints.Rdata"))
 ```
@@ -56,6 +57,9 @@ makeWidthsDF <- function (objList) {
 
     DF$query <- DF$score <- DF$rep <- DF$transcripts <- NULL
     DF$dist  <- OikScrambling:::compDistance(DF$name)
+    DF$distS <- OikScrambling:::compDistance(DF$name, short = TRUE)
+    DF$genus <- OikScrambling:::compGenus(DF$name)
+    DF$class <- OikScrambling:::compDistClass(DF$name)
     DF
   }) |> do.call(what=rbind)
 }
@@ -78,7 +82,7 @@ widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
 # Plot all width distributions
 
 This is useful to verify by eye that collections of distributions in the same
-distance group ressemble each other.
+distance group resemble each other.
 
 ```{r width_after_processing_steps, dependson="pre_compute_widths_object", fig.width=12, fig.height=8}
 gg_freq_poly <- function(tibble) {
@@ -88,23 +92,44 @@ gg_freq_poly <- function(tibble) {
     scale_x_log10()
 }
 
-p <-
-gg_freq_poly(rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
+w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
                    widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
                    widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
                    widths$unalMap |> as.data.frame()|> dplyr::mutate(what = "mapped unaligned"),
                    widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
-                   widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))) +
+                   widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
+
+
+widths_all_tibble <- rbind(widths$gbs |> dplyr::mutate(what = "aligned"),
+                       widths$unal    |> dplyr::mutate(what = "unaligned"),
+                       widths$coa     |> dplyr::mutate(what = "mapped"),
+                       widths$unalMap |> dplyr::mutate(what = "mapped unaligned"),
+                       widths$unmap   |> dplyr::mutate(what = "unmaped"),
+                       widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
+
+p <-gg_freq_poly(widths_all_tibble) +
   aes(col = what) +
   ggtitle("Distribution of alignment width before and after collapsing")
 
 # Showing all individual distributions, to demonstrate we can pool some.
-p + facet_wrap(~dist + name, scales = "free_y")
+p + facet_wrap(~class + genus + distS + name, scales = "free_y")
 ```
 
-```{r width_after_processing_steps2, dependson="width_after_processing_steps", fig.width=12}
+```{r width_after_processing_steps_by_class_and_genus, dependson="width_after_processing_steps", fig.width=12}
+
 # Aggregating by distance class
-p + facet_wrap(~dist, scales = "free_y")
+p_droso <- gg_freq_poly(widths_all_tibble |> dplyr::filter(genus == "Drosophila")) + aes(col = what) + facet_wrap(~genus + class, nrow = 1, scales = "free_y")
+p_ciona <- gg_freq_poly(widths_all_tibble |> dplyr::filter(genus == "Ciona")) + aes(col = what)      + facet_wrap(~genus + class, nrow = 1, scales = "free_y")
+p_oikop <- gg_freq_poly(widths_all_tibble |> dplyr::filter(genus == "Oikopleura")) + aes(col = what) + facet_wrap(~genus + class, nrow = 1, scales = "free_y")
+
+layout <- "
+AAAA
+BBB#
+CCC#
+"
+
+library("patchwork")
+(p_droso / p_ciona / p_oikop) +   plot_layout(design = layout, guides = 'collect')
 ```
 
 # Width distribution of aligned and mapped regions
