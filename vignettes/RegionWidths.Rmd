@@ -212,20 +212,29 @@ chromosome and arm type.  There is a small peak under 500 bp, found on all arms
 except YSR.  The second peak shows two different distributions for long and
 short arms.
 
-```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
 gg_freq_poly(widths$coa) +
   aes(width, after_stat(density), col=name) +
-  facet_wrap(~distS, scales = "free_y", ncol = 1) +
+  facet_wrap(~genus + class, scales = "free_y") +
   ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
 ```
 
+```{r width_after_coalescing_ecdf, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
+ggplot(widths$coa) + aes(width, col = genus) + stat_ecdf() + scale_x_log10() + facet_wrap(~class)
+ggplot(widths$coa) + aes(width, col = class) + stat_ecdf() + scale_x_log10(limits = c(50,5e6)) + facet_wrap(~genus)
+```
+Why is North / North ("intermediate") not bimodal?
 
 ```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
 gg_freq_poly(widths$coa) +
-  aes(width, after_stat(density), col=genus) +
-  facet_wrap(~class, scales = "free_y", ncol = 1) +
+  aes(width, after_stat(density), col=class) +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
   ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
 ```
+
+What is in the first peak of the bimodal distributions ?
+
+### By arm
 
 ```{r width_after_coalescing2, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$coa) +
