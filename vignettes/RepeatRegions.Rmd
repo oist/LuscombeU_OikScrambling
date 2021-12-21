@@ -125,11 +125,12 @@ ggplot(rbind(
   reps_in_Oki.norm.long,
   reps_in_Osa.norm.long,
   reps_in_Bar.norm.long
-  ) |> dplyr::mutate(Distance = OikScrambling:::compDistance(name))) + aes(Region, value) +
+  ) |> dplyr::mutate(Distance = OikScrambling:::compDistance(name))) +
+  aes(x="", value) + xlab("") + 
   geom_boxplot() + geom_point(aes(col = Distance)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
+  facet_grid(~Class ~Region, scales = "free") + coord_flip() +
   ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (all)")
+  ggtitle("Repeats overlaping with computed regions")
 ```
 
 # Tracking repeats across genome pairs
