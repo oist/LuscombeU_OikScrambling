@@ -79,6 +79,16 @@ widths$tra2    <- makeWidthsDF(tra2)    |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
 ```
 
+```{r accessory_functions_and_values}
+names_table <- tibble::tibble(
+  pairnames = levels(factor((widths$gbs$name))),
+  class     = OikScrambling:::compDistClass(pairnames),
+  distS     = OikScrambling:::compDistance(pairnames, short = TRUE),
+  target    = pairnames |> sub(pat="_.*", rep="") |> factor(),
+  query     = pairnames |> sub(pat=".*_", rep="") |> factor()
+)
+```
+
 # Plot all width distributions
 
 This is useful to verify by eye that collections of distributions in the same
@@ -142,20 +152,23 @@ The distribution of alignment widths takes a bimodal appearance after
 collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
 answer is _no_.
 
-```{r width_before_coalescing, dependson="pre_compute_widths_object", fig.width=8}
+```{r width_before_coalescing, dependson="pre_compute_widths_object", fig.width=10}
 gg_freq_poly(widths$gbs) +
-  facet_wrap(~name, scales = "free_y") +
-  ggtitle("Distribution of alignment widths before collapsing")
+  aes(width, after_stat(density), col=name) +
+  facet_wrap(~genus + class, scales = "free_y") +
+  ggtitle("Distribution of aligned region widths") +
+  scale_color_manual(values = names_table$class)
 
 gg_freq_poly(widths$gbs |> dplyr::filter(genus == "Oikopleura")) +
   aes(col=name) +
-  facet_wrap(~dist, scales = "free_y", ncol = 1) +
-  ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
+  facet_wrap(~dist, scales = "free_y", nrow = 1) +
+  ggtitle("Distribution of alignment widths before collapsing, collated by distance group") +
+  scale_color_manual(values = names_table$query)
 ```
 
 ```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
 gg_freq_poly(widths$gbs) +
-  aes(width, after_stat(density), col=name) +
+  aes(width, after_stat(density), col=class) +
   facet_wrap(~distS, scales = "free_y", ncol = 1) +
   ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
 ```
