@@ -317,17 +317,21 @@ the coverage of the genome by the resulting mapped regions is already decreasing
 
 ### Focus on Oki – North comparisons
 
-```{r}
+```{r mapped_region_widths_Oki_vs_North}
 p_hist <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North")) +
   aes(col=name) +
   facet_wrap(~dist, scales = "free_y", nrow = 1) +
   ggtitle("Distribution of mapped region widths (vline at 600)") +
   geom_vline(xintercept = 600)
 
+p_hist
+
 # The cutoff at 600 is good enough for both arms
 p_hist + facet_wrap(~Arm)
 ```
 
+We know from `vignette("RepeatRegions", package = "OikScrambling")` that these
+short mapped regions are not repeats.
 
 ## Unmapped regions
 
