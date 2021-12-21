@@ -84,9 +84,21 @@ annotateWithReps.GRanges <- function(gr, rep) {
   gr
 }
 
+overlapLength.GRanges <- function(gr, rep) {
+  # Inspired from CAGEr:::ranges2names
+  redRep <- reduce(rep)
+  o <- findOverlaps(gr, redRep)
+  o <- as(o, "List")
+  repGrl <- extractList(redRep, o)
+  gr$repOvlp <- pintersect(gr, repGrl) |> width() |> sum()
+  gr
+}
+
 annotateWithReps.GBreaks <- function(gb, repT, repQ) {
   gb$query <- annotateWithReps.GRanges(gb$query, repQ)
   gb       <- annotateWithReps.GRanges(gb,       repT)
+  gb$query <- overlapLength.GRanges   (gb$query, repQ)
+  gb       <- overlapLength.GRanges   (gb,       repT)
 }
 
 annotateWithReps.GBreaksSimpleList <- function(gbl, reps) {
