@@ -33,7 +33,9 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different GBreaks objects are prepared.
 
-# Repeat
+# Repeats intersecting with GBreaks regions
+
+## Compute
 
 ```{r repeat_annotations}
 reps_in <- list()
@@ -95,7 +97,7 @@ reps_in_Osa.norm.long <- toLong.reps(reps_in_Osa.norm)
 reps_in_Bar.norm.long <- toLong.reps(reps_in_Bar.norm)
 ```
 
-Summary numbers.
+## Summary numbers
 
 ```{r summary_numbers}
 sapply(reps_in_Oki.norm, rowMeans)
@@ -103,37 +105,22 @@ sapply(reps_in_Osa.norm, rowMeans)
 sapply(reps_in_Bar.norm, rowMeans)
 ```
 
-```{r summary_plots}
+## Summary plots
+
+Note that Oki has more repeat classes.
+
+```{r summary_plots, fig.width=10}
+# Here, the outlier is the same-species comparison, Okinawa – Kume
 ggplot(reps_in_Oki.long) + aes(Region, value) +
-  geom_point(aes(col = name)) +  geom_boxplot() +
+  geom_boxplot() + geom_point(aes(col = name)) +
   facet_grid(~Class, scales = "free") + coord_flip()
 
-ggplot(reps_in_Osa.long) + aes(Region, value) +
-  geom_point(aes(col = name)) +  geom_boxplot() +
+# There, the outliers are the same-species comparison, Bar – Nor and Osa – Aom.
+ggplot(rbind(reps_in_Osa.long, reps_in_Bar.long)) + aes(Region, value) +
+  geom_boxplot() + geom_point(aes(col = name)) +
   facet_grid(~Class, scales = "free") + coord_flip()
 
-ggplot(reps_in_Bar.long) + aes(Region, value) +
-  geom_point(aes(col = name)) +  geom_boxplot() +
-  facet_grid(~Class, scales = "free") + coord_flip()
-
-ggplot(reps_in_Oki.norm.long) + aes(Region, value) +
-  geom_boxplot() + geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
-  ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Oki)")
-
-ggplot(reps_in_Osa.norm.long) + aes(Region, value) +
-  geom_boxplot() + geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
-  ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Osa)")
-
-ggplot(reps_in_Bar.norm.long) + aes(Region, value) +
-  geom_boxplot() + geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
-  ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Bar)")
-
+# Summary plot combining all comparisons
 ggplot(rbind(
   reps_in_Oki.norm.long,
   reps_in_Osa.norm.long,
