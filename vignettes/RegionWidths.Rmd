@@ -220,22 +220,32 @@ gg_freq_poly(widths$unal |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ## Mapped (coalesced) regions
 
-After coalescing, width distribution becomes clearly bimodal, when faceted by
-chromosome and arm type.  There is a small peak under 500 bp, found on all arms
-except YSR.  The second peak shows two different distributions for long and
-short arms.
+After coalescing, some width distribution become clearly bimodal.
+The distributions are hard to compare between genera and between evolutionary
+distance groups, and even within group for the "same population" _Oikopleura_.
+
+The plots below display facet the data in details for the reader to make their
+opinion about the above statement.
+
+### Whole data
+
+#### Width distributions.
 
 ```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
 gg_freq_poly(widths$coa) +
   aes(width, after_stat(density), col=name) +
   facet_wrap(~genus + class, scales = "free_y") +
-  ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
+  ggtitle("Distribution of mapped region widths")
 ```
+
+#### Empirical cumulative distributions
 
 ```{r width_after_coalescing_ecdf, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
 ggplot(widths$coa) + aes(width, col = genus) + stat_ecdf() + scale_x_log10(limits = c(50,5e6)) + facet_wrap(~class)
 ggplot(widths$coa) + aes(width, col = class) + stat_ecdf() + scale_x_log10(limits = c(50,5e6)) + facet_wrap(~genus)
 ```
+
+#### Cumulative sums.
 
 Note: there is a bug: the lines jump between replicates instead of plotting them separately
 
@@ -265,6 +275,10 @@ gg_freq_poly(widths$coa) +
 What is in the first peak of the bimodal distributions ?
 
 ### By arm
+
+When faceted by chromosome and arm type, bimodality is also observed.  There is
+a small peak under 500 bp, found on all arms except YSR.  The second peak shows
+two different distributions for long and short arms.
 
 ```{r width_after_coalescing2, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$coa) +
@@ -300,6 +314,20 @@ short mobile elements), we could re-coalesce once after removing the shortest
 intervals.  We tried some width cutoffs on the coalescing step, but at 500 bp,
 the coverage of the genome by the resulting mapped regions is already decreasing
 (`vignette("CoalescingCutoffs", package = "OikScrambling")`).
+
+### Focus on Oki – North comparisons
+
+```{r}
+p_hist <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North")) +
+  aes(col=name) +
+  facet_wrap(~dist, scales = "free_y", nrow = 1) +
+  ggtitle("Distribution of mapped region widths (vline at 600)") +
+  geom_vline(xintercept = 600)
+
+# The cutoff at 600 is good enough for both arms
+p_hist + facet_wrap(~Arm)
+```
+
 
 ## Unmapped regions
 
