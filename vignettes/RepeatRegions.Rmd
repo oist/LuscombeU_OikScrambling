@@ -414,3 +414,40 @@ ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
   geom_boxplot() +
   geom_point(aes(col = pairname))
 ```
+
+# Repeat annotation of the shortest mapped regions
+
+In Oki – North comparisons, the distribution of mapped region widths is bimodal
+and the two peaks are best separated around 600 bp.  See
+`vignette("RegionWidths", package = "OikScrambling")` for details.
+
+```{r example_width_dist_for_oki_osa}
+coa$Oki_Osa |> plyranges::mutate(w_short = width < 600) |> as.data.frame() |> tibble::as_tibble() |>
+  ggplot() + aes(width, col =Arm) +
+  geom_freqpoly() + scale_x_log10() +
+  geom_vline(xintercept = 600) +
+  ggtitle("Example width distribution of mapped regions (Oki_Osa)")
+```
+
+We want to know if the regions of width shorter than 600 match more repeats, and
+to what extent the matching repeats cover them.
+
+```{r}
+checkOverlapWithRepeatsInShortAndLongWidthRegions <- function(gr, rep) {
+  grl <- gr |> split(width(gr) < 600)
+  tibble::tibble(
+    `Length`                   = c(Long = "Long", Short = "Short"),
+    `Number of regions`        = c(Long  = length(grl[["FALSE"]]),
+                                 Short = length(grl[["TRUE"]])),
+    `Total width`              = c(Long  = grl[["FALSE"]] |> reduce() |> width() |> sum(),
+                                 Short = grl[["TRUE"]]  |> reduce() |> width() |> sum()),
+    `Width covered by reps`    = c(Long  = intersect(grl[["FALSE"]], rep) |> reduce() |> width() |> sum(),
+                                 Short = intersect(grl[["TRUE"]], rep)  |> reduce() |> width() |> sum())
+  )
+}
+checkOverlapWithRepeatsInShortAndLongWidthRegions(coa$Oki_Osa, reps$Oki)
+checkOverlapWithRepeatsInShortAndLongWidthRegions(coa$Osa_Oki, reps$Osa)
+checkOverlapWithRepeatsInShortAndLongWidthRegions(coa$Bar_Oki, reps$Bar)
+```
+
+In conclusion, most of the short mapped regions are not mapped repeats.
