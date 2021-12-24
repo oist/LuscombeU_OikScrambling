@@ -2,12 +2,14 @@
 % Please edit documentation in R/compDistance.R
 \name{compDistance}
 \alias{compDistance}
-\title{Transform pair name into distance class.}
+\title{Transform pair name into distance name.}
 \usage{
-compDistance(x)
+compDistance(x, short = FALSE)
 }
 \arguments{
 \item{x}{A vector of pair names such as \code{Oki_Kum}, \code{Osa_Nor}, etc}
+
+\item{short}{Further group all Ciona and Drosophila together.}
 }
 \value{
 A vector of "\verb{same_pop"}, \code{"Oki – North"} and \code{"North – North"}.

@@ -1,3 +1,9 @@
+# OikScrambling 0.6.6
+
+* New functions `OikScrambling:::compDistClass()` and
+  `OikScrambling:::compDistClass()`, and new option `short` for
+  `OikScrambling:::compDistance()`, to produce more compact summary graphs.
+
 # OikScrambling 0.6.5
 
 * Identify the flipped repeat as MITE and search for other copies.

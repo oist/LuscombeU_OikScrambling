@@ -7,12 +7,19 @@
 
 loadAllRepeats <- function() {
   reps <- SimpleList()
-  reps$Oki <- rtracklayer::import(system.file("extdata/Annotations/OKI2018_I69.v2/OKI2018_I69.repeats.gff", package = "BreakpointsData"))
-  reps$Osa <- rtracklayer::import(system.file("extdata/Annotations/OSKA2016v1.9/OSKA2016v1.9.repeats.gff",  package = "BreakpointsData"))
-  reps$Bar <- rtracklayer::import(system.file("extdata/Annotations/Bar2_p4.Flye/Bar2_p4.Flye.repeats.gff",  package = "BreakpointsData"))
-  reps$Kum <- rtracklayer::import(system.file("extdata/Annotations/KUM-M3-7f/KUM-M3-7f.repeats.gff",        package = "BreakpointsData"))
-  reps$Aom <- rtracklayer::import(system.file("extdata/Annotations/AOM-5-5f/AOM-5-5f.repeats.gff",          package = "BreakpointsData"))
-  reps$Nor <- rtracklayer::import(system.file("extdata/Annotations/OdB3/OdB3.repeats.gff",                  package = "BreakpointsData"))
+  # Suppressing warning message: ‘In is.na(genome) : is.na() applied to non-(list or vector) of type 'S4'’
+  reps$Oki <- rtracklayer::import(system.file("extdata/Annotations/OKI2018_I69.v2/OKI2018_I69.repeats.gff", package = "BreakpointsData"),
+                                  genome = seqinfo(BSgenome.Odioica.local.OKI2018.I69)) |> suppressWarnings()
+  reps$Osa <- rtracklayer::import(system.file("extdata/Annotations/OSKA2016v1.9/OSKA2016v1.9.repeats.gff",  package = "BreakpointsData"),
+                                  genome = seqinfo(BSgenome.Odioica.local.OSKA2016v1.9)) |> suppressWarnings()
+  reps$Bar <- rtracklayer::import(system.file("extdata/Annotations/Bar2_p4.Flye/Bar2_p4.Flye.repeats.gff",  package = "BreakpointsData"),
+                                  genome = seqinfo(BSgenome.Odioica.local.Bar2.p4)) |> suppressWarnings()
+  reps$Kum <- rtracklayer::import(system.file("extdata/Annotations/KUM-M3-7f/KUM-M3-7f.repeats.gff",        package = "BreakpointsData"),
+                                  genome = seqinfo(BSgenome.Odioica.local.KUM.M3)) |> suppressWarnings()
+  reps$Aom <- rtracklayer::import(system.file("extdata/Annotations/AOM-5-5f/AOM-5-5f.repeats.gff",          package = "BreakpointsData"),
+                                  genome = seqinfo(BSgenome.Odioica.local.AOM.5)) |> suppressWarnings()
+  reps$Nor <- rtracklayer::import(system.file("extdata/Annotations/OdB3/OdB3.repeats.gff",                  package = "BreakpointsData"),
+                                  genome = seqinfo(BSgenome.Odioica.local.Odioica.reference.v3.0)) |> suppressWarnings()
   reps <- endoapply(reps, \(x) {
     x$Class <- x$Target                                              |>
       sub(pat = '".*',                     rep = "")                 |>

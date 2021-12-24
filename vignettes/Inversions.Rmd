@@ -50,9 +50,10 @@ and `?GenomicBreaks::flagInversions`
 More inversions are found after coalescing colinear blocks because of situations
 where `+ - +` was `+ - - +` before collapsing.
 
-The number of detected inversions is further increased after double-coalescing.
+The number of detected inversions is further increased after double-coalescing,
+but not much.
 
-```{r detect_trivial_invertions}
+```{r detect_trivial_invertions, fig.width=8, fig.height=6}
 (invs_summary <- data.frame(
   align  = sapply(gbs,  function(gb) sum(flagInversions(gb)$inv)),
   mapped = sapply(coa,  function(gb) sum(flagInversions(gb)$inv)),
@@ -63,17 +64,23 @@ sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::c
 sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::compDistance(), median))
 sapply(invs_summary, \(x) tapply(x, row.names(invs_summary) |> OikScrambling:::compDistance(), sd))
 
-invs_summary$pairname  <- OikScrambling:::compDistance(rownames(invs_summary)) |>
-  sub(pat = "^Dme_.*", rep = "Droso")
-invs_summary$target    <- sub("_.*", "", rownames(invs_summary))
-invs_summary <- invs_summary |> dplyr::filter(pairname != "Int/Rob – Oki")
+invs_summary$pairname   <- OikScrambling:::compDistance(rownames(invs_summary))
+invs_summary$pairname_s <- OikScrambling:::compDistance(rownames(invs_summary), short = TRUE)
+invs_summary$genus      <- OikScrambling:::compGenus(rownames(invs_summary))
+invs_summary$class      <- OikScrambling:::compDistClass(rownames(invs_summary))
+invs_summary$target     <- sub("_.*", "", rownames(invs_summary))
+invs_summary <- invs_summary[invs_summary$class != "Int/Rob – Oki",]
 
-ggplot(invs_summary  |>
-         dplyr::filter(pairname != "Int/Rob – Oki") |>
-         tidyr::pivot_longer("mapped")) +
-  aes(value, pairname) + geom_point(aes(col = target)) +
+ggplot(invs_summary |> tidyr::pivot_longer(c("align", "mapped", "map2"))) +
+  aes(value, pairname_s) + geom_point(aes(col = target)) +
   ggtitle ("Number of inversions found after different post-processings") +
-  scale_x_log10("Number of trivial inversions (log scale)") + facet_grid(pairname ~ .,scales= "free")
+  facet_wrap(~name, ncol= 1)
+```
+
+```{r number_of_inversions, fig.width=7, dev='svg', fig.ext='svg'}
+ggplot(invs_summary |> tidyr::pivot_longer(c("mapped"))) +
+  aes(value, genus) + geom_point(aes(col = class)) +
+  ggtitle ("Number of inversions found in mapped regions") 
 ```
 
 ## Motif search

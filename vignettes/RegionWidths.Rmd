@@ -17,15 +17,12 @@ knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
-# Introduction
-
-TBW
-
 # Load R pacakges and data
 
-```{r load_packages_and_data}
+```{r load_packages_and_data, dependson="setup"}
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('ggplot2')
+requireNamespace('patchwork')
 (genomes <- OikScrambling:::loadAllGenomes())
 (load("BreakPoints.Rdata"))
 ```
@@ -35,7 +32,7 @@ different GBreaks objects are prepared.
 
 # Precompute widths
 
-```{r pre_compute_widths_object}
+```{r pre_compute_widths_object, dependson="load_packages_and_data"}
 widths <- SimpleList()
 makeWidthsDF <- function (objList) {
   lapply(names(objList), \(name) {
@@ -49,13 +46,25 @@ makeWidthsDF <- function (objList) {
       sub(pat = "BNJZ.*", rep = "Ply")    |>
       sub(pat = "BNKA.*", rep = "Ros")    |>
       sub(pat = "BJTB.*", rep = "Rob")    |>
-      sub(pat = "^R.*", rep = "Sav")
+      sub(pat = "^R.*",   rep = "Sav")    |>
+      sub(pat = "^2L$",   rep = "Dro")    |>
+      sub(pat = "^2R$",   rep = "Dro")    |>
+      sub(pat = "^3L$",   rep = "Dro")    |>
+      sub(pat = "^3R$",   rep = "Dro")    |>
+      sub(pat = "^4$",    rep = "Dro")    |>
+      sub(pat = "^X$",    rep = "Dro")    |>
+      sub(pat = "^Y$",    rep = "Dro")   
+
     DF$query <- DF$score <- DF$rep <- DF$transcripts <- NULL
     DF$dist  <- OikScrambling:::compDistance(DF$name)
+    DF$distS <- OikScrambling:::compDistance(DF$name, short = TRUE)
+    DF$genus <- OikScrambling:::compGenus(DF$name)
+    DF$class <- OikScrambling:::compDistClass(DF$name)
     DF
   }) |> do.call(what=rbind)
 }
 
+# Remove flags from objects so that dataframe conversion yields equal number of columns
 unal  <- sapply(unal,  \(gb) {gb$flag <- NA; gb}) |> SimpleList()
 unmap <- sapply(unmap, \(gb) {gb$flag <- NA; gb}) |> SimpleList()
 unalMap<-sapply(unalMap,\(gb){gb$flag <- NA; gb}) |> SimpleList()
@@ -70,15 +79,22 @@ widths$tra2    <- makeWidthsDF(tra2)    |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
 ```
 
-# Width distribution of aligned and mapped regions
+```{r accessory_functions_and_values}
+names_table <- tibble::tibble(
+  pairnames = levels(factor((widths$gbs$name))),
+  class     = OikScrambling:::compDistClass(pairnames),
+  distS     = OikScrambling:::compDistance(pairnames, short = TRUE),
+  target    = pairnames |> sub(pat="_.*", rep="") |> factor(),
+  query     = pairnames |> sub(pat=".*_", rep="") |> factor()
+)
+```
 
-_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
+# Plot all width distributions
 
-The distribution of alignment widths takes a bimodal appearance after
-collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
-answer is _no_.
+This is useful to verify by eye that collections of distributions in the same
+distance group resemble each other.
 
-```{r width_after_coalescing}
+```{r width_after_processing_steps, dependson="pre_compute_widths_object", fig.width=12, fig.height=8}
 gg_freq_poly <- function(tibble) {
     ggplot(tibble) +
     aes(width) +
@@ -86,26 +102,82 @@ gg_freq_poly <- function(tibble) {
     scale_x_log10()
 }
 
-gg_freq_poly(rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
+w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
                    widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
                    widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
                    widths$unalMap |> as.data.frame()|> dplyr::mutate(what = "mapped unaligned"),
                    widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
-                   widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))) +
+                   widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
+
+
+widths_all_tibble <- rbind(widths$gbs |> dplyr::mutate(what = "aligned"),
+                       widths$unal    |> dplyr::mutate(what = "unaligned"),
+                       widths$coa     |> dplyr::mutate(what = "mapped"),
+                       widths$unalMap |> dplyr::mutate(what = "mapped unaligned"),
+                       widths$unmap   |> dplyr::mutate(what = "unmaped"),
+                       widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
+
+p <-gg_freq_poly(widths_all_tibble) +
   aes(col = what) +
-  geom_freqpoly() +
-  scale_x_log10() +
-  facet_wrap(~name, scales = "free_y") +
   ggtitle("Distribution of alignment width before and after collapsing")
+
+# Showing all individual distributions, to demonstrate we can pool some.
+p + facet_wrap(~class + genus + distS + name, scales = "free_y")
+```
+
+```{r width_after_processing_steps_by_class_and_genus, dependson="width_after_processing_steps", fig.width=12}
+
+# Aggregating by distance class
+p_droso <- gg_freq_poly(widths_all_tibble |> dplyr::filter(genus == "Drosophila")) + aes(col = what) + facet_wrap(~genus + class, nrow = 1, scales = "free_y")
+p_ciona <- gg_freq_poly(widths_all_tibble |> dplyr::filter(genus == "Ciona")) + aes(col = what)      + facet_wrap(~genus + class, nrow = 1, scales = "free_y")
+p_oikop <- gg_freq_poly(widths_all_tibble |> dplyr::filter(genus == "Oikopleura")) + aes(col = what) + facet_wrap(~genus + class, nrow = 1, scales = "free_y")
+
+layout <- "
+AAAA
+BBB#
+CCC#
+"
+
+library("patchwork")
+(p_droso / p_ciona / p_oikop) +   plot_layout(design = layout, guides = 'collect')
+```
+
+# Width distribution of aligned and mapped regions
+
+## Aligned regions
+
+_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
+
+The distribution of alignment widths takes a bimodal appearance after
+collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
+answer is _no_.
+
+```{r width_before_coalescing, dependson="pre_compute_widths_object", fig.width=10}
+gg_freq_poly(widths$gbs) +
+  aes(width, after_stat(density), col=name) +
+  facet_wrap(~genus + class, scales = "free_y") +
+  ggtitle("Distribution of aligned region widths") +
+  scale_color_manual(values = names_table$class)
+
+gg_freq_poly(widths$gbs |> dplyr::filter(genus == "Oikopleura")) +
+  aes(col=name) +
+  facet_wrap(~dist, scales = "free_y", nrow = 1) +
+  ggtitle("Distribution of alignment widths before collapsing, collated by distance group") +
+  scale_color_manual(values = names_table$query)
+```
+
+```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+gg_freq_poly(widths$gbs) +
+  aes(width, after_stat(density), col=class) +
+  facet_wrap(~distS, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
 ```
 
 First, the distribution of widths is not the same on long and short arms.
 For this reason, it would be unwise to filter by width on some operations such
 as coalescing.
 
-## Aligned regions
-
-```{r widths_gbs}
+```{r widths_gbs, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$gbs) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -115,11 +187,19 @@ gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
   ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
+
+gg_freq_poly(widths$gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths before collapsing, split by distance group")
 ```
 
 ## Unaligned regions
 
-```{r widths_unaligned}
+Unaligned regions show no difference of width between arms, except perhaps at
+the “same population” level.
+
+```{r widths_unaligned, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$unal) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -129,63 +209,174 @@ gg_freq_poly(widths$unal |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
   ggtitle("Distribution of unaligned regions width on chr1 before collapsing, split by genome pair")
+
+gg_freq_poly(widths$unal |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of unaligned region widths before collapsing, split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ## Mapped (coalesced) regions
 
-After coalescing, width distribution becomes clearly bimodal, when faceted by
-chromosome and arm type.  There is a small peak under 500 bp, found on all arms
-except YSR.  The second peak shows two different distributions for long and
-short arms.
+After coalescing, some width distribution become clearly bimodal.
+The distributions are hard to compare between genera and between evolutionary
+distance groups, and even within group for the "same population" _Oikopleura_.
 
-```{r width_of_coalesced_regions}
+The plots below display facet the data in details for the reader to make their
+opinion about the above statement.
+
+### Whole data
+
+#### Width distributions.
+
+```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
+gg_freq_poly(widths$coa) +
+  aes(width, after_stat(density), col=name) +
+  facet_wrap(~genus + class, scales = "free_y") +
+  ggtitle("Distribution of mapped region widths")
+```
+
+#### Empirical cumulative distributions
+
+```{r width_after_coalescing_ecdf, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
+ggplot(widths$coa) + aes(width, col = genus) + stat_ecdf() + scale_x_log10(limits = c(50,5e6)) + facet_wrap(~class)
+ggplot(widths$coa) + aes(width, col = class) + stat_ecdf() + scale_x_log10(limits = c(50,5e6)) + facet_wrap(~genus)
+```
+
+#### Cumulative sums.
+
+Note: there is a bug: the lines jump between replicates instead of plotting them separately
+
+```{r width_after_coalescing_cumsum, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
+widths$coa |>
+  dplyr::arrange(name, width) |>
+  dplyr::group_by(name) |>
+  dplyr::mutate(cumsum = cumsum(width)) |>
+  ggplot() + facet_wrap(~class) + aes(x = width, y = cumsum, col = genus) + geom_line() + scale_x_log10() + scale_y_log10()
+
+widths$coa |>
+  dplyr::arrange(name, width) |>
+  dplyr::group_by(name) |>
+  dplyr::mutate(cumsum = cumsum(width)) |>
+  ggplot() + facet_wrap(~genus) + aes(x = width, y = cumsum, col = class) + geom_line() + scale_x_log10() + scale_y_log10()
+```
+
+Why is North / North ("intermediate") not bimodal?
+
+```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+gg_freq_poly(widths$coa) +
+  aes(width, after_stat(density), col=class) +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
+```
+
+What is in the first peak of the bimodal distributions ?
+
+### By arm
+
+When faceted by chromosome and arm type, bimodality is also observed.  There is
+a small peak under 500 bp, found on all arms except YSR.  The second peak shows
+two different distributions for long and short arms.
+
+```{r width_after_coalescing2, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$coa) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of alignment widths after collapsing, split by arm.")
 
-gg_freq_poly(widths$coa |> subset(chr == "chr1")) +
+gg_freq_poly(widths$coa) +
+  aes(col=flag) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths after collapsing, split by flag.")
+
+gg_freq_poly(widths$coa ) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of alignment widths on chr1 after collapsing, split by genome pair") +
+  ggtitle("Distribution of alignment widths on chr1 after collapsing, split by genome pair")+
   geom_vline(xintercept = 500)
+
+gg_freq_poly(widths$coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of alignment widths after collapsing, split by distance group")
+
+gg_freq_poly(widths$coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=flag) +
+  facet_wrap(~class + flag, scales = "free_y") +
+  ggtitle("Distribution of alignment widths after collapsing, split by distance group")
 ```
 
-Therefore, if the first peak represents events that we do not want to consider
+Therefore, if the first peak represented events that we do not want to consider
 breaking synteny (either alignment artefacts or insertion/transpositions of
-short mobile elements), we can re-coalesce once after removing the shortest
-intervals.
+short mobile elements), we could re-coalesce once after removing the shortest
+intervals.  We tried some width cutoffs on the coalescing step, but at 500 bp,
+the coverage of the genome by the resulting mapped regions is already decreasing
+(`vignette("CoalescingCutoffs", package = "OikScrambling")`).
+
+### Focus on Oki – North comparisons
+
+```{r mapped_region_widths_Oki_vs_North}
+p_hist <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North")) +
+  aes(col=name) +
+  facet_wrap(~dist, scales = "free_y", nrow = 1) +
+  ggtitle("Distribution of mapped region widths (vline at 600)") +
+  geom_vline(xintercept = 600)
+
+p_hist
+
+# The cutoff at 600 is good enough for both arms
+p_hist + facet_wrap(~Arm)
+```
+
+We know from `vignette("RepeatRegions", package = "OikScrambling")` that these
+short mapped regions are not repeats.
 
 ## Unmapped regions
+
+Unmapped regions are a bit longer on the short arm in Oki – North comparisons…
 
 ```{r width_of_unmapped_regions}
 gg_freq_poly(widths$unmap) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of widths of ummapped regions, split by arm.")
+  ggtitle("Distribution of unmapped regions width after collapsing, split by arm.")
 
-gg_freq_poly(widths$unmap |> subset(chr == "chr1")) +
+gg_freq_poly(widths$unmap) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of widths of unmapped regions on chr1 after collapsing, split by genome pair") +
-  geom_vline(xintercept = 500)
+  ggtitle("Distribution of unmapped regions width after collapsing, split by genome pair")
+
+gg_freq_poly(widths$unmap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of unmapped region widths after collapsing, split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ## Mapped unaligned regions
 
 Note the short peak when comparing pairs within the same population.
 
-```{r width_of_unAlmapped_regions}
+```{r width_of_unAlmapped_regions, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$unalMap) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of widths of mapped unaligned regions, split by arm.")
 
-gg_freq_poly(widths$unalMap |> subset(chr == "chr1")) +
+gg_freq_poly(widths$unalMap) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of widths of unmapped regions on chr1 after collapsing, split by genome pair") +
-  geom_vline(xintercept = 500)
+  ggtitle("Distribution of widths of mapped unaligned regions, split by genome pair")
+
+gg_freq_poly(widths$unalMap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of widths of mapped unaligned regions, split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ## Translocated regions
@@ -195,34 +386,54 @@ gg_freq_poly(widths$unalMap |> subset(chr == "chr1")) +
 Reminder: here we measure the distance between the two colinear pairs that are
 separated by the translocated pair.
 
-```{r width_of_translocated_regions}
+```{r width_of_translocated_regions, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$tra) +
   aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of widths of translocated regions, split by arm.")
 
 gg_freq_poly(widths$tra) +
-  aes(col=dist) +
-  ggtitle("Distribution of widths of translocated regions, split by evolutionary distance")
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of widths of translocated regions, split by genome pair")
+
+gg_freq_poly(widths$tra |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of widths of translocated regions, split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
+
 
 ### Whole region, after removal
 
 Small peak in _“same pop”_ disapears by design.  Total number in the main peak
 also decreases, because they may pass the size filter on the _query_ genome.
 
-```{r width_of_translocated_regions2}
+
+```{r width_of_translocated_regions_rem, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$tra2) +
   aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of widths of translocated regions (after removal), split by arm.")
 
 gg_freq_poly(widths$tra2) +
-  aes(col=dist) +
-  ggtitle("Distribution of widths of translocated regions (after removal), split by evolutionary distance")
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of widths of translocated regions (after removal), split by genome pair")
+
+gg_freq_poly(widths$tra2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of widths of translocated regions (after removal), split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ### Aligned, before removal
 
-```{r width_of_translocated_regions_coa_aligned}
+```{r width_of_translocated_regions_coa_aligned, dependson="pre_compute_widths_object"}
 widths$tra_coa_aln   <- makeWidthsDF(sapply(coa, \(gb) gb |> flagTranslocations() |> filterTranslocations())) |> tibble::as_tibble()
 
 gg_freq_poly(widths$tra_coa_aln) +
@@ -231,37 +442,60 @@ gg_freq_poly(widths$tra_coa_aln) +
   ggtitle("Distribution of widths of translocated regions (aligned), split by arm.")
 
 gg_freq_poly(widths$tra_coa_aln) +
-  aes(col=dist) +
-  ggtitle("Distribution of widths of translocated regions (aligned), split by evolutionary distance")
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of widths of translocated regions (aligned), split by genome pair")
+
+gg_freq_poly(widths$tra_coa_aln |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of widths of translocated regions (aligned), split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ### Aligned, after removal
 
-```{r width_of_translocated_regions_coa2_aligned}
+```{r width_of_translocated_regions_coa2_aligned, dependson="pre_compute_widths_object"}
 widths$tra_coa2_aln   <- makeWidthsDF(sapply(coa2, \(gb) gb |> flagTranslocations() |> filterTranslocations())) |> tibble::as_tibble()
 
 gg_freq_poly(widths$tra_coa2_aln) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of widths of translocated regions (aligned), split by arm.")
+  ggtitle("Distribution of widths of translocated regions (aligned, after removal), split by arm.")
 
 gg_freq_poly(widths$tra_coa2_aln) +
-  aes(col=dist) +
-  ggtitle("Distribution of widths of translocated regions (aligned), split by evolutionary distance")
+  aes(col=Arm) +
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of widths of translocated regions (aligned, after removal), split by genome pair")
+
+gg_freq_poly(widths$tra_coa2_aln |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of widths of translocated regions (aligned, after removal), split by distance group") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
 ## Double-coalesced regions
 
-```{r re_coalesce}
+```{r re_coalesce, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$coa2) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of alignment widths after double-collapsing, split by arm.")
 
-gg_freq_poly(widths$coa2 |> subset(chr == "chr1")) +
+gg_freq_poly(widths$coa2) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of alignment widths on chr1 after double-collapsing, split by genome pair") 
+  ggtitle("Distribution of widthsof alignment widths after double-collapsing, split by genome pair")
+
+gg_freq_poly(widths$coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths after double-collapsing, split by distance group") +
+  geom_vline(xintercept = 500) +
+  scale_x_log10("Width (vertical bar at 500 bp)")
 ```
 
 # Paired comparison of widths in target and query genomes.
@@ -320,10 +554,10 @@ ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~dist) +
   ggtitle("Width of the target and query translocated regions")
 
 ggPlotW2W(tra2.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
-  ggtitle("Width of the target and query translocated regions")
+  ggtitle("Width of the target and query translocated regions (after removal)")
 
 ggPlotW2W(tra2.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~dist) +
-  ggtitle("Width of the target and query translocated regions")
+  ggtitle("Width of the target and query translocated regions (after removal)")
 
 ggPlotW2W(gbs.w2w) +
   facet_wrap(~query.rep + target.rep) +
@@ -370,26 +604,63 @@ sapply(invs.coa2, \(x) {summary(decode(strand(x)))})
 widths$invs.gbs  <- makeWidthsDF(invs.gbs)  |> tibble::as_tibble()
 widths$invs.coa  <- makeWidthsDF(invs.coa)  |> tibble::as_tibble()
 widths$invs.coa2 <- makeWidthsDF(invs.coa2) |> tibble::as_tibble()
+```
+
+```{r inversion_width_aligned, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$invs.gbs) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by arm.")
 
 gg_freq_poly(widths$invs.gbs) +
   aes(col=Arm) +
-  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by arm.") +
-  geom_vline(xintercept = 1000)
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by genome pair")
+
+gg_freq_poly(widths$invs.gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths for inverted regions, using aligned regions, split by distance group") +
+  geom_vline(xintercept = 500) +
+  scale_x_log10("Width (vertical bar at 500 bp)")
+```
+
+```{r inversion_width_mapped, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$invs.coa) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by arm.")
 
 gg_freq_poly(widths$invs.coa) +
   aes(col=Arm) +
-  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by arm.") +
-  geom_vline(xintercept = 1000)
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by genome pair")
+
+gg_freq_poly(widths$invs.coa |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths for inverted regions, using mapped regions, split by distance group") +
+  geom_vline(xintercept = 500) +
+  scale_x_log10("Width (vertical bar at 500 bp)")
+```
+
+```{r inversion_width_doublemapped, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$invs.coa2) +
+  aes(col=Arm) +
+  facet_wrap(~chr, scales = "free_y") +
+  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm.")
 
 gg_freq_poly(widths$invs.coa2) +
   aes(col=Arm) +
-  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm.") +
-  geom_vline(xintercept = 1000)
+  facet_wrap(~name, scales = "free_y", ncol=5) +
+  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by genome pair")
 
-gg_freq_poly(widths$invs.coa2) +
-  facet_wrap(~dist, scale="free") + 
-  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by comparison") +
-  geom_vline(xintercept = 1000)
+gg_freq_poly(widths$invs.coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=Arm) +
+  facet_wrap(~dist, scales = "free_y", nrow=1) +
+  ggtitle("Distribution of alignment widths for inverted regions, using doublemapped regions, split by distance group") +
+  geom_vline(xintercept = 500) +
+  scale_x_log10("Width (vertical bar at 500 bp)")
 ```
 
 ## Width of gaps next to the inverted regions

@@ -474,3 +474,85 @@ TAGCGCGAAGCGCACACTTTTTCCTTGATTCTATTTTTGTCTTGTACCGGCGGTACAAAA
 ATTTTTGTACCGGCGTTACAAATTTGTACCGCCGTTACAAATTTGTACCGTCGCCGCCCT
 ACACCC
 ```
+
+# ROI 11: highly conserved regions
+
+Many mapped regions have a width shorter than 600 and form a distinct peak
+in width distribution plot (see
+`vignette("RegionWidths", package = "OikScrambling")` for details).
+
+Surprisingly they appear to be very conserved.
+
+
+```{r ROI11_1, fig.height=12, fig.width=9}
+library(msa)
+library(ggmsa)
+
+x <- coa$Oki_Osa |> plyranges::filter(width < 600) |> sort(i=T)
+
+roi <- x[4]
+getSeq(genomes$Oki, roi)
+
+pairwiseAlignment(getSeq(genomes$Oki, roi + 100),
+                  getSeq(genomes$Osa, roi$query + 100),
+                  type = "global") |> writePairwiseAlignments()
+
+roi <- x[10]
+getSeq(genomes$Oki, roi)       |> as.character()
+getSeq(genomes$Osa, roi$query) |> as.character()
+
+
+seqs <- c(
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))                             |> getSeq(x=genomes$Oki),
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))$query                       |> getSeq(x=genomes$Osa),
+  subsetByOverlaps(coa$Oki_Aom, granges(roi), ignore.strand = TRUE)$query |> getSeq(x=genomes$Aom) |> reverseComplement(),
+  subsetByOverlaps(coa$Oki_Bar, granges(roi))$query                       |> getSeq(x=genomes$Bar),
+  subsetByOverlaps(coa$Oki_Nor, granges(roi))$query                       |> getSeq(x=genomes$Nor)
+)
+
+names(seqs) <- c("Oki", "Osa", "Aom", "Bar", "Nor")
+
+(seqs_aln <- msa::msaMuscle(seqs) |> as("DNAMultipleAlignment"))
+
+ggmsa::ggmsa(seqs_aln,   1,  50, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln,  51, 100, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln, 101, 150, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln, 151, 200, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln, 201, 250, seq_name = TRUE)
+
+```
+
+```{r ROI11_2, fig.height=12, fig.width=9}
+roi <- x[11]
+seqs <- c(
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))                             |> getSeq(x=genomes$Oki),
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))$query                       |> getSeq(x=genomes$Osa),
+  subsetByOverlaps(coa$Oki_Aom, granges(roi), ignore.strand = TRUE)$query |> getSeq(x=genomes$Aom) |> reverseComplement(),
+  subsetByOverlaps(coa$Oki_Bar, granges(roi))$query                       |> getSeq(x=genomes$Bar),
+  subsetByOverlaps(coa$Oki_Nor, granges(roi))$query                       |> getSeq(x=genomes$Nor)
+)
+
+names(seqs) <- c("Oki", "Osa", "Aom", "Bar", "Nor")
+
+(seqs_aln <- msa::msaMuscle(seqs) |> as("DNAMultipleAlignment"))
+
+ggmsa::ggmsa(seqs_aln,   1,  50, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln,  51, 100, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln, 101, 150, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln, 151, 200, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln, 201, 250, seq_name = TRUE) /
+ggmsa::ggmsa(seqs_aln, 251, 300, seq_name = TRUE)
+```
+
+## Autocorrelations
+
+There appears to be a small tendency that short width regions are followed by
+short width regions, but I am not sure if I understand the statistics well.
+
+```{r autocorrelations}
+plot(width(coa$Oki_Osa), c(tail(width(coa$Oki_Osa), -1), NA), log = 'xy', pch='.')
+acf(width(coa$Oki_Osa), lag.max = 1000)
+acf(sample(width(coa$Oki_Osa)), lag.max = 1000)
+pacf(width(coa$Oki_Osa), lag.max = 100)
+pacf(sample(width(coa$Oki_Osa)), lag.max = 100)
+```
