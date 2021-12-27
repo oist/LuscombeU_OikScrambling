@@ -118,11 +118,11 @@ The alignment stops are ordered in such a way that start (or left breaks) are
 centred on the top half of the plot, and end alignment stops are centred on the
 bottom. This is why we see different directionality in the plots. At the
 alignment stops, the GC content seems to be lower, but higher once within the
-aligned region. 
+aligned region, except for the Oki – Kum pair.
 
 Now looking at TATA content:
 
-```{r TATA, fig.height=6, fig.width=12}
+```{r TATA, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 #hm_GC1_TATA <- sapply(gbs, bp_heatmap, basep_range = 1000, pat = "TATA", direction = "left") |> SimpleList()
 hm_GC2_TATA <- sapply(coa[1:15], bp_heatmap, basep_range = 1000, pat = "TATA", direction = "left") |> SimpleList()
 
@@ -147,7 +147,7 @@ for TATA boxes, so it does not necessarily show that breakpoints are occurring
 directly after promoter regions. 
 
 
-```{r AAGCsGCwwmkCGrCTTyn, fig.height=6, fig.width=12}
+```{r AAGCsGCwwmkCGrCTTyn, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 #hm_GC1_mot <- sapply(gbs, bp_heatmap, basep_range = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
 hm_GC2_mot <- sapply(coa[1:15], bp_heatmap, basep_range = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
 
