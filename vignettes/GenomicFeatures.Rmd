@@ -339,6 +339,25 @@ They are enriched in introns...
 # plotHeatmapMeta(list(hm_b))
 ```
 
+## Breakpoint coverage around PWM hits
+
+TODO: triplecheck `feature_coverage`, it is old…
+
+```{r genomic_features_pwmHits, cache=FALSE}
+current_GB <- pwmHits
+
+hmList_PWM_OKI$gbOsa     <- feature_coverage(current_GB, gbs$Oki_Osa,  win = 5000, lab = "Oki-Osa", direction = "left")
+hmList_PWM_OKI$gbBar     <- feature_coverage(current_GB, gbs$Oki_Bar,  win = 5000, lab = "Oki-Bar", direction = "left")
+hmList_PWM_OKI$gbKum     <- feature_coverage(current_GB, gbs$Oki_Kum,  win = 5000, lab = "Oki-Kum", direction = "left")
+
+plotHeatmapMeta(hmList_PWM_OKI[c("gbOsa", "gbBar", "gbKum")])
+
+hmList_PWM_OKI$coOsa     <- feature_coverage(current_GB, coa$Oki_Osa,  win = 5000, lab = "Oki-Osa", direction = "left")
+hmList_PWM_OKI$coBar     <- feature_coverage(current_GB, coa$Oki_Bar,  win = 5000, lab = "Oki-Bar", direction = "left")
+hmList_PWM_OKI$coKum     <- feature_coverage(current_GB, coa$Oki_Kum,  win = 5000, lab = "Oki-Kum", direction = "left")
+
+plotHeatmapMeta(hmList_PWM_OKI[c("coOsa", "coBar", "coKum")])
+```
 
 ## Okinawa genome coverage
 
