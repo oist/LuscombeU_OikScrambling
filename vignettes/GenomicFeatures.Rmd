@@ -33,6 +33,7 @@ library('GenomicFeatures') |> suppressPackageStartupMessages()
 genomes     <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings()
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
+reps        <- OikScrambling:::loadAllRepeats()
 load("BreakPoints.Rdata")
 requireNamespace("rGADEM")
 requireNamespace("ggseqlogo")
@@ -276,7 +277,7 @@ The function `feature_coverage` will plot the coverage of tandem repeats around
 centred alignment stops. 
 
 ```{r genomic_features, cache=FALSE}
-current_GB <- gbs$Oki_Osa
+current_GB <- coa$Oki_Osa |> subset(width > 500)
 gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 pwm <- gadems.invLeftGap$Oki_Osa[[1]]
 pwm@consensus
@@ -304,6 +305,19 @@ plotHeatmapMeta(hmList_OKI[c("pwm")])
 Aligned regions are enriched in exons and depleted in introns.  Is it because
 exons are more alignable or is it because it is deleterous to break genes
 in exons ?
+
+## Breakpoints of wide and narrow regions
+
+```{r genomic_features_bpByWidth, cache=FALSE}
+current_GB_wide   <- coa$Oki_Osa |> subset(width >  500)
+current_GB_narrow <- coa$Oki_Osa |> subset(width <= 500)
+plotHeatmapMeta(list(feature_coverage(current_GB_wide,   intronicParts(annots$Oki), win = 1e3, lab = "wide")))
+plotHeatmapMeta(list(feature_coverage(current_GB_narrow, intronicParts(annots$Oki), win = 1e3, lab = "narrow")))
+
+plotHeatmapMeta(list(feature_coverage(current_GB_wide,   reps$Oki, win = 1e3, lab = "wide")))
+plotHeatmapMeta(list(feature_coverage(current_GB_narrow, reps$Oki, win = 1e3, lab = "narrow")))
+```
+
 
 ## Gene feature coverage around PWM hits
 
