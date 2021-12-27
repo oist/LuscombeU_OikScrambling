@@ -268,7 +268,7 @@ inferring that perhaps that some are artefacts of difficult alignment near to
 tandem repeats. 
 
 
-## Gene feature coverage around alignment stops (breakpoints)
+# Gene feature coverage around alignment stops (breakpoints)
 
 TODO: analyse separately the breakpoint regions that are in colinear regions?
 
@@ -276,13 +276,16 @@ The function `feature_coverage` will plot the coverage of tandem repeats around
 centred alignment stops. 
 
 ```{r genomic_features, cache=FALSE}
-#current_GB <- gr_Oki_O # To ease recomputing with another object
 current_GB <- gbs$Oki_Osa
-#current_GB <- coa$Oki_Osa
 gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 pwm <- gadems.invLeftGap$Oki_Osa[[1]]
 pwm@consensus
-pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$Oki)
+# pwmHits <- matchPWM(pwm = sapply(pwm@alignList, \(x) x@seq) |> as("DNAStringSet") |> PWM(), genomes$Oki) # Gives different scores...
+pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$Oki) |> suppressWarnings()
+# Suppressing warnings like:
+# Warning messages:
+# 1: In .Call2("XString_match_PWM", pwm, subject, min.score, count.only,  :
+#   'subject' contains letters not in [ACGT] ==> assigned weight 0 to them
 
 hmList_OKI <- list()
 
@@ -291,16 +294,11 @@ hmList_OKI$promoters  <- feature_coverage(current_GB, promoters(annots$Oki),    
 hmList_OKI$exons      <- feature_coverage(current_GB, exonicParts(annots$Oki),                   win = 2000, lab = "Oki exons", direction = "left")
 hmList_OKI$introns    <- feature_coverage(current_GB, intronicParts(annots$Oki),                 win = 2000, lab = "Oki introns", direction = "left")
 hmList_OKI$cds        <- feature_coverage(current_GB, cds(annots$Oki),                           win = 2000, lab = "Oki cds", direction = "left")
-hmList_OKI$utrs5      <- feature_coverage(current_GB, unlist(fiveUTRsByTranscript(annots$Oki)),  win = 2000, lab = "Oki 5′ UTRs", direction = "left")
-hmList_OKI$utrs3      <- feature_coverage(current_GB, unlist(threeUTRsByTranscript(annots$Oki)), win = 2000, lab = "Oki 3′ UTRs", direction = "left")
 hmList_OKI$pwm        <- feature_coverage(current_GB, pwmHits                                  , win = 2000, lab = "PWM", direction = "left")
 
-plotHeatmapMeta(hmList_OKI)
-plotHeatmapMeta(hmList_OKI$genes)
-plotHeatmapMeta(hmList_OKI[c("exons", "cds")])
-plotHeatmapMeta(hmList_OKI[c("exons", "introns", "utrs5", "utrs3", "pwm")])
-plotHeatmapMeta(hmList_OKI[c("introns", "utrs5", "utrs3", "pwm")])
-plotHeatmapMeta(hmList_OKI[c("utrs5", "utrs3", "pwm")])
+plotHeatmapMeta(hmList_OKI[c("genes", "exons", "cds")]) # Show they look alike.  We keep "exons"
+plotHeatmapMeta(hmList_OKI[c("promoters", "exons", "introns", "pwm")])
+plotHeatmapMeta(hmList_OKI[c("pwm")])
 ```
 
 Aligned regions are enriched in exons and depleted in introns.  Is it because
@@ -320,13 +318,9 @@ hmList_PWM_OKI$promoters <- feature_coverage(current_GB, promoters(annots$Oki), 
 hmList_PWM_OKI$exons     <- feature_coverage(current_GB, exonicParts(annots$Oki),                   win = 2000, lab = "Oki exons", direction = "left")
 hmList_PWM_OKI$introns   <- feature_coverage(current_GB, intronicParts(annots$Oki),                 win = 2000, lab = "Oki introns", direction = "left")
 hmList_PWM_OKI$cds       <- feature_coverage(current_GB, cds(annots$Oki),                           win = 2000, lab = "Oki cds", direction = "left")
-hmList_PWM_OKI$utrs5     <- feature_coverage(current_GB, unlist(fiveUTRsByTranscript(annots$Oki)),  win = 2000, lab = "Oki 5′ UTRs", direction = "left")
-hmList_PWM_OKI$utrs3     <- feature_coverage(current_GB, unlist(threeUTRsByTranscript(annots$Oki)), win = 2000, lab = "Oki 3′ UTRs", direction = "left")
 
-plotHeatmapMeta(hmList_PWM_OKI)
-plotHeatmapMeta(hmList_PWM_OKI[c("exons", "introns")])
-plotHeatmapMeta(hmList_PWM_OKI[c("exons", "utrs5", "utrs3")])
-plotHeatmapMeta(hmList_PWM_OKI[c("utrs5", "utrs3")])
+plotHeatmapMeta(hmList_PWM_OKI[c("genes", "exons", "cds")]) # Show they look alike.  We keep "exons"
+plotHeatmapMeta(hmList_PWM_OKI[c("promoters", "exons", "introns")])
 ```
 
 They are enriched in introns...
