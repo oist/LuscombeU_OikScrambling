@@ -1,5 +1,5 @@
 ---
-title: "Introduction to the OikScrambling package"
+title: "Genomic features of the breakpoints"
 author: 
  - "Charlotte West"
  - "Charles Plessy"
@@ -7,19 +7,21 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{Introduction to the OikScrambling package}
+  %\VignetteIndexEntry{Genomic features of the breakpoints}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
 
-```{r setup}
+```{r setup, cache=FALSE}
 knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
-Load packages and data
-======================
+Genomic features of the breakpoints
+===================================
+
+_Breakpoint annotation_
 
 See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllTranscriptsGR`,
 and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
@@ -28,10 +30,10 @@ different objects are prepared.
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
 library('GenomicFeatures') |> suppressPackageStartupMessages()
-(genomes     <- OikScrambling:::loadAllGenomes())
-(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
-(annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings())
-(load("BreakPoints.Rdata"))
+genomes     <- OikScrambling:::loadAllGenomes()
+transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings()
+annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
+load("BreakPoints.Rdata")
 requireNamespace("rGADEM")
 requireNamespace("ggseqlogo")
 ```
