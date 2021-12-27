@@ -146,11 +146,9 @@ library("patchwork")
 
 ## Aligned regions
 
-_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
+### Whole genomes
 
-The distribution of alignment widths takes a bimodal appearance after
-collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
-answer is _no_.
+_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
 
 ```{r width_before_coalescing, dependson="pre_compute_widths_object", fig.width=10}
 gg_freq_poly(widths$gbs) +
@@ -173,21 +171,32 @@ gg_freq_poly(widths$gbs) +
   ggtitle("Distribution of aligned region widths")
 ```
 
-First, the distribution of widths is not the same on long and short arms.
-For this reason, it would be unwise to filter by width on some operations such
-as coalescing.
+### Faceted by arms
 
-```{r widths_gbs, dependson="pre_compute_widths_object"}
+The distribution of widths is not the same on long and short arms.
+
+Note that for this reason, it would be unwise to filter by width on some
+operations such as coalescing.
+
+```{r widths_gbs_by_arm, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$gbs) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of alignment widths before collapsing, split by arm.")
+  ggtitle("Distribution of aligned region widths")
 
 gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
+  ggtitle("Distribution of aligned region widths on chr1")
+```
 
+Width distribution per arm follows similar pattern on chr2 (first graph).  Pairs
+at a similar evolutionary distance show similar profile, with the exception
+of Osa_Aom, where the number of alignments on short arms is higher.
+Nevertheless, the trend of widths being longer on long arms stay true, so
+we can average them in the plot below.
+
+```{r widths_gbs2_by_arm, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", nrow=1) +
