@@ -212,17 +212,38 @@ the “same population” level.
 gg_freq_poly(widths$unal) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of unaligned regions width before collapsing, split by arm.")
+  ggtitle("Distribution of unaligned region widths")
 
 gg_freq_poly(widths$unal |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of unaligned regions width on chr1 before collapsing, split by genome pair")
+  ggtitle("Distribution of unaligned region widths")
 
 gg_freq_poly(widths$unal |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", ncol=1) +
-  ggtitle("Distribution of unaligned region widths before collapsing, split by distance group") +
+  ggtitle("Distribution of unaligned region widths") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
+```
+
+Interestingly, only in Oikopleura do the width distributions from pairs of
+different distance peak at the same size.  Could that be because the genome is
+very compact?
+
+```{r widths_unaligned2, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$unal |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=name) +
+  facet_wrap(~dist, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of unaligned region widths") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")  +
+  scale_color_manual(values = names_table$query)
+
+gg_freq_poly(widths$unal) +
+  aes(col=class) +
+  facet_wrap(~genus, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of unaligned region widths") +
   geom_vline(xintercept = 300) +
   scale_x_log10("Width (vertical bar at 300 bp)")
 ```
