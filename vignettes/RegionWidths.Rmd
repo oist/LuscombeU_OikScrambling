@@ -162,15 +162,15 @@ gg_freq_poly(widths$gbs) +
 gg_freq_poly(widths$gbs |> dplyr::filter(genus == "Oikopleura")) +
   aes(col=name) +
   facet_wrap(~dist, scales = "free_y", nrow = 1) +
-  ggtitle("Distribution of alignment widths before collapsing, collated by distance group") +
+  ggtitle("Distribution of aligned region widths") +
   scale_color_manual(values = names_table$query)
 ```
 
-```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=9, fig.width=6}
 gg_freq_poly(widths$gbs) +
   aes(width, after_stat(density), col=class) +
-  facet_wrap(~distS, scales = "free_y", ncol = 1) +
-  ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of aligned region widths")
 ```
 
 First, the distribution of widths is not the same on long and short arms.
