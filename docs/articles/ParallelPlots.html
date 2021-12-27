@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -120,7 +120,7 @@
       <h1 data-toc-skip>Whole-chromosome parallel plots</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">15 December, 2021</h4>
+            <h4 data-toc-skip class="date">27 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/ParallelPlots.Rmd" class="external-link"><code>vignettes/ParallelPlots.Rmd</code></a></small>
       <div class="hidden name"><code>ParallelPlots.Rmd</code></div>
@@ -192,7 +192,7 @@
     <span class="op">)</span>
   <span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/phylogenetic_tree-1.svg" width="576"></p>
 </div>
 <div class="section level2">
@@ -292,8 +292,8 @@
 </h2>
 <p>Since Okinawa is the outgroup, let’s look for regions of it that are aligned on both the Osaka and the Barcelona genomes.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
-<span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
+<span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">findOverlapPairs</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Pairs object with 4 pairs and 0 metadata columns:</span>
 <span class="co">##                          first                   second</span>
@@ -303,8 +303,8 @@
 <span class="co">##   [3]  PAR:15193293-15358116:-  PAR:15193294-15358116:-</span>
 <span class="co">##   [4]  XSR:10090052-10210973:-  XSR:10090052-10210972:-</span></code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">gaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 16 ranges and 5 metadata columns:</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">gaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## GBreaks object with 16 ranges and 6 metadata columns:</span>
 <span class="co">##        seqnames            ranges strand |                  query      Arm</span>
 <span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;factor&gt;</span>
 <span class="co">##    [1]     chr2   5825747-5966560      + |   Chr2:5465216-5578318     long</span>
@@ -318,19 +318,32 @@
 <span class="co">##   [14]      XSR   8709632-8820503      + |    XSR:7297396-7413239      XSR</span>
 <span class="co">##   [15]      XSR   8929901-9075791      - |    XSR:7506741-7641724      XSR</span>
 <span class="co">##   [16]      XSR 10090052-10210973      - |  XSR:10484001-10612402      XSR</span>
-<span class="co">##                                  rep            transcripts        flag</span>
-<span class="co">##                      &lt;CharacterList&gt;                  &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##    [1]        tandem,unknown,rnd,... g5554.t1;g5556.t1;g5..        &lt;NA&gt;</span>
-<span class="co">##    [2]  tandem,rnd,LowComplexity,... g6889.t1;g6890.t1;g6..        &lt;NA&gt;</span>
-<span class="co">##    [3] unknown,rnd,LowComplexity,... g7009.t1;g7010.t1;g7..        &lt;NA&gt;</span>
-<span class="co">##    [4]             unknown,rnd,ltr-1 g7918.t1;g7922.t1;g7..        &lt;NA&gt;</span>
-<span class="co">##    [5]        tandem,rnd,unknown,... g8164.t1;g8165.t1;g8..        &lt;NA&gt;</span>
-<span class="co">##    ...                           ...                    ...         ...</span>
-<span class="co">##   [12]      tandem,rnd,LowComplexity g15405.t1;g15406.t1;..         Tra</span>
-<span class="co">##   [13]        tandem,rnd,unknown,... g15508.t1;g15509.t1;..        &lt;NA&gt;</span>
-<span class="co">##   [14]      rnd,tandem,LowComplexity g15864.t1;g15865.t1;..        &lt;NA&gt;</span>
-<span class="co">##   [15]             unknown,rnd,ltr-1 g15934.t1;g15935.t1;..        &lt;NA&gt;</span>
-<span class="co">##   [16]                   rnd,unknown g16292.t1;g16293.t1;..        &lt;NA&gt;</span>
+<span class="co">##                                  rep   repOvlp            transcripts</span>
+<span class="co">##                      &lt;CharacterList&gt; &lt;integer&gt;                  &lt;Rle&gt;</span>
+<span class="co">##    [1]        tandem,unknown,rnd,...      5240 g5554.t1;g5556.t1;g5..</span>
+<span class="co">##    [2]  tandem,rnd,LowComplexity,...     11135 g6889.t1;g6890.t1;g6..</span>
+<span class="co">##    [3] unknown,rnd,LowComplexity,...      5389 g7009.t1;g7010.t1;g7..</span>
+<span class="co">##    [4]             unknown,rnd,ltr-1      6725 g7918.t1;g7922.t1;g7..</span>
+<span class="co">##    [5]        tandem,rnd,unknown,...      9346 g8164.t1;g8165.t1;g8..</span>
+<span class="co">##    ...                           ...       ...                    ...</span>
+<span class="co">##   [12]      tandem,rnd,LowComplexity      2161 g15405.t1;g15406.t1;..</span>
+<span class="co">##   [13]        tandem,rnd,unknown,...      5241 g15508.t1;g15509.t1;..</span>
+<span class="co">##   [14]      rnd,tandem,LowComplexity      1409 g15864.t1;g15865.t1;..</span>
+<span class="co">##   [15]             unknown,rnd,ltr-1      3812 g15934.t1;g15935.t1;..</span>
+<span class="co">##   [16]                   rnd,unknown      1737 g16292.t1;g16293.t1;..</span>
+<span class="co">##               flag</span>
+<span class="co">##        &lt;character&gt;</span>
+<span class="co">##    [1]        &lt;NA&gt;</span>
+<span class="co">##    [2]        &lt;NA&gt;</span>
+<span class="co">##    [3]        &lt;NA&gt;</span>
+<span class="co">##    [4]        &lt;NA&gt;</span>
+<span class="co">##    [5]        &lt;NA&gt;</span>
+<span class="co">##    ...         ...</span>
+<span class="co">##   [12]         Tra</span>
+<span class="co">##   [13]        &lt;NA&gt;</span>
+<span class="co">##   [14]        &lt;NA&gt;</span>
+<span class="co">##   [15]        &lt;NA&gt;</span>
+<span class="co">##   [16]        &lt;NA&gt;</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -405,9 +418,9 @@
 <span class="co">##  [4] BSgenome.Odioica.local.Bar2.p4_1.0.0               </span>
 <span class="co">##  [5] BSgenome.Odioica.local.OSKA2016v1.9_1.0.0          </span>
 <span class="co">##  [6] BSgenome.Odioica.local.OKI2018.I69_1.0.0           </span>
-<span class="co">##  [7] OikScrambling_0.5.0                                </span>
+<span class="co">##  [7] OikScrambling_0.6.6                                </span>
 <span class="co">##  [8] ggplot2_3.3.5                                      </span>
-<span class="co">##  [9] GenomicBreaks_0.12.0                               </span>
+<span class="co">##  [9] GenomicBreaks_0.12.2                               </span>
 <span class="co">## [10] BSgenome_1.62.0                                    </span>
 <span class="co">## [11] rtracklayer_1.54.0                                 </span>
 <span class="co">## [12] Biostrings_2.62.0                                  </span>
@@ -419,7 +432,7 @@
 <span class="co">## [18] BiocGenerics_0.40.0                                </span>
 <span class="co">## </span>
 <span class="co">## loaded via a namespace (and not attached):</span>
-<span class="co">##   [1] backports_1.4.0             Hmisc_4.6-0                </span>
+<span class="co">##   [1] backports_1.4.1             Hmisc_4.6-0                </span>
 <span class="co">##   [3] systemfonts_1.0.3           plyr_1.8.6                 </span>
 <span class="co">##   [5] splines_4.1.2               BiocParallel_1.28.3        </span>
 <span class="co">##   [7] digest_0.6.29               htmltools_0.5.2            </span>
@@ -432,14 +445,14 @@
 <span class="co">##  [21] R.utils_2.11.0              pkgdown_2.0.1              </span>
 <span class="co">##  [23] jpeg_0.1-9                  colorspace_2.0-2           </span>
 <span class="co">##  [25] blob_1.2.2                  textshaping_0.3.6          </span>
-<span class="co">##  [27] xfun_0.28                   dplyr_1.0.7                </span>
+<span class="co">##  [27] xfun_0.29                   dplyr_1.0.7                </span>
 <span class="co">##  [29] crayon_1.4.2                RCurl_1.98-1.5             </span>
 <span class="co">##  [31] jsonlite_1.7.2              lme4_1.1-27.1              </span>
-<span class="co">##  [33] survival_3.2-13             glue_1.5.1                 </span>
+<span class="co">##  [33] survival_3.2-13             glue_1.6.0                 </span>
 <span class="co">##  [35] gtable_0.3.0                zlibbioc_1.40.0            </span>
 <span class="co">##  [37] DelayedArray_0.20.0         weights_1.0.4              </span>
 <span class="co">##  [39] abind_1.4-5                 scales_1.1.1               </span>
-<span class="co">##  [41] DBI_1.1.1                   Rcpp_1.0.7                 </span>
+<span class="co">##  [41] DBI_1.1.2                   Rcpp_1.0.7                 </span>
 <span class="co">##  [43] plotrix_3.8-2               genoPlotR_0.8.11           </span>
 <span class="co">##  [45] xtable_1.8-4                htmlTable_2.3.0            </span>
 <span class="co">##  [47] foreign_0.8-81              bit_4.0.4                  </span>
@@ -458,8 +471,8 @@
 <span class="co">##  [73] evaluate_0.14               stringr_1.4.0              </span>
 <span class="co">##  [75] fastmap_1.1.0               fftwtools_0.9-11           </span>
 <span class="co">##  [77] yaml_2.2.1                  ragg_1.2.1                 </span>
-<span class="co">##  [79] knitr_1.36                  bit64_4.0.5                </span>
-<span class="co">##  [81] fs_1.5.0                    purrr_0.3.4                </span>
+<span class="co">##  [79] knitr_1.37                  bit64_4.0.5                </span>
+<span class="co">##  [81] fs_1.5.2                    purrr_0.3.4                </span>
 <span class="co">##  [83] heatmaps_1.18.0             KEGGREST_1.34.0            </span>
 <span class="co">##  [85] nlme_3.1-153                R.oo_1.24.0                </span>
 <span class="co">##  [87] poweRlaw_0.70.6             pracma_2.3.6               </span>
@@ -468,7 +481,7 @@
 <span class="co">##  [93] bslib_0.3.1                 stringi_1.7.6              </span>
 <span class="co">##  [95] highr_0.9                   desc_1.4.0                 </span>
 <span class="co">##  [97] lattice_0.20-45             CNEr_1.30.0                </span>
-<span class="co">##  [99] Matrix_1.3-4                nloptr_1.2.2.3             </span>
+<span class="co">##  [99] Matrix_1.4-0                nloptr_1.2.2.3             </span>
 <span class="co">## [101] vctrs_0.3.8                 pillar_1.6.4               </span>
 <span class="co">## [103] lifecycle_1.0.1             jquerylib_0.1.4            </span>
 <span class="co">## [105] data.table_1.14.2           bitops_1.0-7               </span>

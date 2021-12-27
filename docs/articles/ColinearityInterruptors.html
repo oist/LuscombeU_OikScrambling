@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -120,7 +120,7 @@
       <h1 data-toc-skip>Regions interrupting colinearity</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">15 December, 2021</h4>
+            <h4 data-toc-skip class="date">27 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/ColinearityInterruptors.Rmd" class="external-link"><code>vignettes/ColinearityInterruptors.Rmd</code></a></small>
       <div class="hidden name"><code>ColinearityInterruptors.Rmd</code></div>
@@ -178,7 +178,7 @@
 <code class="sourceCode R"><span class="co"># contig_3_1 appears to map roughly in the 8,000,000 – 13,000,000 region</span>
 <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html" class="external-link">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_3_1"</span><span class="op">)</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 303 ranges and 6 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 303 ranges and 7 metadata columns:</span>
 <span class="co">##         seqnames            ranges strand |                      query</span>
 <span class="co">##            &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |                  &lt;GRanges&gt;</span>
 <span class="co">##     [1]     chr1   8086429-8100669      + |       contig_3_1:714-16270</span>
@@ -192,32 +192,32 @@
 <span class="co">##   [301]     chr1 12833633-12852708      + | contig_3_1:4641498-4657954</span>
 <span class="co">##   [302]     chr1 12866392-12879379      + | contig_3_1:4657955-4669933</span>
 <span class="co">##   [303]     chr1 12881855-12897271      + | contig_3_1:4669935-4684841</span>
-<span class="co">##             score      Arm                           rep            transcripts</span>
-<span class="co">##         &lt;integer&gt; &lt;factor&gt;               &lt;CharacterList&gt;                  &lt;Rle&gt;</span>
-<span class="co">##     [1]     14241    long                         tandem               g2146.t1</span>
-<span class="co">##     [2]       226    short                           rnd                   &lt;NA&gt;</span>
-<span class="co">##     [3]      4255    long                     rnd,tandem g2151.t1;g2152.t1;g2..</span>
-<span class="co">##     [4]     20695    long                    rnd,unknown g2153.t1;g2157.t1;g2..</span>
-<span class="co">##     [5]       685    long                        unknown                   &lt;NA&gt;</span>
-<span class="co">##     ...       ...      ...                           ...                    ...</span>
-<span class="co">##   [299]      3812     long                          &lt;NA&gt;                   &lt;NA&gt;</span>
-<span class="co">##   [300]     32908     long LowComplexity,unknown,rnd,... g3507.t1;g3511.t2;g3..</span>
-<span class="co">##   [301]     19076     long                    tandem,rnd      g3513.t1;g3515.t1</span>
-<span class="co">##   [302]     12988     long            unknown,tandem,rnd                   &lt;NA&gt;</span>
-<span class="co">##   [303]     15417     long      tandem,LowComplexity,rnd g3531.t1;g3532.t1;g3..</span>
-<span class="co">##                flag</span>
-<span class="co">##         &lt;character&gt;</span>
-<span class="co">##     [1]        &lt;NA&gt;</span>
-<span class="co">##     [2]        &lt;NA&gt;</span>
-<span class="co">##     [3]         Tra</span>
-<span class="co">##     [4]        &lt;NA&gt;</span>
-<span class="co">##     [5]        &lt;NA&gt;</span>
-<span class="co">##     ...         ...</span>
-<span class="co">##   [299]        &lt;NA&gt;</span>
-<span class="co">##   [300]         Tra</span>
-<span class="co">##   [301]         Tra</span>
-<span class="co">##   [302]         Tra</span>
-<span class="co">##   [303]        &lt;NA&gt;</span>
+<span class="co">##             score      Arm                           rep   repOvlp</span>
+<span class="co">##         &lt;integer&gt; &lt;factor&gt;               &lt;CharacterList&gt; &lt;integer&gt;</span>
+<span class="co">##     [1]     14241    long                         tandem       121</span>
+<span class="co">##     [2]       226    short                           rnd        85</span>
+<span class="co">##     [3]      4255    long                     rnd,tandem       114</span>
+<span class="co">##     [4]     20695    long                    rnd,unknown       711</span>
+<span class="co">##     [5]       685    long                        unknown       685</span>
+<span class="co">##     ...       ...      ...                           ...       ...</span>
+<span class="co">##   [299]      3812     long                          &lt;NA&gt;         0</span>
+<span class="co">##   [300]     32908     long LowComplexity,unknown,rnd,...      2219</span>
+<span class="co">##   [301]     19076     long                    tandem,rnd       933</span>
+<span class="co">##   [302]     12988     long            unknown,tandem,rnd      1423</span>
+<span class="co">##   [303]     15417     long      tandem,LowComplexity,rnd       688</span>
+<span class="co">##                    transcripts        flag</span>
+<span class="co">##                          &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##     [1]               g2146.t1        &lt;NA&gt;</span>
+<span class="co">##     [2]                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##     [3] g2151.t1;g2152.t1;g2..         Tra</span>
+<span class="co">##     [4] g2153.t1;g2157.t1;g2..        &lt;NA&gt;</span>
+<span class="co">##     [5]                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##     ...                    ...         ...</span>
+<span class="co">##   [299]                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [300] g3507.t1;g3511.t2;g3..         Tra</span>
+<span class="co">##   [301]      g3513.t1;g3515.t1         Tra</span>
+<span class="co">##   [302]                   &lt;NA&gt;         Tra</span>
+<span class="co">##   [303] g3531.t1;g3532.t1;g3..        &lt;NA&gt;</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <p>How about the second alignment pair, mapping 226 bases of <code>contig_3_1</code> to the short arm?</p>
@@ -226,17 +226,17 @@
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_3_1"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">21079</span><span class="op">)</span> |&gt;
   <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span><span class="op">)</span>
 <span class="va">ROI1</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 3 ranges and 6 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 3 ranges and 7 metadata columns:</span>
 <span class="co">##       seqnames          ranges strand |                  query     score</span>
 <span class="co">##          &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;integer&gt;</span>
 <span class="co">##   [1]     chr1 8086429-8100669      + |   contig_3_1:714-16270     14241</span>
 <span class="co">##   [2]     chr1 3870099-3870324      - | contig_3_1:16561-16812       226</span>
 <span class="co">##   [3]     chr1 8100696-8104950      + | contig_3_1:16822-21079      4255</span>
-<span class="co">##            Arm             rep            transcripts        flag</span>
-<span class="co">##       &lt;factor&gt; &lt;CharacterList&gt;                  &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##   [1]    long           tandem               g2146.t1        &lt;NA&gt;</span>
-<span class="co">##   [2]    short             rnd                   &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [3]    long       rnd,tandem g2151.t1;g2152.t1;g2..         Tra</span>
+<span class="co">##            Arm             rep   repOvlp            transcripts        flag</span>
+<span class="co">##       &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;                  &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##   [1]    long           tandem       121               g2146.t1        &lt;NA&gt;</span>
+<span class="co">##   [2]    short             rnd        85                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [3]    long       rnd,tandem       114 g2151.t1;g2152.t1;g2..         Tra</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -248,17 +248,17 @@
 <p>Is the alignment convincing ?</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Good match where reported</span>
-<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">3870099</span><span class="op">:</span><span class="fl">3870324</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
+<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">3870099</span><span class="op">:</span><span class="fl">3870324</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Local PairwiseAlignmentsSingleSubject (1 of 1)</span>
 <span class="co">## pattern: [1] <span style="color: #000000; background-color: #AFFFFF;">GGGGG</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span>...<span style="color: #000000; background-color: #AFFFFF;">GGG</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">GGG</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span></span>
 <span class="co">## subject: [1] <span style="color: #000000; background-color: #AFFFFF;">GGGGG</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span>...<span style="color: #000000; background-color: #AFFFFF;">GGG</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">GGG</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span></span>
 <span class="co">## score: 344.5798</span></code></pre>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># 50 bp of flanking regions added to contrast</span>
-<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">50</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="op">(</span><span class="fl">3870099</span> <span class="op">-</span><span class="fl">50</span><span class="op">)</span><span class="op">:</span><span class="op">(</span><span class="fl">3870324</span> <span class="op">+</span> <span class="fl">50</span><span class="op">)</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">50</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="op">(</span><span class="fl">3870099</span> <span class="op">-</span><span class="fl">50</span><span class="op">)</span><span class="op">:</span><span class="op">(</span><span class="fl">3870324</span> <span class="op">+</span> <span class="fl">50</span><span class="op">)</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:20 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:11 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -315,13 +315,13 @@
 <span class="co">## #---------------------------------------</span></code></pre>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># No good match between the flanking pairs.</span>
-<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:+"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">8086429</span><span class="op">:</span><span class="fl">8104950</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
+<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:+"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">8086429</span><span class="op">:</span><span class="fl">8104950</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Local PairwiseAlignmentsSingleSubject (1 of 1)</span>
 <span class="co">## pattern:   [113] <span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">TTTTTT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span></span>
 <span class="co">## subject: [11595] <span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TTTTTT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span></span>
 <span class="co">## score: 23.82705</span></code></pre>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">8086429</span><span class="op">:</span><span class="fl">8104950</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_3_1:16561-16812:-"</span><span class="op">)</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">8086429</span><span class="op">:</span><span class="fl">8104950</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"local"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Local PairwiseAlignmentsSingleSubject (1 of 1)</span>
 <span class="co">## pattern:  [221] <span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span></span>
 <span class="co">## subject: [1978] <span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span></span>
@@ -334,7 +334,7 @@
 <p>Let’s look at the area <code>chr1:8080000-12900000</code> covered by <code>contig_3_1</code>. Can we coalesce it once we only keep the paired matches? The answer is no…</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html" class="external-link">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"chr1"</span>, <span class="va">start</span> <span class="op">&gt;</span> <span class="fl">8080000</span>, <span class="va">end</span> <span class="op">&lt;</span> <span class="fl">12900000</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 303 ranges and 6 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 303 ranges and 7 metadata columns:</span>
 <span class="co">##         seqnames            ranges strand |                       query</span>
 <span class="co">##            &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |                   &lt;GRanges&gt;</span>
 <span class="co">##     [1]     chr1   8086429-8100669      + |        contig_3_1:714-16270</span>
@@ -348,32 +348,32 @@
 <span class="co">##   [301]     chr1 12880951-12881290      + | contig_27_1:4164345-4164661</span>
 <span class="co">##   [302]     chr1 12881855-12897271      + |  contig_3_1:4669935-4684841</span>
 <span class="co">##   [303]     chr1 12897273-12899763      - | contig_88_1:1125832-1128287</span>
-<span class="co">##             score      Arm                      rep            transcripts</span>
-<span class="co">##         &lt;integer&gt; &lt;factor&gt;          &lt;CharacterList&gt;                  &lt;Rle&gt;</span>
-<span class="co">##     [1]     14241     long                   tandem               g2146.t1</span>
-<span class="co">##     [2]      4255     long               rnd,tandem g2151.t1;g2152.t1;g2..</span>
-<span class="co">##     [3]       695     long                     &lt;NA&gt;                   &lt;NA&gt;</span>
-<span class="co">##     [4]     20695     long              rnd,unknown g2153.t1;g2157.t1;g2..</span>
-<span class="co">##     [5]     65207     long     LowComplexity,tandem g2160.t1;g2161.t1;g2..</span>
-<span class="co">##     ...       ...      ...                      ...                    ...</span>
-<span class="co">##   [299]     13658     long           unknown,tandem g3518.t1;g3519.t1;g3..</span>
-<span class="co">##   [300]     12988     long       unknown,tandem,rnd                   &lt;NA&gt;</span>
-<span class="co">##   [301]       340     long                     &lt;NA&gt;                   &lt;NA&gt;</span>
-<span class="co">##   [302]     15417     long tandem,LowComplexity,rnd g3531.t1;g3532.t1;g3..</span>
-<span class="co">##   [303]      2491     long                     &lt;NA&gt;                   &lt;NA&gt;</span>
-<span class="co">##                flag</span>
-<span class="co">##         &lt;character&gt;</span>
-<span class="co">##     [1]        &lt;NA&gt;</span>
-<span class="co">##     [2]         Tra</span>
-<span class="co">##     [3]        &lt;NA&gt;</span>
-<span class="co">##     [4]        &lt;NA&gt;</span>
-<span class="co">##     [5]        &lt;NA&gt;</span>
-<span class="co">##     ...         ...</span>
-<span class="co">##   [299]        &lt;NA&gt;</span>
-<span class="co">##   [300]         Tra</span>
-<span class="co">##   [301]        &lt;NA&gt;</span>
-<span class="co">##   [302]        &lt;NA&gt;</span>
-<span class="co">##   [303]         Tra</span>
+<span class="co">##             score      Arm                      rep   repOvlp</span>
+<span class="co">##         &lt;integer&gt; &lt;factor&gt;          &lt;CharacterList&gt; &lt;integer&gt;</span>
+<span class="co">##     [1]     14241     long                   tandem       121</span>
+<span class="co">##     [2]      4255     long               rnd,tandem       114</span>
+<span class="co">##     [3]       695     long                     &lt;NA&gt;         0</span>
+<span class="co">##     [4]     20695     long              rnd,unknown       711</span>
+<span class="co">##     [5]     65207     long     LowComplexity,tandem       620</span>
+<span class="co">##     ...       ...      ...                      ...       ...</span>
+<span class="co">##   [299]     13658     long           unknown,tandem       131</span>
+<span class="co">##   [300]     12988     long       unknown,tandem,rnd      1423</span>
+<span class="co">##   [301]       340     long                     &lt;NA&gt;         0</span>
+<span class="co">##   [302]     15417     long tandem,LowComplexity,rnd       688</span>
+<span class="co">##   [303]      2491     long                     &lt;NA&gt;         0</span>
+<span class="co">##                    transcripts        flag</span>
+<span class="co">##                          &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##     [1]               g2146.t1        &lt;NA&gt;</span>
+<span class="co">##     [2] g2151.t1;g2152.t1;g2..         Tra</span>
+<span class="co">##     [3]                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##     [4] g2153.t1;g2157.t1;g2..        &lt;NA&gt;</span>
+<span class="co">##     [5] g2160.t1;g2161.t1;g2..        &lt;NA&gt;</span>
+<span class="co">##     ...                    ...         ...</span>
+<span class="co">##   [299] g3518.t1;g3519.t1;g3..        &lt;NA&gt;</span>
+<span class="co">##   [300]                   &lt;NA&gt;         Tra</span>
+<span class="co">##   [301]                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [302] g3531.t1;g3532.t1;g3..        &lt;NA&gt;</span>
+<span class="co">##   [303]                   &lt;NA&gt;         Tra</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
@@ -424,10 +424,10 @@
 <code class="sourceCode R"><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##   seqnames start   end width strand score query.seqnames query.start query.end</span>
 <span class="co">## 1     chr1  7785 15657  7873      + 43650    contig_10_1       52244     60120</span>
-<span class="co">##   query.width query.strand query.rep query.transcripts   Arm rep transcripts</span>
-<span class="co">## 1        7877            *       rnd              &lt;NA&gt; short rnd        &lt;NA&gt;</span>
-<span class="co">##   flag</span>
-<span class="co">## 1 &lt;NA&gt;</span></code></pre>
+<span class="co">##   query.width query.strand query.rep query.repOvlp query.transcripts   Arm rep</span>
+<span class="co">## 1        7877            *       rnd          7738              &lt;NA&gt; short rnd</span>
+<span class="co">##   repOvlp transcripts flag</span>
+<span class="co">## 1    6740        &lt;NA&gt; &lt;NA&gt;</span></code></pre>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span><span class="op">$</span><span class="va">contig_10_1</span><span class="op">[</span><span class="fl">52244</span><span class="op">:</span><span class="fl">60120</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">7785</span><span class="op">:</span><span class="fl">15657</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Global PairwiseAlignmentsSingleSubject (1 of 1)</span>
@@ -452,7 +452,7 @@
 <span class="co">##   [4] Motif:rnd-1_family-1..      rnd</span>
 <span class="co">##   [5] Motif:rnd-1_family-2..      rnd</span>
 <span class="co">##   -------</span>
-<span class="co">##   seqinfo: 19 sequences from an unspecified genome; no seqlengths</span></code></pre>
+<span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 </div>
 <div class="section level1">
 <h1 id="unaligned-mapped-region-roi4">Unaligned mapped region: ROI4<a class="anchor" aria-label="anchor" href="#unaligned-mapped-region-roi4"></a>
@@ -472,20 +472,20 @@
 <span class="co">## 4     chr1 554134 554168    35      *           Chr1     1728321   1728530</span>
 <span class="co">## 5     chr1 554365 554546   182      *           Chr1     1727927   1728109</span>
 <span class="co">## 6     chr1 554692 555191   500      *           Chr1     1727331   1727781</span>
-<span class="co">##   query.width query.strand query.rep query.transcripts   Arm rep transcripts</span>
-<span class="co">## 1         351            *       rnd              &lt;NA&gt; short  NA      g56.t1</span>
-<span class="co">## 2         396            *    tandem              &lt;NA&gt; short  NA        &lt;NA&gt;</span>
-<span class="co">## 3         361            *        NA           g385.t1 short  NA        &lt;NA&gt;</span>
-<span class="co">## 4         210            *        NA           g385.t1 short  NA        &lt;NA&gt;</span>
-<span class="co">## 5         183            *        NA           g384.t1 short  NA        &lt;NA&gt;</span>
-<span class="co">## 6         451            *        NA           g384.t1 short rnd        &lt;NA&gt;</span>
-<span class="co">##   flag       Class</span>
-<span class="co">## 1 &lt;NA&gt;  FALSE TRUE</span>
-<span class="co">## 2 &lt;NA&gt;  FALSE TRUE</span>
-<span class="co">## 3 &lt;NA&gt; FALSE FALSE</span>
-<span class="co">## 4 &lt;NA&gt; FALSE FALSE</span>
-<span class="co">## 5 &lt;NA&gt; FALSE FALSE</span>
-<span class="co">## 6 &lt;NA&gt;  TRUE FALSE</span></code></pre>
+<span class="co">##   query.width query.strand query.rep query.repOvlp query.transcripts   Arm rep</span>
+<span class="co">## 1         351            *       rnd           389              &lt;NA&gt; short  NA</span>
+<span class="co">## 2         396            *    tandem           237              &lt;NA&gt; short  NA</span>
+<span class="co">## 3         361            *        NA             0           g385.t1 short  NA</span>
+<span class="co">## 4         210            *        NA             0           g385.t1 short  NA</span>
+<span class="co">## 5         183            *        NA             0           g384.t1 short  NA</span>
+<span class="co">## 6         451            *        NA             0           g384.t1 short rnd</span>
+<span class="co">##   repOvlp transcripts flag       Class</span>
+<span class="co">## 1       0      g56.t1 &lt;NA&gt;  FALSE TRUE</span>
+<span class="co">## 2       0        &lt;NA&gt; &lt;NA&gt;  FALSE TRUE</span>
+<span class="co">## 3       0        &lt;NA&gt; &lt;NA&gt; FALSE FALSE</span>
+<span class="co">## 4       0        &lt;NA&gt; &lt;NA&gt; FALSE FALSE</span>
+<span class="co">## 5       0        &lt;NA&gt; &lt;NA&gt; FALSE FALSE</span>
+<span class="co">## 6     162        &lt;NA&gt; &lt;NA&gt;  TRUE FALSE</span></code></pre>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI4_1</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
 
@@ -495,12 +495,12 @@
 <pre><code><span class="co">##   seqnames  start    end width strand score query.seqnames query.start</span>
 <span class="co">## 1     chr1 551988 552335   348      -   680           Chr1     1731145</span>
 <span class="co">## 2     chr1 552383 552647   265      -   416           Chr1     1730510</span>
-<span class="co">##   query.end query.width query.strand query.rep query.transcripts   Arm rep</span>
-<span class="co">## 1   1731548         404            *        NA              &lt;NA&gt; short  NA</span>
-<span class="co">## 2   1730795         286            *       rnd              &lt;NA&gt; short  NA</span>
-<span class="co">##   transcripts flag</span>
-<span class="co">## 1      g56.t1  Col</span>
-<span class="co">## 2      g56.t1  Col</span></code></pre>
+<span class="co">##   query.end query.width query.strand query.rep query.repOvlp query.transcripts</span>
+<span class="co">## 1   1731548         404            *        NA             0              &lt;NA&gt;</span>
+<span class="co">## 2   1730795         286            *       rnd             4              &lt;NA&gt;</span>
+<span class="co">##     Arm rep repOvlp transcripts flag</span>
+<span class="co">## 1 short  NA       0      g56.t1  Col</span>
+<span class="co">## 2 short  NA       0      g56.t1  Col</span></code></pre>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">ROI4_1</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">range</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 1 range and 1 metadata column:</span>
@@ -514,7 +514,7 @@
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">552335</span><span class="op">:</span><span class="fl">552383</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1730795</span><span class="op">:</span><span class="fl">1731145</span><span class="op">]</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:32 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:23 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -573,7 +573,7 @@
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">552335</span><span class="op">:</span><span class="fl">552383</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1730795</span><span class="op">:</span><span class="fl">1731145</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:33 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:23 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -633,7 +633,7 @@
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">551988</span><span class="op">:</span><span class="fl">552647</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1730510</span><span class="op">:</span><span class="fl">1731548</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:33 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:23 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -768,7 +768,7 @@
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554365</span><span class="op">:</span><span class="fl">554546</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1727927</span><span class="op">:</span><span class="fl">1728109</span><span class="op">]</span>                       , type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:34 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:25 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -815,7 +815,7 @@
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554365</span><span class="op">:</span><span class="fl">554546</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1727927</span><span class="op">:</span><span class="fl">1728109</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:34 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:25 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -859,22 +859,22 @@
 
 <span class="co"># unaligned mapped region with flanking colinear alignments.</span>
 <span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">ROI4_2</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 2 ranges and 6 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 2 ranges and 7 metadata columns:</span>
 <span class="co">##       seqnames        ranges strand |     score                query      Arm</span>
 <span class="co">##          &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;            &lt;GRanges&gt; &lt;factor&gt;</span>
 <span class="co">##   [1]     chr1 554168-554365      - |       450 Chr1:1728109-1728321    short</span>
 <span class="co">##   [2]     chr1 554546-554692      - |       564 Chr1:1727781-1727927    short</span>
-<span class="co">##                   rep transcripts        flag</span>
-<span class="co">##       &lt;CharacterList&gt;       &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##   [1]            &lt;NA&gt;        &lt;NA&gt;         Col</span>
-<span class="co">##   [2]            &lt;NA&gt;        &lt;NA&gt;         Col</span>
+<span class="co">##                   rep   repOvlp transcripts        flag</span>
+<span class="co">##       &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##   [1]            &lt;NA&gt;         0        &lt;NA&gt;         Col</span>
+<span class="co">##   [2]            &lt;NA&gt;         0        &lt;NA&gt;         Col</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">554168</span><span class="op">:</span><span class="fl">554692</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1727781</span><span class="op">:</span><span class="fl">1728321</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:35 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:25 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -954,10 +954,10 @@
 <span class="va">ROI4_3</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##   seqnames  start    end width strand query.seqnames query.start query.end</span>
 <span class="co">## 1     chr1 561646 562124   479      *           Chr1     1722712   1723220</span>
-<span class="co">##   query.width query.strand query.rep       query.transcripts   Arm    rep</span>
-<span class="co">## 1         509            *       rnd g383.t2;g383.t1;g383.t3 short tandem</span>
-<span class="co">##            transcripts flag     Class</span>
-<span class="co">## 1 g57.t3;g57.t1;g57.t2 &lt;NA&gt; TRUE TRUE</span></code></pre>
+<span class="co">##   query.width query.strand query.rep query.repOvlp       query.transcripts</span>
+<span class="co">## 1         509            *       rnd           195 g383.t2;g383.t1;g383.t3</span>
+<span class="co">##     Arm    rep repOvlp          transcripts flag     Class</span>
+<span class="co">## 1 short tandem     158 g57.t3;g57.t1;g57.t2 &lt;NA&gt; TRUE TRUE</span></code></pre>
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># As character for convenience of BLAST searching.</span>
 <span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561646</span><span class="op">:</span><span class="fl">562124</span><span class="op">]</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Only one perfect BLAST hit at the NCBI, to the Oki genome.</span></code></pre></div>
@@ -970,7 +970,7 @@
 <span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561646</span><span class="op">:</span><span class="fl">562124</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1722712</span><span class="op">:</span><span class="fl">1723220</span><span class="op">]</span>                       , type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:35 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:25 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -1045,7 +1045,7 @@
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561646</span><span class="op">:</span><span class="fl">562124</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1722712</span><span class="op">:</span><span class="fl">1723220</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:35 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:26 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -1115,22 +1115,22 @@
 <div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># unaligned mapped region with flanking colinear alignments.</span>
 <span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">ROI4_3</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 2 ranges and 6 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 2 ranges and 7 metadata columns:</span>
 <span class="co">##       seqnames        ranges strand |     score                query      Arm</span>
 <span class="co">##          &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;            &lt;GRanges&gt; &lt;factor&gt;</span>
 <span class="co">##   [1]     chr1 561142-561646      - |      1387 Chr1:1723220-1723727    short</span>
 <span class="co">##   [2]     chr1 562124-563743      - |      2869 Chr1:1720807-1722712    short</span>
-<span class="co">##                   rep transcripts        flag</span>
-<span class="co">##       &lt;CharacterList&gt;       &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##   [1]            &lt;NA&gt;        &lt;NA&gt;         Col</span>
-<span class="co">##   [2]            &lt;NA&gt;        &lt;NA&gt;         Col</span>
+<span class="co">##                   rep   repOvlp transcripts        flag</span>
+<span class="co">##       &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##   [1]            &lt;NA&gt;         0        &lt;NA&gt;         Col</span>
+<span class="co">##   [2]            &lt;NA&gt;         0        &lt;NA&gt;         Col</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">$</span><span class="va">chr1</span><span class="op">[</span><span class="fl">561142</span><span class="op">:</span><span class="fl">563743</span><span class="op">]</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">$</span><span class="va">Chr1</span><span class="op">[</span><span class="fl">1720807</span><span class="op">:</span><span class="fl">1723727</span><span class="op">]</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:58:36 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:13:27 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -1417,18 +1417,18 @@
 <span class="co">## 9      chr1 1484885 1485855   971      -    contig_16_1     4442527   4444265</span>
 <span class="co">## 10     chr1 1485856 1486085   230      -    contig_16_1     4441532   4441769</span>
 <span class="co">## 11     chr1 1486156 1486497   342      +    contig_16_1     4446412   4446746</span>
-<span class="co">##    query.width query.strand    query.rep</span>
-<span class="co">## 1          108            *          rnd</span>
-<span class="co">## 2        31374            * tandem, ....</span>
-<span class="co">## 3         3958            * rnd, unknown</span>
-<span class="co">## 4          974            *           NA</span>
-<span class="co">## 5         8626            * rnd, unk....</span>
-<span class="co">## 6          687            *      unknown</span>
-<span class="co">## 7         1871            * rnd, unknown</span>
-<span class="co">## 8          137            *           NA</span>
-<span class="co">## 9         1739            * unknown, rnd</span>
-<span class="co">## 10         238            *           NA</span>
-<span class="co">## 11         335            *           NA</span>
+<span class="co">##    query.width query.strand    query.rep query.repOvlp</span>
+<span class="co">## 1          108            *          rnd           108</span>
+<span class="co">## 2        31374            * tandem, ....          3619</span>
+<span class="co">## 3         3958            * rnd, unknown           676</span>
+<span class="co">## 4          974            *           NA             0</span>
+<span class="co">## 5         8626            * rnd, unk....          2355</span>
+<span class="co">## 6          687            *      unknown           684</span>
+<span class="co">## 7         1871            * rnd, unknown          1698</span>
+<span class="co">## 8          137            *           NA             0</span>
+<span class="co">## 9         1739            * unknown, rnd           353</span>
+<span class="co">## 10         238            *           NA             0</span>
+<span class="co">## 11         335            *           NA             0</span>
 <span class="co">##                                                                                              query.transcripts</span>
 <span class="co">## 1                                                                                                     g8176.t1</span>
 <span class="co">## 2  g3891.t1;g3892.t1;g3893.t1;g3894.t1;g3895.t1;g3898.t1;g3899.t1;g3896.t1;g3897.t1;g3900.t2;g3900.t1;g3901.t1</span>
@@ -1441,18 +1441,18 @@
 <span class="co">## 9                                                                                                         &lt;NA&gt;</span>
 <span class="co">## 10                                                                                                        &lt;NA&gt;</span>
 <span class="co">## 11                                                                                                        &lt;NA&gt;</span>
-<span class="co">##    score   Arm          rep</span>
-<span class="co">## 1    108 short          rnd</span>
-<span class="co">## 2  29811 short tandem, ....</span>
-<span class="co">## 3   3937 short          rnd</span>
-<span class="co">## 4    949 short           NA</span>
-<span class="co">## 5   7564 short rnd, tan....</span>
-<span class="co">## 6    684 short          rnd</span>
-<span class="co">## 7   1917 short rnd, unknown</span>
-<span class="co">## 8    138 short           NA</span>
-<span class="co">## 9    971 short           NA</span>
-<span class="co">## 10   230 short           NA</span>
-<span class="co">## 11   342 short           NA</span>
+<span class="co">##    score   Arm          rep repOvlp</span>
+<span class="co">## 1    108 short          rnd     108</span>
+<span class="co">## 2  29811 short tandem, ....    1178</span>
+<span class="co">## 3   3937 short          rnd     697</span>
+<span class="co">## 4    949 short           NA       0</span>
+<span class="co">## 5   7564 short rnd, tan....     562</span>
+<span class="co">## 6    684 short          rnd     684</span>
+<span class="co">## 7   1917 short rnd, unknown    1592</span>
+<span class="co">## 8    138 short           NA       0</span>
+<span class="co">## 9    971 short           NA       0</span>
+<span class="co">## 10   230 short           NA       0</span>
+<span class="co">## 11   342 short           NA       0</span>
 <span class="co">##                                                        transcripts flag</span>
 <span class="co">## 1                                                          g302.t1 &lt;NA&gt;</span>
 <span class="co">## 2  g302.t1;g303.t1;g304.t1;g306.t1;g307.t1;g308.t1;g313.t1;g314.t1 &lt;NA&gt;</span>
@@ -1490,16 +1490,16 @@
 <span class="co">## 7     chr1 2405232 2405393   162      -    contig_27_1     1445390   1445562</span>
 <span class="co">## 8     chr1 9897740 9898012   273      +    contig_27_1     1447046   1447318</span>
 <span class="co">## 9     chr2 3010219 3010391   173      -    contig_27_1     1441042   1441221</span>
-<span class="co">##   query.width query.strand    query.rep</span>
-<span class="co">## 1       31374            * tandem, ....</span>
-<span class="co">## 2        3958            * rnd, unknown</span>
-<span class="co">## 3         974            *           NA</span>
-<span class="co">## 4        8626            * rnd, unk....</span>
-<span class="co">## 5         687            *      unknown</span>
-<span class="co">## 6        1871            * rnd, unknown</span>
-<span class="co">## 7         173            *  tandem, rnd</span>
-<span class="co">## 8         273            * rnd, unknown</span>
-<span class="co">## 9         180            *          rnd</span>
+<span class="co">##   query.width query.strand    query.rep query.repOvlp</span>
+<span class="co">## 1       31374            * tandem, ....          3619</span>
+<span class="co">## 2        3958            * rnd, unknown           676</span>
+<span class="co">## 3         974            *           NA             0</span>
+<span class="co">## 4        8626            * rnd, unk....          2355</span>
+<span class="co">## 5         687            *      unknown           684</span>
+<span class="co">## 6        1871            * rnd, unknown          1698</span>
+<span class="co">## 7         173            *  tandem, rnd            68</span>
+<span class="co">## 8         273            * rnd, unknown             2</span>
+<span class="co">## 9         180            *          rnd           180</span>
 <span class="co">##                                                                                             query.transcripts</span>
 <span class="co">## 1 g3891.t1;g3892.t1;g3893.t1;g3894.t1;g3895.t1;g3898.t1;g3899.t1;g3896.t1;g3897.t1;g3900.t2;g3900.t1;g3901.t1</span>
 <span class="co">## 2                                                                                  g3902.t1;g3902.t2;g3901.t1</span>
@@ -1510,16 +1510,16 @@
 <span class="co">## 7                                                                                           g3902.t1;g3902.t2</span>
 <span class="co">## 8                                                                                                        &lt;NA&gt;</span>
 <span class="co">## 9                                                                                                    g3901.t1</span>
-<span class="co">##   score   Arm          rep</span>
-<span class="co">## 1 29811 short tandem, ....</span>
-<span class="co">## 2  3937 short          rnd</span>
-<span class="co">## 3   949 short           NA</span>
-<span class="co">## 4  7564 short rnd, tan....</span>
-<span class="co">## 5   684 short          rnd</span>
-<span class="co">## 6  1917 short rnd, unknown</span>
-<span class="co">## 7   162 short           NA</span>
-<span class="co">## 8   273  long       tandem</span>
-<span class="co">## 9   173 short           NA</span>
+<span class="co">##   score   Arm          rep repOvlp</span>
+<span class="co">## 1 29811 short tandem, ....    1178</span>
+<span class="co">## 2  3937 short          rnd     697</span>
+<span class="co">## 3   949 short           NA       0</span>
+<span class="co">## 4  7564 short rnd, tan....     562</span>
+<span class="co">## 5   684 short          rnd     684</span>
+<span class="co">## 6  1917 short rnd, unknown    1592</span>
+<span class="co">## 7   162 short           NA       0</span>
+<span class="co">## 8   273  long       tandem      24</span>
+<span class="co">## 9   173 short           NA       0</span>
 <span class="co">##                                                       transcripts flag</span>
 <span class="co">## 1 g302.t1;g303.t1;g304.t1;g306.t1;g307.t1;g308.t1;g313.t1;g314.t1 &lt;NA&gt;</span>
 <span class="co">## 2                                                 g319.t1;g319.t2 &lt;NA&gt;</span>
@@ -1542,16 +1542,16 @@
 <span class="co">## 7     chr1 9897740 9898012   273      +    contig_27_1     1447046   1447318</span>
 <span class="co">## 8     chr1 1471276 1478839  7564      +    contig_27_1     1447542   1456167</span>
 <span class="co">## 9     chr1 1479524 1481440  1917      +    contig_27_1     1456168   1458038</span>
-<span class="co">##   query.width query.strand    query.rep</span>
-<span class="co">## 1         687            *      unknown</span>
-<span class="co">## 2       31374            * tandem, ....</span>
-<span class="co">## 3         180            *          rnd</span>
-<span class="co">## 4        3958            * rnd, unknown</span>
-<span class="co">## 5         173            *  tandem, rnd</span>
-<span class="co">## 6         974            *           NA</span>
-<span class="co">## 7         273            * rnd, unknown</span>
-<span class="co">## 8        8626            * rnd, unk....</span>
-<span class="co">## 9        1871            * rnd, unknown</span>
+<span class="co">##   query.width query.strand    query.rep query.repOvlp</span>
+<span class="co">## 1         687            *      unknown           684</span>
+<span class="co">## 2       31374            * tandem, ....          3619</span>
+<span class="co">## 3         180            *          rnd           180</span>
+<span class="co">## 4        3958            * rnd, unknown           676</span>
+<span class="co">## 5         173            *  tandem, rnd            68</span>
+<span class="co">## 6         974            *           NA             0</span>
+<span class="co">## 7         273            * rnd, unknown             2</span>
+<span class="co">## 8        8626            * rnd, unk....          2355</span>
+<span class="co">## 9        1871            * rnd, unknown          1698</span>
 <span class="co">##                                                                                             query.transcripts</span>
 <span class="co">## 1                                                                                                        &lt;NA&gt;</span>
 <span class="co">## 2 g3891.t1;g3892.t1;g3893.t1;g3894.t1;g3895.t1;g3898.t1;g3899.t1;g3896.t1;g3897.t1;g3900.t2;g3900.t1;g3901.t1</span>
@@ -1562,16 +1562,16 @@
 <span class="co">## 7                                                                                                        &lt;NA&gt;</span>
 <span class="co">## 8                                                                                           g3904.t1;g3903.t1</span>
 <span class="co">## 9                                                                                                        &lt;NA&gt;</span>
-<span class="co">##   score   Arm          rep</span>
-<span class="co">## 1   684 short          rnd</span>
-<span class="co">## 2 29811 short tandem, ....</span>
-<span class="co">## 3   173 short           NA</span>
-<span class="co">## 4  3937 short          rnd</span>
-<span class="co">## 5   162 short           NA</span>
-<span class="co">## 6   949 short           NA</span>
-<span class="co">## 7   273  long       tandem</span>
-<span class="co">## 8  7564 short rnd, tan....</span>
-<span class="co">## 9  1917 short rnd, unknown</span>
+<span class="co">##   score   Arm          rep repOvlp</span>
+<span class="co">## 1   684 short          rnd     684</span>
+<span class="co">## 2 29811 short tandem, ....    1178</span>
+<span class="co">## 3   173 short           NA       0</span>
+<span class="co">## 4  3937 short          rnd     697</span>
+<span class="co">## 5   162 short           NA       0</span>
+<span class="co">## 6   949 short           NA       0</span>
+<span class="co">## 7   273  long       tandem      24</span>
+<span class="co">## 8  7564 short rnd, tan....     562</span>
+<span class="co">## 9  1917 short rnd, unknown    1592</span>
 <span class="co">##                                                       transcripts flag</span>
 <span class="co">## 1                                                            &lt;NA&gt; &lt;NA&gt;</span>
 <span class="co">## 2 g302.t1;g303.t1;g304.t1;g306.t1;g307.t1;g308.t1;g313.t1;g314.t1 &lt;NA&gt;</span>
@@ -1606,16 +1606,16 @@
 <span class="co">## 7     chr1 2405232 2405393   162      -    contig_27_1     1445390   1445562</span>
 <span class="co">## 8     chr1 9897740 9898012   273      +    contig_27_1     1447046   1447318</span>
 <span class="co">## 9     chr2 3010219 3010391   173      -    contig_27_1     1441042   1441221</span>
-<span class="co">##   query.width query.strand    query.rep</span>
-<span class="co">## 1       31374            * tandem, ....</span>
-<span class="co">## 2        3958            * rnd, unknown</span>
-<span class="co">## 3         974            *           NA</span>
-<span class="co">## 4        8626            * rnd, unk....</span>
-<span class="co">## 5         687            *      unknown</span>
-<span class="co">## 6        1871            * rnd, unknown</span>
-<span class="co">## 7         173            *  tandem, rnd</span>
-<span class="co">## 8         273            * rnd, unknown</span>
-<span class="co">## 9         180            *          rnd</span>
+<span class="co">##   query.width query.strand    query.rep query.repOvlp</span>
+<span class="co">## 1       31374            * tandem, ....          3619</span>
+<span class="co">## 2        3958            * rnd, unknown           676</span>
+<span class="co">## 3         974            *           NA             0</span>
+<span class="co">## 4        8626            * rnd, unk....          2355</span>
+<span class="co">## 5         687            *      unknown           684</span>
+<span class="co">## 6        1871            * rnd, unknown          1698</span>
+<span class="co">## 7         173            *  tandem, rnd            68</span>
+<span class="co">## 8         273            * rnd, unknown             2</span>
+<span class="co">## 9         180            *          rnd           180</span>
 <span class="co">##                                                                                             query.transcripts</span>
 <span class="co">## 1 g3891.t1;g3892.t1;g3893.t1;g3894.t1;g3895.t1;g3898.t1;g3899.t1;g3896.t1;g3897.t1;g3900.t2;g3900.t1;g3901.t1</span>
 <span class="co">## 2                                                                                  g3902.t1;g3902.t2;g3901.t1</span>
@@ -1626,16 +1626,16 @@
 <span class="co">## 7                                                                                           g3902.t1;g3902.t2</span>
 <span class="co">## 8                                                                                                        &lt;NA&gt;</span>
 <span class="co">## 9                                                                                                    g3901.t1</span>
-<span class="co">##   score   Arm          rep</span>
-<span class="co">## 1 29811 short tandem, ....</span>
-<span class="co">## 2  3937 short          rnd</span>
-<span class="co">## 3   949 short           NA</span>
-<span class="co">## 4  7564 short rnd, tan....</span>
-<span class="co">## 5   684 short          rnd</span>
-<span class="co">## 6  1917 short rnd, unknown</span>
-<span class="co">## 7   162 short           NA</span>
-<span class="co">## 8   273  long       tandem</span>
-<span class="co">## 9   173 short           NA</span>
+<span class="co">##   score   Arm          rep repOvlp</span>
+<span class="co">## 1 29811 short tandem, ....    1178</span>
+<span class="co">## 2  3937 short          rnd     697</span>
+<span class="co">## 3   949 short           NA       0</span>
+<span class="co">## 4  7564 short rnd, tan....     562</span>
+<span class="co">## 5   684 short          rnd     684</span>
+<span class="co">## 6  1917 short rnd, unknown    1592</span>
+<span class="co">## 7   162 short           NA       0</span>
+<span class="co">## 8   273  long       tandem      24</span>
+<span class="co">## 9   173 short           NA       0</span>
 <span class="co">##                                                       transcripts flag   tdist</span>
 <span class="co">## 1 g302.t1;g303.t1;g304.t1;g306.t1;g307.t1;g308.t1;g313.t1;g314.t1 &lt;NA&gt;       5</span>
 <span class="co">## 2                                                 g319.t1;g319.t2 &lt;NA&gt;      16</span>
@@ -1658,16 +1658,16 @@
 <span class="co">## 9   Inf</span></code></pre>
 <div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI5</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span>ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html" class="external-link">flagAll</a></span><span class="op">(</span><span class="op">)</span>|&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html" class="external-link">dist2next</a></span><span class="op">(</span> ignore.strand <span class="op">=</span> <span class="cn">TRUE</span>, step <span class="op">=</span><span class="fl">2</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##      seqnames   start     end width strand          rep</span>
-<span class="co">## 1 contig_11_1  467930  468616   687      -      unknown</span>
-<span class="co">## 2 contig_27_1 1409471 1440844 31374      + tandem, ....</span>
-<span class="co">## 3 contig_27_1 1441042 1441221   180      -          rnd</span>
-<span class="co">## 4 contig_27_1 1441222 1445179  3958      + rnd, unknown</span>
-<span class="co">## 5 contig_27_1 1445390 1445562   173      -  tandem, rnd</span>
-<span class="co">## 6 contig_27_1 1445585 1446558   974      +           NA</span>
-<span class="co">## 7 contig_27_1 1447046 1447318   273      + rnd, unknown</span>
-<span class="co">## 8 contig_27_1 1447542 1456167  8626      + rnd, unk....</span>
-<span class="co">## 9 contig_27_1 1456168 1458038  1871      + rnd, unknown</span>
+<pre><code><span class="co">##      seqnames   start     end width strand          rep repOvlp</span>
+<span class="co">## 1 contig_11_1  467930  468616   687      -      unknown     684</span>
+<span class="co">## 2 contig_27_1 1409471 1440844 31374      + tandem, ....    3619</span>
+<span class="co">## 3 contig_27_1 1441042 1441221   180      -          rnd     180</span>
+<span class="co">## 4 contig_27_1 1441222 1445179  3958      + rnd, unknown     676</span>
+<span class="co">## 5 contig_27_1 1445390 1445562   173      -  tandem, rnd      68</span>
+<span class="co">## 6 contig_27_1 1445585 1446558   974      +           NA       0</span>
+<span class="co">## 7 contig_27_1 1447046 1447318   273      + rnd, unknown       2</span>
+<span class="co">## 8 contig_27_1 1447542 1456167  8626      + rnd, unk....    2355</span>
+<span class="co">## 9 contig_27_1 1456168 1458038  1871      + rnd, unknown    1698</span>
 <span class="co">##                                                                                                   transcripts</span>
 <span class="co">## 1                                                                                                        &lt;NA&gt;</span>
 <span class="co">## 2 g3891.t1;g3892.t1;g3893.t1;g3894.t1;g3895.t1;g3898.t1;g3899.t1;g3896.t1;g3897.t1;g3900.t2;g3900.t1;g3901.t1</span>
@@ -1723,7 +1723,7 @@
 <div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># We start with a broader random region</span>
 <span class="op">(</span><span class="va">ROI6</span> <span class="op">&lt;-</span> <span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html" class="external-link">flagAll</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fl">160</span><span class="op">:</span><span class="fl">200</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 41 ranges and 5 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 41 ranges and 6 metadata columns:</span>
 <span class="co">##        seqnames          ranges strand |                       query      Arm</span>
 <span class="co">##           &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |                   &lt;GRanges&gt; &lt;factor&gt;</span>
 <span class="co">##    [1]     chr1 3881205-3906741      + | contig_27_1:3631331-3656195    short</span>
@@ -1737,19 +1737,19 @@
 <span class="co">##   [39]     chr1 4682663-4683297      + | contig_27_1:4367224-4367927    short</span>
 <span class="co">##   [40]     chr1 4685570-4769819      + | contig_27_1:4368942-4459904    short</span>
 <span class="co">##   [41]     chr1 4770023-4770969      + | contig_27_1:4463373-4464345    short</span>
-<span class="co">##                           rep            transcripts        flag</span>
-<span class="co">##               &lt;CharacterList&gt;                  &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##    [1]     rnd,unknown,tandem g1018.t1;g1024.t1;g1..         Inv</span>
-<span class="co">##    [2]      ltr-1,rnd,unknown      g1030.t1;g1032.t1        &lt;NA&gt;</span>
-<span class="co">##    [3]   rnd,ltr-1,tandem,... g1036.t1;g1037.t2;g1..         Inv</span>
-<span class="co">##    [4]                   &lt;NA&gt;                   &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [5]                   &lt;NA&gt;                   &lt;NA&gt;         Inv</span>
-<span class="co">##    ...                    ...                    ...         ...</span>
-<span class="co">##   [37]                    rnd                   &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [38]                   &lt;NA&gt;                   &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [39]                   &lt;NA&gt;                   &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [40] rnd,tandem,unknown,... g1242.t1;g1243.t1;g1..        &lt;NA&gt;</span>
-<span class="co">##   [41]                unknown                   &lt;NA&gt;         Tra</span>
+<span class="co">##                           rep   repOvlp            transcripts        flag</span>
+<span class="co">##               &lt;CharacterList&gt; &lt;integer&gt;                  &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##    [1]     rnd,unknown,tandem      1421 g1018.t1;g1024.t1;g1..         Inv</span>
+<span class="co">##    [2]      ltr-1,rnd,unknown      2876      g1030.t1;g1032.t1        &lt;NA&gt;</span>
+<span class="co">##    [3]   rnd,ltr-1,tandem,...      1477 g1036.t1;g1037.t2;g1..         Inv</span>
+<span class="co">##    [4]                   &lt;NA&gt;         0                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [5]                   &lt;NA&gt;         0                   &lt;NA&gt;         Inv</span>
+<span class="co">##    ...                    ...       ...                    ...         ...</span>
+<span class="co">##   [37]                    rnd       390                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [38]                   &lt;NA&gt;         0                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [39]                   &lt;NA&gt;         0                   &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [40] rnd,tandem,unknown,...      9359 g1242.t1;g1243.t1;g1..        &lt;NA&gt;</span>
+<span class="co">##   [41]                unknown        94                   &lt;NA&gt;         Tra</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
@@ -1779,7 +1779,7 @@
 <code class="sourceCode R"><span class="va">ROI7</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html" class="external-link">dist2next</a></span><span class="op">(</span>ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/showInversions.html" class="external-link">showInversions</a></span><span class="op">(</span><span class="va">ROI7</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 1826 ranges and 9 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 1826 ranges and 10 metadata columns:</span>
 <span class="co">##        seqnames            ranges strand |                query     score</span>
 <span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;integer&gt;</span>
 <span class="co">##     16     chr1     592887-593096      - | Chr1:1309140-1309328       210</span>
@@ -1793,32 +1793,32 @@
 <span class="co">##   8695      XSR 12324700-12329600      - |  XSR:8992784-8997031      4901</span>
 <span class="co">##   8696      XSR 12331614-12331778      + |  XSR:8990804-8990961       165</span>
 <span class="co">##   8697      XSR 12335389-12337572      - |  XSR:8987052-8988968      2184</span>
-<span class="co">##             Arm             rep transcripts        flag   inv     tdist</span>
-<span class="co">##        &lt;factor&gt; &lt;CharacterList&gt;       &lt;Rle&gt; &lt;character&gt; &lt;Rle&gt; &lt;numeric&gt;</span>
-<span class="co">##     16    short            &lt;NA&gt;        &lt;NA&gt;         Inv  TRUE       100</span>
-<span class="co">##     17    short            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt; FALSE       948</span>
-<span class="co">##     18    short             rnd      g68.t1        &lt;NA&gt; FALSE     29392</span>
-<span class="co">##     37    short          tandem        &lt;NA&gt;         Inv  TRUE       377</span>
-<span class="co">##     38    short            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt; FALSE       440</span>
-<span class="co">##    ...      ...             ...         ...         ...   ...       ...</span>
-<span class="co">##   8642      XSR            &lt;NA&gt;   g16813.t1        &lt;NA&gt; FALSE       113</span>
-<span class="co">##   8643      XSR            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt; FALSE        93</span>
-<span class="co">##   8695      XSR         unknown   g16922.t1         Inv  TRUE      2014</span>
-<span class="co">##   8696      XSR            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt; FALSE      3611</span>
-<span class="co">##   8697      XSR            &lt;NA&gt;   g16922.t1        &lt;NA&gt; FALSE      1165</span>
-<span class="co">##            qdist</span>
-<span class="co">##        &lt;numeric&gt;</span>
-<span class="co">##     16       228</span>
-<span class="co">##     17       213</span>
-<span class="co">##     18        NA</span>
-<span class="co">##     37       425</span>
-<span class="co">##     38       387</span>
-<span class="co">##    ...       ...</span>
-<span class="co">##   8642       388</span>
-<span class="co">##   8643   1180869</span>
-<span class="co">##   8695      1823</span>
-<span class="co">##   8696      1836</span>
-<span class="co">##   8697       356</span>
+<span class="co">##             Arm             rep   repOvlp transcripts        flag   inv</span>
+<span class="co">##        &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt; &lt;Rle&gt;</span>
+<span class="co">##     16    short            &lt;NA&gt;         0        &lt;NA&gt;         Inv  TRUE</span>
+<span class="co">##     17    short            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt; FALSE</span>
+<span class="co">##     18    short             rnd        31      g68.t1        &lt;NA&gt; FALSE</span>
+<span class="co">##     37    short          tandem        68        &lt;NA&gt;         Inv  TRUE</span>
+<span class="co">##     38    short            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt; FALSE</span>
+<span class="co">##    ...      ...             ...       ...         ...         ...   ...</span>
+<span class="co">##   8642      XSR            &lt;NA&gt;         0   g16813.t1        &lt;NA&gt; FALSE</span>
+<span class="co">##   8643      XSR            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt; FALSE</span>
+<span class="co">##   8695      XSR         unknown        26   g16922.t1         Inv  TRUE</span>
+<span class="co">##   8696      XSR            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt; FALSE</span>
+<span class="co">##   8697      XSR            &lt;NA&gt;         0   g16922.t1        &lt;NA&gt; FALSE</span>
+<span class="co">##            tdist     qdist</span>
+<span class="co">##        &lt;numeric&gt; &lt;numeric&gt;</span>
+<span class="co">##     16       100       228</span>
+<span class="co">##     17       948       213</span>
+<span class="co">##     18     29392        NA</span>
+<span class="co">##     37       377       425</span>
+<span class="co">##     38       440       387</span>
+<span class="co">##    ...       ...       ...</span>
+<span class="co">##   8642       113       388</span>
+<span class="co">##   8643        93   1180869</span>
+<span class="co">##   8695      2014      1823</span>
+<span class="co">##   8696      3611      1836</span>
+<span class="co">##   8697      1165       356</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
@@ -1835,30 +1835,42 @@
 <span class="co">## 9      chr1 753366 768703 15338      +           Chr1     2045148   2050583</span>
 <span class="co">## 10     chr1 768953 773691  4739      -           Chr1     4442048   4448098</span>
 <span class="co">## 11     chr1 776248 779526  3279      -           Chr1     3333268   3337597</span>
-<span class="co">##    query.width query.strand    query.rep          query.transcripts score   Arm</span>
-<span class="co">## 1         3161            * rnd, tan....                    g456.t1  1589 short</span>
-<span class="co">## 2         3586            * rnd, unknown                    g492.t1  2790 short</span>
-<span class="co">## 3         2707            *       tandem                    g457.t1  2651 short</span>
-<span class="co">## 4          217            *           NA                       &lt;NA&gt;   206 short</span>
-<span class="co">## 5          276            *           NA                       &lt;NA&gt;   281 short</span>
-<span class="co">## 6          258            *           NA                       &lt;NA&gt;   249 short</span>
-<span class="co">## 7         1616            * LowCompl....                       &lt;NA&gt;   757 short</span>
-<span class="co">## 8          134            *           NA                       &lt;NA&gt;   137 short</span>
-<span class="co">## 9         5436            * rnd, Low....            g458.t1;g459.t1 15338 short</span>
-<span class="co">## 10        6051            *          rnd g1051.t1;g1052.t1;g1053.t1  4739 short</span>
-<span class="co">## 11        4330            *  rnd, tandem                    g750.t1  3279 short</span>
-<span class="co">##             rep     transcripts flag   inv tdist   qdist</span>
-<span class="co">## 1           rnd            &lt;NA&gt;  Tra FALSE   470  119017</span>
-<span class="co">## 2            NA         g106.t1 &lt;NA&gt; FALSE   239  116196</span>
-<span class="co">## 3        tandem            &lt;NA&gt;  Inv  TRUE   377     425</span>
-<span class="co">## 4            NA            &lt;NA&gt; &lt;NA&gt; FALSE   440     387</span>
-<span class="co">## 5            NA            &lt;NA&gt;  Inv  TRUE  1851     596</span>
-<span class="co">## 6            NA            &lt;NA&gt; &lt;NA&gt; FALSE  2624     700</span>
-<span class="co">## 7            NA            &lt;NA&gt;  Inv  TRUE   785     552</span>
-<span class="co">## 8            NA            &lt;NA&gt; &lt;NA&gt; FALSE  1104     520</span>
-<span class="co">## 9  tandem, ....            &lt;NA&gt; &lt;NA&gt; FALSE   250 2391465</span>
-<span class="co">## 10           NA g111.t1;g112.t1 &lt;NA&gt; FALSE  2557 1104451</span>
-<span class="co">## 11   rnd, ltr-1         g115.t1 &lt;NA&gt; FALSE   240 2506121</span></code></pre>
+<span class="co">##    query.width query.strand    query.rep query.repOvlp</span>
+<span class="co">## 1         3161            * rnd, tan....          1634</span>
+<span class="co">## 2         3586            * rnd, unknown           557</span>
+<span class="co">## 3         2707            *       tandem           160</span>
+<span class="co">## 4          217            *           NA             0</span>
+<span class="co">## 5          276            *           NA             0</span>
+<span class="co">## 6          258            *           NA             0</span>
+<span class="co">## 7         1616            * LowCompl....           152</span>
+<span class="co">## 8          134            *           NA             0</span>
+<span class="co">## 9         5436            * rnd, Low....           768</span>
+<span class="co">## 10        6051            *          rnd          1052</span>
+<span class="co">## 11        4330            *  rnd, tandem          1147</span>
+<span class="co">##             query.transcripts score   Arm          rep repOvlp     transcripts</span>
+<span class="co">## 1                     g456.t1  1589 short          rnd      98            &lt;NA&gt;</span>
+<span class="co">## 2                     g492.t1  2790 short           NA       0         g106.t1</span>
+<span class="co">## 3                     g457.t1  2651 short       tandem      68            &lt;NA&gt;</span>
+<span class="co">## 4                        &lt;NA&gt;   206 short           NA       0            &lt;NA&gt;</span>
+<span class="co">## 5                        &lt;NA&gt;   281 short           NA       0            &lt;NA&gt;</span>
+<span class="co">## 6                        &lt;NA&gt;   249 short           NA       0            &lt;NA&gt;</span>
+<span class="co">## 7                        &lt;NA&gt;   757 short           NA       0            &lt;NA&gt;</span>
+<span class="co">## 8                        &lt;NA&gt;   137 short           NA       0            &lt;NA&gt;</span>
+<span class="co">## 9             g458.t1;g459.t1 15338 short tandem, ....    3169            &lt;NA&gt;</span>
+<span class="co">## 10 g1051.t1;g1052.t1;g1053.t1  4739 short           NA       0 g111.t1;g112.t1</span>
+<span class="co">## 11                    g750.t1  3279 short   rnd, ltr-1      77         g115.t1</span>
+<span class="co">##    flag   inv tdist   qdist</span>
+<span class="co">## 1   Tra FALSE   470  119017</span>
+<span class="co">## 2  &lt;NA&gt; FALSE   239  116196</span>
+<span class="co">## 3   Inv  TRUE   377     425</span>
+<span class="co">## 4  &lt;NA&gt; FALSE   440     387</span>
+<span class="co">## 5   Inv  TRUE  1851     596</span>
+<span class="co">## 6  &lt;NA&gt; FALSE  2624     700</span>
+<span class="co">## 7   Inv  TRUE   785     552</span>
+<span class="co">## 8  &lt;NA&gt; FALSE  1104     520</span>
+<span class="co">## 9  &lt;NA&gt; FALSE   250 2391465</span>
+<span class="co">## 10 &lt;NA&gt; FALSE  2557 1104451</span>
+<span class="co">## 11 &lt;NA&gt; FALSE   240 2506121</span></code></pre>
 <div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI7</span><span class="op">[</span><span class="fl">37</span><span class="op">:</span><span class="fl">43</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="ColinearityInterruptors_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
@@ -1946,7 +1958,7 @@
 <div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI8</span> <span class="op">&lt;-</span> <span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[</span><span class="fl">1420</span><span class="op">:</span><span class="fl">1430</span><span class="op">]</span>
 <span class="va">ROI8</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html" class="external-link">flagAll</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 11 ranges and 5 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 11 ranges and 6 metadata columns:</span>
 <span class="co">##        seqnames          ranges strand |                query      Arm</span>
 <span class="co">##           &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;factor&gt;</span>
 <span class="co">##    [1]     chr1 7925162-7925707      - | Chr1:5457033-5457486     long</span>
@@ -1960,19 +1972,19 @@
 <span class="co">##    [9]     chr1 7940004-7940220      + | Chr1:5445781-5445992     long</span>
 <span class="co">##   [10]     chr1 7940630-7940807      - | Chr1:5447947-5448116     long</span>
 <span class="co">##   [11]     chr1 7941410-7942546      + | Chr1:5444239-5445410     long</span>
-<span class="co">##                    rep       transcripts        flag</span>
-<span class="co">##        &lt;CharacterList&gt;             &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##    [1]            &lt;NA&gt;          g2110.t1         Inv</span>
-<span class="co">##    [2]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [3]     unknown,rnd g2111.t1;g2111.t2         Inv</span>
-<span class="co">##    [4]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [5]            &lt;NA&gt; g2111.t1;g2111.t2        &lt;NA&gt;</span>
-<span class="co">##    [6]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [7]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [8]            &lt;NA&gt; g2111.t1;g2111.t2        &lt;NA&gt;</span>
-<span class="co">##    [9]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [10]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [11]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##                    rep   repOvlp       transcripts        flag</span>
+<span class="co">##        &lt;CharacterList&gt; &lt;integer&gt;             &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##    [1]            &lt;NA&gt;         0          g2110.t1         Inv</span>
+<span class="co">##    [2]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [3]     unknown,rnd      1107 g2111.t1;g2111.t2         Inv</span>
+<span class="co">##    [4]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [5]            &lt;NA&gt;         0 g2111.t1;g2111.t2        &lt;NA&gt;</span>
+<span class="co">##    [6]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [7]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [8]            &lt;NA&gt;         0 g2111.t1;g2111.t2        &lt;NA&gt;</span>
+<span class="co">##    [9]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [10]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [11]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb117"><pre class="downlit sourceCode r">
@@ -1983,7 +1995,7 @@
 <p><img src="ColinearityInterruptors_files/figure-html/ROI8.Q-3.png" width="700"></p>
 <div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI8</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagAll.html" class="external-link">flagAll</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 11 ranges and 5 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 11 ranges and 6 metadata columns:</span>
 <span class="co">##        seqnames          ranges strand |                query      Arm</span>
 <span class="co">##           &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;factor&gt;</span>
 <span class="co">##    [1]     chr1 6590477-6591613      - | Chr1:5444239-5445410     long</span>
@@ -1997,19 +2009,19 @@
 <span class="co">##    [9]     chr1 6597341-6606578      + | Chr1:5450903-5456340     long</span>
 <span class="co">##   [10]     chr1 6606708-6606918      - | Chr1:5456632-5456843     long</span>
 <span class="co">##   [11]     chr1 6607316-6607861      + | Chr1:5457033-5457486     long</span>
-<span class="co">##                    rep       transcripts        flag</span>
-<span class="co">##        &lt;CharacterList&gt;             &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##    [1]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [2]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [3]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [4]            &lt;NA&gt; g2111.t1;g2111.t2        &lt;NA&gt;</span>
-<span class="co">##    [5]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [6]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [7]            &lt;NA&gt; g2111.t1;g2111.t2         Inv</span>
-<span class="co">##    [8]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##    [9]     unknown,rnd g2111.t1;g2111.t2         Inv</span>
-<span class="co">##   [10]            &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [11]            &lt;NA&gt;          g2110.t1        &lt;NA&gt;</span>
+<span class="co">##                    rep   repOvlp       transcripts        flag</span>
+<span class="co">##        &lt;CharacterList&gt; &lt;integer&gt;             &lt;Rle&gt; &lt;character&gt;</span>
+<span class="co">##    [1]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [2]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [3]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [4]            &lt;NA&gt;         0 g2111.t1;g2111.t2        &lt;NA&gt;</span>
+<span class="co">##    [5]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [6]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [7]            &lt;NA&gt;         0 g2111.t1;g2111.t2         Inv</span>
+<span class="co">##    [8]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##    [9]     unknown,rnd      1107 g2111.t1;g2111.t2         Inv</span>
+<span class="co">##   [10]            &lt;NA&gt;         0              &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##   [11]            &lt;NA&gt;         0          g2110.t1        &lt;NA&gt;</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 </div>
@@ -2128,11 +2140,11 @@
 <pre><code><span class="co">## [1] "contig_57_1:58108-58350"</span></code></pre>
 <p>Interestingly, this small inversion is flanked by an inverted repeat.</p>
 <div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80780-81022"</span>        <span class="op">)</span> <span class="op">+</span> <span class="fl">200</span> <span class="op">)</span>,
-                  <span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:58108-58350"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80780-81022"</span>        <span class="op">)</span> <span class="op">+</span> <span class="fl">200</span> <span class="op">)</span>,
+                  <span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:58108-58350"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:59:40 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:14:36 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -2208,11 +2220,11 @@
 <span class="co">## #---------------------------------------</span>
 <span class="co">## #---------------------------------------</span></code></pre>
 <div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80780-81022"</span><span class="op">)</span>         <span class="op">+</span> <span class="fl">200</span> <span class="op">)</span>,
-                  <span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:58108-58350"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">200</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80780-81022"</span><span class="op">)</span>         <span class="op">+</span> <span class="fl">200</span> <span class="op">)</span>,
+                  <span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:58108-58350"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">200</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:59:40 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:14:37 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -2289,11 +2301,11 @@
 <span class="co">## #---------------------------------------</span></code></pre>
 <div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># (Adjusted by hand)</span>
-<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80523-80834"</span><span class="op">)</span><span class="op">)</span>,
-                  <span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80968-81279"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80523-80834"</span><span class="op">)</span><span class="op">)</span>,
+                  <span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80968-81279"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 13:59:41 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:14:37 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -2345,7 +2357,7 @@
 <span class="co">## #---------------------------------------</span>
 <span class="co">## #---------------------------------------</span></code></pre>
 <div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80523-80834"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:80523-80834"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] "TTAAGGGTAATGGTATACATCGGCGCGGCGCTGCTCTCTCGATCCGCGCTCCGCCAGAACCTATTTCTCACGAGGCCGTAAAATCTGAACGGATAAAGATTTTTTCAAAATTCAAAAAGATTCTGAATAATTAAAGTCTTTTCTACTAACACAGCAAAATTGGTAATGATTGTCAAAGAGGAACTATCTGAAAATTGCCAGTTTCCTTCAAATGACATTTTCTTCAACATTTCTCATGCAAAATTTTTGAAAATTACACTGTCTTGTAGAGAATCGTCAGTTCTACAAATCCTGTTTTTCAGATTTTTGTTT"</span></code></pre>
 <p>This sequence matches <code>MITE_oki2018_i69_4_20065_S1_MITE#DNA/MITE</code> in Sasha’s repeat annotation.</p>
 <div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
@@ -2393,14 +2405,14 @@
 <span class="co">## 1      PAR 75427 80779  5353      - 30134    contig_57_1       58351     63716</span>
 <span class="co">## 2      PAR 81023 83450  2428      - 13433    contig_57_1       55648     58107</span>
 <span class="co">## 3      PAR 83451 85486  2036      - 11492    contig_57_1       53302     55336</span>
-<span class="co">##   query.width query.strand    query.rep query.transcripts   Arm          rep</span>
-<span class="co">## 1        5366            * unknown, rnd              &lt;NA&gt; short rnd, unknown</span>
-<span class="co">## 2        2460            * rnd, unknown              &lt;NA&gt; short unknown,....</span>
-<span class="co">## 3        2035            *          rnd              &lt;NA&gt; short   ltr-1, rnd</span>
-<span class="co">##   transcripts flag</span>
-<span class="co">## 1        &lt;NA&gt;  Col</span>
-<span class="co">## 2        &lt;NA&gt;  Col</span>
-<span class="co">## 3        &lt;NA&gt;  Col</span></code></pre>
+<span class="co">##   query.width query.strand    query.rep query.repOvlp query.transcripts   Arm</span>
+<span class="co">## 1        5366            * unknown, rnd          2235              &lt;NA&gt; short</span>
+<span class="co">## 2        2460            * rnd, unknown          2338              &lt;NA&gt; short</span>
+<span class="co">## 3        2035            *          rnd           697              &lt;NA&gt; short</span>
+<span class="co">##            rep repOvlp transcripts flag</span>
+<span class="co">## 1 rnd, unknown     915        &lt;NA&gt;  Col</span>
+<span class="co">## 2 unknown,....    1720        &lt;NA&gt;  Col</span>
+<span class="co">## 3   ltr-1, rnd      92        &lt;NA&gt;  Col</span></code></pre>
 <div class="sourceCode" id="cb146"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ROI10_ins</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/cleanGaps.html" class="external-link">cleanGaps</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##   seqnames start   end width strand</span>
@@ -2423,12 +2435,12 @@
 <span class="co">##   seqinfo: 55 sequences from KUM-M3-7f genome</span></code></pre>
 <div class="sourceCode" id="cb153"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Left side</span>
-<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:83350-83550"</span><span class="op">)</span><span class="op">)</span>,
-                  <span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55548-55748"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>,
+<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:83350-83550"</span><span class="op">)</span><span class="op">)</span>,
+                  <span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55548-55748"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>,
                   type <span class="op">=</span> <span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 14:08:19 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:23:25 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -2473,12 +2485,12 @@
 <span class="co">## #---------------------------------------</span></code></pre>
 <div class="sourceCode" id="cb155"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Right side</span>
-<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:83351-83551"</span><span class="op">)</span><span class="op">)</span>,
-                  <span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55236-55436"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>,
+<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:83351-83551"</span><span class="op">)</span><span class="op">)</span>,
+                  <span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55236-55436"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>,
                   type <span class="op">=</span> <span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 14:08:20 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:23:26 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -2523,12 +2535,12 @@
 <span class="co">## #---------------------------------------</span></code></pre>
 <div class="sourceCode" id="cb157"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Both sides</span>
-<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:83350-83551"</span><span class="op">)</span><span class="op">)</span>,
-                  <span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55236-55748"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>,
+<span class="fu">pairwiseAlignment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"PAR:83350-83551"</span><span class="op">)</span><span class="op">)</span>,
+                  <span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55236-55748"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">reverseComplement</span><span class="op">(</span><span class="op">)</span>,
                   type <span class="op">=</span> <span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu">writePairwiseAlignments</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Wed Dec 15 14:08:20 2021</span>
+<span class="co">## # Rundate: Mon Dec 27 14:23:26 2021</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -2596,7 +2608,7 @@
 <span class="co">## #---------------------------------------</span>
 <span class="co">## #---------------------------------------</span></code></pre>
 <div class="sourceCode" id="cb159"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">getSeq</span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55337-55647:+"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"contig_57_1:55337-55647:+"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] "ATCTTAAGGGGGGGCGGGCGGCCACGGTACAAAAGTGGAATTTGTACCGCGGGTACAAATTTTGTACCGCCGGTACAAAAAATCGCAATTGTTTTGACAATAAAAACCGATTTCTACCCATTATAATGCTCACTTTTGAACAGAACTCCACCTCAGCTATACCAGTAAGGAGTTTCCATCAATTCTAGCGCGAAGCGCACACTTTTTCCTTGATTCTATTTTTGTCTTGTACCGGCGGTACAAAAATTTTTGTACCGGCGTTACAAATTTGTACCGCCGTTACAAATTTGTACCGTCGCCGCCCTACACCC"</span></code></pre>
 <p>Exemplar from the Okinawa genome (found by BLASTing the sequence output by <code>getSeq</code> above).</p>
 <pre><code>&gt;RepeatInsertion
@@ -2606,6 +2618,179 @@ ATGCTCACTTTTGAACAGAACTCCACCTCAGCTATACCAGTAAGGAGTTTCCATCAATTC
 TAGCGCGAAGCGCACACTTTTTCCTTGATTCTATTTTTGTCTTGTACCGGCGGTACAAAA
 ATTTTTGTACCGGCGTTACAAATTTGTACCGCCGTTACAAATTTGTACCGTCGCCGCCCT
 ACACCC</code></pre>
+</div>
+</div>
+<div class="section level1">
+<h1 id="roi-11-highly-conserved-regions">ROI 11: highly conserved regions<a class="anchor" aria-label="anchor" href="#roi-11-highly-conserved-regions"></a>
+</h1>
+<p>Many mapped regions have a width shorter than 600 and form a distinct peak in width distribution plot (see <code><a href="../articles/RegionWidths.html">vignette("RegionWidths", package = "OikScrambling")</a></code> for details).</p>
+<p>Surprisingly they appear to be very conserved.</p>
+<div class="sourceCode" id="cb162"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.bioinf.jku.at/software/msa/" class="external-link">msa</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://yulab-smu.top/ggmsa/" class="external-link">ggmsa</a></span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Registered S3 methods overwritten by 'ggalt':</span>
+<span class="co">##   method                  from   </span>
+<span class="co">##   grid.draw.absoluteGrob  ggplot2</span>
+<span class="co">##   grobHeight.absoluteGrob ggplot2</span>
+<span class="co">##   grobWidth.absoluteGrob  ggplot2</span>
+<span class="co">##   grobX.absoluteGrob      ggplot2</span>
+<span class="co">##   grobY.absoluteGrob      ggplot2</span></code></pre>
+<pre><code><span class="co">## ggmsa v1.0.0  Document: http://yulab-smu.top/ggmsa/</span>
+<span class="co">## </span>
+<span class="co">## If you use ggmsa in published research, please cite: DOI: 10.18129/B9.bioc.ggmsa</span></code></pre>
+<div class="sourceCode" id="cb165"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&lt;</span> <span class="fl">600</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span>
+
+<span class="va">roi</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">roi</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## DNAStringSet object of length 1:</span>
+<span class="co">##     width seq</span>
+<span class="co">## [1]   222 <span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">AAAA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">AAA</span><span style="color: #000000; background-color: #AFFFAF;">CC</span>...<span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTTTT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span></span></code></pre>
+<div class="sourceCode" id="cb167"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/pairwiseAlignment.html" class="external-link">pairwiseAlignment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">roi</span> <span class="op">+</span> <span class="fl">100</span><span class="op">)</span>,
+                  <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">roi</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">100</span><span class="op">)</span>,
+                  type <span class="op">=</span> <span class="st">"global"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/PairwiseAlignments-io.html" class="external-link">writePairwiseAlignments</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## ########################################</span>
+<span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
+<span class="co">## # Rundate: Mon Dec 27 14:23:28 2021</span>
+<span class="co">## ########################################</span>
+<span class="co">## #=======================================</span>
+<span class="co">## #</span>
+<span class="co">## # Aligned_sequences: 2</span>
+<span class="co">## # 1: P1</span>
+<span class="co">## # 2: S1</span>
+<span class="co">## # Matrix: NA</span>
+<span class="co">## # Gap_penalty: 14.0</span>
+<span class="co">## # Extend_penalty: 4.0</span>
+<span class="co">## #</span>
+<span class="co">## # Length: 441</span>
+<span class="co">## # Identity:     261/441 (59.2%)</span>
+<span class="co">## # Similarity:    NA/441 (NA%)</span>
+<span class="co">## # Gaps:          47/441 (10.7%)</span>
+<span class="co">## # Score: -695.3687</span>
+<span class="co">## #</span>
+<span class="co">## #</span>
+<span class="co">## #=======================================</span>
+<span class="co">## </span>
+<span class="co">## P1                 1 AGATTTCAAGACGCCTGCCCTTTTTCTTTGCCTAAAATGACCTCGAATTT     50</span>
+<span class="co">##                       |  |  | || |  |     || || | |   | |||  | | |||| |</span>
+<span class="co">## S1                 1 -GCGTAAATGAAGA-TCAAAGTTGTCATAGG--ACAATT-CTTAGAATAT     45</span>
+<span class="co">## </span>
+<span class="co">## P1                51 --AGTCTTTGAA---CCAATGTTATAAAAAAGCTAGA-AAGACAGAGAAA     94</span>
+<span class="co">##                        | | ||||||   |   |||| | | ||| ||| | || | |  | | </span>
+<span class="co">## S1                46 CCAATTTTTGAATAGCTCCTGTTTTTATAAATCTATAGAAAAAATGGTAC     95</span>
+<span class="co">## </span>
+<span class="co">## P1                95 GAGAGCCGGTCTTAAAATGTTTAGAGAAGTGGCTTAAACCCGGAGTATCA    144</span>
+<span class="co">##                      ||  || ||||||||| | ||||||  | | |  ||| || |||||||||</span>
+<span class="co">## S1                96 GATCGC-GGTCTTAAATTTTTTAGA--ACTCGACTAATCCTGGAGTATCA    142</span>
+<span class="co">## </span>
+<span class="co">## P1               145 CGTTGAACATTCTACACCGGTAGAGATAACTTTGAGAAATGATTTGAACA    194</span>
+<span class="co">##                      |||| || || || |    || ||||||| ||||  |||||||| |||| </span>
+<span class="co">## S1               143 CGTTAAAAATCCTGC----GT-GAGATAAGTTTGCAAAATGATTGGAACC    187</span>
+<span class="co">## </span>
+<span class="co">## P1               195 CACGAACACCTTGAAACTACTCCGGTTTCAGCTGTGAGCTAATTTCCGTT    244</span>
+<span class="co">##                       |    |||||||   |||||  ||||||||||| ||||| |||| ||||</span>
+<span class="co">## S1               188 TAGTTGCACCTTGTTGCTACTTTGGTTTCAGCTG-GAGCTTATTTGCGTT    236</span>
+<span class="co">## </span>
+<span class="co">## P1               245 TTTTCTCACGCCACTTTTTT---CAAGATCTAAAAAACAAAAATTAAAAA    291</span>
+<span class="co">##                      ||     |    | |||      ||||||  | || |  ||  || |  |</span>
+<span class="co">## S1               237 TTA----AAATTAATTTCCCAGACAAGATGCAGAACAGCAATTTTCAGTA    282</span>
+<span class="co">## </span>
+<span class="co">## P1               292 GCTGTTTTTCGAGCGCTTGAGATAATCAAGTCCCTGTTCCAGCGACTTTC    341</span>
+<span class="co">##                       ||| ||||   || ||| ||||||||||||   | ||| ||  |||  |</span>
+<span class="co">## S1               283 ACTGCTTTTTCTGCACTTCAGATAATCAAGTA--TTTTCTAGT-ACT--C    327</span>
+<span class="co">## </span>
+<span class="co">## P1               342 AAATC-AAG-CTGAAAT--TGAACGAAAAAAAACGAAAAAAGAGCCTTTG    387</span>
+<span class="co">##                      |  || ||| || | ||  |||  ||  || |  |||  |   || |  |</span>
+<span class="co">## S1               328 AGTTCTAAGACTCACATCTTGATAGAGCAACACTGAAGCA---GCATCAG    374</span>
+<span class="co">## </span>
+<span class="co">## P1               388 TCCGAAAAATAAAGA-TCAAAAAGAAAATCCTCGCT-----    422</span>
+<span class="co">##                      |  || |   || || |  |      |||  |   |     </span>
+<span class="co">## S1               375 T--GATATTGAACGACTTGAGTTTTCAATGTTTTGTGAAAA    413</span>
+<span class="co">## </span>
+<span class="co">## </span>
+<span class="co">## #---------------------------------------</span>
+<span class="co">## #---------------------------------------</span></code></pre>
+<div class="sourceCode" id="cb169"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">roi</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="fl">10</span><span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">roi</span><span class="op">)</span>       |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] "ATTGTTTAGTCTGGGGTTTACAGAAGAGTTGTTTCTTCATGGAACCGGGCTGCTGTAAATCAGAGGACTCGGTCTCGGCCGAGCGCGCGCTGACCTCTAAAGCGGCGGCCCTAGCGCGCATCGTCAAGCGCAAATTTTTCAGAATTGAGCTTCCAAAATCAAACACCAGAAACGCCTTTCGCCGAAAAATCAAGGTTCCATTGAGT"</span></code></pre>
+<div class="sourceCode" id="cb171"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">roi</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] "ATTGTTTAGTCTGCTGTCACAGTAGAGTTGTTGCTTCATGGAACCAGCCCGCAGTAAATCAGAAGAGTCAGTCGCGGACGAGTGCGCGCTGACCTCTAAAGCGGCGGCCCCAACGCGCATCGTCAAGCGCAACATTTTCAGAATTGAGCTTCTGAAATCAAAAAGCAGAAACAATTTCGCCGAATAATCACTCAATTGAAAGACGGTTCCATTGAGT"</span></code></pre>
+<div class="sourceCode" id="cb173"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span>                             |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">query</span>                       |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Aom</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">query</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Aom</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/reverseComplement.html" class="external-link">reverseComplement</a></span><span class="op">(</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">query</span>                       |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Nor</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">query</span>                       |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Nor</span><span class="op">)</span>
+<span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Oki"</span>, <span class="st">"Osa"</span>, <span class="st">"Aom"</span>, <span class="st">"Bar"</span>, <span class="st">"Nor"</span><span class="op">)</span>
+
+<span class="op">(</span><span class="va">seqs_aln</span> <span class="op">&lt;-</span> <span class="fu">msa</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/msa/man/msaMuscle.html" class="external-link">msaMuscle</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="st">"DNAMultipleAlignment"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## DNAMultipleAlignment with 5 rows and 230 columns</span>
+<span class="co">##      aln                                                    names               </span>
+<span class="co">## [1] -----<span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">GGGG</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span>...------------<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span>- Oki</span>
+<span class="co">## [2] -----<span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span>-<span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span>...<span style="color: #000000; background-color: #FFAFAF;">AAA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span>-----<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span>- Osa</span>
+<span class="co">## [3] -----<span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span>-<span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span>...<span style="color: #000000; background-color: #FFAFAF;">AAA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span>- Aom</span>
+<span class="co">## [4] ---<span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span>-<span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span>...<span style="color: #000000; background-color: #AFFFAF;">C</span>-----------<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span> Bar</span>
+<span class="co">## [5] <span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span>-<span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span>...<span style="color: #000000; background-color: #AFFFFF;">G</span>-----------<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span> Nor</span></code></pre>
+<div class="sourceCode" id="cb175"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>,   <span class="fl">1</span>,  <span class="fl">50</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>,  <span class="fl">51</span>, <span class="fl">100</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>, <span class="fl">101</span>, <span class="fl">150</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>, <span class="fl">151</span>, <span class="fl">200</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>, <span class="fl">201</span>, <span class="fl">250</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<p><img src="ColinearityInterruptors_files/figure-html/ROI11_1-1.png" width="864"></p>
+<div class="sourceCode" id="cb176"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">roi</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">[</span><span class="fl">11</span><span class="op">]</span>
+<span class="va">seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span>                             |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">query</span>                       |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Aom</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">query</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Aom</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/reverseComplement.html" class="external-link">reverseComplement</a></span><span class="op">(</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">query</span>                       |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Nor</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">roi</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">query</span>                       |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">genomes</span><span class="op">$</span><span class="va">Nor</span><span class="op">)</span>
+<span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Oki"</span>, <span class="st">"Osa"</span>, <span class="st">"Aom"</span>, <span class="st">"Bar"</span>, <span class="st">"Nor"</span><span class="op">)</span>
+
+<span class="op">(</span><span class="va">seqs_aln</span> <span class="op">&lt;-</span> <span class="fu">msa</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/msa/man/msaMuscle.html" class="external-link">msaMuscle</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="st">"DNAMultipleAlignment"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## DNAMultipleAlignment with 5 rows and 2474 columns</span>
+<span class="co">##      aln                                                    names               </span>
+<span class="co">## [1] <span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">GGGG</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span>...------------------------- Oki</span>
+<span class="co">## [2] --------<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GGGG</span>...<span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">CC</span> Bar</span>
+<span class="co">## [3] --------<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GGGG</span>...------------------------- Nor</span>
+<span class="co">## [4] <span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GG</span>-<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GG</span>-<span style="color: #000000; background-color: #AFFFFF;">G</span>...------------------------- Osa</span>
+<span class="co">## [5] <span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GG</span>-<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GGGG</span>...------------------------- Aom</span></code></pre>
+<div class="sourceCode" id="cb178"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>,   <span class="fl">1</span>,  <span class="fl">50</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>,  <span class="fl">51</span>, <span class="fl">100</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>, <span class="fl">101</span>, <span class="fl">150</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>, <span class="fl">151</span>, <span class="fl">200</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>, <span class="fl">201</span>, <span class="fl">250</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">/</span>
+<span class="fu">ggmsa</span><span class="fu">::</span><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/ggmsa.html" class="external-link">ggmsa</a></span><span class="op">(</span><span class="va">seqs_aln</span>, <span class="fl">251</span>, <span class="fl">300</span>, seq_name <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<p><img src="ColinearityInterruptors_files/figure-html/ROI11_2-1.png" width="864"></p>
+<div class="section level2">
+<h2 id="autocorrelations">Autocorrelations<a class="anchor" aria-label="anchor" href="#autocorrelations"></a>
+</h2>
+<p>There appears to be a small tendency that short width regions are followed by short width regions, but I am not sure if I understand the statistics well.</p>
+<div class="sourceCode" id="cb179"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="cn">NA</span><span class="op">)</span>, log <span class="op">=</span> <span class="st">'xy'</span>, pch<span class="op">=</span><span class="st">'.'</span><span class="op">)</span></code></pre></div>
+<p><img src="ColinearityInterruptors_files/figure-html/autocorrelations-1.png" width="700"></p>
+<div class="sourceCode" id="cb180"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/acf.html" class="external-link">acf</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>, lag.max <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></code></pre></div>
+<p><img src="ColinearityInterruptors_files/figure-html/autocorrelations-2.png" width="700"></p>
+<div class="sourceCode" id="cb181"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/acf.html" class="external-link">acf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span>, lag.max <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></code></pre></div>
+<p><img src="ColinearityInterruptors_files/figure-html/autocorrelations-3.png" width="700"></p>
+<div class="sourceCode" id="cb182"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/acf.html" class="external-link">pacf</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>, lag.max <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></code></pre></div>
+<p><img src="ColinearityInterruptors_files/figure-html/autocorrelations-4.png" width="700"></p>
+<div class="sourceCode" id="cb183"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/acf.html" class="external-link">pacf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu">width</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span>, lag.max <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></code></pre></div>
+<p><img src="ColinearityInterruptors_files/figure-html/autocorrelations-5.png" width="700"></p>
 </div>
 </div>
   </div>
