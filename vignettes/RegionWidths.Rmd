@@ -364,17 +364,19 @@ widths$coa$nonCoa <- sapply(coa, \(x) x$nonCoa) |> unlist()
 ### Focus on Oki – North comparisons
 
 ```{r mapped_region_widths_Oki_vs_North}
-p_hist <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North")) +
+p_all <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North")) +
   aes(col=name) +
   facet_wrap(~dist, scales = "free_y", nrow = 1) +
-  ggtitle("Distribution of mapped region widths (vline at 600)") +
+  ggtitle("Distribution of mapped region widths (vline at 600)") + theme_bw() +
   geom_vline(xintercept = 600)
 
-p_hist
+p_coa_map <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", Arm %in% c("short", "long"))) +
+  aes(col=name) +
+  ggtitle("FALSE = collapsed, TRUE = non-collapsed") + theme_bw() +
+  geom_vline(xintercept = 600) +
+  facet_wrap(~nonCoa + Arm)
 
-# The cutoff at 600 is good enough for both arms
-p_hist + facet_wrap(~Arm)
-p_hist + facet_wrap(~nonCoa + Arm)
+p_all + p_coa_map + plot_layout(guides = 'collect') + theme_bw()
 ```
 
 The short-width mapped peak is made of aligned regions that can not be coalesced.
