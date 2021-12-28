@@ -254,7 +254,7 @@ After coalescing, some width distribution become clearly bimodal.
 The distributions are hard to compare between genera and between evolutionary
 distance groups, and even within group for the "same population" _Oikopleura_.
 
-The plots below display facet the data in details for the reader to make their
+The plots below display the data in details for the reader to make their
 opinion about the above statement.
 
 ### Whole data
@@ -262,11 +262,24 @@ opinion about the above statement.
 #### Width distributions.
 
 ```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
+# Using after_stat(density) to make more meaningful comparisons between genus
 gg_freq_poly(widths$coa) +
   aes(width, after_stat(density), col=name) +
   facet_wrap(~genus + class, scales = "free_y") +
+  ggtitle("Distribution of mapped region widths") +
+  scale_color_manual(values = names_table$query)
+```
+
+Faceting by genus only.  Why is North / North ("intermediate") not bimodal?
+
+```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+gg_freq_poly(widths$coa) +
+  aes(width, after_stat(density), col=class) +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
   ggtitle("Distribution of mapped region widths")
 ```
+
+What is in the first peak of the bimodal distributions ?
 
 #### Empirical cumulative distributions
 
@@ -293,16 +306,6 @@ widths$coa |>
   ggplot() + facet_wrap(~genus) + aes(x = width, y = cumsum, col = class) + geom_line() + scale_x_log10() + scale_y_log10()
 ```
 
-Why is North / North ("intermediate") not bimodal?
-
-```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
-gg_freq_poly(widths$coa) +
-  aes(width, after_stat(density), col=class) +
-  facet_wrap(~genus, scales = "free_y", ncol = 1) +
-  ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
-```
-
-What is in the first peak of the bimodal distributions ?
 
 ### By arm
 
