@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
       </span>
     </div>
 
@@ -194,7 +194,7 @@
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">annotateWithReps.GRanges</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Inspired from CAGEr:::ranges2names</span>
-  <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span><span class="op">)</span>
+  <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
   <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">o</span>, <span class="st">"List"</span><span class="op">)</span>
   <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/extractList.html" class="external-link">extractList</a></span><span class="op">(</span><span class="va">rep</span><span class="op">$</span><span class="va">Class</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">o</span><span class="op">)</span>
   <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/List-utils.html" class="external-link">endoapply</a></span><span class="op">(</span><span class="va">o</span>, <span class="va">unique</span><span class="op">)</span>
@@ -206,7 +206,7 @@
 <span class="va">overlapLength.GRanges</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Inspired from CAGEr:::ranges2names</span>
   <span class="va">redRep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="va">rep</span><span class="op">)</span>
-  <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">gr</span>, <span class="va">redRep</span><span class="op">)</span>
+  <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">gr</span>, <span class="va">redRep</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
   <span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">o</span>, <span class="st">"List"</span><span class="op">)</span>
   <span class="va">repGrl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/extractList.html" class="external-link">extractList</a></span><span class="op">(</span><span class="va">redRep</span>, <span class="va">o</span><span class="op">)</span>
   <span class="va">gr</span><span class="op">$</span><span class="va">repOvlp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/setops-methods.html" class="external-link">pintersect</a></span><span class="op">(</span><span class="va">gr</span>, <span class="va">repGrl</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span>
@@ -1020,7 +1020,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <span class="co">##  [73] munsell_0.5.0               tools_4.1.2                </span>
 <span class="co">##  [75] cachem_1.0.6                generics_0.1.1             </span>
 <span class="co">##  [77] RSQLite_2.2.9               ade4_1.7-18                </span>
-<span class="co">##  [79] broom_0.7.10                OikScrambling_0.6.6        </span>
+<span class="co">##  [79] broom_0.7.10                OikScrambling_0.7.0        </span>
 <span class="co">##  [81] evaluate_0.14               stringr_1.4.0              </span>
 <span class="co">##  [83] fastmap_1.1.0               fftwtools_0.9-11           </span>
 <span class="co">##  [85] yaml_2.2.1                  ragg_1.2.1                 </span>
