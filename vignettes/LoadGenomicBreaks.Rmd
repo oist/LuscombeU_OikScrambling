@@ -75,7 +75,7 @@ Load from `BreakpointsData` package via `OikScrambling:::loadAllRepeats()`
 
 annotateWithReps.GRanges <- function(gr, rep) {
   # Inspired from CAGEr:::ranges2names
-  o <- findOverlaps(gr, rep)
+  o <- findOverlaps(gr, rep, ignore.strand = TRUE)
   o <- as(o, "List")
   o <- extractList(rep$Class |> as.character(), o)
   o <- endoapply(o, unique)
@@ -87,7 +87,7 @@ annotateWithReps.GRanges <- function(gr, rep) {
 overlapLength.GRanges <- function(gr, rep) {
   # Inspired from CAGEr:::ranges2names
   redRep <- reduce(rep)
-  o <- findOverlaps(gr, redRep)
+  o <- findOverlaps(gr, redRep, ignore.strand = TRUE)
   o <- as(o, "List")
   repGrl <- extractList(redRep, o)
   gr$repOvlp <- pintersect(gr, repGrl) |> width() |> sum()

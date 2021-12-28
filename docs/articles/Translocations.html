@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
       </span>
     </div>
 
@@ -120,7 +120,7 @@
       <h1 data-toc-skip>Translocations</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">13 December, 2021</h4>
+            <h4 data-toc-skip class="date">27 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/Translocations.Rmd" class="external-link"><code>vignettes/Translocations.Rmd</code></a></small>
       <div class="hidden name"><code>Translocations.Rmd</code></div>
@@ -216,13 +216,13 @@
 <span class="co">## Dme_Dma        266.000  285.000 134.0000</span>
 <span class="co">## Dme_Dsu         98.000  131.000  96.0000</span>
 <span class="co">## Dme_Dya        173.000  194.000 106.0000</span>
+<span class="co">## In same pop   1073.333 1182.667 433.6667</span>
 <span class="co">## Int – Int     1581.000 1734.000 626.0000</span>
 <span class="co">## Int – Rob      978.000 1176.667 631.6667</span>
 <span class="co">## Int/Rob – Oki    6.000    7.000   7.0000</span>
 <span class="co">## Int/Rob – Sav  130.500  232.500 230.0000</span>
 <span class="co">## North – North  324.750  435.500 234.7500</span>
-<span class="co">## Oki – North    397.375  475.000 262.3750</span>
-<span class="co">## same_pop      1073.333 1182.667 433.6667</span></code></pre>
+<span class="co">## Oki – North    397.375  475.000 262.3750</span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                align mapped  map2</span>
@@ -230,13 +230,13 @@
 <span class="co">## Dme_Dma        266.0  285.0 134.0</span>
 <span class="co">## Dme_Dsu         98.0  131.0  96.0</span>
 <span class="co">## Dme_Dya        173.0  194.0 106.0</span>
+<span class="co">## In same pop   1011.0 1156.0 355.0</span>
 <span class="co">## Int – Int     1581.0 1734.0 626.0</span>
 <span class="co">## Int – Rob      952.0 1127.0 617.0</span>
 <span class="co">## Int/Rob – Oki    6.0    7.0   7.0</span>
 <span class="co">## Int/Rob – Sav  130.5  232.5 230.0</span>
 <span class="co">## North – North  296.5  395.0 196.0</span>
-<span class="co">## Oki – North    392.0  462.0 248.5</span>
-<span class="co">## same_pop      1011.0 1156.0 355.0</span></code></pre>
+<span class="co">## Oki – North    392.0  462.0 248.5</span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">]</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                    align     mapped       map2</span>
@@ -244,13 +244,13 @@
 <span class="co">## Dme_Dma               NA         NA         NA</span>
 <span class="co">## Dme_Dsu               NA         NA         NA</span>
 <span class="co">## Dme_Dya               NA         NA         NA</span>
+<span class="co">## In same pop   108.831674  94.854274 231.262477</span>
 <span class="co">## Int – Int             NA         NA         NA</span>
 <span class="co">## Int – Rob     117.183617 195.295503 246.327695</span>
 <span class="co">## Int/Rob – Oki   4.242641   4.242641   4.242641</span>
 <span class="co">## Int/Rob – Sav   3.535534   7.778175   7.071068</span>
 <span class="co">## North – North  56.835288  94.182447 100.061231</span>
-<span class="co">## Oki – North    29.281576  42.385982  39.896070</span>
-<span class="co">## same_pop      108.831674  94.854274 231.262477</span></code></pre>
+<span class="co">## Oki – North    29.281576  42.385982  39.896070</span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">trans_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pairname</span>, pch <span class="op">=</span> <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -303,7 +303,7 @@
 <span class="co">## map2Tot          8132    7876    1625    8176    8280    8127    3358    8083</span>
 <span class="co">## map2allTrans      304     291     258     320     325     277     167     280</span>
 <span class="co">## map2Strans        235     215     227     250     280     204     134     211</span>
-<span class="co">## map2StransRep     100      86     193     101     130      82      91      87</span>
+<span class="co">## map2StransRep     121     106     205     123     162      93     103      97</span>
 <span class="co">##               Osa_Aom Osa_Nor Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor Ply_Ros</span>
 <span class="co">## aln             15261   24497   32265   24851   31557   24717   15184   40659</span>
 <span class="co">## alnStrans         862     292     224     223     243     224     777    1227</span>
@@ -313,7 +313,7 @@
 <span class="co">## map2Tot          2256    4500    7849    3373    7849    3452    4319    4224</span>
 <span class="co">## map2allTrans      268     339     256     201     250     204     502     489</span>
 <span class="co">## map2Strans        293     324     191     160     190     154     570     511</span>
-<span class="co">## map2StransRep     244     230      75     102      77      94     458       0</span>
+<span class="co">## map2StransRep     260     259      89     118      91     111     519       0</span>
 <span class="co">##               Ply_Rob Ply_Sav Ply_Oki Rob_Ros Rob_Ply Rob_Sav Rob_Oki Dme_Dbu</span>
 <span class="co">## aln             56000   68463    2127   60384   60205   70201    2347   47893</span>
 <span class="co">## alnStrans         658      51       2     705     776      62       4     129</span>
@@ -350,7 +350,7 @@
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Charles Plessy.</p>
+<p>Developed by Aleksandra Bliznina, Michael Mansfield, Charles Plessy.</p>
 </div>
 
 <div class="pkgdown">

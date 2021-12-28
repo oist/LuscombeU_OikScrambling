@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
       </span>
     </div>
 
@@ -118,9 +118,24 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-Analysis of the Oikopleura breakpoint dataset for the scrambling
-    project.  The data is distributed in a drat repository on GitHub at
-    &lt;<a href="https://oist.github.io/plessy_oikgenomes_drat/" class="external-link">https://oist.github.io/plessy_oikgenomes_drat/</a>&gt;.
+<div class="section level1">
+<div class="page-header"><h1 id="oikscrambling">OikScrambling<a class="anchor" aria-label="anchor" href="#oikscrambling"></a>
+</h1></div>
+<p>This package contains a collection of vignettes to perform the analysis of pairwise genome alignments between <em>Oikopleura</em> genomes.</p>
+<p>The core functions used here are maintained in our <em>GenomicBreaks</em> R package, which is fully documented at: <a href="https://oist.github.io/GenomicBreaks" class="external-link uri">https://oist.github.io/GenomicBreaks</a>.</p>
+<div class="section level2">
+<h2 id="how-to-build-this-site">How to build this site<a class="anchor" aria-label="anchor" href="#how-to-build-this-site"></a>
+</h2>
+<p>See the main vignette for details</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="co"># And so on for the BSgenome packages.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif R CMD INSTALL .</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>srun <span class="op">-</span>pcompute <span class="op">-</span>c8 <span class="op">--</span>mem 300G <span class="op">--</span>pty <span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"pkgdown::build_article('LoadGenomicBreaks')"</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>srun <span class="op">-</span>pcompute <span class="op">-</span>c8 <span class="op">--</span>mem 300G <span class="op">--</span>pty <span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"pkgdown::build_site(devel=TRUE, lazy=TRUE)"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>srun <span class="op">-</span>pcompute <span class="op">-</span>c8 <span class="op">--</span>mem 300G <span class="op">--</span>pty <span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"pkgdown::build_site()"</span></span></code></pre></div>
+</div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -151,8 +166,8 @@ Analysis of the Oikopleura breakpoint dataset for the scrambling
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Aleksandra Bliznina <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-5031-8023" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Michael Mansfield <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0003-4717-4721" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Aleksandra Bliznina <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-5031-8023" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Michael Mansfield <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0003-4717-4721" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 <li>Charles Plessy <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-7410-6295" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>

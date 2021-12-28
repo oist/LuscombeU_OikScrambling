@@ -55,7 +55,7 @@ makeWidthsDF <- function (objList) {
       sub(pat = "^X$",    rep = "Dro")    |>
       sub(pat = "^Y$",    rep = "Dro")   
 
-    DF$query <- DF$score <- DF$rep <- DF$transcripts <- NULL
+    DF$query <- DF$score <- DF$rep <- DF$repOvlp <- DF$transcripts <- NULL
     DF$dist  <- OikScrambling:::compDistance(DF$name)
     DF$distS <- OikScrambling:::compDistance(DF$name, short = TRUE)
     DF$genus <- OikScrambling:::compGenus(DF$name)
@@ -146,11 +146,9 @@ library("patchwork")
 
 ## Aligned regions
 
-_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
+### Whole genomes
 
-The distribution of alignment widths takes a bimodal appearance after
-collapsing.  Is the small peak made of artefacts ?  We will see shortly that the
-answer is _no_.
+_Aligned_ means "before coalescing" and _mapped_ means "after coalescing".
 
 ```{r width_before_coalescing, dependson="pre_compute_widths_object", fig.width=10}
 gg_freq_poly(widths$gbs) +
@@ -162,32 +160,43 @@ gg_freq_poly(widths$gbs) +
 gg_freq_poly(widths$gbs |> dplyr::filter(genus == "Oikopleura")) +
   aes(col=name) +
   facet_wrap(~dist, scales = "free_y", nrow = 1) +
-  ggtitle("Distribution of alignment widths before collapsing, collated by distance group") +
+  ggtitle("Distribution of aligned region widths") +
   scale_color_manual(values = names_table$query)
 ```
 
-```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+```{r width_before_coalescing2, dependson="pre_compute_widths_object", fig.height=9, fig.width=6}
 gg_freq_poly(widths$gbs) +
   aes(width, after_stat(density), col=class) +
-  facet_wrap(~distS, scales = "free_y", ncol = 1) +
-  ggtitle("Distribution of alignment widths before collapsing, collated by distance group")
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Distribution of aligned region widths")
 ```
 
-First, the distribution of widths is not the same on long and short arms.
-For this reason, it would be unwise to filter by width on some operations such
-as coalescing.
+### Faceted by arms
 
-```{r widths_gbs, dependson="pre_compute_widths_object"}
+The distribution of widths is not the same on long and short arms.
+
+Note that for this reason, it would be unwise to filter by width on some
+operations such as coalescing.
+
+```{r widths_gbs_by_arm, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$gbs) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of alignment widths before collapsing, split by arm.")
+  ggtitle("Distribution of aligned region widths")
 
 gg_freq_poly(widths$gbs |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of alignment widths on chr1 before collapsing, split by genome pair")
+  ggtitle("Distribution of aligned region widths on chr1")
+```
 
+Width distribution per arm follows similar pattern on chr2 (first graph).  Pairs
+at a similar evolutionary distance show similar profile, with the exception
+of Osa_Aom, where the number of alignments on short arms is higher.
+Nevertheless, the trend of widths being longer on long arms stay true, so
+we can average them in the plot below.
+
+```{r widths_gbs2_by_arm, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$gbs |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", nrow=1) +
@@ -203,17 +212,38 @@ the “same population” level.
 gg_freq_poly(widths$unal) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of unaligned regions width before collapsing, split by arm.")
+  ggtitle("Distribution of unaligned region widths")
 
 gg_freq_poly(widths$unal |> subset(chr == "chr1")) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of unaligned regions width on chr1 before collapsing, split by genome pair")
+  ggtitle("Distribution of unaligned region widths")
 
 gg_freq_poly(widths$unal |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", ncol=1) +
-  ggtitle("Distribution of unaligned region widths before collapsing, split by distance group") +
+  ggtitle("Distribution of unaligned region widths") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")
+```
+
+Interestingly, only in Oikopleura do the width distributions from pairs of
+different distance peak at the same size.  Could that be because the genome is
+very compact?
+
+```{r widths_unaligned2, dependson="pre_compute_widths_object"}
+gg_freq_poly(widths$unal |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+  aes(col=name) +
+  facet_wrap(~dist, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of unaligned region widths") +
+  geom_vline(xintercept = 300) +
+  scale_x_log10("Width (vertical bar at 300 bp)")  +
+  scale_color_manual(values = names_table$query)
+
+gg_freq_poly(widths$unal) +
+  aes(col=class) +
+  facet_wrap(~genus, scales = "free_y", ncol=1) +
+  ggtitle("Distribution of unaligned region widths") +
   geom_vline(xintercept = 300) +
   scale_x_log10("Width (vertical bar at 300 bp)")
 ```
@@ -224,7 +254,7 @@ After coalescing, some width distribution become clearly bimodal.
 The distributions are hard to compare between genera and between evolutionary
 distance groups, and even within group for the "same population" _Oikopleura_.
 
-The plots below display facet the data in details for the reader to make their
+The plots below display the data in details for the reader to make their
 opinion about the above statement.
 
 ### Whole data
@@ -232,11 +262,24 @@ opinion about the above statement.
 #### Width distributions.
 
 ```{r width_after_coalescing, dependson="pre_compute_widths_object", fig.height=8, fig.width=12}
+# Using after_stat(density) to make more meaningful comparisons between genus
 gg_freq_poly(widths$coa) +
   aes(width, after_stat(density), col=name) +
   facet_wrap(~genus + class, scales = "free_y") +
+  ggtitle("Distribution of mapped region widths") +
+  scale_color_manual(values = names_table$query)
+```
+
+Faceting by genus only.  Why is North / North ("intermediate") not bimodal?
+
+```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
+gg_freq_poly(widths$coa) +
+  aes(width, after_stat(density), col=class) +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
   ggtitle("Distribution of mapped region widths")
 ```
+
+What is in the first peak of the bimodal distributions ?
 
 #### Empirical cumulative distributions
 
@@ -263,16 +306,6 @@ widths$coa |>
   ggplot() + facet_wrap(~genus) + aes(x = width, y = cumsum, col = class) + geom_line() + scale_x_log10() + scale_y_log10()
 ```
 
-Why is North / North ("intermediate") not bimodal?
-
-```{r width_after_coalescing2, dependson="pre_compute_widths_object", fig.height=12, fig.width=8}
-gg_freq_poly(widths$coa) +
-  aes(width, after_stat(density), col=class) +
-  facet_wrap(~genus, scales = "free_y", ncol = 1) +
-  ggtitle("Distribution of alignment widths after collapsing, collated by distance group")
-```
-
-What is in the first peak of the bimodal distributions ?
 
 ### By arm
 
@@ -280,7 +313,7 @@ When faceted by chromosome and arm type, bimodality is also observed.  There is
 a small peak under 500 bp, found on all arms except YSR.  The second peak shows
 two different distributions for long and short arms.
 
-```{r width_after_coalescing2, dependson="pre_compute_widths_object"}
+```{r width_after_coalescing3, dependson="pre_compute_widths_object"}
 gg_freq_poly(widths$coa) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
@@ -315,6 +348,19 @@ intervals.  We tried some width cutoffs on the coalescing step, but at 500 bp,
 the coverage of the genome by the resulting mapped regions is already decreasing
 (`vignette("CoalescingCutoffs", package = "OikScrambling")`).
 
+### Non-coalesced mapped regions
+
+The mapped regions that are found identical in the aligned set are those that
+were not coalesced... Are they the small peak ?
+
+```{r non_coalesced_mapped_regions}
+for(name in names(coa)) {
+  coa[[name]]$nonCoa <- coa[[name]] %in% gbs [[name]]
+}
+widths$coa$nonCoa <- sapply(coa, \(x) x$nonCoa) |> unlist()
+
+```
+
 ### Focus on Oki – North comparisons
 
 ```{r mapped_region_widths_Oki_vs_North}
@@ -328,7 +374,10 @@ p_hist
 
 # The cutoff at 600 is good enough for both arms
 p_hist + facet_wrap(~Arm)
+p_hist + facet_wrap(~nonCoa + Arm)
 ```
+
+The short-width mapped peak is made of aligned regions that can not be coalesced.
 
 We know from `vignette("RepeatRegions", package = "OikScrambling")` that these
 short mapped regions are not repeats.

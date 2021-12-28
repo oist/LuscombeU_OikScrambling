@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
       </span>
     </div>
 
@@ -120,7 +120,7 @@
       <h1 data-toc-skip>Repeat regions</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">13 December, 2021</h4>
+            <h4 data-toc-skip class="date">27 December, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/RepeatRegions.Rmd" class="external-link"><code>vignettes/RepeatRegions.Rmd</code></a></small>
       <div class="hidden name"><code>RepeatRegions.Rmd</code></div>
@@ -156,8 +156,11 @@
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are prepared.</p>
 </div>
 <div class="section level1">
-<h1 id="repeat">Repeat<a class="anchor" aria-label="anchor" href="#repeat"></a>
+<h1 id="repeats-intersecting-with-gbreaks-regions">Repeats intersecting with GBreaks regions<a class="anchor" aria-label="anchor" href="#repeats-intersecting-with-gbreaks-regions"></a>
 </h1>
+<div class="section level2">
+<h2 id="compute">Compute<a class="anchor" aria-label="anchor" href="#compute"></a>
+</h2>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reps_in</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">Oki_pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Oki_Osa"</span>, <span class="st">"Oki_Bar"</span>, <span class="st">"Oki_Kum"</span>, <span class="st">"Oki_Aom"</span>, <span class="st">"Oki_Nor"</span><span class="op">)</span>
@@ -216,7 +219,10 @@
 <span class="va">reps_in_Oki.norm.long</span> <span class="op">&lt;-</span> <span class="fu">toLong.reps</span><span class="op">(</span><span class="va">reps_in_Oki.norm</span><span class="op">)</span>
 <span class="va">reps_in_Osa.norm.long</span> <span class="op">&lt;-</span> <span class="fu">toLong.reps</span><span class="op">(</span><span class="va">reps_in_Osa.norm</span><span class="op">)</span>
 <span class="va">reps_in_Bar.norm.long</span> <span class="op">&lt;-</span> <span class="fu">toLong.reps</span><span class="op">(</span><span class="va">reps_in_Bar.norm</span><span class="op">)</span></code></pre></div>
-<p>Summary numbers.</p>
+</div>
+<div class="section level2">
+<h2 id="summary-numbers">Summary numbers<a class="anchor" aria-label="anchor" href="#summary-numbers"></a>
+</h2>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps_in_Oki.norm</span>, <span class="va">rowMeans</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               total      unal        gbs     unmap    unmap2   unalMap</span>
@@ -257,53 +263,37 @@
 <span class="co">## rnd           0.5728714 0.05200550</span>
 <span class="co">## tandem        0.7069960 0.03617205</span>
 <span class="co">## unknown       0.6781281 0.04337281</span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="summary-plots">Summary plots<a class="anchor" aria-label="anchor" href="#summary-plots"></a>
+</h2>
+<p>Note that Oki has more repeat classes.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_in_Oki.long</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+<code class="sourceCode R"><span class="co"># Here, the outlier is the same-species comparison, Okinawa – Kume</span>
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_in_Oki.long</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="RepeatRegions_files/figure-html/summary_plots-1.png" width="700"></p>
+<p><img src="RepeatRegions_files/figure-html/summary_plots-1.png" width="960"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_in_Osa.long</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+<code class="sourceCode R"><span class="co"># There, the outliers are the same-species comparison, Bar – Nor and Osa – Aom.</span>
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">reps_in_Osa.long</span>, <span class="va">reps_in_Bar.long</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="RepeatRegions_files/figure-html/summary_plots-2.png" width="700"></p>
+<p><img src="RepeatRegions_files/figure-html/summary_plots-2.png" width="960"></p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_in_Bar.long</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="RepeatRegions_files/figure-html/summary_plots-3.png" width="700"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_in_Oki.norm.long</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Fraction overlaping"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Repeats overlaping with (un)aligned/mapped regions (Oki)"</span><span class="op">)</span></code></pre></div>
-<p><img src="RepeatRegions_files/figure-html/summary_plots-4.png" width="700"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_in_Osa.norm.long</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Fraction overlaping"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Repeats overlaping with (un)aligned/mapped regions (Osa)"</span><span class="op">)</span></code></pre></div>
-<p><img src="RepeatRegions_files/figure-html/summary_plots-5.png" width="700"></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_in_Bar.norm.long</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Fraction overlaping"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Repeats overlaping with (un)aligned/mapped regions (Bar)"</span><span class="op">)</span></code></pre></div>
-<p><img src="RepeatRegions_files/figure-html/summary_plots-6.png" width="700"></p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>
+<code class="sourceCode R"><span class="co"># Summary plot combining all comparisons</span>
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>
   <span class="va">reps_in_Oki.norm.long</span>,
   <span class="va">reps_in_Osa.norm.long</span>,
   <span class="va">reps_in_Bar.norm.long</span>
-  <span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Distance <span class="op">=</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Region</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
+  <span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Distance <span class="op">=</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="st">""</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">Distance</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span><span class="va">Class</span> <span class="op">~</span><span class="va">Region</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Fraction overlaping"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Repeats overlaping with (un)aligned/mapped regions (all)"</span><span class="op">)</span></code></pre></div>
-<p><img src="RepeatRegions_files/figure-html/summary_plots-7.png" width="700"></p>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Repeats overlaping with computed regions"</span><span class="op">)</span></code></pre></div>
+<p><img src="RepeatRegions_files/figure-html/summary_plots-3.png" width="960"></p>
+</div>
 </div>
 <div class="section level1">
 <h1 id="tracking-repeats-across-genome-pairs">Tracking repeats across genome pairs<a class="anchor" aria-label="anchor" href="#tracking-repeats-across-genome-pairs"></a>
@@ -314,7 +304,7 @@
 <h2 id="aligned">Aligned<a class="anchor" aria-label="anchor" href="#aligned"></a>
 </h2>
 <p>More than 10,000 repeat annotations are in regions aligned to the same-population control genome, demonstrating that they are mapable in principle.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">isPresent</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">r</span>, <span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">countOverlaps</a></span><span class="op">(</span><span class="va">r</span>,<span class="va">gb</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>
 
 <span class="va">alignedRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
@@ -326,7 +316,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">alignedRepsOki</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_align-1.png" width="700"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">alignedRepsOsa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   align_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">)</span>,
   align_Bar <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span>,
@@ -336,7 +326,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">alignedRepsOsa</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_align-2.png" width="700"></p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">alignedRepsBar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   align_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">gbs</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
   align_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">gbs</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
@@ -351,7 +341,7 @@
 <h2 id="unaligned">Unaligned<a class="anchor" aria-label="anchor" href="#unaligned"></a>
 </h2>
 <p>~40,000 repeat annotations are in regions that are not aligned to a different-population_query_ genome. This might be caused by insertions and deletions.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalignedRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unal_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unal</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
   unal_Aom <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unal</span><span class="op">$</span><span class="va">Oki_Aom</span><span class="op">)</span>,
@@ -361,7 +351,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unalignedRepsOki</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unal-1.png" width="700"></p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalignedRepsOsa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unal_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">unal</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">)</span>,
   unal_Bar <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">unal</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span>,
@@ -371,7 +361,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unalignedRepsOsa</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unal-2.png" width="700"></p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">alignedRepsBar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unal_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">unal</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
   unal_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">unal</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
@@ -385,7 +375,7 @@
 <div class="section level2">
 <h2 id="mapped">Mapped<a class="anchor" aria-label="anchor" href="#mapped"></a>
 </h2>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mappedRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   mapped_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
   mapped_Aom <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Aom</span><span class="op">)</span>,
@@ -395,7 +385,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">mappedRepsOki</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_mapped-1.png" width="700"></p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mappedRepsOsa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   mapped_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">)</span>,
   mapped_Bar <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span>,
@@ -405,7 +395,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">mappedRepsOsa</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_mapped-2.png" width="700"></p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mappedRepsBar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   mapped_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
   mapped_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
@@ -419,7 +409,7 @@
 <div class="section level2">
 <h2 id="unmapped">Unmapped<a class="anchor" aria-label="anchor" href="#unmapped"></a>
 </h2>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmappedRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unmapped_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unmap</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
   unmapped_Aom <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unmap</span><span class="op">$</span><span class="va">Oki_Aom</span><span class="op">)</span>,
@@ -429,7 +419,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unmappedRepsOki</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unmapped-1.png" width="700"></p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmappedRepsOsa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unmapped_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">unmap</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">)</span>,
   unmapped_Bar <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">unmap</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span>,
@@ -439,7 +429,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unmappedRepsOsa</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unmapped-2.png" width="700"></p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmappedRepsBar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unmapped_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">unmap</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
   unmapped_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">unmap</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
@@ -453,7 +443,7 @@
 <div class="section level2">
 <h2 id="unaligned-but-mapped-by-flanking-colinear-blocks">Unaligned but mapped by flanking colinear blocks<a class="anchor" aria-label="anchor" href="#unaligned-but-mapped-by-flanking-colinear-blocks"></a>
 </h2>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalMapRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unalMap_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unalMap</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
   unalMap_Aom <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unalMap</span><span class="op">$</span><span class="va">Oki_Aom</span><span class="op">)</span>,
@@ -463,7 +453,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unalMapRepsOki</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unalMap-1.png" width="700"></p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalMapRepsOsa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unalMap_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">unalMap</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">)</span>,
   unalMap_Bar <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">unalMap</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span>,
@@ -473,7 +463,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unalMapRepsOsa</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unalMap-2.png" width="700"></p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalMapRepsBar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unalMap_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">unalMap</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
   unalMap_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">unalMap</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
@@ -487,7 +477,7 @@
 <div class="section level2">
 <h2 id="transposed">Transposed<a class="anchor" aria-label="anchor" href="#transposed"></a>
 </h2>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">traRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   tra_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">tra</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
   tra_Aom <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">tra</span><span class="op">$</span><span class="va">Oki_Aom</span><span class="op">)</span>,
@@ -497,7 +487,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">traRepsOki</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_tra-1.png" width="700"></p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">traRepsOsa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   tra_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">tra</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">)</span>,
   tra_Bar <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Osa</span>, <span class="va">tra</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span>,
@@ -507,7 +497,7 @@
 <span class="op">)</span>
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">traRepsOsa</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_tra-2.png" width="700"></p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">traRepsBar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   tra_Oki <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">tra</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
   tra_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Bar</span>, <span class="va">tra</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
@@ -523,7 +513,7 @@
 <h1 id="repeat-annotation-of-the-gbreaks-objects">Repeat annotation of the GBreaks objects<a class="anchor" aria-label="anchor" href="#repeat-annotation-of-the-gbreaks-objects"></a>
 </h1>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are annotated.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">countGbsMatchingReps</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">rep</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
  <span class="va">fracGbsMatchingReps</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gbl</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbl</span>, <span class="va">countGbsMatchingReps</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbl</span>, <span class="va">length</span><span class="op">)</span>
 
@@ -540,16 +530,16 @@
 <pre><code><span class="co">## <span style="color: #949494;"># A tibble: 3 × 10</span></span>
 <span class="co">##   dist       aligned unAligned mapped unMapped unAlMapped transposed transposed2</span>
 <span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;">1</span> North – N…  0.168      0.494  0.497    0.487      0.487      0.617       0.739</span>
-<span class="co">## <span style="color: #BCBCBC;">2</span> Oki – Nor…  0.072<span style="text-decoration: underline;">0</span>     0.360  0.312    0.381      0.349      0.502       0.602</span>
-<span class="co">## <span style="color: #BCBCBC;">3</span> same_pop    0.503      0.598  0.652    0.580      0.535      0.702       0.825</span>
+<span class="co">## <span style="color: #BCBCBC;">1</span> In same p…   0.678     0.598  0.809    0.580      0.535      0.702       0.825</span>
+<span class="co">## <span style="color: #BCBCBC;">2</span> North – N…   0.297     0.494  0.602    0.487      0.487      0.617       0.739</span>
+<span class="co">## <span style="color: #BCBCBC;">3</span> Oki – Nor…   0.135     0.360  0.404    0.381      0.349      0.502       0.602</span>
 <span class="co">## <span style="color: #949494;"># … with 2 more variables: mapped2 &lt;dbl&gt;, unMapped2 &lt;dbl&gt;</span></span></code></pre>
 </div>
 <div class="section level1">
 <h1 id="reduced-repeat-set">Reduced repeat set<a class="anchor" aria-label="anchor" href="#reduced-repeat-set"></a>
 </h1>
 <p>Old plots; they show that the above is also true if we merge overlapping repeats.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reps.reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">reduce</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co"># They are short.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps.reduced</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -564,7 +554,7 @@
 <div class="section level1">
 <h1 id="colinearity-interruptors-unmapped-regions">Colinearity interruptors (unmapped regions ?)<a class="anchor" aria-label="anchor" href="#colinearity-interruptors-unmapped-regions"></a>
 </h1>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps_coa</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
     pairname    <span class="op">=</span> <span class="va">Oki_pairs</span>,
     total       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">reps.reduced</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>,
@@ -582,7 +572,7 @@
 <span class="co">## <span style="color: #BCBCBC;">3</span> Oki_Kum  <span style="text-decoration: underline;">31</span>520        <span style="text-decoration: underline;">5</span>351     <span style="text-decoration: underline;">27</span>409   87.0     17.0 104. </span>
 <span class="co">## <span style="color: #BCBCBC;">4</span> Oki_Aom  <span style="text-decoration: underline;">31</span>520       <span style="text-decoration: underline;">14</span>898     <span style="text-decoration: underline;">16</span>339   51.8     47.3  99.1</span>
 <span class="co">## <span style="color: #BCBCBC;">5</span> Oki_Nor  <span style="text-decoration: underline;">31</span>520       <span style="text-decoration: underline;">15</span>834     <span style="text-decoration: underline;">15</span>177   48.2     50.2  98.4</span></code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_coa</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mapped"</span>, <span class="st">"unmapped"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Matches of repeats to mapped or unmaped regions"</span><span class="op">)</span> <span class="op">+</span>
@@ -596,7 +586,7 @@
 <div class="section level1">
 <h1 id="unaligned-regions">Unaligned regions<a class="anchor" aria-label="anchor" href="#unaligned-regions"></a>
 </h1>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps_gbs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
     pairname   <span class="op">=</span> <span class="va">Oki_pairs</span>,
     total      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">reps.reduced</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>,
@@ -614,7 +604,7 @@
 <span class="co">## <span style="color: #BCBCBC;">3</span> Oki_Kum  <span style="text-decoration: underline;">31</span>520      <span style="text-decoration: underline;">12</span>735    <span style="text-decoration: underline;">22</span>222    70.5      40.4 111. </span>
 <span class="co">## <span style="color: #BCBCBC;">4</span> Oki_Aom  <span style="text-decoration: underline;">31</span>520      <span style="text-decoration: underline;">26</span>910     <span style="text-decoration: underline;">4</span>906    15.6      85.4 101. </span>
 <span class="co">## <span style="color: #BCBCBC;">5</span> Oki_Nor  <span style="text-decoration: underline;">31</span>520      <span style="text-decoration: underline;">27</span>116     <span style="text-decoration: underline;">4</span>379    13.9      86.0  99.9</span></code></pre>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">reps_gbs</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aligned"</span>, <span class="st">"unaligned"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">value</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Matches of repeats to aligned or unaligned regions"</span><span class="op">)</span> <span class="op">+</span>
@@ -624,6 +614,54 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pairname</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/unaligned_regions-1.png" width="700"></p>
+</div>
+<div class="section level1">
+<h1 id="repeat-annotation-of-the-shortest-mapped-regions">Repeat annotation of the shortest mapped regions<a class="anchor" aria-label="anchor" href="#repeat-annotation-of-the-shortest-mapped-regions"></a>
+</h1>
+<p>In Oki – North comparisons, the distribution of mapped region widths is bimodal and the two peaks are best separated around 600 bp. See <code><a href="../articles/RegionWidths.html">vignette("RegionWidths", package = "OikScrambling")</a></code> for details.</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>w_short <span class="op">=</span> <span class="va">width</span> <span class="op">&lt;</span> <span class="fl">600</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> |&gt;
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, col <span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">geom_freqpoly</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">600</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Example width distribution of mapped regions (Oki_Osa)"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<p><img src="RepeatRegions_files/figure-html/example_width_dist_for_oki_osa-1.png" width="700"></p>
+<p>We want to know if the regions of width shorter than 600 match more repeats, and to what extent the matching repeats cover them.</p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">checkOverlapWithRepeatsInShortAndLongWidthRegions</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">grl</span> <span class="op">&lt;-</span> <span class="va">gr</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">600</span><span class="op">)</span>
+  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
+    `Length`                   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long <span class="op">=</span> <span class="st">"Long"</span>, Short <span class="op">=</span> <span class="st">"Short"</span><span class="op">)</span>,
+    `Number of regions`        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,
+                                 Short <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,
+    `Total width`              <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span>,
+                                 Short <span class="op">=</span> <span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span>  |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,
+    `Width covered by reps`    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/setops-methods.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span>, <span class="va">rep</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span>,
+                                 Short <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/setops-methods.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span>, <span class="va">rep</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+  <span class="op">)</span>
+<span class="op">}</span>
+<span class="fu">checkOverlapWithRepeatsInShortAndLongWidthRegions</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">reps</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## <span style="color: #949494;"># A tibble: 2 × 4</span></span>
+<span class="co">##   Length `Number of regions` `Total width` `Width covered by reps`</span>
+<span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;">1</span> Long                  <span style="text-decoration: underline;">5</span>664      44<span style="text-decoration: underline;">510</span>187                 1<span style="text-decoration: underline;">978</span>784</span>
+<span class="co">## <span style="color: #BCBCBC;">2</span> Short                 <span style="text-decoration: underline;">3</span>179        <span style="text-decoration: underline;">858</span>460                    <span style="text-decoration: underline;">6</span>205</span></code></pre>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">checkOverlapWithRepeatsInShortAndLongWidthRegions</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Oki</span>, <span class="va">reps</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## <span style="color: #949494;"># A tibble: 2 × 4</span></span>
+<span class="co">##   Length `Number of regions` `Total width` `Width covered by reps`</span>
+<span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;">1</span> Long                  <span style="text-decoration: underline;">5</span>624      41<span style="text-decoration: underline;">234</span>589                 2<span style="text-decoration: underline;">102</span>670</span>
+<span class="co">## <span style="color: #BCBCBC;">2</span> Short                 <span style="text-decoration: underline;">3</span>212        <span style="text-decoration: underline;">851</span>419                    <span style="text-decoration: underline;">4</span>123</span></code></pre>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">checkOverlapWithRepeatsInShortAndLongWidthRegions</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Bar_Oki</span>, <span class="va">reps</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## <span style="color: #949494;"># A tibble: 2 × 4</span></span>
+<span class="co">##   Length `Number of regions` `Total width` `Width covered by reps`</span>
+<span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;">1</span> Long                  <span style="text-decoration: underline;">5</span>295      39<span style="text-decoration: underline;">663</span>995                 1<span style="text-decoration: underline;">638</span>582</span>
+<span class="co">## <span style="color: #BCBCBC;">2</span> Short                 <span style="text-decoration: underline;">3</span>198        <span style="text-decoration: underline;">822</span>315                    <span style="text-decoration: underline;">5</span>703</span></code></pre>
+<p>In conclusion, most of the short mapped regions are not mapped repeats.</p>
 </div>
   </div>
 
@@ -639,7 +677,7 @@
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Charles Plessy.</p>
+<p>Developed by Aleksandra Bliznina, Michael Mansfield, Charles Plessy.</p>
 </div>
 
 <div class="pkgdown">
