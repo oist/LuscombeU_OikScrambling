@@ -308,16 +308,74 @@ in exons ?
 
 ## Breakpoints of wide and narrow regions
 
-```{r genomic_features_bpByWidth, cache=FALSE}
-current_GB_wide   <- coa$Oki_Osa |> subset(width >  500)
-current_GB_narrow <- coa$Oki_Osa |> subset(width <= 500)
-plotHeatmapMeta(list(feature_coverage(current_GB_wide,   intronicParts(annots$Oki), win = 1e3, lab = "wide")))
-plotHeatmapMeta(list(feature_coverage(current_GB_narrow, intronicParts(annots$Oki), win = 1e3, lab = "narrow")))
+We can filter most of them due to the fact that they do not coalesce.
+See `vignette("RegionWidths", package = "OikScrambling")` for details.
 
-plotHeatmapMeta(list(feature_coverage(current_GB_wide,   reps$Oki, win = 1e3, lab = "wide")))
-plotHeatmapMeta(list(feature_coverage(current_GB_narrow, reps$Oki, win = 1e3, lab = "narrow")))
+```{r non_coalesced_mapped_regions}
+for(name in names(coa)) {
+  coa[[name]]$nonCoa <- coa[[name]] %in% gbs [[name]]
+}
 ```
 
+### Coding sequences
+
+Close to the breakpoint of uncoalesced mapped regions, exon annotations are
+depleted, which makes sense, as exons are usually mapable.  Within the mapped
+regions, frequency of introns and exons are comparable.  In contrary, within
+coalesced mapped regions, the exon annotations are over-represented.
+
+```{r genomic_features_bpByWidth, cache=FALSE}
+current_GB_wide   <- coa$Oki_Osa[ ! coa$Oki_Osa$nonCoa]
+current_GB_narrow <- coa$Oki_Osa[   coa$Oki_Osa$nonCoa]
+
+current_GB_wide   |> width() |> summary()
+current_GB_narrow |> width() |> summary()
+
+hmListW <- list()
+hmListN <- list()
+
+hmListW$genes  <- feature_coverage(current_GB_wide,     genes(annots$Oki),         win = 1e3, lab = "genes",  direction = "left")
+hmListW$cds    <- feature_coverage(current_GB_wide,     cds(annots$Oki),           win = 1e3, lab = "CDS",    direction = "left")
+hmListW$intron <- feature_coverage(current_GB_wide,     intronicParts(annots$Oki), win = 1e3, lab = "intron", direction = "left")
+hmListW$exon   <- feature_coverage(current_GB_wide,     exonicParts(annots$Oki),   win = 1e3, lab = "exon",   direction = "left")
+
+hmListN$genes  <- feature_coverage(current_GB_narrow,   genes(annots$Oki),         win = 1e3, lab = "genes",  direction = "left")
+hmListN$cds    <- feature_coverage(current_GB_narrow,   cds(annots$Oki),           win = 1e3, lab = "CDS",    direction = "left")
+hmListN$intron <- feature_coverage(current_GB_narrow,   intronicParts(annots$Oki), win = 1e3, lab = "intron", direction = "left")
+hmListN$exon   <- feature_coverage(current_GB_narrow,   exonicParts(annots$Oki),   win = 1e3, lab = "exon",   direction = "left")
+
+plotHeatmapMeta(hmListN)
+plotHeatmapMeta(hmListW)
+
+plotHeatmapMeta(hmListN[c("intron", "exon")])
+plotHeatmapMeta(hmListW[c("intron", "exon")])
+```
+
+### Repeats
+
+As expected, both types of mapped regions are depleted for repeats.
+Surprisingly, in both cases the depletion is relaxed after ~200 bp only.
+
+```{r genomic_repeats_bpByWidth, cache=FALSE}
+plotHeatmapMeta(list(feature_coverage(current_GB_wide,   reps$Oki, win = 1e3, lab = "wide",    direction = "left")))
+plotHeatmapMeta(list(feature_coverage(current_GB_narrow, reps$Oki, win = 1e3, lab = "narrow",  direction = "left")))
+```
+
+### PWM
+
+The PWM motif, which is rare in comparison to the other features, follows
+a profile that bears resemblance to the repeat profile.
+
+```{r genomic_pwm_bpByWidth, cache=FALSE}
+plotHeatmapMeta(list(feature_coverage(current_GB_wide,   pwmHits, win = 1e3, lab = "wide",    direction = "left")))
+plotHeatmapMeta(list(feature_coverage(current_GB_narrow, pwmHits, win = 1e3, lab = "narrow",  direction = "left")))
+```
+
+### Question
+
+in `vignette("ColinearityInterruptors", package = "OikScrambling")`, we saw
+that some uncoalesced regions map uniquely and are well conserved across
+genomes.  What are they... enhancers ?
 
 ## Gene feature coverage around PWM hits
 
