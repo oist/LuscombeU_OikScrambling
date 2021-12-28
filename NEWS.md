@@ -1,3 +1,9 @@
+# OikScrambling 0.7.0
+
+* Overlap with repeats on both strands.  The difference is not so massive,
+  considering that the unaligned and unmapped regions are already strandless
+  anyway.
+
 # OikScrambling 0.6.6
 
 * New functions `OikScrambling:::compDistClass()` and
