@@ -382,6 +382,30 @@ The short-width mapped peak is made of aligned regions that can not be coalesced
 We know from `vignette("RepeatRegions", package = "OikScrambling")` that these
 short mapped regions are not repeats.
 
+### Compound picture
+
+Let's put into parallel "aligned", "unaligned" and "mapped"
+
+```{r compound1}
+p_ali <- gg_freq_poly(widths$gbs |> dplyr::filter(! is.na(genus))) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Aligned")
+
+p_una <- gg_freq_poly(widths$unal |> dplyr::filter(! is.na(genus))) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Not aligned")
+
+p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Mapped")
+
+# Patchwork
+(p_ali | p_una | p_map) + plot_layout(ncol = 3, guides = 'collect') + theme_bw()
+```
+
 ## Unmapped regions
 
 Unmapped regions are a bit longer on the short arm in Oki – North comparisons…
