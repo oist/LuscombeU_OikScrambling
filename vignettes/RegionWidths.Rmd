@@ -384,7 +384,7 @@ The short-width mapped peak is made of aligned regions that can not be coalesced
 We know from `vignette("RepeatRegions", package = "OikScrambling")` that these
 short mapped regions are not repeats.
 
-### Compound picture
+### Compound pictures
 
 Let's put into parallel "aligned", "unaligned" and "mapped"
 
@@ -406,6 +406,31 @@ p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
 
 # Patchwork
 (p_ali | p_una | p_map) + plot_layout(ncol = 3, guides = 'collect') + theme_bw()
+```
+
+```{r compound2}
+p_ali2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", nonCoa)) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Aligned (not collapsed)")
+
+p_una2 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "Oki – North")) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Not mapped")
+
+p_map2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Mapped")
+
+p_unalmap2 <- gg_freq_poly(widths$unalMap |> dplyr::filter(dist == "Oki – North")) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Double gaps")
+
+# Patchwork
+(p_ali2 | p_una2 | p_map2 | p_unalmap2) + plot_layout(ncol = 4, guides = 'collect') + theme_bw()
 ```
 
 ## Unmapped regions
