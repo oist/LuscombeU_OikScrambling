@@ -332,37 +332,51 @@ coalesced mapped regions, the exon annotations are over-represented.
 ```{r genomic_features_bpByWidth, cache=FALSE}
 current_GB_wide   <- coa$Oki_Osa[ ! coa$Oki_Osa$nonCoa] |> plyranges::arrange(width)
 current_GB_narrow <- coa$Oki_Osa[   coa$Oki_Osa$nonCoa]
-current_GB_unal    <- unal$Oki_Osa
+current_GB_unmap   <- unmap$Oki_Osa
 current_GB_unalMap <- unalMap$Oki_Osa
 
 current_GB_wide   |> width() |> summary()
 current_GB_narrow |> width() |> summary()
-current_GB_unal   |> width() |> summary()
+current_GB_unmap  |> width() |> summary()
 current_GB_unalMap|> width() |> summary()
 
-hmListW <- list()
-hmListN <- list()
-hmListUA <- list()
-hmListUM <- list()
-
-prepareFreqPlot <- function(gb, annot, win = 1e3) {
+prepareFreqPlot <- function(gb, annot, win = 2.5e3) {
   l <- list()
-  #l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = "left")
+  l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = "left")
   #l$cds    <- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = "left")
   l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = "left")
   l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = "left")
+  #reorder
+  newOrder <- order(rowSums(l$intron@image))
+  l$intron@image <- l$intron@image[newOrder,]
+  l$exon@image   <- l$exon@image[newOrder,]
   l
 }
 
-hmListW  <- prepareFreqPlot(current_GB_wide,    annots$Oki)
-hmListN  <- prepareFreqPlot(current_GB_narrow,  annots$Oki)
-hmListUA <- prepareFreqPlot(current_GB_unal,    annots$Oki)
-hmListUM <- prepareFreqPlot(current_GB_unalMap, annots$Oki)
+prepareGGFreqPlot <- function(x, desc = NULL) {
+  l <- lapply(names(x), \(name){
+    val <- colSums(x[[name]]@image)
+    what <- name
+    tibble::tibble(val, freq = val / nrow(x[[name]]@image), what, pos = 1:length(val), desc)
+  })
+   do.call(rbind, l)
+}
 
-plotHeatmapMeta(hmListN)
-plotHeatmapMeta(hmListW)
-plotHeatmapMeta(hmListUA)
-plotHeatmapMeta(hmListUM)
+hmListWide    <- prepareFreqPlot(current_GB_wide,    annots$Oki)
+hmListNarrow  <- prepareFreqPlot(current_GB_narrow,  annots$Oki)
+hmListUnmap   <- prepareFreqPlot(current_GB_unmap,    annots$Oki)
+hmListUnalMap <- prepareFreqPlot(current_GB_unalMap, annots$Oki)
+
+rbind(
+  hmListNarrow  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnmap   |> prepareGGFreqPlot("02_unmap"),
+  hmListWide    |> prepareGGFreqPlot("03_wide"),
+  hmListUnalMap |> prepareGGFreqPlot("04_unalMap")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1)
 ```
 
 ### Repeats
