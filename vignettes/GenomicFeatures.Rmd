@@ -282,9 +282,7 @@ The function `feature_coverage` will plot the coverage of tandem repeats around
 centred alignment stops. 
 
 ```{r genomic_features, cache=FALSE}
-current_GB <- coa$Oki_Osa |> subset(width > 500)
-
-
+current_GB <- coa$Oki_Osa
 hmList_OKI <- list()
 
 hmList_OKI$genes      <- feature_coverage(current_GB, genes(annots$Oki),                         win = 2000, lab = "Oki genes", direction = "left")
@@ -292,19 +290,31 @@ hmList_OKI$promoters  <- feature_coverage(current_GB, promoters(annots$Oki),    
 hmList_OKI$exons      <- feature_coverage(current_GB, exonicParts(annots$Oki),                   win = 2000, lab = "Oki exons", direction = "left")
 hmList_OKI$introns    <- feature_coverage(current_GB, intronicParts(annots$Oki),                 win = 2000, lab = "Oki introns", direction = "left")
 hmList_OKI$cds        <- feature_coverage(current_GB, cds(annots$Oki),                           win = 2000, lab = "Oki cds", direction = "left")
+```
 
+```{r genomic_features_genes_exons_cds, cache=FALSE}
 plotHeatmapMeta(hmList_OKI[c("genes", "exons", "cds")]) # Show they look alike.  We keep "exons"
+```
+
+The features _genes_, _exons_ and _cds_ have comparable profiles.  Let's keep only _exons_ in the rest of the analysis.
+
+```{r genomic_features_2, cache=FALSE}
 plotHeatmapMeta(hmList_OKI[c("promoters", "exons", "introns")])
 ```
 
-Aligned regions are enriched in exons and depleted in introns.  Is it because
-exons are more alignable or is it because it is deleterous to break genes
-in exons ?
+Positive coordinates start in aligned regions and negative coordinates start
+in unaligned regions.  As we move further from 0, we can not guarantee that
+the statement is still true because some regions have a width narrower than
+the plot window.  This is why the values tend to equilibrate near the
+boundaries.
+
+Aligned regions are enriched in exons and depleted in introns.
 
 ## Breakpoints of wide and narrow regions
 
-We can filter most of them due to the fact that they do not coalesce.
-See `vignette("RegionWidths", package = "OikScrambling")` for details.
+Most of the narrow-width aligned regions did not coalesce.  We use this
+as a classifier instead of an arbitrary width cutoff.  See
+`vignette("RegionWidths", package = "OikScrambling")` for details.
 
 ```{r non_coalesced_mapped_regions}
 for(name in names(coa)) {
@@ -320,30 +330,39 @@ regions, frequency of introns and exons are comparable.  In contrary, within
 coalesced mapped regions, the exon annotations are over-represented.
 
 ```{r genomic_features_bpByWidth, cache=FALSE}
-current_GB_wide   <- coa$Oki_Osa[ ! coa$Oki_Osa$nonCoa]
+current_GB_wide   <- coa$Oki_Osa[ ! coa$Oki_Osa$nonCoa] |> plyranges::arrange(width)
 current_GB_narrow <- coa$Oki_Osa[   coa$Oki_Osa$nonCoa]
+current_GB_unal    <- unal$Oki_Osa
+current_GB_unalMap <- unalMap$Oki_Osa
 
 current_GB_wide   |> width() |> summary()
 current_GB_narrow |> width() |> summary()
+current_GB_unal   |> width() |> summary()
+current_GB_unalMap|> width() |> summary()
 
 hmListW <- list()
 hmListN <- list()
+hmListUA <- list()
+hmListUM <- list()
 
-hmListW$genes  <- feature_coverage(current_GB_wide,     genes(annots$Oki),         win = 1e3, lab = "genes",  direction = "left")
-hmListW$cds    <- feature_coverage(current_GB_wide,     cds(annots$Oki),           win = 1e3, lab = "CDS",    direction = "left")
-hmListW$intron <- feature_coverage(current_GB_wide,     intronicParts(annots$Oki), win = 1e3, lab = "intron", direction = "left")
-hmListW$exon   <- feature_coverage(current_GB_wide,     exonicParts(annots$Oki),   win = 1e3, lab = "exon",   direction = "left")
+prepareFreqPlot <- function(gb, annot, win = 1e3) {
+  l <- list()
+  #l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = "left")
+  #l$cds    <- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = "left")
+  l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = "left")
+  l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = "left")
+  l
+}
 
-hmListN$genes  <- feature_coverage(current_GB_narrow,   genes(annots$Oki),         win = 1e3, lab = "genes",  direction = "left")
-hmListN$cds    <- feature_coverage(current_GB_narrow,   cds(annots$Oki),           win = 1e3, lab = "CDS",    direction = "left")
-hmListN$intron <- feature_coverage(current_GB_narrow,   intronicParts(annots$Oki), win = 1e3, lab = "intron", direction = "left")
-hmListN$exon   <- feature_coverage(current_GB_narrow,   exonicParts(annots$Oki),   win = 1e3, lab = "exon",   direction = "left")
+hmListW  <- prepareFreqPlot(current_GB_wide,    annots$Oki)
+hmListN  <- prepareFreqPlot(current_GB_narrow,  annots$Oki)
+hmListUA <- prepareFreqPlot(current_GB_unal,    annots$Oki)
+hmListUM <- prepareFreqPlot(current_GB_unalMap, annots$Oki)
 
 plotHeatmapMeta(hmListN)
 plotHeatmapMeta(hmListW)
-
-plotHeatmapMeta(hmListN[c("intron", "exon")])
-plotHeatmapMeta(hmListW[c("intron", "exon")])
+plotHeatmapMeta(hmListUA)
+plotHeatmapMeta(hmListUM)
 ```
 
 ### Repeats
