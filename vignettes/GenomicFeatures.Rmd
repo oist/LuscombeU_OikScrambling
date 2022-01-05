@@ -271,7 +271,12 @@ tandem repeats.
 
 # Gene feature coverage around alignment stops (breakpoints)
 
-TODO: analyse separately the breakpoint regions that are in colinear regions?
+Breakpoints are between mapped regions.  If the unmapped region is broad we have
+little information where the breakpoint originally was.  We set arbitrarly the
+breakpoints to the left-side (end-side) coordinate of mapped regions.
+
+Mapped regions can consist of multiple colinear aligned regions, or be a single
+uncoalesced aligned region.  We will see that they have different properties.
 
 The function `feature_coverage` will plot the coverage of tandem repeats around
 centred alignment stops. 
