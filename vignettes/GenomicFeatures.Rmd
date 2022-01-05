@@ -283,15 +283,7 @@ centred alignment stops.
 
 ```{r genomic_features, cache=FALSE}
 current_GB <- coa$Oki_Osa |> subset(width > 500)
-gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
-pwm <- gadems.invLeftGap$Oki_Osa[[1]]
-pwm@consensus
-# pwmHits <- matchPWM(pwm = sapply(pwm@alignList, \(x) x@seq) |> as("DNAStringSet") |> PWM(), genomes$Oki) # Gives different scores...
-pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$Oki) |> suppressWarnings()
-# Suppressing warnings like:
-# Warning messages:
-# 1: In .Call2("XString_match_PWM", pwm, subject, min.score, count.only,  :
-#   'subject' contains letters not in [ACGT] ==> assigned weight 0 to them
+
 
 hmList_OKI <- list()
 
@@ -300,11 +292,9 @@ hmList_OKI$promoters  <- feature_coverage(current_GB, promoters(annots$Oki),    
 hmList_OKI$exons      <- feature_coverage(current_GB, exonicParts(annots$Oki),                   win = 2000, lab = "Oki exons", direction = "left")
 hmList_OKI$introns    <- feature_coverage(current_GB, intronicParts(annots$Oki),                 win = 2000, lab = "Oki introns", direction = "left")
 hmList_OKI$cds        <- feature_coverage(current_GB, cds(annots$Oki),                           win = 2000, lab = "Oki cds", direction = "left")
-hmList_OKI$pwm        <- feature_coverage(current_GB, pwmHits                                  , win = 2000, lab = "PWM", direction = "left")
 
 plotHeatmapMeta(hmList_OKI[c("genes", "exons", "cds")]) # Show they look alike.  We keep "exons"
-plotHeatmapMeta(hmList_OKI[c("promoters", "exons", "introns", "pwm")])
-plotHeatmapMeta(hmList_OKI[c("pwm")])
+plotHeatmapMeta(hmList_OKI[c("promoters", "exons", "introns")])
 ```
 
 Aligned regions are enriched in exons and depleted in introns.  Is it because
@@ -372,6 +362,16 @@ The PWM motif, which is rare in comparison to the other features, follows
 a profile that bears resemblance to the repeat profile.
 
 ```{r genomic_pwm_bpByWidth, cache=FALSE}
+gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
+pwm <- gadems.invLeftGap$Oki_Osa[[1]]
+pwm@consensus
+# pwmHits <- matchPWM(pwm = sapply(pwm@alignList, \(x) x@seq) |> as("DNAStringSet") |> PWM(), genomes$Oki) # Gives different scores...
+pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$Oki) |> suppressWarnings()
+# Suppressing warnings like:
+# Warning messages:
+# 1: In .Call2("XString_match_PWM", pwm, subject, min.score, count.only,  :
+#   'subject' contains letters not in [ACGT] ==> assigned weight 0 to them
+
 plotHeatmapMeta(list(feature_coverage(current_GB_wide,   pwmHits, win = 1e3, lab = "wide",    direction = "left")))
 plotHeatmapMeta(list(feature_coverage(current_GB_narrow, pwmHits, win = 1e3, lab = "narrow",  direction = "left")))
 ```
