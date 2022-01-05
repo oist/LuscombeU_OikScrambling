@@ -30,6 +30,7 @@ different objects are prepared.
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
 library('GenomicFeatures') |> suppressPackageStartupMessages()
+library('heatmaps')        |> suppressPackageStartupMessages()
 genomes     <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings()
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
@@ -96,7 +97,6 @@ centered on alignment stops.  Lets look at `GC` content before and after
 coalescing: 
 
 ```{r echo=T, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
-library(heatmaps)
 #hm_GC1 <- sapply(gbs,  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
 hm_GC2 <- sapply(coa[1:15],  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
 #hm_GC3 <- sapply(coa2, bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
