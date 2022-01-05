@@ -1,3 +1,7 @@
+# OikScrambling 0.7.1
+
+* Created compound plots of width distribution for Figure 2.
+
 # OikScrambling 0.7.0
 
 * Overlap with repeats on both strands.  The difference is not so massive,
