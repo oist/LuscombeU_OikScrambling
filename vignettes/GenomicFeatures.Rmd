@@ -41,8 +41,11 @@ requireNamespace("ggseqlogo") |> suppressPackageStartupMessages()
 # Nucleic acid content heatmaps
 
 The `GenomicBreaks::bp_heatmap()` function plots nucleic acid content in windows
-centered on alignment stops.  Lets look at `GC` content before and after
-coalescing: 
+centered on alignment stops.
+
+## GC
+
+Lets look at `GC` content before and after coalescing: 
 
 ```{r echo=T, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 #hm_GC1 <- sapply(gbs,  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
@@ -68,6 +71,8 @@ centred on the top half of the plot, and end alignment stops are centred on the
 bottom. This is why we see different directionality in the plots. At the
 alignment stops, the GC content seems to be lower, but higher once within the
 aligned region, except for the Oki – Kum pair.
+
+## TATA
 
 Now looking at TATA content:
 
@@ -195,27 +200,6 @@ The accumulation of alignment breaks of one pairwise alignment onto another sugg
 bp_pair_analysis(gr_ref_q1 = coa$Osa_Oki, gr_ref_q2 = coa$Osa_Nor, win = 1000, lab = "Oki~Nor") |> plotHeatmapMeta()
 bp_pair_analysis(gr_ref_q1 = coa$Osa_Oki, gr_ref_q2 = coa$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotHeatmapMeta()
 ```
-
-## Tandem repeat coverage around alignment stops (breakpoints)
-
-The function `GenomicBreaks::feature_coverage()` will plot the coverage of tandem repeats around
-centred alignment stops. 
-
-```{r echo=T, message=F, warning=F, cache=FALSE}
-# 
-# hm_tan1 <- feature_coverage(gr_ob = gr_O_Oki, feat = tan_O, win = 4000, lab = "Osk ~ Oki", direction = "left")
-# plotHeatmapMeta(hm_tan1)
-#  
-# hm_tan2 <- feature_coverage(gr_ob = reduced_gr_O_Oki, feat = tan_O, win = 4000, lab = "OSK~Oki (coalesced)", direction = "left")
-# plotHeatmapMeta(hm_tan2)
-# 
-# # should I also add comparison of proportions of tandem proximities before and after coalescion?
-```
-
-There appears to be less tandem repeats around alignment stops after coalescion,
-inferring that perhaps that some are artefacts of difficult alignment near to
-tandem repeats. 
-
 
 # Gene feature coverage around alignment stops (breakpoints)
 
