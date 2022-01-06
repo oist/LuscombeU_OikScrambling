@@ -38,20 +38,6 @@ requireNamespace("rGADEM")    |> suppressPackageStartupMessages()
 requireNamespace("ggseqlogo") |> suppressPackageStartupMessages()
 ```
 
-
-# Coverage
-
-Another characteristic of alignment stops that we can examine is the coverage depth over said alignment stops. By aligning raw reads to assembled genomes, we can obtain per-base coverage depth for target or query genome. Low coverage directly on and surrounding an alignment stop may suggest unreliability in it being a true breakpoint. The function `bp_coverage` returns a GRanges object of the bps, with associated averaged and point converage in the metadatacolumns. 
-
-```{r echo=T, message=F, warning=F}
-
-# cov_gr_O_Oki <- bp_coverage(gr_ob = q_Oki, cov_gr = Oki_cov_pb, win = 50)
-# cov_gr_O_Oki
-
-```
-
-
-
 # Nucleic acid content heatmaps
 
 The `GenomicBreaks::bp_heatmap()` function plots nucleic acid content in windows
@@ -446,5 +432,19 @@ As previously discussed, low coverage over an alignment stop could lower the lik
 
 We may choose to kick out the one alignment stop for which there is no coverage. However, only 15 out of 34572 alignment stops have a coverage of less than or equal to 50, meaning that it would be hard to exclude more than just a few alignment stops using coverage information for breakpoint analysis. 
 
+# Coverage
 
+_Needs coverage information to be recomputed_
 
+Another characteristic of alignment stops that we can examine is the coverage depth over said alignment stops. By aligning raw reads to assembled genomes, we can obtain per-base coverage depth for target or query genome. Low coverage directly on and surrounding an alignment stop may suggest unreliability in it being a true breakpoint. The function `bp_coverage` returns a GRanges object of the bps, with associated averaged and point converage in the metadatacolumns. 
+
+```{r coverage}
+# cov_gr_O_Oki <- bp_coverage(gr_ob = q_Oki, cov_gr = Oki_cov_pb, win = 50)
+# cov_gr_O_Oki
+```
+
+# Session information
+
+```{r sessioninfo}
+sessionInfo()
+```
