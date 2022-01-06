@@ -18,8 +18,8 @@ knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
-Genomic features of the breakpoints
-===================================
+Load packages and data
+======================
 
 See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllTranscriptsGR`,
 and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
@@ -34,8 +34,8 @@ transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings()
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
 reps        <- OikScrambling:::loadAllRepeats()
 load("BreakPoints.Rdata")
-requireNamespace("rGADEM")
-requireNamespace("ggseqlogo")
+requireNamespace("rGADEM")    |> suppressPackageStartupMessages()
+requireNamespace("ggseqlogo") |> suppressPackageStartupMessages()
 ```
 
 
