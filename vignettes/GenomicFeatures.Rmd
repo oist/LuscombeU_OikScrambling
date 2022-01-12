@@ -187,14 +187,24 @@ plotHeatmapList(sm_GC2_mot[1:5])
 
 ## Evidence for breakpoint hotspots
 
-The function `bp_pair_analysis` takes two pairwise alignments with the same target genome, and plots the alignment stops on to the centred alignment stops of the other. In the plot below, Osaka is there consistent target genome, and as such acts as a coordinate system to relate alignment stops across genomes. Lets produce two of these 3-way analyses; one between Osaka-Okinawa-Norway, and one between Osaka-Okinawa-Aomori
+The function `?GenomicBreaks::bp_pair_analysis` takes two pairwise alignments
+with the same target genome, and plots the alignment stops on to the centred
+alignment stops of the other.
+
+In the plot below, Osaka is there consistent target genome, and as such acts as
+a coordinate system to relate alignment stops across genomes. Lets produce two
+of these 3-way analyses; one between Osaka-Okinawa-Norway, and one between
+Osaka-Okinawa-Aomori.
 
 ```{r breakpoint_hotspot_gbs}
 bp_pair_analysis(gr_ref_q1 = gbs$Osa_Oki, gr_ref_q2 = gbs$Osa_Nor, win = 1000, lab = "Oki~Nor") |> plotHeatmapMeta()
 bp_pair_analysis(gr_ref_q1 = gbs$Osa_Oki, gr_ref_q2 = gbs$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotHeatmapMeta()
 ```
 
-The accumulation of alignment breaks of one pairwise alignment onto another suggests the existence of breakpoint hotspots; regions where breaks are far more likely to occur. Intuitively, this would lead to the presumption of synteny blocks, also. The pattern is consistent after coalescing, too;
+The accumulation of alignment breaks of one pairwise alignment onto another
+suggests the existence of breakpoint hotspots; regions where breaks are far
+more likely to occur. Intuitively, this would lead to the presumption of synteny
+blocks, also. The pattern is consistent after coalescing, too;
 
 ```{r breakpoint_hotspot_coa}
 bp_pair_analysis(gr_ref_q1 = coa$Osa_Oki, gr_ref_q2 = coa$Osa_Nor, win = 1000, lab = "Oki~Nor") |> plotHeatmapMeta()
