@@ -260,6 +260,11 @@ unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithTranscripts, tran
 Coalescing alignments
 ---------------------
 
+### Coalesce
+
+We call these coalesced regions “mapped regions”.  Some of the bases in the
+region are aligned and some not (see the “mapped unaligned regions” later).
+
 ```{r coalescing_algorithm, cache=TRUE, dependson="GBreaks_object"}
 coa <- BiocParallel::bplapply(gbs, coalesce_contigs) |> SimpleList()
 coa[ 1:5]  <- BiocParallel::bplapply(coa[ 1:5],  flagLongShort, longShort$Oki)
@@ -272,8 +277,25 @@ coa[Oik_Oik] <- annotateWithTranscripts(coa[Oik_Oik], transcripts)
 coa <- sapply(coa, flagAll) |> SimpleList()
 ```
 
+### Flag non-coalesced
+
+Mark the regions that are identical in the aligned and the mapped objects with
+a `nonCoa` flag meaning _non coalesced_.
+
+```{r mark_non_coalesced_regions}
+for(name in names(coa)) {
+  coa[[name]]$nonCoa <- coa[[name]] %in% gbs [[name]]
+}
+
+for(name in names(gbs)) {
+  gbs[[name]]$nonCoa <- gbs[[name]] %in% coa [[name]]
+}
+```
+
 Unmapped regions
 ----------------
+
+### Generate
 
 We can not call them “uncoalesced” because this would also qualify aligned
 regions that were not colinear with any other region.
@@ -292,6 +314,54 @@ unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithReps.GRanges, r
 unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithTranscripts, transcripts$Oki)
 unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithTranscripts, transcripts$Osa)
 unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithTranscripts, transcripts$Bar)
+```
+
+### Flag non-coalesced
+
+Mark the regions that are identical in the unaligned and the unmapped objects
+the same `nonCoa` flag.  The flag is `TRUE` by definition in all unmapped
+objects, but we keep it so that objects have similar structures.
+
+```{r mark_non_coalesced_regions}
+for(name in names(unal)) {
+  unal[[name]]$nonCoa  <- unal[[name]]  %in% unmap [[name]]
+}
+
+for(name in names(unmap)) {
+  unmap[[name]]$nonCoa <- unmap[[name]] %in% unal  [[name]]
+}
+```
+
+Whole-genome objects
+--------------------
+
+Let's have objects that cover the whole genomes (with the possible exception
+of the telomeric regions) and contain non-overlapping aligned, unaligned
+and syntenic regions.  These are `GRanges` objects, not `GBreaks`, since they
+contain unaligned regions.
+
+```{r}
+makeWholeGenomeObject <- function(aligned, unaligned, coalesced) {
+  aligned_nonCoa   <- aligned[aligned$nonCoa]
+  unaligned_nonCoa <- unaligned[unaligned$nonCoa]
+  syntenic         <- coalesced[ ! coalesced$nonCoa]
+  
+  # Let's keep only the common metadata
+  mcols(aligned_nonCoa) <- mcols(aligned_nonCoa)[,colnames(mcols(unaligned))]
+  mcols(syntenic)       <- mcols(syntenic)[      ,colnames(mcols(unaligned))]
+  
+  # Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.
+  aligned_nonCoa$nonCoa <- unaligned_nonCoa$nonCoa <- syntenic$nonCoa <- NULL
+  aligned_nonCoa$type   <- 'aligned'
+  unaligned_nonCoa$type <- 'unaligned'
+  syntenic$type         <- 'syntenic'
+
+  wholeGenome <- c(aligned_nonCoa, unaligned_nonCoa, syntenic) |> sort(ignore.strand = TRUE)
+  wholeGenome$type <- factor(wholeGenome$type)
+  wholeGenome
+}
+
+wgo <- mapply(makeWholeGenomeObject, gbs, unal, coa) |> SimpleList()
 ```
 
 Mapped unaligned regions
