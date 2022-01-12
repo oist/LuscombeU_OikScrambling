@@ -332,6 +332,38 @@ for(name in names(unmap)) {
 }
 ```
 
+Whole-genome objects
+--------------------
+
+Let's have objects that cover the whole genomes (with the possible exception
+of the telomeric regions) and contain non-overlapping aligned, unaligned
+and syntenic regions.  These are `GRanges` objects, not `GBreaks`, since they
+contain unaligned regions.
+
+```{r}
+makeWholeGenomeObject <- function(aligned, unaligned, coalesced) {
+  aligned_nonCoa   <- aligned[aligned$nonCoa]
+  unaligned_nonCoa <- unaligned[unaligned$nonCoa]
+  syntenic         <- coalesced[ ! coalesced$nonCoa]
+  
+  # Let's keep only the common metadata
+  mcols(aligned_nonCoa) <- mcols(aligned_nonCoa)[,colnames(mcols(unaligned))]
+  mcols(syntenic)       <- mcols(syntenic)[      ,colnames(mcols(unaligned))]
+  
+  # Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.
+  aligned_nonCoa$nonCoa <- unaligned_nonCoa$nonCoa <- syntenic$nonCoa <- NULL
+  aligned_nonCoa$type   <- 'aligned'
+  unaligned_nonCoa$type <- 'unaligned'
+  syntenic$type         <- 'syntenic'
+
+  wholeGenome <- c(aligned_nonCoa, unaligned_nonCoa, syntenic) |> sort(ignore.strand = TRUE)
+  wholeGenome$type <- factor(wholeGenome$type)
+  wholeGenome
+}
+
+wgo <- mapply(makeWholeGenomeObject, gbs, unal, coa) |> SimpleList()
+```
+
 Mapped unaligned regions
 ------------------------
 
