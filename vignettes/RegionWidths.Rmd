@@ -38,7 +38,9 @@ makeWidthsDF <- function (objList) {
   lapply(names(objList), \(name) {
     DF <- mcols(objList[[name]])
     if (nrow(DF) == 0) return(DataFrame())
-    if (is.null(DF$Arm)) DF$Arm <- NA
+    if (is.null(DF$Arm)   ) DF$Arm     <- NA
+    if (is.null(DF$flag))   DF$flag    <- NA
+    if (is.null(DF$nonCoa)) DF$nonCoa  <- NA
     DF$name  <- name
     DF$width <- width(objList[[name]])
     DF$chr   <- seqnames(objList[[name]]) |>
@@ -63,11 +65,6 @@ makeWidthsDF <- function (objList) {
     DF
   }) |> do.call(what=rbind)
 }
-
-# Remove flags from objects so that dataframe conversion yields equal number of columns
-unal  <- sapply(unal,  \(gb) {gb$flag <- NA; gb}) |> SimpleList()
-unmap <- sapply(unmap, \(gb) {gb$flag <- NA; gb}) |> SimpleList()
-unalMap<-sapply(unalMap,\(gb){gb$flag <- NA; gb}) |> SimpleList()
 
 widths$gbs     <- makeWidthsDF(gbs)     |> tibble::as_tibble()
 widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
