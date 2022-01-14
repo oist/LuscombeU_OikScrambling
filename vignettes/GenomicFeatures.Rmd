@@ -282,6 +282,7 @@ prepareFreqPlot <- function(gb, annot, win = 2.5e3) {
   #l$cds    <- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = "left")
   l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = "left")
   l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = "left")
+  l$reps   <- feature_coverage(gb,     reps$Oki,             win = win, lab = "repeats",direction = "left")
   #reorder
   newOrder <- order(rowSums(l$intron@image))
   l$intron@image <- l$intron@image[newOrder,]
