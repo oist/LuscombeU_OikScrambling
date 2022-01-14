@@ -303,10 +303,10 @@ current_GB_narrow |> width() |> summary()
 current_GB_unmap  |> width() |> summary()
 current_GB_unalMap|> width() |> summary()
 
-hmListWide    <- prepareFreqPlot(current_GB_wide,    annots$Oki)
-hmListNarrow  <- prepareFreqPlot(current_GB_narrow,  annots$Oki)
-hmListUnmap   <- prepareFreqPlot(current_GB_unmap,    annots$Oki)
-hmListUnalMap <- prepareFreqPlot(current_GB_unalMap, annots$Oki)
+hmListWide    <- prepareFreqPlot(current_GB_wide,    annots$Oki, reps$Oki)
+hmListNarrow  <- prepareFreqPlot(current_GB_narrow,  annots$Oki, reps$Oki)
+hmListUnmap   <- prepareFreqPlot(current_GB_unmap,   annots$Oki, reps$Oki)
+hmListUnalMap <- prepareFreqPlot(current_GB_unalMap, annots$Oki, reps $Oki)
 
 rbind(
   hmListNarrow  |> prepareGGFreqPlot("01_narrow"),
@@ -359,6 +359,34 @@ rbind(
 
 This mildens the differences observed in the earlier section, probably because
 it requires the aligned region to be nearby a syntenic region.
+
+#### Aligning on center instead of border.
+
+As the plots are hardcoded to use the left border, let's artificially make
+regions of 1 bp on centers, rather than changing the accessory function.
+
+```{r genomic_features_byType}
+current_GB_wide_c    <- current_GB_wide    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_unalMap_c <- current_GB_unalMap |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+
+hmListWide_c    <- prepareFreqPlot(current_GB_wide_c,    annots$Oki, reps$Oki)
+hmListNarrow_c  <- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki)
+hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki)
+hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki)
+
+rbind(
+  hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
+  hmListWide_c    |> prepareGGFreqPlot("03_wide"),
+  hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1)
+```
 
 
 ### PWM
