@@ -265,23 +265,14 @@ depleted, which makes sense, as exons are usually mapable.  Within the mapped
 regions, frequency of introns and exons are comparable.  In contrary, within
 coalesced mapped regions, the exon annotations are over-represented.
 
-```{r genomic_features_bpByWidth, cache=FALSE}
-current_GB_wide   <- coa$Oki_Osa[ ! coa$Oki_Osa$nonCoa] |> plyranges::arrange(width)
-current_GB_narrow <- coa$Oki_Osa[   coa$Oki_Osa$nonCoa]
-current_GB_unmap   <- unmap$Oki_Osa
-current_GB_unalMap <- unalMap$Oki_Osa
-
-current_GB_wide   |> width() |> summary()
-current_GB_narrow |> width() |> summary()
-current_GB_unmap  |> width() |> summary()
-current_GB_unalMap|> width() |> summary()
-
-prepareFreqPlot <- function(gb, annot, win = 2.5e3) {
+```{r genomic_features_byType_accessory_Functions}
+prepareFreqPlot <- function(gb, annot, rep, win = 1e3) {
   l <- list()
   l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = "left")
   #l$cds    <- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = "left")
   l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = "left")
   l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = "left")
+  l$reps   <- feature_coverage(gb,     rep,                  win = win, lab = "repeats",direction = "left")
   #reorder
   newOrder <- order(rowSums(l$intron@image))
   l$intron@image <- l$intron@image[newOrder,]
@@ -293,15 +284,29 @@ prepareGGFreqPlot <- function(x, desc = NULL) {
   l <- lapply(names(x), \(name){
     val <- colSums(x[[name]]@image)
     what <- name
-    tibble::tibble(val, freq = val / nrow(x[[name]]@image), what, pos = 1:length(val), desc)
+    tibble::tibble(val, freq = val / nrow(x[[name]]@image), what, pos = 1:length(val) - round(length(val)) / 2, desc)
   })
    do.call(rbind, l)
 }
+```
 
-hmListWide    <- prepareFreqPlot(current_GB_wide,    annots$Oki)
-hmListNarrow  <- prepareFreqPlot(current_GB_narrow,  annots$Oki)
-hmListUnmap   <- prepareFreqPlot(current_GB_unmap,    annots$Oki)
-hmListUnalMap <- prepareFreqPlot(current_GB_unalMap, annots$Oki)
+#### Synteny as a proxy for aligned region width.
+
+```{r genomic_features_byType}
+current_GB_wide   <- coa$Oki_Osa[ ! coa$Oki_Osa$nonCoa] |> plyranges::arrange(width)
+current_GB_narrow <- coa$Oki_Osa[   coa$Oki_Osa$nonCoa]
+current_GB_unmap   <- unmap$Oki_Osa
+current_GB_unalMap <- unalMap$Oki_Osa
+
+current_GB_wide   |> width() |> summary()
+current_GB_narrow |> width() |> summary()
+current_GB_unmap  |> width() |> summary()
+current_GB_unalMap|> width() |> summary()
+
+hmListWide    <- prepareFreqPlot(current_GB_wide,    annots$Oki, reps$Oki)
+hmListNarrow  <- prepareFreqPlot(current_GB_narrow,  annots$Oki, reps$Oki)
+hmListUnmap   <- prepareFreqPlot(current_GB_unmap,   annots$Oki, reps$Oki)
+hmListUnalMap <- prepareFreqPlot(current_GB_unalMap, annots$Oki, reps $Oki)
 
 rbind(
   hmListNarrow  |> prepareGGFreqPlot("01_narrow"),
@@ -315,15 +320,74 @@ rbind(
   facet_wrap(~desc, nrow = 1)
 ```
 
-### Repeats
+#### Linked regions
 
-As expected, both types of mapped regions are depleted for repeats.
-Surprisingly, in both cases the depletion is relaxed after ~200 bp only.
+Same approach, but enforcing a succession of just-aligned, unaligned and
+syntenic regions.
 
-```{r genomic_repeats_bpByWidth, cache=FALSE}
-plotHeatmapMeta(list(feature_coverage(current_GB_wide,   reps$Oki, win = 1e3, lab = "repeats",  direction = "left")))
-plotHeatmapMeta(list(feature_coverage(current_GB_narrow, reps$Oki, win = 1e3, lab = "repeats",  direction = "left")))
+```{r genomic_features_byType2}
+flag_aln_unal_syn <- function (x) {
+  p0 <- x$type
+  p1 <- c(tail(p0, -1), factor('aligned'))
+  p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
+  p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
+}
+current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
+
+current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
+current_GB_unal    <- current_GB[which(current_GB$flag_a_u_s) + 1]
+current_GB_syn     <- current_GB[which(current_GB$flag_a_u_s) + 2]
+
+current_GB_aln   |> width() |> summary()
+current_GB_unal  |> width() |> summary()
+current_GB_syn   |> width() |> summary()
+
+hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$Oki)
+hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$Oki)
+hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$Oki)
+
+rbind(
+  hmListAln  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnal |> prepareGGFreqPlot("02_unal"),
+  hmListSyn  |> prepareGGFreqPlot("03_syn")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1)
 ```
+
+This mildens the differences observed in the earlier section, probably because
+it requires the aligned region to be nearby a syntenic region.
+
+#### Aligning on center instead of border.
+
+As the plots are hardcoded to use the left border, let's artificially make
+regions of 1 bp on centers, rather than changing the accessory function.
+
+```{r genomic_features_byType}
+current_GB_wide_c    <- current_GB_wide    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_unalMap_c <- current_GB_unalMap |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+
+hmListWide_c    <- prepareFreqPlot(current_GB_wide_c,    annots$Oki, reps$Oki)
+hmListNarrow_c  <- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki)
+hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki)
+hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki)
+
+rbind(
+  hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
+  hmListWide_c    |> prepareGGFreqPlot("03_wide"),
+  hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1)
+```
+
 
 ### PWM
 
