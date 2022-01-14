@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.0</span>
       </span>
     </div>
 
@@ -121,7 +121,7 @@
                         <h4 data-toc-skip class="author">Charlotte West</h4>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">05 January, 2022</h4>
+            <h4 data-toc-skip class="date">14 January, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/OikScrambling.Rmd" class="external-link"><code>vignettes/OikScrambling.Rmd</code></a></small>
       <div class="hidden name"><code>OikScrambling.Rmd</code></div>
@@ -207,7 +207,7 @@
 <span class="co">##     S4Vectors::SimpleList(Oki = OKI2018_I69, Osa = OSKA2016v1.9, </span>
 <span class="co">##         Bar = Bar2_p4, Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)</span>
 <span class="co">## }</span>
-<span class="co">## &lt;bytecode: 0x5581f8296758&gt;</span>
+<span class="co">## &lt;bytecode: 0x5639364a74e8&gt;</span>
 <span class="co">## &lt;environment: namespace:OikScrambling&gt;</span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -247,7 +247,7 @@
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
 <span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 30852 ranges and 7 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 30852 ranges and 8 metadata columns:</span>
 <span class="co">##           seqnames          ranges strand |     score                 query</span>
 <span class="co">##              &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;             &lt;GRanges&gt;</span>
 <span class="co">##       [1]     chr1   152288-154766      - |      2142 PAR:15511940-15514448</span>
@@ -261,19 +261,19 @@
 <span class="co">##   [30850]      YSR 2783954-2785297      - |      2677  Chr2:9464587-9465931</span>
 <span class="co">##   [30851]      YSR 2790986-2795531      - |      4996  Chr2:9459905-9464402</span>
 <span class="co">##   [30852]      YSR 2832349-2836860      - |      7232   YSR:1771962-1776463</span>
-<span class="co">##                Arm             rep   repOvlp transcripts        flag</span>
-<span class="co">##           &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt;</span>
-<span class="co">##       [1]    short             rnd      1820        &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##       [2]    short            &lt;NA&gt;         0       g4.t1        &lt;NA&gt;</span>
-<span class="co">##       [3]    short            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##       [4]    short            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##       [5]    short           ltr-1         0        &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##       ...      ...             ...       ...         ...         ...</span>
-<span class="co">##   [30848]      YSR            &lt;NA&gt;         0        &lt;NA&gt;         Col</span>
-<span class="co">##   [30849]      YSR            &lt;NA&gt;         0        &lt;NA&gt;         Col</span>
-<span class="co">##   [30850]      YSR            &lt;NA&gt;         0        &lt;NA&gt;         Col</span>
-<span class="co">##   [30851]      YSR    ltr-1,tandem      4396        &lt;NA&gt;        &lt;NA&gt;</span>
-<span class="co">##   [30852]      YSR           ltr-1      4512        &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##                Arm             rep   repOvlp transcripts        flag    nonCoa</span>
+<span class="co">##           &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt; &lt;logical&gt;</span>
+<span class="co">##       [1]    short             rnd      1820        &lt;NA&gt;        &lt;NA&gt;      TRUE</span>
+<span class="co">##       [2]    short            &lt;NA&gt;         0       g4.t1        &lt;NA&gt;      TRUE</span>
+<span class="co">##       [3]    short            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span>
+<span class="co">##       [4]    short            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span>
+<span class="co">##       [5]    short           ltr-1         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span>
+<span class="co">##       ...      ...             ...       ...         ...         ...       ...</span>
+<span class="co">##   [30848]      YSR            &lt;NA&gt;         0        &lt;NA&gt;         Col     FALSE</span>
+<span class="co">##   [30849]      YSR            &lt;NA&gt;         0        &lt;NA&gt;         Col     FALSE</span>
+<span class="co">##   [30850]      YSR            &lt;NA&gt;         0        &lt;NA&gt;         Col     FALSE</span>
+<span class="co">##   [30851]      YSR    ltr-1,tandem      4396        &lt;NA&gt;        &lt;NA&gt;     FALSE</span>
+<span class="co">##   [30852]      YSR           ltr-1      4512        &lt;NA&gt;        &lt;NA&gt;      TRUE</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
@@ -391,7 +391,7 @@
     <span class="op">)</span>
   <span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="OikScrambling_files/figure-html/phylogenetic_tree-1.png" width="576"></p>
 </div>
 <div class="section level1">

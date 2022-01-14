@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.0</span>
       </span>
     </div>
 
@@ -62,7 +62,7 @@
       <a href="../articles/DistanceMeasures.html">Distance Measures</a>
     </li>
     <li>
-      <a href="../articles/GenomicFeatures.html">Introduction to the OikScrambling package</a>
+      <a href="../articles/GenomicFeatures.html">Genomic features of the breakpoints</a>
     </li>
     <li>
       <a href="../articles/Inversions.html">Inversions</a>
@@ -143,7 +143,7 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      </span>
-<span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "longShort"</span></code></pre>
+<span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "wgo"       "longShort"</span></code></pre>
 <div class="section level2">
 <h2 id="orthogroups">Orthogroups<a class="anchor" aria-label="anchor" href="#orthogroups"></a>
 </h2>
@@ -923,7 +923,7 @@
 <pre><code><span class="co">## [1] 28632444</span></code></pre>
 <div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">gb_N</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## GBreaks object with 4073 ranges and 7 metadata columns:</span>
+<pre><code><span class="co">## GBreaks object with 4073 ranges and 8 metadata columns:</span>
 <span class="co">##          seqnames          ranges strand |                query     score</span>
 <span class="co">##             &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;integer&gt;</span>
 <span class="co">##      [1]     Chr1     15573-21624      - | Chr1:3585703-3594761      6052</span>
@@ -950,6 +950,19 @@
 <span class="co">##   [4071]      YSR                rnd         0   g14124.t1        &lt;NA&gt;</span>
 <span class="co">##   [4072]      YSR                rnd         0        &lt;NA&gt;        &lt;NA&gt;</span>
 <span class="co">##   [4073]      YSR                rnd       304        &lt;NA&gt;        &lt;NA&gt;</span>
+<span class="co">##             nonCoa</span>
+<span class="co">##          &lt;logical&gt;</span>
+<span class="co">##      [1]     FALSE</span>
+<span class="co">##      [2]      TRUE</span>
+<span class="co">##      [3]     FALSE</span>
+<span class="co">##      [4]     FALSE</span>
+<span class="co">##      [5]      TRUE</span>
+<span class="co">##      ...       ...</span>
+<span class="co">##   [4069]      TRUE</span>
+<span class="co">##   [4070]      TRUE</span>
+<span class="co">##   [4071]      TRUE</span>
+<span class="co">##   [4072]      TRUE</span>
+<span class="co">##   [4073]      TRUE</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 68 sequences from Bar2_p4 genome</span></code></pre>
 <div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
@@ -1627,7 +1640,7 @@
 <span class="co">##  [4] BSgenome.Odioica.local.Bar2.p4_1.0.0               </span>
 <span class="co">##  [5] BSgenome.Odioica.local.OSKA2016v1.9_1.0.0          </span>
 <span class="co">##  [6] BSgenome.Odioica.local.OKI2018.I69_1.0.0           </span>
-<span class="co">##  [7] OikScrambling_0.7.0                                </span>
+<span class="co">##  [7] OikScrambling_0.8.0                                </span>
 <span class="co">##  [8] ggplot2_3.3.5                                      </span>
 <span class="co">##  [9] GenomicBreaks_0.12.2                               </span>
 <span class="co">## [10] BSgenome_1.62.0                                    </span>

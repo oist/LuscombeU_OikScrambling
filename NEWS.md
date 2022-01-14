@@ -1,5 +1,11 @@
 # OikScrambling 0.7.1
 
+* Added a new `wgo` whole-genome object indicating if a base is part of a
+  syntenic block, or just aligned, or unaligned.  Added `nonCoa` flags to the
+  `gbs`, `unal` and `coa` objects to also reflect that.
+
+# OikScrambling 0.7.1
+
 * Created compound plots of width distribution for Figure 2.
 
 # OikScrambling 0.7.0

@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.0</span>
       </span>
     </div>
 
@@ -120,7 +120,7 @@
       <h1 data-toc-skip>Load genomic break data</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">05 January, 2022</h4>
+            <h4 data-toc-skip class="date">14 January, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/LoadGenomicBreaks.Rmd" class="external-link"><code>vignettes/LoadGenomicBreaks.Rmd</code></a></small>
       <div class="hidden name"><code>LoadGenomicBreaks.Rmd</code></div>
@@ -374,6 +374,10 @@
 <div class="section level2">
 <h2 id="coalescing-alignments">Coalescing alignments<a class="anchor" aria-label="anchor" href="#coalescing-alignments"></a>
 </h2>
+<div class="section level3">
+<h3 id="coalesce">Coalesce<a class="anchor" aria-label="anchor" href="#coalesce"></a>
+</h3>
+<p>We call these coalesced regions “mapped regions”. Some of the bases in the region are aligned and some not (see the “mapped unaligned regions” later).</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">coalesce_contigs</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">coa</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">coa</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
@@ -385,11 +389,28 @@
 
 <span class="va">coa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">flagAll</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="flag-non-coalesced">Flag non-coalesced<a class="anchor" aria-label="anchor" href="#flag-non-coalesced"></a>
+</h3>
+<p>Mark the regions that are identical in the aligned and the mapped objects with a <code>nonCoa</code> flag meaning <em>non coalesced</em>.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">for</span><span class="op">(</span><span class="va">name</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">coa</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">coa</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">gbs</span> <span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>
+<span class="op">}</span>
+
+<span class="kw">for</span><span class="op">(</span><span class="va">name</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">gbs</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="va">gbs</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">coa</span> <span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>
+<span class="op">}</span></code></pre></div>
+</div>
+</div>
 <div class="section level2">
 <h2 id="unmapped-regions">Unmapped regions<a class="anchor" aria-label="anchor" href="#unmapped-regions"></a>
 </h2>
+<div class="section level3">
+<h3 id="generate">Generate<a class="anchor" aria-label="anchor" href="#generate"></a>
+</h3>
 <p>We can not call them “uncoalesced” because this would also qualify aligned regions that were not colinear with any other region.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmap</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="va">unmap</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">unmap</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
@@ -404,11 +425,52 @@
 <span class="va">unmap</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">unmap</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">annotateWithTranscripts</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span>
 <span class="va">unmap</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">unmap</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">annotateWithTranscripts</span>, <span class="va">transcripts</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="flag-non-coalesced-1">Flag non-coalesced<a class="anchor" aria-label="anchor" href="#flag-non-coalesced-1"></a>
+</h3>
+<p>Mark the regions that are identical in the unaligned and the unmapped objects the same <code>nonCoa</code> flag. The flag is <code>TRUE</code> by definition in all unmapped objects, but we keep it so that objects have similar structures.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">for</span><span class="op">(</span><span class="va">name</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unal</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">unal</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">nonCoa</span>  <span class="op">&lt;-</span> <span class="va">unal</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>  <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">unmap</span> <span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>
+<span class="op">}</span>
+
+<span class="kw">for</span><span class="op">(</span><span class="va">name</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">unmap</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">unmap</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="va">unmap</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">unal</span>  <span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span>
+<span class="op">}</span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="whole-genome-objects">Whole-genome objects<a class="anchor" aria-label="anchor" href="#whole-genome-objects"></a>
+</h2>
+<p>Let’s have objects that cover the whole genomes (with the possible exception of the telomeric regions) and contain non-overlapping aligned, unaligned and syntenic regions. These are <code>GRanges</code> objects, not <code>GBreaks</code>, since they contain unaligned regions.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">makeWholeGenomeObject</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">aligned</span>, <span class="va">unaligned</span>, <span class="va">coalesced</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">aligned_nonCoa</span>   <span class="op">&lt;-</span> <span class="va">aligned</span><span class="op">[</span><span class="va">aligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
+  <span class="va">unaligned_nonCoa</span> <span class="op">&lt;-</span> <span class="va">unaligned</span><span class="op">[</span><span class="va">unaligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
+  <span class="va">syntenic</span>         <span class="op">&lt;-</span> <span class="va">coalesced</span><span class="op">[</span> <span class="op">!</span> <span class="va">coalesced</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
+  
+  <span class="co"># Let's keep only the common metadata</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">aligned_nonCoa</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">aligned_nonCoa</span><span class="op">)</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">unaligned</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">syntenic</span><span class="op">)</span>       <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">syntenic</span><span class="op">)</span><span class="op">[</span>      ,<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">unaligned</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
+  
+  <span class="co"># Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.</span>
+  <span class="va">aligned_nonCoa</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="va">unaligned_nonCoa</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="va">syntenic</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="cn">NULL</span>
+  <span class="va">aligned_nonCoa</span><span class="op">$</span><span class="va">type</span>   <span class="op">&lt;-</span> <span class="st">'aligned'</span>
+  <span class="va">unaligned_nonCoa</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="st">'unaligned'</span>
+  <span class="va">syntenic</span><span class="op">$</span><span class="va">type</span>         <span class="op">&lt;-</span> <span class="st">'syntenic'</span>
+
+  <span class="va">wholeGenome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">aligned_nonCoa</span>, <span class="va">unaligned_nonCoa</span>, <span class="va">syntenic</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+  <span class="va">wholeGenome</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">wholeGenome</span><span class="op">$</span><span class="va">type</span><span class="op">)</span>
+  <span class="va">wholeGenome</span>
+<span class="op">}</span>
+
+<span class="va">wgo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mapply.html" class="external-link">mapply</a></span><span class="op">(</span><span class="va">makeWholeGenomeObject</span>, <span class="va">gbs</span>, <span class="va">unal</span>, <span class="va">coa</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+</div>
 <div class="section level2">
 <h2 id="mapped-unaligned-regions">Mapped unaligned regions<a class="anchor" aria-label="anchor" href="#mapped-unaligned-regions"></a>
 </h2>
 <p>We can pair the unaligned regions that are between two colinearly aligned regions.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">filterMappedUnaligned</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">colinearRegions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterColinearRegions.html" class="external-link">filterColinearRegions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagColinearAlignments.html" class="external-link">flagColinearAlignments</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>, rename <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
   <span class="co"># Turning the sequence of [(TRUE)n, FALSE]n into indices.</span>
@@ -439,7 +501,7 @@
 <h2 id="translocated-regions">Translocated regions<a class="anchor" aria-label="anchor" href="#translocated-regions"></a>
 </h2>
 <p>Here we compute new <code>GBreaks</code> objects representing the intervals between two regions that would be colinear if there would not be a translocation separating them.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">removeTranslocations</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>
     <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">]</span>
@@ -476,7 +538,7 @@
 <h2 id="coalesce-again">Coalesce again<a class="anchor" aria-label="anchor" href="#coalesce-again"></a>
 </h2>
 <p>We remove the translocated regions that interrupt colinearity, where one of the colinear pairs is closer than 200 bp.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">removeTranslocationsOnTargetGenome</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html" class="external-link">dist2next</a></span><span class="op">(</span><span class="va">gb</span>, step <span class="op">=</span> <span class="fl">2</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -505,7 +567,7 @@
 <h2 id="unmapped-regions-2">Unmapped regions 2<a class="anchor" aria-label="anchor" href="#unmapped-regions-2"></a>
 </h2>
 <p>The intervals between double-coalesced regions.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmap2</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="va">unmap2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">unmap2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
@@ -524,7 +586,7 @@
 <h2 id="translocated-regions-2">Translocated regions 2<a class="anchor" aria-label="anchor" href="#translocated-regions-2"></a>
 </h2>
 <p>To check that we really removed the small ones as intented.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tra2</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">traGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html" class="external-link">as</a></span><span class="op">(</span><span class="st">"SimpleList"</span><span class="op">)</span>
 
 <span class="va">tra2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">tra2</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>
@@ -539,7 +601,7 @@
 <div class="section level2">
 <h2 id="numbers-of-blocks">Numbers of blocks<a class="anchor" aria-label="anchor" href="#numbers-of-blocks"></a>
 </h2>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">bp_summary</span> <span class="op">&lt;-</span> 
   <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>
     gbs     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span>,
@@ -578,7 +640,7 @@
 <span class="co">## Int/Rob – Sav 240.5000 4089.500</span>
 <span class="co">## North – North 227.7500 3670.750</span>
 <span class="co">## Oki – North   287.8750 8046.500</span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">bp_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">bp_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                 gbs    unal    coa  unmap unmap2 unalMap    tra  tra2   coa2</span>
 <span class="co">## Dme_Dbu       47893 47867.0 5959.0 5951.0 5869.0 41934.0  411.0 405.0 5877.0</span>
@@ -592,7 +654,7 @@
 <span class="co">## Int/Rob – Sav 69332 69275.0 4094.5 4068.5 4063.5 65237.5  239.5 240.5 4089.5</span>
 <span class="co">## North – North 24607 24103.5 4139.0 4081.5 3369.0 20434.5  458.5 202.5 3412.5</span>
 <span class="co">## Oki – North   31252 31041.5 8806.0 8785.0 8090.5 22446.0  501.5 285.5 8105.0</span></code></pre>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">bp_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">bp_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                      gbs      unal       coa     unmap     unmap2    unalMap</span>
 <span class="co">## Dme_Dbu               NA        NA        NA        NA         NA         NA</span>
@@ -622,7 +684,7 @@
 <div class="section level2">
 <h2 id="fraction-of-the-genome-aligned-or-mapped">Fraction of the genome aligned or mapped<a class="anchor" aria-label="anchor" href="#fraction-of-the-genome-aligned-or-mapped"></a>
 </h2>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R">  <span class="va">aligned_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="va">mapped_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="va">mapped2_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>,  \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -663,7 +725,7 @@
 <span class="co">## Dme_Dsu 59.8730476 76.684629 76.712764</span>
 <span class="co">## Dme_Dya 76.9451636 84.778190 84.900306</span>
 <span class="co">## Dme_Dma 80.9637966 85.833201 86.001342</span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               align_frac map_frac map2_frac</span>
 <span class="co">## Dme_Dbu             21.7     71.1      71.6</span>
@@ -677,7 +739,7 @@
 <span class="co">## Int/Rob – Sav       13.8     68.8      68.8</span>
 <span class="co">## North – North       70.6     83.9      84.2</span>
 <span class="co">## Oki – North         53.7     73.5      73.8</span></code></pre>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               align_frac map_frac map2_frac</span>
 <span class="co">## Dme_Dbu             21.7     71.1      71.6</span>
@@ -691,7 +753,7 @@
 <span class="co">## Int/Rob – Sav       13.8     68.8      68.8</span>
 <span class="co">## North – North       71.1     83.5      83.9</span>
 <span class="co">## Oki – North         53.9     73.3      73.6</span></code></pre>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span>     |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               align_frac map_frac map2_frac</span>
 <span class="co">## Dme_Dbu               NA       NA        NA</span>
@@ -709,7 +771,7 @@
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>
   gbs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span>,
   coa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">length</span><span class="op">)</span>,
@@ -726,7 +788,7 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Cumulative plot (gbs ⊃ coa ⊃ coa2) of the computed genomic regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/summary-1.png" width="700"></p>
 <p>NOTE: how does that compare with ANI (Average Nucleotide Identity) ?</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>`Bar2_p4__AOM-5-5f` <span class="op">=</span> <span class="fl">87.489</span>, Bar2_p4__Bar2_p4 <span class="op">=</span> <span class="fl">100</span>, `Bar2_p4__KUM-M3-7f` <span class="op">=</span> <span class="fl">78.45822</span>, 
 Bar2_p4__O_alb <span class="op">=</span> <span class="fl">69.79983</span>, Bar2_p4__O_lon <span class="op">=</span> <span class="fl">66.11535</span>, Bar2_p4__O_van <span class="op">=</span> <span class="fl">69.29796</span>, 
 Bar2_p4__OdB3 <span class="op">=</span> <span class="fl">97.7499</span>, Bar2_p4__OKI2018_I69_1.0 <span class="op">=</span> <span class="fl">78.68358</span>, 
@@ -853,24 +915,24 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scale <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: Removed 1 rows containing missing values (geom_point).</span></code></pre>
-<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">align_summary</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"– Oki"</span>, <span class="va">dist</span><span class="op">)</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">align_frac</span>, <span class="va">sim</span>, col<span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-2-2.png" width="700"></p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">align_summary</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"– Oki"</span>, <span class="va">dist</span><span class="op">)</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">map_frac</span>, <span class="va">sim</span>, col<span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-1-3.png" width="700"></p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-2-3.png" width="700"></p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">genome_sizes</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aom<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Aom</span><span class="op">)</span><span class="op">)</span>, Bar<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Bar</span><span class="op">)</span><span class="op">)</span>,
                   Oki<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span><span class="op">)</span>, Osa<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Osa</span><span class="op">)</span><span class="op">)</span>,
                   Kum<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Kum</span><span class="op">)</span><span class="op">)</span>, Nor<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Nor</span><span class="op">)</span><span class="op">)</span>,
@@ -887,7 +949,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <span class="co">## 128639392 128639392 128639392 117529544 117529544 117529544 117529544 137547960 </span>
 <span class="co">##       Dme       Dme       Dme </span>
 <span class="co">## 137547960 137547960 137547960</span></code></pre>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dens</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
   nbreak   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">length</span><span class="op">)</span>,
   nbreak2  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">length</span><span class="op">)</span>,
@@ -911,7 +973,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Density of breakpoints in paired comparisons, arranged per genus"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">11</span>, s<span class="op">=</span><span class="fl">.6</span>, v<span class="op">=</span><span class="fl">.9</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/Bimap-envirAPI.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">11</span>,<span class="fl">11</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/breakpoints_per_Mb-1.png" width="700"></p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1664</span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dens</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">density2</span>, <span class="va">genus</span>, col <span class="op">=</span> <span class="va">dist</span>, pch <span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
@@ -925,8 +987,8 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <div class="section level1">
 <h1 id="save-data">Save data<a class="anchor" aria-label="anchor" href="#save-data"></a>
 </h1>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">unal</span>, <span class="va">coa</span>, <span class="va">unmap</span>, <span class="va">unalMap</span>, <span class="va">tra</span>, <span class="va">tra2</span>, <span class="va">coa2</span>, <span class="va">unmap2</span>, <span class="va">longShort</span>, file <span class="op">=</span> <span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">unal</span>, <span class="va">coa</span>, <span class="va">unmap</span>, <span class="va">unalMap</span>, <span class="va">tra</span>, <span class="va">tra2</span>, <span class="va">coa2</span>, <span class="va">unmap2</span>, <span class="va">wgo</span>, <span class="va">longShort</span>, file <span class="op">=</span> <span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"echo '9f273f099ecbfa44899b6c343d1382f1  BreakPoints.Rdata' | md5sum -c"</span>, intern <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning in system("echo '9f273f099ecbfa44899b6c343d1382f1 BreakPoints.Rdata'</span>
 <span class="co">## | md5sum -c", : running command 'echo '9f273f099ecbfa44899b6c343d1382f1</span>
@@ -938,7 +1000,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <div class="section level1">
 <h1 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h1>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
 <span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span>
@@ -1020,7 +1082,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <span class="co">##  [73] munsell_0.5.0               tools_4.1.2                </span>
 <span class="co">##  [75] cachem_1.0.6                generics_0.1.1             </span>
 <span class="co">##  [77] RSQLite_2.2.9               ade4_1.7-18                </span>
-<span class="co">##  [79] broom_0.7.10                OikScrambling_0.6.6        </span>
+<span class="co">##  [79] broom_0.7.10                OikScrambling_0.8.0        </span>
 <span class="co">##  [81] evaluate_0.14               stringr_1.4.0              </span>
 <span class="co">##  [83] fastmap_1.1.0               fftwtools_0.9-11           </span>
 <span class="co">##  [85] yaml_2.2.1                  ragg_1.2.1                 </span>
