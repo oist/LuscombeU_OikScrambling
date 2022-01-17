@@ -308,7 +308,7 @@ hmListNarrow  <- prepareFreqPlot(current_GB_narrow,  annots$Oki, reps$Oki)
 hmListUnmap   <- prepareFreqPlot(current_GB_unmap,   annots$Oki, reps$Oki)
 hmListUnalMap <- prepareFreqPlot(current_GB_unalMap, annots$Oki, reps $Oki)
 
-rbind(
+(p_boundary <- rbind(
   hmListNarrow  |> prepareGGFreqPlot("01_narrow"),
   hmListUnmap   |> prepareGGFreqPlot("02_unmap"),
   hmListWide    |> prepareGGFreqPlot("03_wide"),
@@ -317,7 +317,8 @@ rbind(
 )|> ggplot() +
   aes(pos, freq, col = what) +
   geom_line() +
-  facet_wrap(~desc, nrow = 1)
+  facet_wrap(~desc, nrow = 1) +
+  ggtitle("Aligned on regions left boundary"))
 ```
 
 #### Linked regions
@@ -332,6 +333,9 @@ flag_aln_unal_syn <- function (x) {
   p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
   p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
 }
+
+current_GB <- wgo$Oki_Osa
+
 current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
 
 current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
@@ -366,6 +370,8 @@ As the plots are hardcoded to use the left border, let's artificially make
 regions of 1 bp on centers, rather than changing the accessory function.
 
 ```{r genomic_features_byType}
+current_GB <- coa$Oki_Osa
+
 current_GB_wide_c    <- current_GB_wide    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
 current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
 current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
@@ -378,18 +384,25 @@ hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki)
 hmListUnal_c    <- prepareFreqPlot(current_GB_unal_c,    annots$Oki, reps$Oki)
 hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki)
 
-rbind(
+( p_center <- rbind(
   hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
   hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
-  hmListUnal_c    |> prepareGGFreqPlot("02b_unmap"),
+#  hmListUnal_c    |> prepareGGFreqPlot("02b_unmap"),
   hmListWide_c    |> prepareGGFreqPlot("03_wide"),
   hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
 )|> ggplot() +
   aes(pos, freq, col = what) +
   geom_line() +
-  facet_wrap(~desc, nrow = 1)
+  facet_wrap(~desc, nrow = 1) +
+  ggtitle("Aligned on region midpoints."))
 ```
 
+#### Comparison
+
+```{r optional_patchwork}
+# library(patchwork)
+# p_boundary / p_center
+```
 
 ### PWM
 
