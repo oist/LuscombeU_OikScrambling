@@ -411,6 +411,75 @@ p_center
 # p_boundary / p_center
 ```
 
+#### Linked regions
+
+Same approach, but enforcing a succession of just-aligned, unaligned and
+syntenic regions.
+
+```{r genomic_features_byType2}
+flag_aln_unal_syn <- function (x) {
+  p0 <- x$type
+  p1 <- c(tail(p0, -1), factor('aligned'))
+  p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
+  p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
+}
+current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
+
+current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
+current_GB_unal    <- current_GB[which(current_GB$flag_a_u_s) + 1]
+current_GB_syn     <- current_GB[which(current_GB$flag_a_u_s) + 2]
+
+current_GB_aln   |> width() |> summary()
+current_GB_unal  |> width() |> summary()
+current_GB_syn   |> width() |> summary()
+
+hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$Oki)
+hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$Oki)
+hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$Oki)
+
+rbind(
+  hmListAln  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnal |> prepareGGFreqPlot("02_unal"),
+  hmListSyn  |> prepareGGFreqPlot("03_syn")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1)
+```
+
+This mildens the differences observed in the earlier section, probably because
+it requires the aligned region to be nearby a syntenic region.
+
+#### Aligning on center instead of border.
+
+As the plots are hardcoded to use the left border, let's artificially make
+regions of 1 bp on centers, rather than changing the accessory function.
+
+```{r genomic_features_byType}
+current_GB_wide_c    <- current_GB_wide    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+current_GB_unalMap_c <- current_GB_unalMap |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+
+hmListWide_c    <- prepareFreqPlot(current_GB_wide_c,    annots$Oki, reps$Oki)
+hmListNarrow_c  <- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki)
+hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki)
+hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki)
+
+rbind(
+  hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
+  hmListWide_c    |> prepareGGFreqPlot("03_wide"),
+  hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1)
+```
+
+
 ### PWM
 
 The PWM motif, which is rare in comparison to the other features, follows
