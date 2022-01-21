@@ -68,6 +68,14 @@ axt$Osa_Oki <- readAxt("~/projects/GenomicBreaks_results/results-v3/last/OSKA201
                        file.path(system.file("extdata", package="BSgenome.Odioica.local.OSKA2016v1.9"), "single_sequences.2bit"),
                        file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"))
 
+axt$Osa_Bar <- readAxt("~/projects/GenomicBreaks_results/results-v3/last/OSKA2016v1.9__Bar2_p4.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OSKA2016v1.9"), "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.Bar2.p4"),  "single_sequences.2bit"))
+
+axt$Osa_Aom <- readAxt("~/projects/GenomicBreaks_results/results-v3/last/OSKA2016v1.9__AOM-5-5f.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OSKA2016v1.9"), "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.AOM.5"),  "single_sequences.2bit"))
+
 axt$Bar_Oki <- readAxt("~/projects/GenomicBreaks_results/results-v3/last/Bar2_p4__OKI2018_I69_1.0.axt.gz",
                        file.path(system.file("extdata", package="BSgenome.Odioica.local.Bar2.p4"),      "single_sequences.2bit"),
                        file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"))
@@ -136,6 +144,12 @@ calculateCEs <- function(window, identity) {
   ce$Osa_Oki <- ceScan_to_GB(axt$Osa_Oki, window = window, identity = identity,
                              tFilter = NULL,                  qFilter = NULL,
                              tGenome = BSgenome.Odioica.local.OSKA2016v1.9, qGenome = BSgenome.Odioica.local.OKI2018.I69)
+  ce$Osa_Bar <- ceScan_to_GB(axt$Osa_Bar, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OSKA2016v1.9, qGenome = BSgenome.Odioica.local.Bar2.p4)
+  ce$Osa_Aom <- ceScan_to_GB(axt$Osa_Aom, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OSKA2016v1.9, qGenome = BSgenome.Odioica.local.AOM.5)
   ce$Bar_Oki <- ceScan_to_GB(axt$Bar_Oki, window = window, identity = identity,
                              tFilter = NULL,                  qFilter = NULL,
                              tGenome = BSgenome.Odioica.local.Bar2.p4, qGenome = BSgenome.Odioica.local.OKI2018.I69)
