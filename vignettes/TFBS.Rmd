@@ -16,21 +16,33 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+We skip all computations if `pwmMatchesOki.Rds`, because it is heavy.
+
 ```{r setup2}
+if (! file.exists("pwmMatchesOki.Rds")) {
 library("GenomicBreaks")
 genomes     <- OikScrambling:::loadAllGenomes()
+}
 ```
 
+Select all vertebrate entries; convert to a list of position-weight matrices.
+
 ```{r load_TFBS}
+if (! file.exists("pwmMatchesOki.Rds")) {
 library(TFBSTools)
 library(JASPAR2020)
 PFMatrixList <- getMatrixSet(JASPAR2020, list(tax_group="vertebrates"))
 PFMatrixList
 PWMatrixList <- toPWM(PFMatrixList)
+}
 ```
 
+Scan the Okinawa genome, save the results and save a reduced version for the
+Gen
+
 ```{r scan_TFBS}
-TFBS <- SimpleList()
+if (! file.exists("pwmMatchesOki.Rds")) {
+
 Oki_DNAStringSet <- lapply(seqnames(genomes$Oki), \(name) genomes$Oki[[name]]) |> as("DNAStringSet")
 names(Oki_DNAStringSet) <- seqnames(genomes$Oki)
 
@@ -44,6 +56,18 @@ searchSeq2GB <- function(pwm, genomeseqs, mc.cores=1L) {
   strand(gr) <- '*'
   unique(sort(gr, ignore.strand=TRUE))
 }
-siteSet <- searchSeq2GB(PWMatrixList[1], Oki_DNAStringSet)
-pwmMatchesOnOki <- lapply(PWMatrixList[1:20] |> as.list(), searchSeq2GB, Oki_DNAStringSet, mc.cores=4L)
+
+pwmMatchesOnOki <- lapply(PWMatrixList |> as.list(), searchSeq2GB, Oki_DNAStringSet)
+# x_15_98 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.98 & gr$absScore > 15]) |> as("GRangesList") |> unlist() |> reduce()
+# x_10_95 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.95 & gr$absScore > 10]) |> as("GRangesList") |> unlist() |> reduce()
+# x_15_95 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.95 & gr$absScore > 15]) |> as("GRangesList") |> unlist() |> reduce()
+# x_12_90 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.90 & gr$absScore > 12]) |> as("GRangesList") |> unlist() |> reduce()
+# x_15_90 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.90 & gr$absScore > 15]) |> as("GRangesList") |> unlist() |> reduce()
+# Selected this one as a compromise between lower baseline and visible peaks.
+pwmMatchesOnOki_12_95 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.95 & gr$absScore > 12]) |> as("GRangesList") |> unlist() |> reduce()
+# x_10_99 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.99 & gr$absScore > 10]) |> as("GRangesList") |> unlist() |> reduce()
+
+saveRDS(pwmMatchesOnOki,       "pwmMatchesOki.Rds")
+saveRDS(pwmMatchesOnOki_12_95, "pwmMatchesOki_12_95.Rds")
+}
 ```
