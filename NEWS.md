@@ -1,8 +1,15 @@
-# OikScrambling 0.7.1
+# OikScrambling 0.8.2
+
+* Added a new `SegmentMovements` vignette.
+
+# OikScrambling 0.8.1
 
 * Added a new `wgo` whole-genome object indicating if a base is part of a
-  syntenic block, or just aligned, or unaligned.  Added `nonCoa` flags to the
-  `gbs`, `unal` and `coa` objects to also reflect that.
+  syntenic block, or just aligned, or unaligned.
+
+# OikScrambling 0.8.0
+
+* Added `nonCoa` flags to the `gbs`, `unal` and `coa` objects.
 
 # OikScrambling 0.7.1
 
