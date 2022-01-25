@@ -39,10 +39,7 @@ Whenever a collinear segment moves between species, if the homologous segment is
 ```{r calculate_movement_distances}
 # Find midpoints of a GRanges.
 grMidpoint <- function(gr) {
-  starts <- as.data.frame(ranges(gr))$start
-  ends <- as.data.frame(ranges(gr))$end
-  mids <- (starts+ends)/2
-  mids
+  start(resize(gr, 1, fix = "center"))
 }
 
 # Find distance between two equivalent GRanges.
