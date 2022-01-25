@@ -2,6 +2,7 @@
 title: "Segment movement distances"
 author: 
  - "Michael Mansfield"
+ - "Charles Plessy"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -85,7 +86,7 @@ segDists$Osa_Bar <- chromDist(gbs$Osa_Bar, synPairs$Chr_Chr)
 ```{r plot_movement_distances_oki_osa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
 plotSegDists <- function(segDist, facet.by='seqnames~Arm', binWidth=100000) {
   ggplot(as.data.frame(segDist)) +
-    aes(x=distance) +
+    aes(x=distance, fill = Arm) +
     geom_histogram(binwidth = binWidth) +
     facet_wrap(facet.by, scales="free_x", ncol=2)
 }
