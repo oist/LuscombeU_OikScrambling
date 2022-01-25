@@ -37,26 +37,16 @@ load("BreakPoints.Rdata")
 Whenever a collinear segment moves between species, if the homologous segment is located on an equivalent chromosome, a distance can be calculated.
 
 ```{r calculate_movement_distances}
-# Find midpoints of a GRanges.
-grMidpoint <- function(gr) {
-  start(resize(gr, 1, fix = "center"))
-}
-
 # Find distance between two equivalent GRanges.
-# Input: two GRanges (probably the target and query of a GBreaks object)
-# Output: Absolute distance between the two GRanges based on some metric ("start", "end", or "midpoint")
-GRangesDist <- function(gr1, gr2, distMetric="midpoint") {
-  if(distMetric == "start"){
-    segDistance <- abs(gr2$start - gr1$start)
-  } else if(distMetric=="end") {
-    segDistance <- abs(gr2$end - gr1$end)
-  } else if(distMetric=="midpoint") {
-    # Add midpoints
-    gr1$midpoint <- grMidpoint(gr1)
-    gr2$midpoint <- grMidpoint(gr2)
-    segDistance <- abs(gr2$midpoint - gr1$midpoint)
-  }
-  segDistance
+# Input: a GBreaks object
+# Output: Absolute distance between the target and query ranges based on some metric ("start", "end", or "midpoint")
+GBreaksDist <- function(gb, distMetric=c("midpoint", "start", "end")) {
+  distMetric <- match.arg(distMetric)
+  distFun <- switch(distMetric,
+                    start    = start,
+                    end      = end,
+                    midpoint = \(gr) gr |> resize(1, fix = "center") |> start() )
+  abs(distFun(gb) - distFun(gb$query))
 }
 
 chromDist <- function(gb, chromosomePairing=NULL, distMetric="midpoint"){
@@ -83,7 +73,7 @@ chromDist <- function(gb, chromosomePairing=NULL, distMetric="midpoint"){
   
   # Now that the GRanges are only on equivalent chromosomes, calculate the distances between them.
   # This can be "start", "end", or "midpoint" distance.
-  chrom_gb$distance <- GRangesDist(chrom_gb, chrom_gb$query, distMetric=distMetric)
+  chrom_gb$distance <- GBreaksDist(chrom_gb, distMetric=distMetric)
   chrom_gb
 }
 
