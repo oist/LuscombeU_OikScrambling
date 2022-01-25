@@ -66,12 +66,18 @@ chromDist <- function(gb, chromosomePairing=NULL, distMetric="midpoint"){
   gb
 }
 
-chromosomePairing <- list("sp1"=c("chr1", "chr2", "PAR", "XSR", "YSR"), "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
+# Unfortunately, the use of upper and lower case in chromosome names was not
+# standardised when assembling the genomes.
+synPairs <- SimpleList()
+synPairs$chr_Chr <- list("sp1"=c("chr1", "chr2", "PAR", "XSR", "YSR"),
+                         "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
+synPairs$Chr_Chr <- list("sp1"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"),
+                         "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
+
 segDists <- SimpleList()
-segDists$Oki_Osa <- chromDist(gbs$Oki_Osa, chromosomePairing = chromosomePairing)
-segDists$Oki_Bar <- chromDist(gbs$Oki_Osa, chromosomePairing = chromosomePairing)
-chromosomePairing <- list("sp1"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"), "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
-segDists$Osa_Bar <- chromDist(gbs$Osa_Bar, chromosomePairing = chromosomePairing)
+segDists$Oki_Osa <- chromDist(gbs$Oki_Osa, synPairs$chr_Chr)
+segDists$Oki_Bar <- chromDist(gbs$Oki_Bar, synPairs$chr_Chr)
+segDists$Osa_Bar <- chromDist(gbs$Osa_Bar, synPairs$Chr_Chr)
 ```
 
 ## Plotting segment movement distances
@@ -97,11 +103,9 @@ plotSegDists(segDists$Osa_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtit
 ## Segment movement distances (coalesced)
 ```{r calculate_movement_distances_coa}
 segDistsCoa <- SimpleList()
-chromosomePairing <- list("sp1"=c("chr1", "chr2", "PAR", "XSR", "YSR"), "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
-segDistsCoa$Oki_Osa <- chromDist(coa$Oki_Osa, chromosomePairing = chromosomePairing)
-segDistsCoa$Oki_Bar <- chromDist(coa$Oki_Osa, chromosomePairing = chromosomePairing)
-chromosomePairing <- list("sp1"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"), "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
-segDistsCoa$Osa_Bar <- chromDist(coa$Osa_Bar, chromosomePairing = chromosomePairing)
+segDistsCoa$Oki_Osa <- chromDist(coa$Oki_Osa, synPairs$chr_Chr)
+segDistsCoa$Oki_Bar <- chromDist(coa$Oki_Bar, synPairs$chr_Chr)
+segDistsCoa$Osa_Bar <- chromDist(coa$Osa_Bar, synPairs$Chr_Chr)
 ```
 
 ```{r plot_movement_distances_oki_osa_coa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
