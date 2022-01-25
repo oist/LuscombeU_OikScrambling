@@ -1,0 +1,180 @@
+---
+title: "Segment movement distances"
+author: 
+ - "Michael Mansfield"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Segment movement distances}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Load packages and data
+
+See the `vignette("OikScrambling", package = "OikScrambling")` for general
+details on package and data load.
+
+See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different `GBreaks` objects are prepared.
+
+```{r load_packages_and_data}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  library('ggplot2')
+  library("BreakpointsData")
+})
+load("BreakPoints.Rdata")
+```
+
+# Segment movement distances
+Whenever a collinear segment moves between species, if the homologous segment is located on an equivalent chromosome, a distance can be calculated.
+
+```{r calculate_movement_distances}
+# Find distance between two equivalent GRanges.
+# Input: a GBreaks object
+# Output: Absolute distance between the target and query ranges based on some metric ("start", "end", or "midpoint")
+GBreaksDist <- function(gb, distMetric=c("midpoint", "start", "end")) {
+  distMetric <- match.arg(distMetric)
+  distFun <- switch(distMetric,
+                    start    = start,
+                    end      = end,
+                    midpoint = \(gr) gr |> resize(1, fix = "center") |> start() )
+  abs(distFun(gb) - distFun(gb$query))
+}
+
+filterSyntenicPairs <- function(gb, chromosomePairing) {
+  syntenic_pairs <- paste(chromosomePairing[["sp1"]], chromosomePairing[["sp2"]], sep = "_")
+  is_syntenic    <- paste(seqnames(gb),               seqnames(gb$query),         sep = "_") %in% syntenic_pairs
+  gb[is_syntenic]
+}
+
+chromDist <- function(gb, chromosomePairing=NULL, distMetric="midpoint"){
+  # Subset to include only ranges in which all chrom in sp1 are paired to their equivalent in sp2
+  # Note that a similar function could be used to compare the identity of chromosome arms
+  gb <- filterSyntenicPairs(gb, chromosomePairing)
+  
+  # Now that the GRanges are only on equivalent chromosomes, calculate the distances between them.
+  # This can be "start", "end", or "midpoint" distance.
+  gb$distance <- GBreaksDist(gb, distMetric=distMetric)
+  gb
+}
+
+# Unfortunately, the use of upper and lower case in chromosome names was not
+# standardised when assembling the genomes.
+synPairs <- SimpleList()
+synPairs$chr_Chr <- list("sp1"=c("chr1", "chr2", "PAR", "XSR", "YSR"),
+                         "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
+synPairs$Chr_Chr <- list("sp1"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"),
+                         "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
+
+segDists <- SimpleList()
+segDists$Oki_Osa <- chromDist(gbs$Oki_Osa, synPairs$chr_Chr)
+segDists$Oki_Bar <- chromDist(gbs$Oki_Bar, synPairs$chr_Chr)
+segDists$Osa_Bar <- chromDist(gbs$Osa_Bar, synPairs$Chr_Chr)
+```
+
+## Plotting segment movement distances
+
+```{r plot_movement_distances_oki_osa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+plotSegDists <- function(segDist, facet.by='seqnames~Arm', binWidth=100000) {
+  ggplot(as.data.frame(segDist)) +
+    aes(x=distance) +
+    geom_histogram(binwidth = binWidth) +
+    facet_wrap(facet.by, scales="free_x", ncol=2)
+}
+plotSegDists(segDists$Oki_Osa, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Oki-Osa: segment movement distances (uncoalesced)")
+```
+
+```{r plot_movement_distances_oki_bar, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+plotSegDists(segDists$Oki_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Oki-Bar: segment movement distances (uncoalesced)")
+```
+
+```{r plot_movement_distances_osa_bar, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+plotSegDists(segDists$Osa_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Osa-Bar: segment movement distances (uncoalesced)")
+```
+
+## Segment movement distances (coalesced)
+```{r calculate_movement_distances_coa}
+segDistsCoa <- SimpleList()
+segDistsCoa$Oki_Osa <- chromDist(coa$Oki_Osa, synPairs$chr_Chr)
+segDistsCoa$Oki_Bar <- chromDist(coa$Oki_Bar, synPairs$chr_Chr)
+segDistsCoa$Osa_Bar <- chromDist(coa$Osa_Bar, synPairs$Chr_Chr)
+```
+
+```{r plot_movement_distances_oki_osa_coa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+plotSegDists(segDistsCoa$Oki_Osa, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Oki-Osa: segment movement distances (coalesced)")
+```
+
+```{r plot_movement_distances_oki_bar_coa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+plotSegDists(segDistsCoa$Oki_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Oki-Bar: segment movement distances (coalesced)")
+```
+
+```{r plot_movement_distances_osa_bar_coa, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+plotSegDists(segDistsCoa$Osa_Bar, facet.by='seqnames~Arm', binWidth=100000) + ggtitle("Osa-Bar: segment movement distances (coalesced)")
+```
+
+## Plotting segment movements relative to coordinates
+
+Uses, start coordinate as a proxy for midpoint, but the difference should be
+hardly perceptible.
+
+```{r funct_to_plot_movement_distance_on_coords}
+plot_movement_distance_on_coords <- \(gb) gb |>
+  as.data.frame() |>
+  ggplot() +
+    aes(start, distance, col=Arm) +
+    geom_point() +
+    xlab("Start on target") +
+    ylab("Distance between midpoints on query and target") +
+    facet_wrap(~seqnames)
+```
+
+```{r plot_movement_distance_on_coords_oki_osa_gb, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+segDists$Oki_Osa |> plot_movement_distance_on_coords() + ggtitle("Oki - Osa")
+```
+```{r plot_movement_distance_on_coords_oki_bar_gb, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+segDists$Oki_Bar |> plot_movement_distance_on_coords() + ggtitle("Oki - Bar")
+```
+```{r plot_movement_distance_on_coords_osa_bar_gb, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+segDists$Osa_Bar |> plot_movement_distance_on_coords() + ggtitle("Osa - Bar")
+```
+
+## Plotting distance between query ranges relative to target coordinates
+
+This assumes that the center an unaligned region would be plotted on the same
+pixel as the center of its flanking aligned regions.
+
+```{r funct_to_plot_distance_to_next_query_on_coords}
+plot_distance_to_next_query_on_coords <- \(gb) gb |>
+  dist2next() |>
+  as.data.frame() |>
+  ggplot() +
+    aes(end + 1, qdist, col=Arm) +
+    geom_point() +
+    xlab("Start unaligned region on target") +
+    ylab("Distance between flanking regions on query") +
+    facet_wrap(~seqnames)
+```
+
+```{r plot_distance_to_next_query_on_coords_oki_osa_gb, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+segDists$Oki_Osa |> plot_distance_to_next_query_on_coords() + ggtitle("Oki - Osa")
+```
+```{r plot_distance_to_next_query_on_coords_oki_bar_gb, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+segDists$Oki_Bar |> plot_distance_to_next_query_on_coords() + ggtitle("Oki - Bar")
+```
+```{r plot_distance_to_next_query_on_coords_osa_bar_gb, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+segDists$Osa_Bar |> plot_distance_to_next_query_on_coords() + ggtitle("Osa - Bar")
+```
+
+# Session information
+
+```{r session_information}
+sessionInfo()
+```
