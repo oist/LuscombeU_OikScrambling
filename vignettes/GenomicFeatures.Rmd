@@ -332,6 +332,9 @@ flag_aln_unal_syn <- function (x) {
   p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
   p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
 }
+
+current_GB <- wgo$Oki_Osa
+
 current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
 
 current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
