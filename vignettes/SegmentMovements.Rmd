@@ -49,32 +49,21 @@ GBreaksDist <- function(gb, distMetric=c("midpoint", "start", "end")) {
   abs(distFun(gb) - distFun(gb$query))
 }
 
-chromDist <- function(gb, chromosomePairing=NULL, distMetric="midpoint"){
-  chrom_sp1 <- chromosomePairing[["sp1"]]
-  chrom_sp2 <- chromosomePairing[["sp2"]]
+filterSyntenicPairs <- function(gb, chromosomePairing) {
+  syntenic_pairs <- paste(chromosomePairing[["sp1"]], chromosomePairing[["sp2"]], sep = "_")
+  is_syntenic    <- paste(seqnames(gb),               seqnames(gb$query),         sep = "_") %in% syntenic_pairs
+  gb[is_syntenic]
+}
 
-  # Subset to include only chromosomes of interest
-  chrom_gb <- gb[seqnames(gb) %in% chrom_sp1]
-  chrom_gb <- chrom_gb[seqnames(chrom_gb$query) %in% chrom_sp2]
-  
+chromDist <- function(gb, chromosomePairing=NULL, distMetric="midpoint"){
   # Subset to include only ranges in which all chrom in sp1 are paired to their equivalent in sp2
   # Note that a similar function could be used to compare the identity of chromosome arms
-  pairedChromosomes <- apply(as.data.frame(chrom_gb), 1, function(GRange) {
-    t_seqname_index = which(chromosomePairing[["sp1"]] == GRange$seqnames)
-    q_seqname_index = which(chromosomePairing[["sp2"]] == GRange$query.seqnames)
-    if(t_seqname_index == q_seqname_index) {
-      paired = TRUE
-    } else {
-      paired = FALSE
-    }
-    paired
-  })
-  chrom_gb <- chrom_gb[pairedChromosomes]
+  gb <- filterSyntenicPairs(gb, chromosomePairing)
   
   # Now that the GRanges are only on equivalent chromosomes, calculate the distances between them.
   # This can be "start", "end", or "midpoint" distance.
-  chrom_gb$distance <- GBreaksDist(chrom_gb, distMetric=distMetric)
-  chrom_gb
+  gb$distance <- GBreaksDist(gb, distMetric=distMetric)
+  gb
 }
 
 chromosomePairing <- list("sp1"=c("chr1", "chr2", "PAR", "XSR", "YSR"), "sp2"=c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
