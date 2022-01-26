@@ -25,6 +25,7 @@ library('ggplot2')
 requireNamespace('patchwork') |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
+ces <- readRDS("CEs.Rds")
 ```
 
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
@@ -404,28 +405,33 @@ p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
 ```
 
 ```{r compound2}
-p_ali2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", nonCoa)) +
+p_ali2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", nonCoa)) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Aligned (not collapsed)")
+  ggtitle("Isolated alignments")
 
 p_una2 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "Oki – North")) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Not mapped")
+  ggtitle("Not aligned, not mapped")
 
-p_map2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
+p_syn2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Mapped")
+  ggtitle("Synteny block")
+
+p_map2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Synteny alignment")
 
 p_unalmap2 <- gg_freq_poly(widths$unalMap |> dplyr::filter(dist == "Oki – North")) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Double gaps")
+  ggtitle("Unaligned but syntenic")
 
 # Patchwork
-(p_ali2 | p_una2 | p_map2 | p_unalmap2) + plot_layout(ncol = 4, guides = 'collect') + theme_bw()
+(p_ali2 | p_una2 | p_syn2 | p_map2 | p_unalmap2) + plot_layout(ncol = 5, guides = 'collect') + theme_bw()
 ```
 
 ## Unmapped regions
