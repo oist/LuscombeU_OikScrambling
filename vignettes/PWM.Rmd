@@ -37,10 +37,66 @@ library('ggplot2')
 
 requireNamespace("ggseqlogo")
 requireNamespace("JASPAR2020")
-requireNamespace("rGADEM")
+library("rGADEM") |> suppressPackageStartupMessages()
 ```
 
 # Motif searches
+
+```{r functions_for_motif_search}
+# Note that GADEM crashes on sequences longer than ~48 kbp.
+getGRseqs <- function (gr, max = 48000) { 
+  bsgenome_name <- gr |> genome() |> unique()
+  bsgenome_obj <- get(bsgenome_name)
+  seqs <- BSgenome::getSeq(bsgenome_obj,  gr)
+  metadata(seqs)$genome <- bsgenome_name
+  seqs[width(seqs) < max]
+}
+
+# Slow !
+doGadem <- function(seqs) {
+  bsgenome_name <- metadata(seqs)$genome
+  bsgenome_obj <- get(bsgenome_name)
+  GADEM(seqs, verbose=1, genome=bsgenome_obj)
+}
+
+gadems <- SimpleList()
+```
+
+
+## Aligned non-coalesced regions
+
+Aligned regions that do not coalesce into syntenic blocks are relatively
+depleted in genes, and show no enrichment of exons versus introns.  They are
+also depleted in repeats, and are mildly enriched in CNEs.  Altogether, they
+can not be summarised in one feature.  So let's see if there are motifs enriched
+there.
+
+See `vignette("GenomicFeatuers", package = "OikScrambling")` for details on
+these regions.
+
+```{r search_in_aln_nonCoa}
+alnNonCoa_seqs <- sapply(gbs[1:15], \(gb) gb[gb$nonCoa] |> getGRseqs()) |> SimpleList()
+if(!file.exists("gadems.alnNonCoa.Rds")) {
+  gadems$alnNonCoa <- BiocParallel::bplapply(alnNonCoa_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$alnNonCoa, file = "gadems.alnNonCoa.Rds")
+} else {
+  gadems$alnNonCoa <- readRDS("gadems.alnNonCoa.Rds")
+}
+```
+
+## Unmapped
+
+There regions are not aligned and not within a synteny block.
+
+```{r search_in_unmap}
+unmap_seqs <- sapply(unmap[1:15], getGRseqs) |> SimpleList()
+if(!file.exists("gadems.unmap.Rds")) {
+  gadems$unmap <- BiocParallel::bplapply(unmap_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$unmap, file = "gadems.unmap.Rds")
+} else {
+  gadems$unmap <- readRDS("gadems.unmap.Rds")
+}
+```
 
 ## Inversions
 
@@ -54,18 +110,13 @@ See `vignette("Inversions", package = "OikScrambling")` for details on inversion
 ```{r search_for_inversions}
 inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
 
-data.frame(width=width(inv.lgaps$Oki_Osa)) |>
-  ggplot(aes(width)) + geom_histogram() +  scale_x_log10()
-
-getGRseqs <- function (gr) { 
-  bsgenome_name <- gr |> genome() |> unique()
-  bsgenome_obj <- get(bsgenome_name)
-  seqs <- BSgenome::getSeq(bsgenome_obj,  gr)
-  metadata(seqs)$genome <- bsgenome_name
-  seqs
+inv.lgaps_seqs <- sapply(inv.lgaps[1:15], getGRseqs) |> SimpleList()
+if(!file.exists("gadems.inv.lgaps.Rds")) {
+  gadems$inv.lgaps <- BiocParallel::bplapply(inv.lgaps_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$inv.lgaps, file = "gadems.inv.lgaps.Rds")
+} else {
+  gadems$inv.lgaps <- readRDS("gadems.inv.lgaps.Rds")
 }
-
-inv.lgaps.Seq <- sapply(inv.lgaps[1:15], getGRseqs) |> SimpleList()
 ```
 
 ### AT richness
@@ -92,32 +143,8 @@ I was tempted to explain this difference with A/T homopolymer stetches.  But
 de novo motif prediction with rGADEM finds AT-rich motifs in any set of Oik
 sequences that I have tried.
 
-The following code is not run by the vignette because the computation takes
-time. Its results are saved in an external file, loaded by the vignette.
-
-```
-library("rGADEM")
-# Slow !
-# Note that GADEM crashes on sequences longer than 50 kbp.
-doGadem <- function(seqs) {
-  bsgenome_name <- metadata(seqs)$genome
-  bsgenome_obj <- get(bsgenome_name)
-  seqs <- seqs[width(seqs) < 50000]
-  GADEM(seqs, verbose=1, genome=bsgenome_obj)
-}
-
-gadems.inv        <- sapply(invSeq, doGadem) |> SimpleList()
-gadems.invLeftGap <- sapply(inv.lgaps.Seq, doGadem) |> SimpleList()
-
-saveRDS(gadems.invLeftGap, file = "gadems.invLeftGap.Rda")
-```
-
 ```{r plot_all_motifs, fig.width=6}
-library("rGADEM")
-# gadems.inv        <-  readRDS("gadems.inv.Rda")
-gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
-
-gadems <- gadems.invLeftGap
+gadems <- gadems$inv.lgaps
 
 for (curObjName in names(gadems)) {
   for (n in seq_along(gadems[[curObjName]]@motifList)) {
