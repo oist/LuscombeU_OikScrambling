@@ -362,36 +362,36 @@ As the plots are hardcoded to use the left border, let's artificially make
 regions of 1 bp on centers, rather than changing the accessory function.
 
 ```{r genomic_features_byType_center}
-current_GB <- coa$Oki_Osa
-
-current_GB_wide_c    <- current_GB_wide    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
-current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
-current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
-current_GB_unal_c    <- current_GB_unal    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
-current_GB_unalMap_c <- current_GB_unalMap |> plyranges::anchor_center() |> plyranges::mutate(width=1)
-
-currentCNE <- ces$ce__50__47$Oki_Osa
-
-hmListWide_c    <- prepareFreqPlot(current_GB_wide_c,    annots$Oki, reps$Oki, currentCNE)
-hmListNarrow_c  <- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki, currentCNE)
-hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki, currentCNE)
-hmListUnal_c    <- prepareFreqPlot(current_GB_unal_c,    annots$Oki, reps$Oki, currentCNE)
-hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki, currentCNE)
-
-p_center <- rbind(
-  hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
-  hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
-#  hmListUnal_c    |> prepareGGFreqPlot("02b_unmap"),
-  hmListWide_c    |> prepareGGFreqPlot("03_wide"),
-  hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
-)|> ggplot() +
-  aes(pos, freq, col = what) +
-  geom_line() +
-  facet_wrap(~desc, nrow = 1) +
-  ggtitle("Aligned on region midpoints.")
-
-p_center$data$what  <- p_center$data$what |> sub(pat = "CNE", rep = "CE_50_47")
-p_center
+# current_GB <- coa$Oki_Osa
+# 
+# current_GB_wide_c    <- current_GB_wide    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_unal_c    <- current_GB_unal    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_unalMap_c <- current_GB_unalMap |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# 
+# currentCNE <- ces$ce__50__47$Oki_Osa
+# 
+# hmListWide_c    <- prepareFreqPlot(current_GB_wide_c,    annots$Oki, reps$Oki, currentCNE)
+# hmListNarrow_c  <- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki, currentCNE)
+# hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki, currentCNE)
+# hmListUnal_c    <- prepareFreqPlot(current_GB_unal_c,    annots$Oki, reps$Oki, currentCNE)
+# hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki, currentCNE)
+# 
+# p_center <- rbind(
+#   hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
+#   hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
+# #  hmListUnal_c    |> prepareGGFreqPlot("02b_unmap"),
+#   hmListWide_c    |> prepareGGFreqPlot("03_wide"),
+#   hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
+# )|> ggplot() +
+#   aes(pos, freq, col = what) +
+#   geom_line() +
+#   facet_wrap(~desc, nrow = 1) +
+#   ggtitle("Aligned on region midpoints.")
+# 
+# p_center$data$what  <- p_center$data$what |> sub(pat = "CNE", rep = "CE_50_47")
+# p_center
 ```
 
 #### Comparison
