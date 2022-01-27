@@ -1,0 +1,177 @@
+---
+title: "Conserved non-coding elements"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Conserved non-coding elements}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I am using the [CNEr](https://bioconductor.org/packages/release/bioc/html/CNEr.html)
+package to detect the conserved non-coding elements in _Oikopleura_ genomes.
+
+As a data source, I use I use the postmasked alignment files produced by the
+pairwise alignment pipeline.  As `last-split` enforces a one-to-one relationship
+this data is more stringent than the "nets" expected by _CNEr_.  Also, there
+is no whole-genome duplication in the species we study.  Therefore I do not need
+to run the realignment step detailed in _CNEr_'s vignette.
+
+```{r prepare_CNEr}
+library("CNEr")
+library("GenomicBreaks")
+library("GenomicFeatures")
+genomes     <- OikScrambling:::loadAllGenomes()
+annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
+reps        <- OikScrambling:::loadAllRepeats()
+```
+
+Load the alignments in Axt format.
+
+```{r prepare_axtfiles}
+axt <- SimpleList()
+axt$Oki_Osa <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__OSKA2016v1.9.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OSKA2016v1.9"), "single_sequences.2bit"))
+axt$Oki_Bar <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__Bar2_p4.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.Bar2.p4"),      "single_sequences.2bit"))
+axt$Oki_Kum <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__KUM-M3-7f.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.KUM.M3"),       "single_sequences.2bit"))
+axt$Oki_Aom <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__AOM-5-5f.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.AOM.5"),       "single_sequences.2bit"))
+axt$Oki_Nor <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__OdB3.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.Odioica.reference.v3.0"), "single_sequences.2bit"))
+axt$Oki_Olo <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__O_lon.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"))
+second(axt$Oki_Olo) <- forceSeqLengths(second(axt$Oki_Olo))
+axt$Oki_Ova <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__O_van.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"))
+second(axt$Oki_Ova) <- forceSeqLengths(second(axt$Oki_Ova))
+axt$Oki_Oal <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OKI2018_I69_1.0__O_alb.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"))
+second(axt$Oki_Oal) <- forceSeqLengths(second(axt$Oki_Oal))
+
+
+axt$Osa_Oki <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OSKA2016v1.9__OKI2018_I69_1.0.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OSKA2016v1.9"), "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"))
+
+axt$Osa_Bar <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OSKA2016v1.9__Bar2_p4.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OSKA2016v1.9"), "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.Bar2.p4"),  "single_sequences.2bit"))
+
+axt$Osa_Aom <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/OSKA2016v1.9__AOM-5-5f.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OSKA2016v1.9"), "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.AOM.5"),  "single_sequences.2bit"))
+
+axt$Bar_Oki <- readAxt("/bucket/LuscombeU/common/Breakpoints/Alignments/Oidioi_pairwise_v3/Bar2_p4__OKI2018_I69_1.0.axt.gz",
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.Bar2.p4"),      "single_sequences.2bit"),
+                       file.path(system.file("extdata", package="BSgenome.Odioica.local.OKI2018.I69"),  "single_sequences.2bit"))
+```
+
+```{r compute_CNEs}
+
+GPairs2GBreaks <- function(GPairs, tGenome = NULL, qGenome = NULL, fix = TRUE) {
+  if(isTRUE(fix))
+    GPairs <- fixCoordinates(GPairs)
+  target <- granges(first(GPairs))
+  if(! is.null(tGenome))
+    target <- GRanges(target, seqinfo = seqinfo(tGenome))
+  query <- granges(second(GPairs))
+  if(! is.null(qGenome))
+    query <- GRanges(query, seqinfo = seqinfo(qGenome))
+  gb <- GBreaks(target = target, query = query)
+  ### Remove this once Issue 9 is resolved
+  strand(gb) <- strand(gb$query)
+  strand(gb$query) <- "*"
+  ###
+  mcols(gb) <- cbind(mcols(gb), mcols(GPairs))
+  sort(gb, ignore.strand = TRUE)
+}
+
+ceScan_to_GB <- function (axt, tFilter, qFilter, tGenome, qGenome, window, identity) {
+  axt <- fixCoordinates(axt)
+  cne <- ceScan(axt, tFilter = tFilter, qFilter = qFilter, window = window, identity = identity)
+  GPairs2GBreaks(cne[[1]], tGenome = tGenome, qGenome = qGenome, fix = FALSE)
+}
+
+## CNEs are filtered against coding sequences
+cne <- SimpleList()
+cne$Oki_Osa <- ceScan_to_GB(axt$Oki_Osa, window = 50L, identity = 50L,
+                            tFilter = exons(annots$Oki),                  qFilter = exons(annots$Osa),
+                            tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = BSgenome.Odioica.local.OSKA2016v1.9)
+
+# CE are not filtered against coding sequences
+calculateCEs <- function(window, identity) {
+  ce <- SimpleList()
+  
+  ce$Oki_Osa <- ceScan_to_GB(axt$Oki_Osa, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = BSgenome.Odioica.local.OSKA2016v1.9)
+  ce$Oki_Bar <- ceScan_to_GB(axt$Oki_Bar, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = BSgenome.Odioica.local.Bar2.p4)
+  ce$Oki_Kum <- ceScan_to_GB(axt$Oki_Kum, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = BSgenome.Odioica.local.KUM.M3)
+  ce$Oki_Aom <- ceScan_to_GB(axt$Oki_Aom, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = BSgenome.Odioica.local.AOM.5)
+  ce$Oki_Nor <- ceScan_to_GB(axt$Oki_Nor, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = BSgenome.Odioica.local.Odioica.reference.v3.0)
+  ce$Oki_Olo <- ceScan_to_GB(axt$Oki_Olo, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = NULL)
+  ce$Oki_Ova <- ceScan_to_GB(axt$Oki_Ova, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = NULL)
+  ce$Oki_Oal <- ceScan_to_GB(axt$Oki_Oal, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OKI2018.I69, qGenome = NULL)
+  ce$Osa_Oki <- ceScan_to_GB(axt$Osa_Oki, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OSKA2016v1.9, qGenome = BSgenome.Odioica.local.OKI2018.I69)
+  ce$Osa_Bar <- ceScan_to_GB(axt$Osa_Bar, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OSKA2016v1.9, qGenome = BSgenome.Odioica.local.Bar2.p4)
+  ce$Osa_Aom <- ceScan_to_GB(axt$Osa_Aom, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.OSKA2016v1.9, qGenome = BSgenome.Odioica.local.AOM.5)
+  ce$Bar_Oki <- ceScan_to_GB(axt$Bar_Oki, window = window, identity = identity,
+                             tFilter = NULL,                  qFilter = NULL,
+                             tGenome = BSgenome.Odioica.local.Bar2.p4, qGenome = BSgenome.Odioica.local.OKI2018.I69)
+  ce
+}
+
+ces <- SimpleList()
+ces$ce_200_200 <- calculateCEs(200L, 200L)
+ces$ce_200_198 <- calculateCEs(200L, 198L)
+ces$ce_200_196 <- calculateCEs(200L, 196L)
+ces$ce_200_194 <- calculateCEs(200L, 194L)
+ces$ce_100_100 <- calculateCEs(100L, 100L)
+ces$ce_100__99 <- calculateCEs(100L, 99L)
+ces$ce_100__98 <- calculateCEs(100L, 98L)
+ces$ce_100__97 <- calculateCEs(100L, 97L)
+ces$ce_100__96 <- calculateCEs(100L, 96L)
+ces$ce_100__95 <- calculateCEs(100L, 95L)
+ces$ce__50__50 <- calculateCEs(50L, 50L)
+ces$ce__50__49 <- calculateCEs(50L, 49L)
+ces$ce__50__48 <- calculateCEs(50L, 48L)
+ces$ce__50__47 <- calculateCEs(50L, 47L)
+sapply(ces, sapply, length)
+
+saveRDS(ces, "CEs.Rds")
+```
