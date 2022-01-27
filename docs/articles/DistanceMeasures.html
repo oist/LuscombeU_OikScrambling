@@ -53,6 +53,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/CNEs.html">Conserved non-coding elements</a>
+    </li>
+    <li>
       <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
     </li>
     <li>
@@ -92,6 +95,9 @@
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
     </li>
     <li>
+      <a href="../articles/TFBS.html">Transcription factor binding sites</a>
+    </li>
+    <li>
       <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
@@ -123,7 +129,7 @@
       <h1 data-toc-skip>Distance Measures</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">25 January, 2022</h4>
+            <h4 data-toc-skip class="date">27 January, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/DistanceMeasures.Rmd" class="external-link"><code>vignettes/DistanceMeasures.Rmd</code></a></small>
       <div class="hidden name"><code>DistanceMeasures.Rmd</code></div>
@@ -163,14 +169,14 @@
 <p>Ad-hoc index measuring to what extent a scaffold of the <em>target</em> genome is mostly aligned to a single scaffold in the <em>query</em> genome. See <code><a href="https://oist.github.io/GenomicBreaks/reference/synteny_index.html" class="external-link">?GenomicBreaks::synteny_index</a></code> for details. One limitation to the use of this index is that it requires that at least the <em>query</em> genome is a complete chromosome assembly.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pairs2table6x3</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>
-    Oki <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="cn">NA</span>,        Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Oki</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
-    Kum <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Kum</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Kum</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Kum</span><span class="op">)</span>,
-    Osa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Osa</span>, Osa <span class="op">=</span> <span class="cn">NA</span>,        Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
-    Aom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Aom</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Aom</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Aom</span><span class="op">)</span>,
-    Bar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Bar</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Bar</span>, Bar <span class="op">=</span> <span class="cn">NA</span>       <span class="op">)</span>,
-    Nor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Nor</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Nor</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Nor</span><span class="op">)</span>
+  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>
+    Oki <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="cn">NA</span>,        Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Oki</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
+    Kum <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Kum</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Kum</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Kum</span><span class="op">)</span>,
+    Osa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Osa</span>, Osa <span class="op">=</span> <span class="cn">NA</span>,        Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
+    Aom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Aom</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Aom</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Aom</span><span class="op">)</span>,
+    Bar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Bar</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Bar</span>, Bar <span class="op">=</span> <span class="cn">NA</span>       <span class="op">)</span>,
+    Nor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Nor</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Nor</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Nor</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">}</span>
 
