@@ -1,0 +1,157 @@
+---
+title: "Chromosome-scale feature density plots"
+author: 
+ - "Michael Mansfield"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Chromosome plots}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
+knitr::opts_knit$set(verbose = TRUE)
+```
+
+# Introduction
+
+In this vignette, we develop some of the materials needed to produce plots that summarize genomic data at chromosome-scale.
+
+The core functions used here are maintained in our _GenomicBreaks_ R package,
+which is fully documented at: <https://oist.github.io/GenomicBreaks>.
+
+## Load packages
+
+# Load R packages and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+library('dplyr')
+library('ggplot2')
+library('purrr')
+library('viridis') |> suppressPackageStartupMessages()
+(genomes <- OikScrambling:::loadAllGenomes())
+(transcripts <- OikScrambling:::loadAllTranscriptsGR())
+(load("BreakPoints.Rdata"))
+```
+
+### Creating chromosome-scale plots
+In this vignette, we create the plumbing needed to generate summary plots that show windows of genomic features on a chromosome scale. 
+
+#### Summarizing genomic windows of annotated `GRanges` objects
+Below, I create some of the functions needed to produce these plots.
+
+```{r chromosome_plot_helper_fxns, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Find midpoints of a GRanges object
+grMidpoint <- function(gr) {
+  starts <- as.data.frame(ranges(gr))$start
+  ends <- as.data.frame(ranges(gr))$end
+  mids <- (starts+ends)/2
+  mids
+}
+
+# Make a BSgenome into a GRanges object, one range per chromosome
+genomeToGR <- function(genome) {
+  df <- data.frame(seqnames=seqnames(genome), start=1, end=lengths(genome), strand="*")
+  gr <- makeGRangesFromDataFrame(df)
+  gr
+}
+
+# Make a genome into a bunch of windows of length N
+genomeGRToWindows <- function(gr, windowSize=10000) {
+  df <- as.data.frame(gr)
+  chr <- split(df, df$seqnames)
+  chr <- lapply(chr, function(l) {
+    start_positions <- seq(from=1, to=l$end, by=windowSize)
+    end_positions = start_positions + windowSize
+    end_positions[length(end_positions)] <- l$end
+    df <- data.frame(seqnames=l$seqnames, start=start_positions, end=end_positions)
+    df
+  })
+  chr <- do.call(rbind, chr)
+  rownames(chr) <- NULL
+  gr <- makeGRangesFromDataFrame(chr)
+  gr
+}
+
+# Generate counts and stats for a column within mcol(GRanges)
+mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
+  count <- length(mcol)
+  count_window <- count/windowSize
+  
+  if(is.numeric(mcol)){
+    mean_num <- mean(mcol)
+    mean_window <- mean(mcol)/windowSize
+    median_window <- median(mcol)
+    sd_window <- sd(mcol)
+  } else {
+    mean_num <- NA
+    mean_window <- mean(mcol)/windowSize
+    median_num <- NA
+    median_
+    median_window = NA
+    sd_window = NA
+  }
+  df[[paste(mcolName, '.count', sep='')]] = count
+  df[[paste(mcolName, '.count_window', sep='')]] = count_window
+  df[[paste(mcolName, '.mean', sep='')]] = mean_window
+  df[[paste(mcolName, '.mean_window', sep='')]] = mean_window
+  df[[paste(mcolName, '.median_window', sep='')]] = median_window
+  df[[paste(mcolName, '.sd_window', sep='')]] = sd_window
+}
+# Intersect each genome window with some other GRange (meta, as in metadata)
+# This requires that meta is in the same coordinate system as the genome
+metaPerWindow <- function(genomeWindows, meta, windowSize=10000, metaCols=NULL) {
+  # For every genomic window...
+  gwl <- lapply(1:nrow(genomeWindows), function(gw){
+    ovl <- subsetByOverlaps(meta, gw) # Intersect genome window's range with metadata
+    # 
+  })
+  #count = 
+  #count_per_window = count / windowSize
+  #count_mean = mean(count)
+  #count_median = median(count)
+  #count_sd = sd(count)
+}
+
+grWindows <- function(genome=NULL, meta=NULL, windowSize=10000, metaCols=NULL){
+  # Make a chromosome-scale GRange from genome
+  genome <- genomeToGR(genome)
+  # Make a windowed GRange from chromosomes
+  genome <- genomeGRToWindows(genome, windowSize=windowSize)
+
+  # Add midpoints to metadata
+  #meta$midpoint <- grMidpoint(meta)
+  # Overlap windowed GRange with some annotation GRange
+  ovl <- findOverlaps(genome, meta)
+  metadata_cols <- mcols(meta)
+  tmp <- metaPerWindow(genome, meta)
+  print(head(tmp))
+  #print(length(list(ovl@from)))
+  #tmp <- aggregate(metadata_cols$dNdS_GUIDANCE2, list(ovl@from), mean)
+  #print(head(tmp))
+  
+  #print(head(ovl))
+  #overlaps <- findOverlaps(genome, meta)
+  #averagedSignal <- aggregate(score(sites), list(overlaps@from), mean)
+  #print(head(overl))
+}
+#overlaps <- findOverlaps(signal, intervals)
+#signal <- signal[overlaps@queryHits]
+#averagedSignal <- aggregate(score(sites), list(overlaps@subjectHits), mean)
+tmp <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=10000)
+```
+
+
+
+# Session information
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+
