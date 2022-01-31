@@ -60,7 +60,8 @@ BSgenomeToGR <- function(genome) {
   gr <- makeGRangesFromDataFrame(df)
   gr
 }
-(BSgenomeToGR(genomes$Oki))
+tmp <- genomes$Oki |> BSgenomeToGR()
+(tmp)
 
 # Make a genome into a bunch of windows of length N
 genomeGRToWindows <- function(gr, windowSize=10000) {
@@ -78,7 +79,8 @@ genomeGRToWindows <- function(gr, windowSize=10000) {
   gr <- makeGRangesFromDataFrame(chr)
   gr
 }
-(genomeGRToWindows(tmp))
+tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
+(tmp)
 
 # Generate counts and stats for a column within mcol(GRanges)
 mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
@@ -99,45 +101,85 @@ mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
   }
   df
 }
-(mcolStats(subsetByOverlaps(transcripts$Oki, tmp2[1:70,])$dNdS_HmmCleaner))
+# Picked a random line with a dN/dS value (65) 
+tmp2 <- mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65,])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner')
+(tmp2)
 
 # Wrapper to calculate stats (i.e., mcolStats) on every column in a metadata GRanges
-mcolStatsArray <- function(metaSubset, windowSize=10000, includeMetaCols=NULL) {
-  metaSubset <- as.data.frame(mcols(metaSubset))
-  meta_cols <- colnames(metaSubset)
+mcolStatsArray <- function(meta, windowSize=10000, includeMetaCols=NULL) {
+  metaMcols <- mcols(meta)
+  metaMcolNames <- colnames(metaMcols)
   # If metaCols is supplied, then only include metaCols in the array.
   if(!is.null(includeMetaCols)){
-    meta_cols <- meta_cols[which(meta_cols %in% includeMetaCols)]
+    metaMcolNames <- metaMcolNames[which(metaMcolNames %in% includeMetaCols)]
   }
-  # For every remaining metadata column, calculate stats, using the column name to allow cbinding
-  mcolSA <- lapply(meta_cols, function(m) mcolStats(metaSubset[[m]], mcolName=m, windowSize=windowSize))
-  mcolSA <- do.call(cbind, mcolSA)
+  # For every remaining metadata column, calculate stats
+  mcolSA <- lapply(metaMcolNames, function(m) {
+    dat <- as.list(metaMcols[[m]])
+    names(dat) <- m
+    df <- mcolStats(metaMcols[[m]], mcolName=m, windowSize=windowSize)
+    df
+  })
+  mcolSA <- do.call(cbind, mcolSA)  |> DataFrame()
   mcolSA
 }
-(mcolStatsArray(subsetByOverlaps(transcripts$Oki, tmp2[1:70,])))
+(mcolStatsArray(subsetByOverlaps(transcripts$Oki, tmp[30,])))
+
+# Separate function to make a fake stats dataframe with nothing in it
+mcolBlankArray <- function(meta, includeMetaCols=NULL){
+  metaMcols <- mcols(meta)
+  metaMcolNames <- colnames(metaMcols)
+  # If metaCols is supplied, then only include metaCols in the array.
+  if(!is.null(includeMetaCols)){
+    metaMcolNames <- metaMcolNames[which(metaMcolNames %in% includeMetaCols)]
+  }
+  # For every remaining metadata column, calculate stats
+  mcolSA <- lapply(metaMcolNames, function(m) {
+    dat <- as.list(metaMcols[[m]])
+    names(dat) <- m
+    df <- data.frame(matrix(0))
+    colnames(df)[1] = paste(m, 'count', sep='.')
+    df[[paste(m, 'count_norm', sep='.')]] = 0
+    df[[paste(m, 'mean', sep='.')]] = NA
+    df[[paste(m, 'median', sep='.')]] = NA
+    df[[paste(m, 'sd', sep='.')]] = NA
+    df
+  })
+  mcolSA <- do.call(cbind, mcolSA)  |> DataFrame()
+  mcolSA
+}
+(mcolBlankArray(subsetByOverlaps(transcripts$Oki, tmp[30,])))
+
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
-metaPerWindow <- function(genomeWindows, meta, windowSize=10000, includeMetaCols=NULL, threads=1) {
+metaPerWindow <- function(genomeWindows, meta, windowSize=10000, includeMetaCols=NULL) {
   # For every genomic window...
-  gwl <- BiocParallel::bplapply(1:length(genomeWindows), function(gw){
+  #gwl <- BiocParallel::bplapply(1:length(genomeWindows), function(gw){
+  gwl <- lapply(1:length(genomeWindows), function(gw){
     ovl <- subsetByOverlaps(meta, genomeWindows[gw,]) # Get metadata window aligning with genome window
-    mc <- mcolStatsArray(ovl, windowSize=windowSize, includeMetaCols=includeMetaCols) # For every metadata window, calculate stats
-    annot <- ovl # Create annotated GRanges
-    #annot <- lapply(colnames(mc), function(col) annot[[col]] <- mc[[col]])
-    annot
+    if(length(ovl)==0){ # If there is no overlap between the GRanges, initialize a blank one
+      cur_window <- genomeWindows[gw,]
+      mc <- mcolBlankArray(meta[1,], includeMetaCols = includeMetaCols)
+      mcols(cur_window) <- mc
+      cur_window
+    } else {
+      mc <- mcolStatsArray(ovl, windowSize=windowSize, includeMetaCols=includeMetaCols) # For every metadata window, calculate stats
+      cur_window <- genomeWindows[gw,] # Create annotated GRanges
+      mcols(cur_window) <- mc
+      cur_window
+    }
   })
-  gwl
+  gwl #<- as(gwl, "GRangesList") # |> unlist() # unlist(as(l3, "GRangesList"))
 }
-metaPerWindow(tmp2, transcripts$Oki[1:100,], windowSize=10000, includeMetaCols=NULL, threads=4)
-
+tmp3 <- metaPerWindow(genomeWindows=genomeGRToWindows(BSgenomeToGR(genomes$Oki))[10:60,], transcripts$Oki, windowSize=10000)
 
 # Function to do everything
-grWindows <- function(genome=NULL, meta=NULL, windowSize=10000, includeMetaCols=NULL, threads=1){
+grWindows <- function(genome=NULL, meta=NULL, windowSize=10000, includeMetaCols=NULL){
   genome <- BSgenomeToGR(genome)                             # Make GRanges from genome
   genome <- genomeGRToWindows(genome, windowSize=windowSize) # Make a windowed GRange from chromosome GRanges
-  mpw <- metaPerWindow(genome, meta, windowSize=windowSize, includeMetaCols=includeMetaCols, threads=threads) # if 
+  mpw <- metaPerWindow(genome, meta, windowSize=windowSize, includeMetaCols=includeMetaCols) # if 
 }
-tmp <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=10000, threads=4)
+tmp <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=10000)
 ```
 
 
