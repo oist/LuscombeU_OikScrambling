@@ -42,6 +42,14 @@ library("rGADEM") |> suppressPackageStartupMessages()
 
 # Motif searches
 
+[GADEM](https://www.niehs.nih.gov/research/resources/software/biostatistics/gadem/index.cfm)'s
+documentation states:
+
+> _The background sequences are simulated using the [a,c,g,t] frequencies in
+> the input sequences, with length matched between the two sets. The background
+> sequences are used as the random sequences for assessing motif enrichment in
+> the input data._
+
 ```{r functions_for_motif_search}
 # Note that GADEM crashes on sequences longer than ~48 kbp.
 getGRseqs <- function (gr, max = 48000) { 
@@ -199,29 +207,79 @@ We start to see species-specific motifs:
     the reverse complements).
 
 
-```{r show_alnNonCoa_motifs}
+```{r show_unal_motifs}
 showAllMotifs(gadems$unmap)
 ```
 
 Here are a few graphical examples.
 
-```{r plot_some_alnNonCoa_motifs}
+```{r plot_some_unal_motifs}
 plotOneMotif(gadems$unmap$Oki_Osa[[2]], "Okinawa - Osaka")
 plotOneMotif(gadems$unmap$Oki_Kum[[1]], "Okinawa - Kume")
 plotOneMotif(gadems$unmap$Osa_Oki[[1]], "Osaka - Okinawa")
 plotOneMotif(gadems$unmap$Bar_Osa[[1]], "Barcelona - Okinawa")
 ```
 
-## Unaligned regions left to inversiond
+## Unaligned regions left to inversion
+
+  - We still find `AAAA.....AAAA`,`AAGAA`, `A`-rich (or their reverse-complement).
+  - We see palindromic motifs (`CCTGA.TCAGG`, `aaGCCGc...gCGGCtt`) in the Okinawan genome.
+  - Two other motifs are found when comparing Oki to Aom (`nGAGGCmACGmsCGTTCn`)
+    and to Nor `nACGCyCryTCATTCTwTy`).
+  - In the Osaka genome, we see a the `GCT..GCT` motif again.
+
+
+```{r show_invLeft_motifs}
+showAllMotifs(gadems$inv.lgaps)
+```
+
 
 Here are a few graphical examples.
 
-```{r plot_some_alnNonCoa_motifs}
+### `CCTGA.TCAGG`
+
+```{r plot_some_CCTGA.TCAGG_motifs_from_invs}
 plotOneMotif(gadems$inv.lgaps$Oki_Osa[[1]], "Okinawa - Osaka")
-plotOneMotif(gadems$unmap$Oki_Kum[[1]], "Okinawa - Kume")
-plotOneMotif(gadems$unmap$Osa_Oki[[1]], "Osaka - Okinawa")
-plotOneMotif(gadems$unmap$Bar_Osa[[1]], "Barcelona - Okinawa")
+plotOneMotif(gadems$inv.lgaps$Oki_Kum[[2]], "Okinawa - Kume")
 ```
+
+### `aaGCCGc...gCGGCtt`
+
+```{r plot_some_aaGCCGc...gCGGCtt_motifs_from_invs}
+plotOneMotif(gadems$inv.lgaps$Oki_Osa[[3]], "Okinawa - Osaka")
+plotOneMotif(gadems$inv.lgaps$Oki_Kum[[1]], "Okinawa - Kume")
+```
+
+### Other from Okinawan genome
+
+```{r plot_some_more_motifs_from_invs}
+plotOneMotif(gadems$inv.lgaps$Oki_Aom[[6]], "Okinawa - Aomori")
+plotOneMotif(gadems$inv.lgaps$Oki_Nor[[4]], "Okinawa - Norway")
+```
+
+### `GCT..GCT`
+
+```{r plot_GCT..GCT_motifs_from_invs}
+plotOneMotif(gadems$inv.lgaps$Osa_Oki[[1]], "Osaka - Okinawa")
+plotOneMotif(gadems$inv.lgaps$Osa_Bar[[1]], "Osaka - Barcelona")
+```
+
+### `GCTTCGCTTC`
+
+
+```{r plot_GCTTCGCTTC_from_invs}
+plotOneMotif(gadems$inv.lgaps$Osa_Kum[[1]], "Osaka - Kume")
+plotOneMotif(gadems$inv.lgaps$Bar_Osa[[1]], "Barcelona - Okinawa")
+```
+
+### `CAA....TTGGTCA`
+
+```{r plot_CAA....TTGGTCA_from_invs}
+plotOneMotif(gadems$inv.lgaps$Osa_Kum[[5]], "Osaka - Kume")
+plotOneMotif(gadems$inv.lgaps$Osa_Oki[[4]], "Osaka - Okinawa")
+plotOneMotif(gadems$inv.lgaps$Osa_Nor[[2]], "Osaka - Norway")
+```
+
 ### AT richness
 
 ```{r at_richness}
