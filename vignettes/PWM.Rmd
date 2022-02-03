@@ -76,6 +76,7 @@ these regions.
 
 ```{r search_in_aln_nonCoa}
 alnNonCoa_seqs <- sapply(gbs[1:15], \(gb) gb[gb$nonCoa] |> getGRseqs()) |> SimpleList()
+sapply(alnNonCoa_seqs, length)
 if(!file.exists("gadems.alnNonCoa.Rds")) {
   gadems$alnNonCoa <- BiocParallel::bplapply(alnNonCoa_seqs, doGadem) |> SimpleList()
   saveRDS(gadems$alnNonCoa, file = "gadems.alnNonCoa.Rds")
@@ -90,6 +91,7 @@ There regions are not aligned and not within a synteny block.
 
 ```{r search_in_unmap}
 unmap_seqs <- sapply(unmap[1:15], getGRseqs) |> SimpleList()
+sapply(unmap_seqs, length)
 if(!file.exists("gadems.unmap.Rds")) {
   gadems$unmap <- BiocParallel::bplapply(unmap_seqs, doGadem) |> SimpleList()
   saveRDS(gadems$unmap, file = "gadems.unmap.Rds")
@@ -98,7 +100,7 @@ if(!file.exists("gadems.unmap.Rds")) {
 }
 ```
 
-## Inversions
+## Unaligned regions near inversions
 
 I wanted to search search for motifs near inversions to see if they can
 lead to an explanation.
@@ -109,8 +111,8 @@ See `vignette("Inversions", package = "OikScrambling")` for details on inversion
 
 ```{r search_for_inversions}
 inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
-
 inv.lgaps_seqs <- sapply(inv.lgaps[1:15], getGRseqs) |> SimpleList()
+sapply(inv.lgaps_seqs, length)
 if(!file.exists("gadems.inv.lgaps.Rds")) {
   gadems$inv.lgaps <- BiocParallel::bplapply(inv.lgaps_seqs, doGadem) |> SimpleList()
   saveRDS(gadems$inv.lgaps, file = "gadems.inv.lgaps.Rds")
@@ -210,8 +212,7 @@ plotOneMotif(gadems$unmap$Osa_Oki[[1]], "Osaka - Okinawa")
 plotOneMotif(gadems$unmap$Bar_Osa[[1]], "Barcelona - Okinawa")
 ```
 
-## Inversion left gaps
-
+## Unaligned regions left to inversiond
 
 Here are a few graphical examples.
 
