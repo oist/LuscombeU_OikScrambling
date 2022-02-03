@@ -127,7 +127,63 @@ Number of motifs found
 sapply(gadems, sapply, \(x) length(x@motifList))
 ```
 
-# Analysis
+# Display
+
+Service functions.
+
+```{r plot_all_motifs, fig.width=6}
+showAllMotifs <- function(gadems) {
+  sapply(names(gadems), \(name) {
+    sapply(seq_along(gadems[[name]]@motifList), \(n) {
+      gadems[[name]][[n]]@consensus
+    })
+  })
+}
+
+plotAllMotifs <- function(gadems) {
+  for (curObjName in names(gadems)) {
+    for (n in seq_along(gadems[[curObjName]]@motifList)) {
+      p <- plotOneMotif(gadems[[curObjName]][[n]], curObjName)
+      print(p)
+    }
+  }
+}
+
+plotOneMotif <- function(gadem, pairName = NULL) {
+  pwm <- rGADEM::getPWM(gadem)
+  title = paste0("Motif consensus: ", gadem@consensus)
+  if(!is.null(pairName))
+  title <- paste0("Genome pair: ", pairName, ", ", title)
+  # Suppressed warning message: `guides(<scale> = FALSE)` is deprecated. Please use `guides(<scale> = "none")` instead. 
+  p <- ggseqlogo::ggseqlogo(pwm) |> suppressWarnings()
+  p  + ggtitle(title)
+}
+```
+
+## Aligned non-coalesced regions
+
+Many comparison return a motif that looks like `AAAA.....AAAA`, and some also
+return `AAGAA` (or their reverse-complement).
+
+The Oki - Kume comparison shows T-rich motifs (note that they could have been
+A-rich reverse-complement).
+
+Sometimes a weaker A-rich / T-rich motif is also found.
+
+```{r show_alnNonCoa_motifs}
+showAllMotifs(gadems$alnNonCoa)
+```
+
+Here are a few graphical examples.
+
+```{r plot_some_alnNonCoa_motifs}
+plotOneMotif(gadems$alnNonCoa$Oki_Osa[[1]], "Okinawa - Osaka")
+plotOneMotif(gadems$alnNonCoa$Oki_Osa[[2]], "Okinawa - Osaka")
+plotOneMotif(gadems$alnNonCoa$Oki_Kum[[1]], "Okinawa - Kume")
+plotOneMotif(gadems$alnNonCoa$Oki_Kum[[2]], "Okinawa - Kume")
+plotOneMotif(gadems$alnNonCoa$Osa_Oki[[2]], "Osaka - Okinawa")
+plotOneMotif(gadems$alnNonCoa$Osa_Bar[[2]], "Osaka - Barcelona")
+```
 
 ### AT richness
 
@@ -154,20 +210,6 @@ I was tempted to explain this difference with A/T homopolymer stetches.  But
 de novo motif prediction with rGADEM finds AT-rich motifs in any set of Oik
 sequences that I have tried.
 
-```{r plot_all_motifs, fig.width=6}
-gadems <- gadems$inv.lgaps
-
-for (curObjName in names(gadems)) {
-  for (n in seq_along(gadems[[curObjName]]@motifList)) {
-    gadem <- gadems[[curObjName]][[n]]
-    pwm <- rGADEM::getPWM(gadem)
-    cons <- gadem@consensus
-    p <- ggseqlogo::ggseqlogo(pwm) +
-      ggtitle(paste(curObjName, cons))
-    print(p)
-  }
-}
-```
 
 ```{r}
 
