@@ -1,19 +1,19 @@
 ---
-title: "Motif finding and analysis"
+title: "Motif search and analysis"
 author: 
  - "Charles Plessy"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Motif finding and analysis}
+  %\VignetteIndexEntry{Motif search and analysis}
   %\VignetteEncoding{UTF-8}
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r setup}
-knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(cache = TRUE, include = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
@@ -21,7 +21,7 @@ knitr::opts_knit$set(verbose = TRUE)
 
 Search for motifs in regions near genomic breaks.  By default the computations
 that take time are loaded from R objects.  The source code to generate them
-needs to be executed by hand when needed.
+is only executed when the object files can not be found.
 
 # Load pacakges
 
@@ -36,7 +36,7 @@ load("BreakPoints.Rdata")
 library('ggplot2')
 
 requireNamespace("ggseqlogo")
-requireNamespace("JASPAR2020")
+requireNamespace("JASPAR2020") |> suppressPackageStartupMessages()
 library("rGADEM") |> suppressPackageStartupMessages()
 ```
 
@@ -118,6 +118,16 @@ if(!file.exists("gadems.inv.lgaps.Rds")) {
   gadems$inv.lgaps <- readRDS("gadems.inv.lgaps.Rds")
 }
 ```
+
+## Summary
+
+Number of motifs found
+
+```{r summarise_gadems}
+sapply(gadems, sapply, \(x) length(x@motifList))
+```
+
+# Analysis
 
 ### AT richness
 
