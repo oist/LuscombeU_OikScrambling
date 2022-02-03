@@ -159,9 +159,15 @@ plotAllMotifs <- function(gadems) {
   }
 }
 
-plotOneMotif <- function(gadem, pairName = NULL) {
-  pwm <- rGADEM::getPWM(gadem)
-  title = paste0("Motif consensus: ", gadem@consensus)
+plotOneMotif <- function(gadem, pairName = NULL, range = NULL) {
+  if(is.null(range)) {
+    pwm <- rGADEM::getPWM(gadem)
+    consensus <- gadem@consensus
+  } else {
+    pwm <- rGADEM::getPWM(gadem)[,range]
+    consensus <- gadem@consensus |> subseq(min(range), max(range))
+  }
+  title = paste0("Motif consensus: ", consensus)
   if(!is.null(pairName))
   title <- paste0("Genome pair: ", pairName, ", ", title)
   # Suppressed warning message: `guides(<scale> = FALSE)` is deprecated. Please use `guides(<scale> = "none")` instead. 
@@ -280,31 +286,31 @@ plotOneMotif(gadems$inv.lgaps$Osa_Oki[[4]], "Osaka - Okinawa")
 plotOneMotif(gadems$inv.lgaps$Osa_Nor[[2]], "Osaka - Norway")
 ```
 
-### AT richness
+# AT richness
+
+Unmapped regions have a much higher AT-richness than aligned ones.
 
 ```{r at_richness}
 ## Inverted regions are AT-rich as usual.
 invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> SimpleList()
 invSeq <-  sapply(invRegions, getGRseqs) |> SimpleList()
 
-sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> summary())
+rbind(
+  alnNonCoa = sapply(alnNonCoa_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  unmap     = sapply(unmap_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  inv.lgaps = sapply(inv.lgaps_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  inv       = sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean())
+)
+
 (genomes.AT <- sapply(genomes, \(g)
   weighted.mean(letterFrequency(getSeq(g), "AT", as.prob = TRUE), seqlengths(g))))
 
-## But gaps are a bit more AT-rich.
-sapply(inv.lgaps.Seq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> summary())
-
 ## This difference is significant.
-t.test(letterFrequency(invSeq$Oki_Osa, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Oki_Osa, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Osa_Oki, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Osa_Oki, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Oki_Bar, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Oki_Bar, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Oki_Kum, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Oki_Kum, "AT", as.prob = TRUE))
+t.test(letterFrequency(invSeq$Oki_Osa, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Osa, "AT", as.prob = TRUE))
+t.test(letterFrequency(invSeq$Osa_Oki, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Osa_Oki, "AT", as.prob = TRUE))
+t.test(letterFrequency(invSeq$Oki_Bar, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Bar, "AT", as.prob = TRUE))
+t.test(letterFrequency(invSeq$Oki_Kum, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Kum, "AT", as.prob = TRUE))
 ```
-
-I was tempted to explain this difference with A/T homopolymer stetches.  But
-de novo motif prediction with rGADEM finds AT-rich motifs in any set of Oik
-sequences that I have tried.
-
 
 ```{r}
 
@@ -342,9 +348,16 @@ On the other hand, a motif containing GCGAAGCGAA identified in Osa_Oki shows:
   Oki   Osa   Bar   Kum   Aom   Nor 
   483 21360 23340   501 21594 16413 
 ```
-  
+
+# Search for the motifs in JASPAR
+
 ```{r screenJaspar}
-checkJaspar <- function (pwm) {
+checkJaspar <- function (pwm, range=NULL) {
+  if(is.null(range))
+    PWMat <- TFBSTools::PWMatrix(ID=pwm@consensus, profileMatrix = pwm@pwm)
+  else
+    PWMat <- TFBSTools::PWMatrix(ID = subseq(pwm@consensus, min(range), max(range)),
+                                 profileMatrix = pwm@pwm[,range])
   #---- see https://compgenomr.github.io/book/motif-discovery.html
   pwmLib <- TFBSTools::getMatrixSet(
     JASPAR2020::JASPAR2020,
@@ -364,13 +377,12 @@ checkJaspar <- function (pwm) {
   pwmLibDf[order(-pwmLibDf$similarity),]
 }
 
-PWMat <- TFBSTools::PWMatrix(ID="rAAGCsGCwwmkCGrCTTyn", profileMatrix = pwm)
-pwm_res <- checkJaspar(PWMat)
-head(pwm_res)
+gadems$inv.lgaps$Oki_Osa[[1]] |> checkJaspar() |> head()
+gadems$inv.lgaps$Oki_Kum[[1]] |> checkJaspar() |> head()
 
-pwmhalf <- pwm[,2:8]
-pwmhalf_res <- checkJaspar(PWMatrix(ID="AAGCnGC", profileMatrix = pwmhalf))
-head(pwmhalf_res)
+# Let's trim the motif.
+gadems$inv.lgaps$Oki_Kum[[1]] |> plotOneMotif(range = 2:9)
+gadems$inv.lgaps$Oki_Osa[[1]] |> checkJaspar(range = 2:9) |> head()
 ```
 
 But a search in Jaspar with either the full motif or its halof did not reveal
