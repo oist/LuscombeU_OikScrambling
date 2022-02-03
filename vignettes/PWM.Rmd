@@ -185,6 +185,35 @@ plotOneMotif(gadems$alnNonCoa$Osa_Oki[[2]], "Osaka - Okinawa")
 plotOneMotif(gadems$alnNonCoa$Osa_Bar[[2]], "Osaka - Barcelona")
 ```
 
+## Unaligned non-mapped regions
+
+We still find `AAAA.....AAAA`,`AAGAA`, `A`-rich (or their reverse-complement),
+but not as systematicaly.
+
+We start to see species-specific motifs:
+
+  - Variations over `GsCsCkwmGsGsC` in some Oki -> other comparisons.
+  - Variations over `GCT..GCT` in some Nor -> other comparisons (pay attention
+    the reverse complements).
+
+
+```{r show_alnNonCoa_motifs}
+showAllMotifs(gadems$unmap)
+```
+
+Here are a few graphical examples.
+
+```{r plot_some_alnNonCoa_motifs}
+plotOneMotif(gadems$unmap$Oki_Osa[[2]], "Okinawa - Osaka")
+plotOneMotif(gadems$unmap$Oki_Kum[[1]], "Okinawa - Kume")
+plotOneMotif(gadems$unmap$Osa_Oki[[1]], "Osaka - Okinawa")
+plotOneMotif(gadems$unmap$Bar_Osa[[1]], "Barcelona - Okinawa")
+```
+
+## Inversion left gaps
+
+(to be written)
+
 ### AT richness
 
 ```{r at_richness}
