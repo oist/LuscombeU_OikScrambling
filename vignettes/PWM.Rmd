@@ -127,7 +127,8 @@ invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> S
 invSeq <-  sapply(invRegions, getGRseqs) |> SimpleList()
 
 sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> summary())
-genomes.AT
+(genomes.AT <- sapply(genomes, \(g)
+  weighted.mean(letterFrequency(getSeq(g), "AT", as.prob = TRUE), seqlengths(g))))
 
 ## But gaps are a bit more AT-rich.
 sapply(inv.lgaps.Seq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> summary())
