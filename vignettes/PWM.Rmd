@@ -30,7 +30,8 @@ Core packages that provide functions we use a lot.
 ```{r loadlib}
 library('OikScrambling')   |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
-transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings()
+annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
+
 load("BreakPoints.Rdata")
 
 library('ggplot2')
@@ -117,7 +118,7 @@ See `vignette("Inversions", package = "OikScrambling")` for details on inversion
 
 ### Isolate the left-side gaps in inversions
 
-```{r search_for_inversions}
+```{r search_in_gaps_near_inversions}
 inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
 inv.lgaps_seqs <- sapply(inv.lgaps[1:15], getGRseqs) |> SimpleList()
 sapply(inv.lgaps_seqs, length)
@@ -131,15 +132,44 @@ if(!file.exists("gadems.inv.lgaps.Rds")) {
 
 ## Inversions
 
-To do...
+```{r search_in_inversions}
+inv_seqs <- sapply(coa[1:15], leftInversionGaps) |> sapply(getGRseqs) |> SimpleList()
+sapply(inv_seqs, length)
+if (!file.exists("gadems.invs.Rds")) {
+  gadems$invs <- BiocParallel::bplapply(inv_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$inv.lgaps, file = "gadems.invs.Rds")
+} else {
+  gadems$invs <- readRDS("gadems.invs.Rds")
+}
+```
 
 ## Promoters
 
-To do ...
+```{r search_in_promoters}
+prom_seqs <- sapply(annots[1:3], \(gb) suppressWarnings(trim(promoters(gb)))) |>
+  sapply(getGRseqs) |> SimpleList()
+sapply(prom_seqs, length)
+if (!file.exists("gadems.proms.Rds")) {
+  gadems$invs <- BiocParallel::bplapply(prom_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$inv.lgaps, file = "gadems.proms.Rds")
+} else {
+  gadems$proms <- readRDS("gadems.proms.Rds")
+}
+```
 
 ## Introns
 
-To do ...
+```{r search_in_introns}
+intron_seqs <- sapply(annots[1:3], GenomicFeatures::intronicParts) |>
+  sapply(getGRseqs) |> SimpleList()
+sapply(intron_seqs, length)
+if (!file.exists("gadems.introns.Rds")) {
+  gadems$introns <- BiocParallel::bplapply(intron_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$inv.lgaps, file = "gadems.introns.Rds")
+} else {
+  gadems$introns <- readRDS("gadems.introns.Rds")
+}
+```
 
 ## Summary
 
