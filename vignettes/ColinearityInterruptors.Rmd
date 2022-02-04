@@ -60,14 +60,19 @@ of interest.
 The best match for chr1 in the Kume assembly is `contig_3_1`.  It maps roughly
 in the 8,000,000 – 13,000,000 region.
 
-```{r Kum_chr1_assembly}
+```{r Kum_chr1_assembly_1}
 bestMatch <- function(gb)
   tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
 
 coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
 
-coa$Oki_Kum |> flagAll() |> plyranges::filter(seqnames(query) == "contig_3_1") |>
-  plyranges::arrange(start(query))
+coa$Oki_Kum |> plotApairOfChrs()
+```
+
+`contig_27_1` is most of chr1's short arm.
+
+```{r Kum_chr1_assembly_2}
+coa$Oki_Kum |> plotApairOfChrs(chrQ = "contig_27_1")
 ```
 
 # Alignments are real (Region of Interest 1)
