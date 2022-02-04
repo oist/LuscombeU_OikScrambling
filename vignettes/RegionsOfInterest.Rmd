@@ -45,6 +45,63 @@ We have collected in a separate vignette (`vignette("ColinearityInterruptors",
 package = "OikScrambling")`) regions of interest that interrupt colinearity in
 same-population alignments such as Oki vs Kum.
 
+The ROIs are not in the order I studied them, because I reorganised the code
+in the meantime.
+
+# ROI1: composite transposon
+
+This was identified and analysed by Martin Frith.  I am just transposing the
+report in Bioconductor's context.
+
+In `contig_27_1` (which is most of chr1's short arm), there is an indel region:
+the aligned regions in the Okinawa genome are directly in contact, but on the
+Kume genome the aligned regions are separated by a 5146-bp gap.
+
+```{r ROI1}
+(ROI1 <- gbs$Oki_Kum |> subsetByOverlaps(GRanges("chr1:3720291-3734643")))
+cleanGaps(ROI1$query) |> as.data.frame()
+```
+
+Interestingly, the unaligned region in Kume contains two repeat elements in
+inverted tandem.
+
+```{r ROI_breaks_pair_align}
+pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
+                  getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = F)) |> reverseComplement(),
+                  type="global") |> writePairwiseAlignments()
+```
+
+<details>
+<summary>Click to see the pairwise alignment between the Kume insert and its
+own reverse-complement.</summary>
+```{r ROI_pair_align}
+pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query)),
+                  getSeq(genomes$Kum, cleanGaps(ROI1$query)) |> reverseComplement(),
+                  type="global")
+```
+</details>
+
+Immediately upstream these repeats, there a tandem octamer `AAGATACG`.  In
+the Okinawan genome, it is present as a single copy.
+
+```{r ROI_breaks_pair_align2}
+pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
+                  getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = F)),
+                  type="global") |> writePairwiseAlignments()
+```
+
+It does not appear to be more frequent in the Okinawan genomes compared to the
+others.
+
+```{r search_for_AAGATACG}
+sapply(genomes, vmatchPattern, pat = "AAGATACG") |> sapply(length)
+```
+
+Questions:
+
+ - How frequent is the inverted pair of repeats that we see?
+ - Is there any hint of functionality for the sequence in the gap?
+
 # Unaligned mapped region: ROI4
 
 Let's check examples of unaligned mapped regions in function of presence of repeats.
