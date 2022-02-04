@@ -129,6 +129,18 @@ if(!file.exists("gadems.inv.lgaps.Rds")) {
 }
 ```
 
+## Inversions
+
+To do...
+
+## Promoters
+
+To do ...
+
+## Introns
+
+To do ...
+
 ## Summary
 
 Number of motifs found
@@ -312,27 +324,6 @@ t.test(letterFrequency(invSeq$Oki_Bar, "AT", as.prob = TRUE), letterFrequency(in
 t.test(letterFrequency(invSeq$Oki_Kum, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Kum, "AT", as.prob = TRUE))
 ```
 
-```{r}
-
-#RGadem positive control: check introns ?
-# set.seed(1664)
-# intr <- sample(intronicParts(tx_OKI), 1000)
-# intr <- BSgenome::getSeq(OKI2018_I69, intr)
-# gadem <- GADEM(intr, verbose=1, genome=OKI2018_I69)
-# > consensus(gadem)
-# [1] "nAAAAwnnwnAAAwn"
-# Also found motifs like rryCAATTbwTkCGmAkyT
-
-
-#RGadem positive control: check promoters ?
-# set.seed(1664)
-# prom <- sample(promoters(tx_OKI), 1000)
-# prom <- BSgenome::getSeq(OKI2018_I69, prom)
-# gadem <- GADEM(prom, verbose=1, genome=OKI2018_I69)
-# consensus(gadem)
-# [1] "nAAAAwwnwnnAAAAwn" "nTTTTCTTyn"       
-# Also found motifs like TTTmAAAA
-```
 
 A palindromic (rAAGCsGCwwmkCGrCTTyn) motif is found in the left gaps.
 
@@ -389,18 +380,6 @@ But a search in Jaspar with either the full motif or its halof did not reveal
 strong hits.  Visual inspection of PRDM9 sequence logos via Google did not show
 similarity either.
 
-### Export rAAGCsGCwwmkCGrCTTyn alignments to a file
-
-```{r pwmHitSequenceExportForGLAM2}
-# gademHitsToBS <- function(gadem, n) {
-#   alignList <- gadem[[n]]@alignList
-#   pwmSeqs <- sapply(alignList, function(align) align@seq)
-#   Biostrings::DNAStringSet(pwmSeqs)
-# }
-# 
-# pwmSeqs <- gademHitsToBS(gadem, 1)
-# writeXStringSet(pwmBS, file="firstGapsGADEMpwm.fasta")
-```
 
 ```
 # writeXStringSet(lgapsSeq_Oki_O, file="firstGaps.fasta")
