@@ -113,6 +113,7 @@ Questions:
 
  - How frequent is the inverted pair of repeats that we see?
  - Is there any hint of functionality for the sequence in the gap?
+ - are the indels fixed in their respective populations?
  
  
 ## How often do we see tandem site duplication in similar indel configurations ?
@@ -146,6 +147,21 @@ alignFlank <- function(gb)
                     type="global") |> writePairwiseAlignments()
 
 alignFlank(gb[1])
+
+alignFlank2 <- function(gb, qGenome=genomes$Kum, n = 6) {
+  # Remove 1-bp padding
+  gb$query <- gb$query -1
+  pairwiseAlignment(getSeq(qGenome, gb$query |> resize(n, fix = "start")),
+                    getSeq(qGenome, gb$query |> flank(n, start = F)),
+                    type="global")
+}
+alignFlank2(gb) |> nedit() |> table()
+
+gb$nedit <- alignFlank2(gb) |> nedit() 
+gb$consensus <- alignFlank2(gb) |> compareStrings()
+
+gb[gb$nedit==0]$consensus |> table() |> sort() |> tail()
+gb[gb$nedit==0]$consensus |> table() |> length()
 
 msAlignFlank <- function(gb, tGenome = genomes$Oki, qGenome=genomes$Kum)
 list(
