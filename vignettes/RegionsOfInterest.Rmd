@@ -77,7 +77,7 @@ own reverse-complement.</summary>
 ```{r ROI_pair_align}
 pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query)),
                   getSeq(genomes$Kum, cleanGaps(ROI1$query)) |> reverseComplement(),
-                  type="global")
+                  type="global") |> writePairwiseAlignments()
 ```
 </details>
 
@@ -88,6 +88,18 @@ the Okinawan genome, it is present as a single copy.
 pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
                   getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = F)),
                   type="global") |> writePairwiseAlignments()
+```
+
+The multiple alignment below shows that a) left and right arms of the Kume alignments
+match the Okinawa genome, and b) there is a tandem site duplication at the break.
+
+```{r ROI_breaks_pair_align2}
+# Note that genome alignment is +/- therefore the order below is counter-intuitive.
+list(
+  kum_right = getSeq(genomes$Kum, ROI1$query[1] |> flank(20, both = T, start = T))[[1]],
+  kum_left  = getSeq(genomes$Kum, ROI1$query[2] |> flank(20, both = T, start = F))[[1]],
+  oki_left  = getSeq(genomes$Oki, ROI1[2] |> flank(20, both = T, start = F))[[1]]
+) |> as("DNAStringSet") |> msa::msaClustalW()
 ```
 
 It does not appear to be more frequent in the Okinawan genomes compared to the
@@ -101,6 +113,47 @@ Questions:
 
  - How frequent is the inverted pair of repeats that we see?
  - Is there any hint of functionality for the sequence in the gap?
+ 
+ 
+## How often do we see tandem site duplication in similar indel configurations ?
+
+The `unalMap` objects contain unaligned regions flanked by colinear regions.
+Let's search for other situations where one of the regions has a width of zero.
+
+Note: _in order to represent zero-width intervals in this object, which would
+be impossible with `GRanges` objects, the unaligned regions were arbitrarly
+added one base of each flanking aligned regions_.
+
+These regions are rare in between-species alignments (at most a few percents),
+and common in within-population alignments (~10 to 20 percents).
+
+Note2: _the numbers would double if I would also inspect the query genome widths_.
+
+```{r search_for_indels_with_TSDs}
+unalMap |> sapply(\(gb) length(gb[width(gb) <= 2]))  # See note above
+round(unalMap |> sapply(\(gb) length(gb[width(gb) <= 2])) / sapply(unalMap, length) * 100 )
+```
+
+Let's inspect within-population alignments first.
+
+```{r search_for_indels_with_TSDs2}
+gb <- unalMap$Oki_Kum |> plyranges::filter(width == 2)
+gb$query |> width() |> summary()
+
+alignFlank <- function(gb)
+  pairwiseAlignment(getSeq(genomes$Kum, gb$query |> flank(20, both = T, start = T)),
+                    getSeq(genomes$Kum, gb$query |> flank(20, both = T, start = F)),
+                    type="global") |> writePairwiseAlignments()
+
+alignFlank(gb[1])
+
+msAlignFlank <- function(gb, tGenome = genomes$Oki, qGenome=genomes$Kum)
+list(
+  kum_left  = getSeq(qGenome, gb$query |> flank(20, both = T, start = T))[[1]],
+  oki_left  = getSeq(tGenome, gb       |> flank(20, both = T, start = F))[[1]],
+  kum_right = getSeq(qGenome, gb$query |> flank(20, both = T, start = F))[[1]]
+) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
+```
 
 # Unaligned mapped region: ROI4
 
