@@ -48,7 +48,9 @@ same-population alignments such as Oki vs Kum.
 The ROIs are not in the order I studied them, because I reorganised the code
 in the meantime.
 
-# ROI1: composite transposon
+# ROI1: composite transposon and tandem site duplication.
+
+## Details on the region
 
 This was identified and analysed by Martin Frith.  I am just transposing the
 report in Bioconductor's context.
@@ -57,13 +59,18 @@ In `contig_27_1` (which is most of chr1's short arm), there is an indel region:
 the aligned regions in the Okinawa genome are directly in contact, but on the
 Kume genome the aligned regions are separated by a 5146-bp gap.
 
+(The regions align on opposite strands, so the plot looks strange if you are
+not familiar with it.)
+
 ```{r ROI1}
 (ROI1 <- gbs$Oki_Kum |> subsetByOverlaps(GRanges("chr1:3720291-3734643")))
+plotApairOfChrs(ROI1)
 cleanGaps(ROI1$query) |> as.data.frame()
 ```
 
 Interestingly, the unaligned region in Kume contains two repeat elements in
-inverted tandem.
+inverted tandem.  You can see them in the alignment below, of the left-side
+boundary of the unaligned region to the reverse-complement of its right side.
 
 ```{r ROI_breaks_pair_align}
 pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
@@ -72,8 +79,8 @@ pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = 
 ```
 
 <details>
-<summary>Click to see the pairwise alignment between the Kume insert and its
-own reverse-complement.</summary>
+<summary>Click here to see the full pairwise alignment between the Kume insert
+and its own reverse-complement.</summary>
 ```{r ROI_pair_align}
 pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query)),
                   getSeq(genomes$Kum, cleanGaps(ROI1$query)) |> reverseComplement(),
@@ -82,7 +89,8 @@ pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query)),
 </details>
 
 Immediately upstream these repeats, there a tandem octamer `AAGATACG`.  In
-the Okinawan genome, it is present as a single copy.
+the Okinawan genome, it is present as a single copy.  You can see it in the
+alignment below, where the right-side boundary was not reverse-complemented.
 
 ```{r ROI_breaks_pair_align2}
 pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
@@ -90,31 +98,24 @@ pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = 
                   type="global") |> writePairwiseAlignments()
 ```
 
-The multiple alignment below shows that a) left and right arms of the Kume alignments
-match the Okinawa genome, and b) there is a tandem site duplication at the break.
+The same can be seen in the multiple alignment below comparising the left and
+right arms of the Kume alignments and their match to the Okinawa genome.
 
 ```{r ROI_breaks_pair_align2}
 # Note that genome alignment is +/- therefore the order below is counter-intuitive.
 list(
   kum_right = getSeq(genomes$Kum, ROI1$query[1] |> flank(20, both = T, start = T))[[1]],
   kum_left  = getSeq(genomes$Kum, ROI1$query[2] |> flank(20, both = T, start = F))[[1]],
-  oki_left  = getSeq(genomes$Oki, ROI1[2] |> flank(20, both = T, start = F))[[1]]
+  oki       = getSeq(genomes$Oki, ROI1[2] |> flank(20, both = T, start = F))[[1]]
 ) |> as("DNAStringSet") |> msa::msaClustalW()
 ```
 
-It does not appear to be more frequent in the Okinawan genomes compared to the
-others.
+The microhomology does not appear to be more frequent in the Okinawan genome
+compared to the others.
 
 ```{r search_for_AAGATACG}
 sapply(genomes, vmatchPattern, pat = "AAGATACG") |> sapply(length)
 ```
-
-Questions:
-
- - How frequent is the inverted pair of repeats that we see?
- - Is there any hint of functionality for the sequence in the gap?
- - are the indels fixed in their respective populations?
- 
  
 ## How often do we see tandem site duplication in similar indel configurations ?
 
@@ -135,7 +136,8 @@ unalMap |> sapply(\(gb) length(gb[width(gb) <= 2]))  # See note above
 round(unalMap |> sapply(\(gb) length(gb[width(gb) <= 2])) / sapply(unalMap, length) * 100 )
 ```
 
-Let's inspect within-population alignments first.
+Let's inspect within-population alignments first.  Here is an example with
+a `CATCTTTG` TSD.
 
 ```{r search_for_indels_with_TSDs2}
 gb <- unalMap$Oki_Kum |> plyranges::filter(width == 2)
@@ -146,15 +148,31 @@ alignFlank <- function(gb)
                     getSeq(genomes$Kum, gb$query |> flank(20, both = T, start = F)),
                     type="global") |> writePairwiseAlignments()
 
-alignFlank(gb[1])
+alignFlank(gb[4])
 
-alignFlank2 <- function(gb, qGenome=genomes$Kum, n = 6) {
+alignFlank2 <- function(gb, qGenome=genomes$Kum, n = 8) {
   # Remove 1-bp padding
   gb$query <- gb$query -1
   pairwiseAlignment(getSeq(qGenome, gb$query |> resize(n, fix = "start")),
                     getSeq(qGenome, gb$query |> flank(n, start = F)),
                     type="global")
 }
+alignFlank2(gb[4])
+
+msAlignFlank <- function(gb, tGenome = genomes$Oki, qGenome=genomes$Kum)
+list(
+  kum_left  = getSeq(qGenome, gb$query |> flank(20, both = T, start = T))[[1]],
+  oki_left  = getSeq(tGenome, gb       |> flank(20, both = T, start = F))[[1]],
+  kum_right = getSeq(qGenome, gb$query |> flank(20, both = T, start = F))[[1]]
+) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
+
+msAlignFlank(gb[4])
+```
+
+Let's count the number of perfect 8-nt matches.  See the variety in their
+sequences: none of them is found more than twice!
+
+```{r search_for_indels_with_TSDs3}
 alignFlank2(gb) |> nedit() |> table()
 
 gb$nedit <- alignFlank2(gb) |> nedit() 
@@ -163,13 +181,16 @@ gb$consensus <- alignFlank2(gb) |> compareStrings()
 gb[gb$nedit==0]$consensus |> table() |> sort() |> tail()
 gb[gb$nedit==0]$consensus |> table() |> length()
 
-msAlignFlank <- function(gb, tGenome = genomes$Oki, qGenome=genomes$Kum)
-list(
-  kum_left  = getSeq(qGenome, gb$query |> flank(20, both = T, start = T))[[1]],
-  oki_left  = getSeq(tGenome, gb       |> flank(20, both = T, start = F))[[1]],
-  kum_right = getSeq(qGenome, gb$query |> flank(20, both = T, start = F))[[1]]
-) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
 ```
+
+## Remaining questions
+
+Questions:
+
+ - How frequent is the inverted pair of repeats that we see?
+ - Is there any hint of functionality for the sequence in the gap?
+ - are the indels fixed in their respective populations?
+ - Am I missing half of the microhomologies because of alignments to negative strands ?
 
 # Unaligned mapped region: ROI4
 
