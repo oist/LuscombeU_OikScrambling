@@ -12,11 +12,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, echo=FALSE}
-knitr::opts_chunk$set(include = FALSE)
-knitr::opts_knit$set(verbose = TRUE)
-```
-
 # Load pacakges and data
 
 See the `vignette("OikScrambling", package = "OikScrambling")` for general
@@ -101,7 +96,7 @@ pairwiseAlignment(getSeq(genomes$Kum, cleanGaps(ROI1$query) |> flank(20, both = 
 The same can be seen in the multiple alignment below comparising the left and
 right arms of the Kume alignments and their match to the Okinawa genome.
 
-```{r ROI_breaks_pair_align2}
+```{r ROI_breaks_pair_align3}
 # Note that genome alignment is +/- therefore the order below is counter-intuitive.
 list(
   kum_right = getSeq(genomes$Kum, ROI1$query[1] |> flank(20, both = T, start = T))[[1]],
