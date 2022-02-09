@@ -1,3 +1,7 @@
+# OikScrambling 0.8.3
+
+* Move some regions of interest in a separate vignette.
+
 # OikScrambling 0.8.2
 
 * Added a new `SegmentMovements` vignette.
