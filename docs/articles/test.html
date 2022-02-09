@@ -129,7 +129,7 @@
 
       
 
-      </header><script src="ColinearityInterruptors_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="test_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Regions interrupting colinearity</h1>
@@ -137,100 +137,23 @@
             
             <h4 data-toc-skip class="date">09 February, 2022</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/ColinearityInterruptors.Rmd" class="external-link"><code>vignettes/ColinearityInterruptors.Rmd</code></a></small>
-      <div class="hidden name"><code>ColinearityInterruptors.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/test.Rmd" class="external-link"><code>vignettes/test.Rmd</code></a></small>
+      <div class="hidden name"><code>test.Rmd</code></div>
 
     </div>
 
     
     
-<div class="section level1">
-<h1 id="load-pacakges-and-data">Load pacakges and data<a class="anchor" aria-label="anchor" href="#load-pacakges-and-data"></a>
-</h1>
-<p>See the <code><a href="../articles/OikScrambling.html">vignette("OikScrambling", package = "OikScrambling")</a></code> for general details on package and data load.</p>
-<p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different <code>GBreaks</code> objects are prepared.</p>
-</div>
-<div class="section level1">
-<h1 id="the-problem">The problem:<a class="anchor" aria-label="anchor" href="#the-problem"></a>
-</h1>
-<p>The plot below shows high colinearity between Oki and Kum, which are from the same species. It also shows that the <code>GenomicBreaks</code> objects are still scattered in small pieces. What is interrupting colinearity?</p>
-<p>In this vignette, we look at a couple of example regions in details. These regions helped me to decide how to process the data in <em>Load Genomic Breaks</em> (<code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> and to decide which analysis to prioritise elsewhere.</p>
-<p>See <code><a href="../articles/RegionsOfInterest.html">vignette("RegionsOfInterest", package = "OikScrambling")</a></code> for other regions of interest.</p>
-</div>
-<div class="section level1">
-<h1 id="aproximate-assembly-of-kumes-chromosome-1-">Aproximate assembly of Kume’s chromosome 1.<a class="anchor" aria-label="anchor" href="#aproximate-assembly-of-kumes-chromosome-1-"></a>
-</h1>
-<p>The best match for chr1 in the Kume assembly is <code>contig_3_1</code>. It maps roughly in the 8,000,000 – 13,000,000 region.</p>
-<p><code>contig_27_1</code> is most of chr1’s short arm.</p>
-</div>
-<div class="section level1">
-<h1 id="alignments-are-real-region-of-interest-1">Alignments are real (Region of Interest 1)<a class="anchor" aria-label="anchor" href="#alignments-are-real-region-of-interest-1"></a>
-</h1>
-<p>When an alignment interrupts colinearity, is it trustable ?</p>
-<p>Let’s check the second alignment pair, mapping 226 bases of <code>contig_3_1</code> to the short arm.</p>
-<p>Is the alignment convincing ?</p>
-<p>Yes, the alignment looks real!</p>
-</div>
-<div class="section level1">
-<h1 id="colinearity-interrupted-by-inversions-and-translocations-region-of-interest-2">Colinearity interrupted by inversions and translocations (Region of Interest 2)<a class="anchor" aria-label="anchor" href="#colinearity-interrupted-by-inversions-and-translocations-region-of-interest-2"></a>
-</h1>
-<p>Let’s look at the area <code>chr1:8080000-12900000</code> covered by <code>contig_3_1</code>. Can we coalesce it once we only keep the paired matches? The answer is no…</p>
-<p>Colinearity appears to be interrupted by many inversions and translocations.</p>
-</div>
-<div class="section level1">
-<h1 id="well-aligned-repeats-are-kept-in-the-one-to-one-graph-region-of-interest-3">Well-aligned repeats are kept in the one-to-one graph (Region of interest 3)<a class="anchor" aria-label="anchor" href="#well-aligned-repeats-are-kept-in-the-one-to-one-graph-region-of-interest-3"></a>
-</h1>
-</div>
-<div class="section level1">
-<h1 id="what-still-interrupts-colinearity-once-repeats-are-ruled-out-roi5">What still interrupts colinearity once repeats are ruled out ? (ROI5)<a class="anchor" aria-label="anchor" href="#what-still-interrupts-colinearity-once-repeats-are-ruled-out-roi5"></a>
-</h1>
-<p>We start with a random region</p>
-<p>Let’s focus on alignments between chr1 and contig_27_1:</p>
-<p>Very short gaps between successive ranges in ROI5</p>
-<p>Can we coalesce better by removing the translocations ?</p>
-<p>This is now implemented in the <code>coa2</code> objects, with a size treshold of 200.</p>
-</div>
-<div class="section level1">
-<h1 id="what-still-interrupts-colinearity-once-translocations-are-removed-roi6">What still interrupts colinearity once translocations are removed ? (ROI6)<a class="anchor" aria-label="anchor" href="#what-still-interrupts-colinearity-once-translocations-are-removed-roi6"></a>
-</h1>
-<p>Inversions …</p>
-</div>
-<div class="section level1">
-<h1 id="filling-inversions-to-better-see-the-rest-roi9">Filling inversions to better see the rest (ROI9)<a class="anchor" aria-label="anchor" href="#filling-inversions-to-better-see-the-rest-roi9"></a>
-</h1>
-<p>We will not fill inversions in objects we analyse, because we do not want to erase their breakpoints.</p>
-</div>
-<div class="section level1">
-<h1 id="roi-10-small-unaligned-inversion-in-oki-kum-alignment">ROI 10: small unaligned inversion in Oki-Kum alignment<a class="anchor" aria-label="anchor" href="#roi-10-small-unaligned-inversion-in-oki-kum-alignment"></a>
-</h1>
-<div class="section level2">
-<h2 id="the-small-unaligned-inversion">The small unaligned inversion<a class="anchor" aria-label="anchor" href="#the-small-unaligned-inversion"></a>
-</h2>
-<p>Martin reported a small unaligned inversion at PAR:80769-81032 in the Oki – Kum alignment (version 3). Note that it will not be visible on the plot if this vignette is rebuilt with an alignment updated to include these inversions.</p>
-<p>Interestingly, this small inversion is flanked by an inverted repeat.</p>
-<p>This sequence matches <code>MITE_oki2018_i69_4_20065_S1_MITE#DNA/MITE</code> in Sasha’s repeat annotation.</p>
-</div>
-<div class="section level2">
-<h2 id="other-interesting-things-in-the-area">Other interesting things in the area<a class="anchor" aria-label="anchor" href="#other-interesting-things-in-the-area"></a>
-</h2>
-<p>Expanding the area broader, there is this interesting pattern where there is only one gap on the <em>Oki</em> side and two gaps on the <em>Kum</em> side. This is because the alignments on the <em>Oki</em> side are directly contacting each other.</p>
-<p>Exemplar from the Okinawa genome (found by BLASTing the sequence output by <code>getSeq</code> above).</p>
-<pre><code>&gt;RepeatInsertion
-AAgggggggCGGGCGGCCACGGTACAAAAGTGGAATTTGTACCGCGGGTACAAATTTTGT
-ACCGCCGGTACAAAAAATCGCAATTGTTTTGACAATAAAAACCGATTTCTACCCATTATA
-ATGCTCACTTTTGAACAGAACTCCACCTCAGCTATACCAGTAAGGAGTTTCCATCAATTC
-TAGCGCGAAGCGCACACTTTTTCCTTGATTCTATTTTTGTCTTGTACCGGCGGTACAAAA
-ATTTTTGTACCGGCGTTACAAATTTGTACCGCCGTTACAAATTTGTACCGTCGCCGCCCT
-ACACCC</code></pre>
-</div>
-</div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>include <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="st">"hello"</span></code></pre></div>
+<pre><code><span class="co">## [1] "hello"</span></code></pre>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 

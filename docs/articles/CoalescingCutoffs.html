@@ -89,6 +89,9 @@
       <a href="../articles/RegionWidths.html">Width of the aligned and mapped regions.</a>
     </li>
     <li>
+      <a href="../articles/RegionsOfInterest.html">Regions interrupting colinearity</a>
+    </li>
+    <li>
       <a href="../articles/RepeatRegions.html">Repeat regions</a>
     </li>
     <li>
@@ -99,6 +102,9 @@
     </li>
     <li>
       <a href="../articles/Translocations.html">Translocations</a>
+    </li>
+    <li>
+      <a href="../articles/test.html">Regions interrupting colinearity</a>
     </li>
   </ul>
 </li>
@@ -129,7 +135,7 @@
       <h1 data-toc-skip>Modifying coalescent cutoffs</h1>
                         <h4 data-toc-skip class="author">Michael Mansfield</h4>
             
-            <h4 data-toc-skip class="date">27 January, 2022</h4>
+            <h4 data-toc-skip class="date">09 February, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/CoalescingCutoffs.Rmd" class="external-link"><code>vignettes/CoalescingCutoffs.Rmd</code></a></small>
       <div class="hidden name"><code>CoalescingCutoffs.Rmd</code></div>
@@ -332,17 +338,17 @@
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Number of segments</span>
 <span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="va">cutoff_coas_tables</span><span class="op">$</span><span class="va">NumSegments</span>, col<span class="op">=</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">magma</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, cluster_cols<span class="op">=</span><span class="cn">F</span>, cluster_row<span class="op">=</span><span class="cn">F</span>, gaps_col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>,<span class="fl">23</span><span class="op">)</span>, angle_col <span class="op">=</span> <span class="fl">90</span>, main<span class="op">=</span><span class="st">'Number of alignments (uncoalesced) or syntenic regions (coalesced)'</span>, display_numbers<span class="op">=</span><span class="cn">T</span>, number_color<span class="op">=</span><span class="st">'#d9d9d9'</span>, number_format<span class="op">=</span><span class="st">"%.0f"</span>, fontsize_number<span class="op">=</span><span class="fl">6</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_numSegs-1.svg" width="768"> ##### Total aligned</p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_numSegs-1.svg" width="768"> ##### Total aligned</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="va">cutoff_coas_tables</span><span class="op">$</span><span class="va">TotalAligned</span>, col<span class="op">=</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">magma</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, cluster_cols<span class="op">=</span><span class="cn">F</span>, gaps_col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>,<span class="fl">23</span><span class="op">)</span>, cluster_row<span class="op">=</span><span class="cn">F</span>, angle_col <span class="op">=</span> <span class="fl">90</span>, main<span class="op">=</span><span class="st">'Sum of all alignment widths (Mbp)'</span>, display_numbers<span class="op">=</span><span class="cn">T</span>, number_color<span class="op">=</span><span class="st">'#d9d9d9'</span>, number_format<span class="op">=</span><span class="st">"%.0f"</span>, fontsize_number<span class="op">=</span><span class="fl">6</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_totAli-1.svg" width="768"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_totAli-1.svg" width="768"></p>
 </div>
 <div class="section level5">
 <h5 id="largest-segment">Largest segment<a class="anchor" aria-label="anchor" href="#largest-segment"></a>
 </h5>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="va">cutoff_coas_tables</span><span class="op">$</span><span class="va">LargestSegment</span>, col<span class="op">=</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">magma</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, cluster_cols<span class="op">=</span><span class="cn">F</span>, gaps_col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>,<span class="fl">23</span><span class="op">)</span>, cluster_row<span class="op">=</span><span class="cn">F</span>, angle_col <span class="op">=</span> <span class="fl">90</span>, main<span class="op">=</span><span class="st">'Size of largest segment (Mbp)'</span>, display_numbers<span class="op">=</span><span class="cn">T</span>, number_color<span class="op">=</span><span class="st">'#d9d9d9'</span>, number_format<span class="op">=</span><span class="st">"%.0f"</span>, fontsize_number<span class="op">=</span><span class="fl">6</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_lrgstSeg-1.svg" width="768"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_lrgstSeg-1.svg" width="768"></p>
 </div>
 <div class="section level5">
 <h5 id="percent-of-genome-covered-by-alignments">Percent of genome covered by alignments<a class="anchor" aria-label="anchor" href="#percent-of-genome-covered-by-alignments"></a>
@@ -350,7 +356,7 @@
 <p>Note the denominator here is the mean of the query and target genome sizes.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="va">cutoff_coas_tables</span><span class="op">$</span><span class="va">PercentGenomeCovered</span>, col<span class="op">=</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">magma</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, cluster_cols<span class="op">=</span><span class="cn">F</span>, gaps_col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>,<span class="fl">23</span><span class="op">)</span>, cluster_row<span class="op">=</span><span class="cn">F</span>, angle_col <span class="op">=</span> <span class="fl">90</span>, main<span class="op">=</span><span class="st">'Percentage of query/target genomes covered (%)'</span>, display_numbers<span class="op">=</span><span class="cn">T</span>, number_color<span class="op">=</span><span class="st">'#d9d9d9'</span>, number_format<span class="op">=</span><span class="st">"%.0f"</span>, fontsize_number<span class="op">=</span><span class="fl">6</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_pctGen-1.svg" width="768"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_pctGen-1.svg" width="768"></p>
 </div>
 <div class="section level5">
 <h5 id="percent-of-total-aligned-positions-represented-in-alignments">Percent of total aligned positions represented in alignments<a class="anchor" aria-label="anchor" href="#percent-of-total-aligned-positions-represented-in-alignments"></a>
@@ -358,7 +364,7 @@
 <p>Note the denominator here is the mean of the query and target genome sizes.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="va">cutoff_coas_tables</span><span class="op">$</span><span class="va">PercentOriginalAlignment</span>, col<span class="op">=</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">magma</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, cluster_cols<span class="op">=</span><span class="cn">F</span>, gaps_col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>,<span class="fl">23</span><span class="op">)</span>, cluster_row<span class="op">=</span><span class="cn">F</span>, angle_col <span class="op">=</span> <span class="fl">90</span>, main<span class="op">=</span><span class="st">'Percentage of originally-aligned positions covered (%)'</span>, display_numbers<span class="op">=</span><span class="cn">T</span>, number_color<span class="op">=</span><span class="st">'#d9d9d9'</span>, number_format<span class="op">=</span><span class="st">"%.0f"</span>, fontsize_number<span class="op">=</span><span class="fl">6</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_pctOrig-1.svg" width="768"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_pctOrig-1.svg" width="768"></p>
 </div>
 </div>
 <div class="section level3">
@@ -367,20 +373,20 @@
 <p>Now let’s make some chromosome plots. Here are the original Okinawa-Osaka alignments, with no coalescing.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">uncoalesced</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">'chr1'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_1-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_1-1.svg" width="576"></p>
 <p>You can see many details here, including the huge number of small alignments. Many of these are removed by coalescing:</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_0</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">'chr1'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_2-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_2-1.svg" width="576"></p>
 <p>However, many small alignments persist after coalescing. As seen above, applying length filters to remove small alignments can drastically reduce the number of segments - or in other words, greatly increase the contiguity of the coalesced alignments.</p>
 <p>Here is the result of removing alignments below 250bp - a fairly conservative threshold:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_250</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">'chr1'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_3-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_3-1.svg" width="576"></p>
 <p>And if we go too far, we lose too much information for it to be useful:</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_10000</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">'chr1'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_4-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_4-1.svg" width="576"></p>
 <div class="section level4">
 <h4 id="using-maximal-coverage-of-querytarget-genomes-as-the-selector">Using “maximal coverage of query/target genomes” as the selector<a class="anchor" aria-label="anchor" href="#using-maximal-coverage-of-querytarget-genomes-as-the-selector"></a>
 </h4>
@@ -390,39 +396,39 @@
 </h6>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_250</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">'chr1'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_5-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_5-1.svg" width="576"></p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_250</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">'chr2'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_6-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_6-1.svg" width="576"></p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_250</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">'PAR'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_7-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_7-1.svg" width="576"></p>
 </div>
 <div class="section level6">
 <h6 id="okinawa-barcelona">Okinawa-Barcelona<a class="anchor" aria-label="anchor" href="#okinawa-barcelona"></a>
 </h6>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_100</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">'chr1'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_8-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_8-1.svg" width="576"></p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_100</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">'chr2'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_9-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_9-1.svg" width="576"></p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_100</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">'PAR'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_10-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_10-1.svg" width="576"></p>
 </div>
 <div class="section level6">
 <h6 id="osaka-barcelona">Osaka-Barcelona<a class="anchor" aria-label="anchor" href="#osaka-barcelona"></a>
 </h6>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_250</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">'Chr1'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_11-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_11-1.svg" width="576"></p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_250</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">'Chr2'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_12-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_12-1.svg" width="576"></p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_250</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">'PAR'</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_13-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_13-1.svg" width="576"></p>
 </div>
 <div class="section level6">
 <h6 id="okinawa-kume">Okinawa-Kume<a class="anchor" aria-label="anchor" href="#okinawa-kume"></a>
@@ -470,7 +476,7 @@
 <span class="va">x</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/mergeSeqLevels.html" class="external-link">mergeSeqLevels</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span>, <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contig_27_1"</span>, <span class="st">"contig_90_1"</span>, <span class="st">"contig_3_1"</span>, <span class="st">"contig_88_1"</span><span class="op">)</span>, <span class="st">"new_scaffold"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">'chr1'</span>, dna_seg_scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_14-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_14-1.svg" width="576"></p>
 <p>Note that when you try to increase this further, you begin losing many regions:</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">cutoff_coas</span><span class="op">$</span><span class="va">coa_minWidth_10000</span><span class="op">$</span><span class="va">Oki_Kum</span>
@@ -479,7 +485,7 @@
 <span class="va">x</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/mergeSeqLevels.html" class="external-link">mergeSeqLevels</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span>, <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contig_27_1"</span>, <span class="st">"contig_90_1"</span>, <span class="st">"contig_3_1"</span>, <span class="st">"contig_88_1"</span><span class="op">)</span>, <span class="st">"new_scaffold"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">'chr1'</span>, dna_seg_scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_15-1.svg" width="576"></p>
+<p><img src="../docs/articles/CoalescingCutoffs_files/figure-html/coa_cutoff_chrPlot_15-1.svg" width="576"></p>
 </div>
 </div>
 </div>
