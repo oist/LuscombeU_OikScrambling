@@ -1,3 +1,9 @@
+# OikScrambling 1.0.0
+
+* Major change in the BSgenome packages, needing the removal of the old ones
+  and the recomputation of the data.  The new packages allow to much easier
+  link the GBreaks objects to their genome sequence or annotations.
+
 # OikScrambling 0.8.3
 
 * Move some regions of interest in a separate vignette.
