@@ -29,10 +29,10 @@ different objects are prepared.
 library('OikScrambling')   |> suppressPackageStartupMessages()
 library('GenomicFeatures') |> suppressPackageStartupMessages()
 library('heatmaps')        |> suppressPackageStartupMessages()
-genomes     <- OikScrambling:::loadAllGenomes()
+genomes     <- OikScrambling:::loadAllGenomes(compat = F)
 transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings()
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
-reps        <- OikScrambling:::loadAllRepeats()
+reps        <- OikScrambling:::loadAllRepeats(compat = F)
 load("BreakPoints.Rdata")
 requireNamespace("rGADEM")    |> suppressPackageStartupMessages()
 requireNamespace("ggseqlogo") |> suppressPackageStartupMessages()
@@ -338,9 +338,9 @@ current_GB_aln   |> width() |> summary()
 current_GB_unal  |> width() |> summary()
 current_GB_syn   |> width() |> summary()
 
-hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$Oki)
-hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$Oki)
-hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$Oki)
+hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$OKI2018.I69)
+hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$OKI2018.I69)
+hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$OKI2018.I69)
 
 rbind(
   hmListAln  |> prepareGGFreqPlot("01_narrow"),
@@ -411,7 +411,7 @@ gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 pwm <- gadems.invLeftGap$Oki_Osa[[1]]
 pwm@consensus
 # pwmHits <- matchPWM(pwm = sapply(pwm@alignList, \(x) x@seq) |> as("DNAStringSet") |> PWM(), genomes$Oki) # Gives different scores...
-pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$Oki) |> suppressWarnings()
+pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$OKI2018.I69) |> suppressWarnings()
 # Suppressing warnings like:
 # Warning messages:
 # 1: In .Call2("XString_match_PWM", pwm, subject, min.score, count.only,  :
