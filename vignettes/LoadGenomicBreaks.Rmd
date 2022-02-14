@@ -437,7 +437,7 @@ To check that we really removed the small ones as intented.
 tra2 <- BiocParallel::bplapply(coa2, traGaps) |> as("SimpleList")
 
 tra2[Oik_Oik] <- BiocParallel::bplapply(tra2[Oik_Oik], flagLongShort_, longShort)
-tra2[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(tra2[Oik_Oik], reps)
+tra2[Oik_Oik] <- annotateWithReps(tra2[Oik_Oik], reps)
 tra2[Oik_Oik] <- annotateWithTranscripts(tra2[Oik_Oik], transcripts)
 
 tra2 <- sapply(tra2, flagAll) |> SimpleList()
