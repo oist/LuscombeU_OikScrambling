@@ -48,6 +48,81 @@ target      …──────────━━━━━              ──
 
 ```
 
+# Service functions
+
+## Align breakpoints
+
+```
+pat          ++++
+range  --------==========----------
+sub                    ++++             (or ---- if rev = F)
+
+```
+
+```{r service_function_alignBreakpoints}
+alignBreakPoints <- function(gr, n = 20, reverseComplement = FALSE) {
+  if (isFALSE(reverseComplement)) reverseComplement <- identity
+  pairwiseAlignment(getSeq(gr |> flank(n, both = T, start = T)),
+                    getSeq(gr |> flank(n, both = T, start = F)) |> reverseComplement(),
+                    type="global")
+}
+```
+
+## Align ends
+
+```
+pat            ++++
+range  --------==========----------
+sub                  ++++             (or ---- if rev = F)
+
+```
+
+```{r service_function_alignEnds}
+alignEnds <- function(gr, n = 20, reverseComplement = FALSE) {
+  if (isFALSE(reverseComplement)) reverseComplement <- identity
+  pairwiseAlignment(getSeq(gr |> resize(n, fix = "start")),
+                    getSeq(gr |> resize(n, fix = "end")) |> reverseComplement(),
+                    type="global")
+}
+```
+
+## Search for TSDs
+
+```
+pat            +
+range  --------==========----------
+sub                      +         
+```
+
+```{r service_function_alignEnds}
+searchForTSDs <- function(gr, n = 8) {
+  # Remove 1-bp padding
+  gr <- gr -1
+  pairwiseAlignment(getSeq(gr |> resize(n, fix = "start")),
+                    getSeq(gr |>  flank(n, start = F)),
+                    type="global")
+}
+```
+
+## Align indels
+
+```
+                          ++++          ++++
+query       …──────────────────────────────────────────…
+target      …───────────────              ─────────────…
+                          ++..............++
+```
+
+```{r service_function_alignInDel}
+alignInDel <- function(gb) {
+  list(
+    q_l = getSeq(gb$query[1] |> flank(20, both = T, start = T))[[1]],
+    trg = getSeq(gb[1]       |> flank(20, both = T, start = F))[[1]],
+    q_r = getSeq(gb$query[2] |> flank(20, both = T, start = F))[[1]]
+  ) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
+}
+```
+
 # ROI1: composite transposon and tandem site duplication.
 
 ## Details on the region
@@ -63,6 +138,9 @@ gap.
 (The regions align on opposite strands, so the plot looks strange if you are
 not familiar with it.)
 
+ROI1 is represented by a `GBreaks` object of lenght 2.  The Kume-specific
+sequence can be obtained with the `cleanGaps` function.
+
 ```{r ROI1}
 (ROI1 <- gbs$Oki_Kum |> subsetByOverlaps(GRanges("chr1:3720291-3734643")))
 plotApairOfChrs(ROI1)
@@ -74,9 +152,7 @@ inverted tandem.  You can see them in the alignment below, of the left-side
 boundary of the unaligned region to the reverse-complement of its right side.
 
 ```{r ROI_breaks_pair_align}
-pairwiseAlignment(getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
-                  getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = F)) |> reverseComplement(),
-                  type="global") |> writePairwiseAlignments()
+ROI1$query |> cleanGaps() |> alignBreakPoints(30, rev=TRUE)
 ```
 
 <details>
@@ -94,9 +170,7 @@ the Okinawan genome, it is present as a single copy.  You can see it in the
 alignment below, where the right-side boundary was not reverse-complemented.
 
 ```{r ROI_breaks_pair_align2}
-pairwiseAlignment(getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
-                  getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = F)),
-                  type="global") |> writePairwiseAlignments()
+ROI1$query |> cleanGaps() |> alignBreakPoints(30, rev=FALSE)
 ```
 
 The same can be seen in the multiple alignment below comparising the left and
@@ -128,43 +202,31 @@ be impossible with `GRanges` objects, the unaligned regions were arbitrarly
 added one base of each flanking aligned regions_.
 
 These regions are rare in between-species alignments (at most a few percents),
-and common in within-population alignments (~10 to 20 percents).
-
-Note2: _the numbers would double if I would also inspect the query genome widths_.
+and common in within-population alignments (14–28 percents).
 
 ```{r search_for_indels_with_TSDs}
-unalMap |> sapply(\(gb) length(gb[width(gb) <= 2]))  # See note above
-round(unalMap |> sapply(\(gb) length(gb[width(gb) <= 2])) / sapply(unalMap, length) * 100 )
+isIndel <- \(gb) width(gb) <= 2 | width(gb$query) <= 2
+unalMap |> sapply(\(gb) length(gb[isIndel(gb)]))
+round(unalMap |> sapply(\(gb) length(gb[isIndel(gb)])) / sapply(unalMap, length) * 100 )
 ```
 
-Let's inspect within-population alignments first.  Here is an example with
-a `CATCTTTG` TSD.
+Let's inspect within-population alignments first, considering only cases where
+the indel region is on the _query_ genome.  Here is an example with a `CATCTTTG`
+TSD.
 
 ```{r search_for_indels_with_TSDs2}
 gb <- unalMap$Oki_Kum |> plyranges::filter(width == 2)
 gb$query |> width() |> summary()
 
-alignFlank <- function(gb)
-  pairwiseAlignment(getSeq(gb$query |> flank(20, both = T, start = T)),
-                    getSeq(gb$query |> flank(20, both = T, start = F)),
-                    type="global") |> writePairwiseAlignments()
-
-alignFlank(gb[4])
-
-alignFlank2 <- function(gb, n = 8) {
-  # Remove 1-bp padding
-  gb$query <- gb$query -1
-  pairwiseAlignment(getSeq(gb$query |> resize(n, fix = "start")),
-                    getSeq(gb$query |> flank(n, start = F)),
-                    type="global")
-}
-alignFlank2(gb[4])
+alignBreakPoints(gb$query[4])
+searchForTSDs(gb$query[4] |> shift(1))
+alignEnds(gb$query[4], 40)
 
 msAlignFlank <- function(gb)
 list(
-  kum_left  = getSeq(gb$query |> flank(20, both = T, start = T))[[1]],
-  oki_left  = getSeq(gb       |> flank(20, both = T, start = F))[[1]],
-  kum_right = getSeq(gb$query |> flank(20, both = T, start = F))[[1]]
+  query_left  = getSeq(gb$query |> flank(20, both = T, start = T))[[1]],
+  target      = getSeq(gb       |> flank(20, both = T, start = F))[[1]],
+  query_right = getSeq(gb$query |> flank(20, both = T, start = F))[[1]]
 ) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
 
 msAlignFlank(gb[4])
@@ -174,21 +236,22 @@ Let's count the number of perfect 8-nt matches.  See the variety in their
 sequences: none of them is found more than twice!
 
 ```{r search_for_indels_with_TSDs3}
-alignFlank2(gb) |> nedit() |> table()
+searchForTSDs(gb$query) |> nedit() |> table()
 
-gb$nedit <- alignFlank2(gb) |> nedit() 
-gb$consensus <- alignFlank2(gb) |> compareStrings()
+gb$nedit <- searchForTSDs(gb$query) |> nedit() 
+gb$consensus <- searchForTSDs(gb$query) |> compareStrings()
 
 gb[gb$nedit==0]$consensus |> table() |> sort() |> tail()
 gb[gb$nedit==0]$consensus |> table() |> length()
-
 ```
+
+## How frequent is the inverted pair of repeats that we see?
+
 
 ## Remaining questions
 
 Questions:
 
- - How frequent is the inverted pair of repeats that we see?
  - Is there any hint of functionality for the sequence in the gap?
  - are the indels fixed in their respective populations?
  - Am I missing half of the microhomologies because of alignments to negative strands ?
