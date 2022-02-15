@@ -18,8 +18,8 @@ different objects are prepared.
 
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
+(genomes <- OikScrambling:::loadAllGenomes(compat = F))
+(transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings())
 (load("BreakPoints.Rdata"))
 ```
 
@@ -71,29 +71,32 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOG
   sort(gb)
 }
 
+flagLongShort_ <- function(gr, annot) {
+  genome <- gr |> genome() |> unique()
+  flagLongShort(gr, annot[[genome]])
+}
+
 orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
   orthoPairs <- SimpleList()
-  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Oki, transcripts$Osa, treeName, HOGs)
-  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Oki, transcripts$Bar, treeName, HOGs)
-  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$Oki, transcripts$Kum, treeName, HOGs)
-  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$Oki, transcripts$Aom, treeName, HOGs)
-  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Oki, transcripts$Nor, treeName, HOGs)
+  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1",   transcripts$OKI2018.I69, transcripts$OSKA2016v1.9, treeName, HOGs)
+  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$OKI2018.I69, transcripts$Bar2.p4, treeName, HOGs)
+  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$OKI2018.I69, transcripts$KUM.M3.7f, treeName, HOGs)
+  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$OKI2018.I69, transcripts$AOM.5.5f, treeName, HOGs)
+  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$OKI2018.I69, transcripts$OdB3, treeName, HOGs)
   
-  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Osa, transcripts$Bar, treeName, HOGs)
-  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Osa, transcripts$Oki, treeName, HOGs)
-  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Osa, transcripts$Kum, treeName, HOGs)
-  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Osa, transcripts$Aom, treeName, HOGs)
-  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Osa, transcripts$Nor, treeName, HOGs)
+  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$OSKA2016v1.9, transcripts$Bar2.p4, treeName, HOGs)
+  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$OSKA2016v1.9, transcripts$OKI2018.I69, treeName, HOGs)
+  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$OSKA2016v1.9, transcripts$KUM.M3.7f, treeName, HOGs)
+  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$OSKA2016v1.9, transcripts$AOM.5.5f, treeName, HOGs)
+  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$OSKA2016v1.9, transcripts$OdB3, treeName, HOGs)
   
-  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar, transcripts$Osa, treeName, HOGs)
-  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar, transcripts$Oki, treeName, HOGs)
-  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar, transcripts$Kum, treeName, HOGs)
-  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar, transcripts$Aom, treeName, HOGs)
-  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar, transcripts$Nor, treeName, HOGs)
+  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar2.p4, transcripts$OSKA2016v1.9, treeName, HOGs)
+  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar2.p4, transcripts$OKI2018.I69, treeName, HOGs)
+  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar2.p4, transcripts$KUM.M3.7f, treeName, HOGs)
+  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar2.p4, transcripts$AOM.5.5f, treeName, HOGs)
+  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar2.p4, transcripts$OdB3, treeName, HOGs)
   
-  orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
-  orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
-  orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
+  orthoPairs <- sapply(orthoPairs,  flagLongShort_, longShort)
   
   orthoPairs
 }
@@ -122,8 +125,8 @@ Problem: some annotations overlap
 ---------------------------------
 
 ```{r fix_Bar_Osk}
-transcripts$Bar |> length()
-transcripts$Bar |> reduce(min = 0) |> length()
+transcripts$Bar2.p4 |> length()
+transcripts$Bar2.p4 |> reduce(min = 0) |> length()
 
 flagOverlaps <- function(gr) {
   # Find overlaps
@@ -134,7 +137,7 @@ flagOverlaps <- function(gr) {
   seq_along(gr) %in% idx
 }
 
-transcripts$Bar[flagOverlaps(transcripts$Bar)]
+transcripts$Bar2.p4[flagOverlaps(transcripts$Bar2.p4)]
 
 # Show examples
 orthoPairs$Oki_Osa[flagOverlaps(orthoPairs$Oki_Osa)]
@@ -192,15 +195,11 @@ coalOrtho <- function(gb) {
 
 orthoBlocks <- sapply(orthoPairsFiltered[1:15], coalOrtho) |> SimpleList()
 orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
-orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
-orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
-orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
+orthoBlocks[ 1:15 ] <- sapply(orthoBlocks[ 1:15 ],  flagLongShort_, longShort)
 
 orthoBlocks_core <- sapply(orthoPairsFiltered_core[1:15], coalOrtho) |> SimpleList()
 orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
-orthoBlocks_core[ 1:5 ] <- sapply(orthoBlocks_core[ 1:5 ],  flagLongShort, longShort$Oki)
-orthoBlocks_core[ 6:10] <- sapply(orthoBlocks_core[ 6:10],  flagLongShort, longShort$Osa)
-orthoBlocks_core[11:15] <- sapply(orthoBlocks_core[11:15],  flagLongShort, longShort$Bar)
+orthoBlocks_core[ 1:15 ] <- sapply(orthoBlocks_core[ 1:15 ],  flagLongShort_, longShort)
 
 sapply(orthoBlocks, length)
 sapply(orthoBlocks_core, length)
@@ -394,7 +393,7 @@ subsetByOverlaps(coa$Oki_Osa, Hox4_4e4) |> plotApairOfChrs("chr2", xlim = gb2xli
 subsetByOverlaps(coa$Oki_Osa, Hox4_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_1e5))
 
 ## Genes
-Hox4_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox4_4e4 |> range())
+Hox4_4e4.genes <- transcripts$OKI2018.I69 |> subsetByOverlaps(Hox4_4e4 |> range())
 mids <- Hox4_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
 text <- Hox4_4e4.genes$tx_name |> as.character()
 annot <- genoPlotR::annotation(x1=start(Hox4_4e4.genes), x2=end(Hox4_4e4.genes), text=text, rot=30)
@@ -421,7 +420,7 @@ subsetByOverlaps(coa$Oki_Osa, Hox1_4e4) |> plotApairOfChrs("chr2", xlim = gb2xli
 subsetByOverlaps(coa$Oki_Osa, Hox1_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_1e5))
 
 ## Genes
-Hox1_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox1_4e4 |> range())
+Hox1_4e4.genes <- transcripts$OKI2018.I69 |> subsetByOverlaps(Hox1_4e4 |> range())
 mids <- Hox1_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
 text <- Hox1_4e4.genes$tx_name |> as.character()
 annot <- genoPlotR::annotation(x1=start(Hox1_4e4.genes), x2=end(Hox1_4e4.genes), text=text, rot=30)

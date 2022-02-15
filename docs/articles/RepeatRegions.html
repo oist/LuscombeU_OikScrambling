@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
@@ -53,6 +53,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/CNEs.html">Conserved non-coding elements</a>
+    </li>
+    <li>
       <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
     </li>
     <li>
@@ -86,10 +89,16 @@
       <a href="../articles/RegionWidths.html">Width of the aligned and mapped regions.</a>
     </li>
     <li>
+      <a href="../articles/RegionsOfInterest.html">Regions of interest</a>
+    </li>
+    <li>
       <a href="../articles/RepeatRegions.html">Repeat regions</a>
     </li>
     <li>
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
+    </li>
+    <li>
+      <a href="../articles/TFBS.html">Transcription factor binding sites</a>
     </li>
     <li>
       <a href="../articles/Translocations.html">Translocations</a>
@@ -123,7 +132,7 @@
       <h1 data-toc-skip>Repeat regions</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">25 January, 2022</h4>
+            <h4 data-toc-skip class="date">15 February, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/RepeatRegions.Rmd" class="external-link"><code>vignettes/RepeatRegions.Rmd</code></a></small>
       <div class="hidden name"><code>RepeatRegions.Rmd</code></div>
@@ -545,7 +554,7 @@
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reps.reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">reduce</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co"># They are short.</span>
-<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps.reduced</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps.reduced</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/CNEr/man/Axt-util.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                Oki       Osa        Bar        Kum        Aom        Nor</span>
 <span class="co">## Min.       15.0000    9.0000    12.0000    13.0000    11.0000    11.0000</span>
 <span class="co">## 1st Qu.    58.0000   66.0000    57.0000    59.0000    67.0000    63.0000</span>

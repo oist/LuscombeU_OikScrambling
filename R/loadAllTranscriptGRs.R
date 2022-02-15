@@ -6,10 +6,13 @@
 #' @author Charles Plessy
 #' @author Michael Mansfield
 #'
+#' @param compat Set to TRUE to keep the old names.  This option will be removed
+#' when the migration will be complete.
+#'
 #' @returns Returns a [`SimpleList`] of `GRanges` objects representing the
 #' annotations of the genomes we study.
 
-loadAllTranscriptsGR <- function() {
+loadAllTranscriptsGR <- function(compat = TRUE) {
   genomes <- OikScrambling:::loadAllGenomes()
   # Load TxDB annotations
   annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings()
@@ -29,5 +32,9 @@ loadAllTranscriptsGR <- function() {
   })
   # Give transcript names to the rows
   transcripts <- sapply(transcripts, \(x) {names(x) <- x$tx_name ; x}) |> SimpleList()
+
+  if(isFALSE(compat))
+    names(transcripts) <- c("OKI2018.I69", "OSKA2016v1.9", "Bar2.p4", "KUM.M3.7f", "AOM.5.5f", "OdB3", "Ply", "Ros")
+
   transcripts
 }

@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
@@ -53,6 +53,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/CNEs.html">Conserved non-coding elements</a>
+    </li>
+    <li>
       <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
     </li>
     <li>
@@ -86,10 +89,16 @@
       <a href="../articles/RegionWidths.html">Width of the aligned and mapped regions.</a>
     </li>
     <li>
+      <a href="../articles/RegionsOfInterest.html">Regions of interest</a>
+    </li>
+    <li>
       <a href="../articles/RepeatRegions.html">Repeat regions</a>
     </li>
     <li>
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
+    </li>
+    <li>
+      <a href="../articles/TFBS.html">Transcription factor binding sites</a>
     </li>
     <li>
       <a href="../articles/Translocations.html">Translocations</a>
@@ -124,7 +133,7 @@
                         <h4 data-toc-skip class="author">Charlotte West</h4>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">25 January, 2022</h4>
+            <h4 data-toc-skip class="date">15 February, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/OikScrambling.Rmd" class="external-link"><code>vignettes/OikScrambling.Rmd</code></a></small>
       <div class="hidden name"><code>OikScrambling.Rmd</code></div>
@@ -199,18 +208,24 @@
 <p>The accessory function <code>OikScrambling:::loadAllGenomes()</code> attaches <code>BSgenome</code> packages in the session and outputs a <code>SimpleList</code> containing references to the <code>BSgenome</code> objects for convenience, such as easy looping, and tab-completion to show the available objects.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="va"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span></code></pre></div>
-<pre><code><span class="co">## function () </span>
+<pre><code><span class="co">## function (compat = TRUE) </span>
 <span class="co">## {</span>
-<span class="co">##     library("BSgenome.Odioica.local.OKI2018.I69")</span>
-<span class="co">##     library("BSgenome.Odioica.local.OSKA2016v1.9")</span>
-<span class="co">##     library("BSgenome.Odioica.local.Bar2.p4")</span>
-<span class="co">##     library("BSgenome.Odioica.local.KUM.M3")</span>
-<span class="co">##     library("BSgenome.Odioica.local.AOM.5")</span>
-<span class="co">##     library("BSgenome.Odioica.local.Odioica.reference.v3.0")</span>
-<span class="co">##     S4Vectors::SimpleList(Oki = OKI2018_I69, Osa = OSKA2016v1.9, </span>
-<span class="co">##         Bar = Bar2_p4, Kum = KUM_M3, Aom = AOM_5, Nor = OdB3)</span>
+<span class="co">##     suppressPackageStartupMessages({</span>
+<span class="co">##         library("BSgenome.Oidioi.OIST.OKI2018.I69")</span>
+<span class="co">##         library("BSgenome.Oidioi.OIST.OSKA2016v1.9")</span>
+<span class="co">##         library("BSgenome.Oidioi.OIST.Bar2.p4")</span>
+<span class="co">##         library("BSgenome.Oidioi.OIST.KUM.M3.7f")</span>
+<span class="co">##         library("BSgenome.Oidioi.OIST.AOM.5.5f")</span>
+<span class="co">##         library("BSgenome.Oidioi.genoscope.OdB3")</span>
+<span class="co">##     })</span>
+<span class="co">##     genomes &lt;- SimpleList(sapply(c("OKI2018.I69", "OSKA2016v1.9", </span>
+<span class="co">##         "Bar2.p4", "KUM.M3.7f", "AOM.5.5f", "OdB3"), BSgenome::getBSgenome))</span>
+<span class="co">##     if (isTRUE(compat)) </span>
+<span class="co">##         names(genomes) &lt;- c("Oki", "Osa", "Bar", "Kum", "Aom", </span>
+<span class="co">##             "Nor")</span>
+<span class="co">##     genomes</span>
 <span class="co">## }</span>
-<span class="co">## &lt;bytecode: 0x55819d2cabf0&gt;</span>
+<span class="co">## &lt;bytecode: 0x5595ab946430&gt;</span>
 <span class="co">## &lt;environment: namespace:OikScrambling&gt;</span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -224,7 +239,7 @@
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Genome average AT content (multicore computation)</span>
 <span class="op">(</span><span class="va">genomes.AT</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">genomes</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/getSeq-methods.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##       Oki       Osa       Bar       Kum       Aom       Nor </span>
 <span class="co">## 0.5893477 0.5831737 0.6004930 0.5891578 0.5852745 0.5686432</span></code></pre>
 </div>
@@ -278,36 +293,36 @@
 <span class="co">##   [30851]      YSR    ltr-1,tandem      4396        &lt;NA&gt;        &lt;NA&gt;     FALSE</span>
 <span class="co">##   [30852]      YSR           ltr-1      4512        &lt;NA&gt;        &lt;NA&gt;      TRUE</span>
 <span class="co">##   -------</span>
-<span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
+<span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></code></pre>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">$</span><span class="va">query</span></code></pre></div>
-<pre><code><span class="co">## GRanges object with 30852 ranges and 3 metadata columns:</span>
-<span class="co">##           seqnames            ranges strand |             rep   repOvlp</span>
-<span class="co">##              &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; | &lt;CharacterList&gt; &lt;integer&gt;</span>
-<span class="co">##       [1]      PAR 15511940-15514448      * |            &lt;NA&gt;         0</span>
-<span class="co">##       [2]      PAR   2352378-2352781      * |            &lt;NA&gt;         0</span>
-<span class="co">##       [3]     Chr2   1044232-1044999      * |            &lt;NA&gt;         0</span>
-<span class="co">##       [4]     Chr2   3294310-3295456      * |             rnd        63</span>
-<span class="co">##       [5]      YSR   1698314-1699115      * |            &lt;NA&gt;         0</span>
-<span class="co">##       ...      ...               ...    ... .             ...       ...</span>
-<span class="co">##   [30848]     Chr2   9474939-9475240      * |            &lt;NA&gt;         0</span>
-<span class="co">##   [30849]     Chr2   9473557-9474600      * |            &lt;NA&gt;         0</span>
-<span class="co">##   [30850]     Chr2   9464587-9465931      * |            &lt;NA&gt;         0</span>
-<span class="co">##   [30851]     Chr2   9459905-9464402      * |            &lt;NA&gt;         0</span>
-<span class="co">##   [30852]      YSR   1771962-1776463      * |            &lt;NA&gt;         0</span>
-<span class="co">##                 transcripts</span>
-<span class="co">##                       &lt;Rle&gt;</span>
-<span class="co">##       [1]              &lt;NA&gt;</span>
-<span class="co">##       [2]          g7612.t1</span>
-<span class="co">##       [3]          g3324.t1</span>
-<span class="co">##       [4]              &lt;NA&gt;</span>
-<span class="co">##       [5]         g15233.t1</span>
-<span class="co">##       ...               ...</span>
-<span class="co">##   [30848]          g5781.t1</span>
-<span class="co">##   [30849]          g5781.t1</span>
-<span class="co">##   [30850]          g5779.t1</span>
-<span class="co">##   [30851] g5777.t1;g5778.t1</span>
-<span class="co">##   [30852]         g15241.t1</span>
+<pre><code><span class="co">## GRanges object with 30852 ranges and 4 metadata columns:</span>
+<span class="co">##           seqnames            ranges strand |      Arm             rep</span>
+<span class="co">##              &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; | &lt;factor&gt; &lt;CharacterList&gt;</span>
+<span class="co">##       [1]      PAR 15511940-15514448      * |    long             &lt;NA&gt;</span>
+<span class="co">##       [2]      PAR   2352378-2352781      * |    short            &lt;NA&gt;</span>
+<span class="co">##       [3]     Chr2   1044232-1044999      * |    short            &lt;NA&gt;</span>
+<span class="co">##       [4]     Chr2   3294310-3295456      * |    short             rnd</span>
+<span class="co">##       [5]      YSR   1698314-1699115      * |    long             &lt;NA&gt;</span>
+<span class="co">##       ...      ...               ...    ... .      ...             ...</span>
+<span class="co">##   [30848]     Chr2   9474939-9475240      * |     YSR             &lt;NA&gt;</span>
+<span class="co">##   [30849]     Chr2   9473557-9474600      * |     YSR             &lt;NA&gt;</span>
+<span class="co">##   [30850]     Chr2   9464587-9465931      * |     YSR             &lt;NA&gt;</span>
+<span class="co">##   [30851]     Chr2   9459905-9464402      * |     YSR             &lt;NA&gt;</span>
+<span class="co">##   [30852]      YSR   1771962-1776463      * |     long            &lt;NA&gt;</span>
+<span class="co">##             repOvlp       transcripts</span>
+<span class="co">##           &lt;integer&gt;             &lt;Rle&gt;</span>
+<span class="co">##       [1]         0              &lt;NA&gt;</span>
+<span class="co">##       [2]         0          g7612.t1</span>
+<span class="co">##       [3]         0          g3324.t1</span>
+<span class="co">##       [4]        63              &lt;NA&gt;</span>
+<span class="co">##       [5]         0         g15233.t1</span>
+<span class="co">##       ...       ...               ...</span>
+<span class="co">##   [30848]         0          g5781.t1</span>
+<span class="co">##   [30849]         0          g5781.t1</span>
+<span class="co">##   [30850]         0          g5779.t1</span>
+<span class="co">##   [30851]         0 g5777.t1;g5778.t1</span>
+<span class="co">##   [30852]         0         g15241.t1</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></code></pre>
 <p>In the example displayed above, the object contains the pairwise alignment between genomes of two dioceous <em>Oikopleura</em> individuals; one from the Osaka assembly <code>OSKA2016</code> (<em>target</em>) and one from the Okinawa assembly <code>OKI2018_I69</code> (<em>query</em>).</p>
@@ -319,22 +334,10 @@
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">longShort</span></code></pre></div>
 <pre><code><span class="co">## List of length 3</span>
-<span class="co">## names(3): Oki Osa Bar</span></code></pre>
+<span class="co">## names(3): OKI2018.I69 OSKA2016v1.9 Bar2.p4</span></code></pre>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span></code></pre></div>
-<pre><code><span class="co">## GRanges object with 8 ranges and 2 metadata columns:</span>
-<span class="co">##       seqnames           ranges strand |              Name        Type</span>
-<span class="co">##          &lt;Rle&gt;        &lt;IRanges&gt;  &lt;Rle&gt; |       &lt;character&gt; &lt;character&gt;</span>
-<span class="co">##   [1]     chr1        1-5191657      * |    chr1 short arm       short</span>
-<span class="co">##   [2]     chr1 5192156-14533022      * |     chr1 long arm        long</span>
-<span class="co">##   [3]     chr2        1-5707009      * |    chr2 short arm       short</span>
-<span class="co">##   [4]     chr2 5707508-16158756      * |     chr2 long arm        long</span>
-<span class="co">##   [5]      PAR        1-6029625      * |     PAR short arm       short</span>
-<span class="co">##   [6]      PAR 6030124-17092476      * |      PAR long arm        long</span>
-<span class="co">##   [7]      XSR       1-12959145      * | X-specific region         XSR</span>
-<span class="co">##   [8]      YSR        1-2916375      * | Y-specific region         YSR</span>
-<span class="co">##   -------</span>
-<span class="co">##   seqinfo: 19 sequences from OKI2018_I69 genome</span></code></pre>
+<pre><code><span class="co">## NULL</span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="repeats">Repeats<a class="anchor" aria-label="anchor" href="#repeats"></a>
@@ -394,7 +397,7 @@
     <span class="op">)</span>
   <span class="op">)</span>
 
-<span class="fu"><a href="http://yulab-smu.top/ggmsa/reference/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="OikScrambling_files/figure-html/phylogenetic_tree-1.png" width="576"></p>
 </div>
 <div class="section level1">

@@ -29,10 +29,8 @@ Core packages that provide functions we use a lot.
 
 ```{r loadlib}
 library('OikScrambling')   |> suppressPackageStartupMessages()
-genomes <- OikScrambling:::loadAllGenomes()
-annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
-
-load("BreakPoints.Rdata")
+(genomes <- OikScrambling:::loadAllGenomes(compat = F))
+(transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings())
 
 library('ggplot2')
 
@@ -172,6 +170,12 @@ if (!file.exists("gadems.introns.Rds")) {
 ```
 
 ## Summary
+
+```{r at_richness}
+## Inverted regions are AT-rich as usual.
+invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> SimpleList()
+invSeq <-  sapply(invRegions, getSeq) |> SimpleList()
+```
 
 Number of motifs found
 
@@ -431,16 +435,16 @@ with its PWM.
 
 ```{r PWM_score_on_chrs, warning=FALSE}
 # No exact match
-vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)
+#vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)
 
 pwm <- rGADEM::getPWM(gadems$inv.lgaps$Oki_Osa[[1]])
 
 pwmHits <- sapply(genomes, matchPWM, pwm = pwm)
 sapply(pwmHits, length)
-hist(pwmHits$Oki$score)
-hist(pwmHits$Osa$score)
+hist(pwmHits$OKI2018.I69$score)
+hist(pwmHits$OSKA2016v1.9$score)
 
-pwmHit <- pwmHits$Oki
+pwmHit <- pwmHits$OKI2018.I69
 
 library("Gviz")
 options(ucscChromosomeNames=FALSE)
@@ -461,17 +465,17 @@ plotTracks(list(gen, a, trk))
 
 ```{r}
 
-length(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa))
-length(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa))
+length(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa))
+length(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa))
 
-hist(score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
-hist(score(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa)))
+hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
+hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)))
 
 # Scores in gaps are higher than average.
-t.test(score(pwmHits$Oki), score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
+t.test(score(pwmHits$OKI2018.I69), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # Scores in gaps and inversions are not different 
-t.test(score(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa)), score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
+t.test(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # rtracklayer::export.bed(pwmHits, "AAGCsGCwwmkCGrCTTyn.bed")
 
