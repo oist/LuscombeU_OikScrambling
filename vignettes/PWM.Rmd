@@ -30,8 +30,8 @@ Core packages that provide functions we use a lot.
 ```{r loadlib, echo=T, results='hide'}
 library('OikScrambling')   |> suppressPackageStartupMessages()
 
-(genomes <- OikScrambling:::loadAllGenomes())
-(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
+(genomes <- OikScrambling:::loadAllGenomes(compat = F))
+(transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings())
 (load("BreakPoints.Rdata"))
 
 library('ggplot2')
@@ -66,15 +66,7 @@ inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
 data.frame(width=width(inv.lgaps$Oki_Osa)) |>
   ggplot(aes(width)) + geom_histogram() +  scale_x_log10()
 
-getGRseqs <- function (gr) { 
-  bsgenome_name <- gr |> genome() |> unique()
-  bsgenome_obj <- get(bsgenome_name)
-  seqs <- BSgenome::getSeq(bsgenome_obj,  gr)
-  metadata(seqs)$genome <- bsgenome_name
-  seqs
-}
-
-inv.lgaps.Seq <- sapply(inv.lgaps[1:15], getGRseqs) |> SimpleList()
+inv.lgaps.Seq <- sapply(inv.lgaps[1:15], getSeq) |> SimpleList()
 ```
 
 ### AT richness
@@ -82,7 +74,7 @@ inv.lgaps.Seq <- sapply(inv.lgaps[1:15], getGRseqs) |> SimpleList()
 ```{r at_richness}
 ## Inverted regions are AT-rich as usual.
 invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> SimpleList()
-invSeq <-  sapply(invRegions, getGRseqs) |> SimpleList()
+invSeq <-  sapply(invRegions, getSeq) |> SimpleList()
 
 sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> summary())
 genomes.AT
@@ -244,17 +236,17 @@ with its PWM.
 
 ```{r PWM_score_on_chrs, warning=FALSE}
 # No exact match
-vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)
+#vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)
 
 pwm <- rGADEM::getPWM(gadems.invLeftGap$Oki_Osa[[1]])
 gadems.invLeftGap$Oki_Osa[[1]]@consensus
 
 pwmHits <- sapply(genomes, matchPWM, pwm = pwm)
 sapply(pwmHits, length)
-hist(pwmHits$Oki$score)
-hist(pwmHits$Osa$score)
+hist(pwmHits$OKI2018.I69$score)
+hist(pwmHits$OSKA2016v1.9$score)
 
-pwmHit <- pwmHits$Oki
+pwmHit <- pwmHits$OKI2018.I69
 
 library("Gviz")
 options(ucscChromosomeNames=FALSE)
