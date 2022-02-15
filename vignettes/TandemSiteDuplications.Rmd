@@ -123,6 +123,16 @@ alignInDel <- function(gb) {
 }
 ```
 
+## Align to self
+
+```{r service_function_alignToSelf}
+alignToSelf <- function(gr) {
+  pairwiseAlignment(getSeq(gr),
+                    getSeq(gr) |> reverseComplement(),
+                    type="global")
+}
+```
+
 # ROI1: composite transposon and tandem site duplication.
 
 ## Details on the region
@@ -159,9 +169,7 @@ ROI1$query |> cleanGaps() |> alignBreakPoints(30, rev=TRUE)
 <summary>Click here to see the full pairwise alignment between the Kume insert
 and its own reverse-complement.</summary>
 ```{r ROI_pair_align}
-pairwiseAlignment(getSeq(cleanGaps(ROI1$query)),
-                  getSeq(cleanGaps(ROI1$query)) |> reverseComplement(),
-                  type="global") |> writePairwiseAlignments()
+ROI1$query |> cleanGaps() |> alignToSelf() |> writePairwiseAlignments()
 ```
 </details>
 
@@ -246,6 +254,40 @@ gb[gb$nedit==0]$consensus |> table() |> length()
 ```
 
 ## How frequent is the inverted pair of repeats that we see?
+
+```{r}
+checkTIR <- function(gr, reps) {
+  genome <- unique(genome(gr))
+  r <- subsetByOverlaps(reps[[genome]], gr)
+  if (length(r) < 2) return(Inf)
+  if (identical(strand(head(r,1)), strand(tail(r,1)))) return(Inf)
+  stringDist(c(head(r, 1)$Target, tail(r, 1)$Target)) |> as.numeric()
+}
+
+nameTIR <- function(gr, reps) {
+  genome <- unique(genome(gr))
+  r <- subsetByOverlaps(reps[[genome]], gr)
+  if (length(r) < 2) return(NA)
+  paste(head(r, 1)$Target, tail(r, 1)$Target)
+}
+
+gb$hasTIR <- sapply(seq_along(gb), \(n) checkTIR(gb$query[n], reps))
+which(gb$hasTIR <= 4)
+
+gb$query[28] |> alignToSelf()
+gb$query[28] |> searchForTSDs(20)
+
+# But also in regions not flagged with hasTIR:
+gb$query[20] |> alignToSelf()
+gb$query[20] |> searchForTSDs(20)
+
+# TSDs with short TIR on Oki_Osa
+unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][30]$query |> searchForTSDs(20)
+unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][30]$query |> alignToSelf()
+
+unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][3]$query |> searchForTSDs(20)
+unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][3]$query |> alignToSelf()
+```
 
 
 ## Remaining questions
