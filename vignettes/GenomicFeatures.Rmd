@@ -407,7 +407,7 @@ regions of 1 bp on centers, rather than changing the accessory function.
 The PWM motif, which is rare in comparison to the other features, follows
 a profile that bears resemblance to the repeat profile.
 
-```{r genomic_pwm_bpByWidth, cache=FALSE}
+```{r genomic_pwm_bpByWidth}
 gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 pwm <- gadems.invLeftGap$Oki_Osa[[1]]
 pwm@consensus
@@ -432,7 +432,7 @@ genomes.  What are they... enhancers ?
 
 Let's look at coverage around PWM hits of the AAGCsGCwwmkCGrCTTyn motif
 
-```{r genomic_features_pwmHits, cache=FALSE}
+```{r genomic_features_pwmHits}
 current_GB <- pwmHits
 
 hmList_PWM_OKI <- list()
@@ -448,7 +448,7 @@ plotHeatmapMeta(hmList_PWM_OKI[c("promoters", "exons", "introns")])
 
 They are enriched in introns...
 
-```{r genomic_features3, cache=FALSE}
+```{r genomic_features3}
 # 
 # # Sandbox to make sanity checks.
 # 
@@ -466,7 +466,7 @@ They are enriched in introns...
 
 TODO: triplecheck `feature_coverage`, it is old…
 
-```{r genomic_features_pwmHits2, cache=FALSE}
+```{r genomic_features_pwmHits2}
 current_GB <- pwmHits
 
 hmList_PWM_OKI$gbOsa     <- feature_coverage(current_GB, gbs$Oki_Osa,  win = 5000, lab = "Oki-Osa", direction = "left")
