@@ -337,11 +337,7 @@ plotOneMotif(gadems$inv.lgaps$Osa_Nor[[2]], "Osaka - Norway")
 
 Unmapped regions have a much higher AT-richness than aligned ones.
 
-```{r at_richness}
-## Inverted regions are AT-rich as usual.
-invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> SimpleList()
-invSeq <-  sapply(invRegions, getSeq_) |> SimpleList()
-
+```{r at_richness2}
 rbind(
   alnNonCoa = sapply(alnNonCoa_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   unmap     = sapply(unmap_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
