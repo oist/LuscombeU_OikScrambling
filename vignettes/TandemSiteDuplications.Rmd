@@ -34,25 +34,31 @@ transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F)
 
 # Purpose
 
-Here we explore regions of interest that caught our attention.
+Here we explore regions of interest that feature an insertion-deletion site
+flanked by a _tandem site duplication_.
 
-We have collected in a separate vignette (`vignette("ColinearityInterruptors",
-package = "OikScrambling")`) regions of interest that interrupt colinearity in
-same-population alignments such as Oki vs Kum.
+In our _genomic breaks_ objects, representing _one-to-one_ alignments, one copy
+of the tandem-duplicated site is part of the alignment, and the other is not.
 
-The ROIs are not in the order I studied them, because I reorganised the code
-in the meantime.
+```
+                   TSD
+query       …──────────━━━━━─────────━━━━━─────────────…
+alignment    ...............              .............
+target      …──────────━━━━━              ─────────────…
+
+```
 
 # ROI1: composite transposon and tandem site duplication.
 
 ## Details on the region
 
-This was identified and analysed by Martin Frith.  I am just transposing the
-report in Bioconductor's context.
+_ROI1_ identified and analysed by Martin Frith.  Here I am just transposing the
+finding in Bioconductor's context.
 
-In `contig_27_1` (which is most of chr1's short arm), there is an indel region:
-the aligned regions in the Okinawa genome are directly in contact, but on the
-Kume genome the aligned regions are separated by a 5146-bp gap.
+In `contig_27_1` (which is most of Kume genome's chr1's short arm), there is an
+indel region where the aligned regions in the Okinawa genome are directly in
+contact, but on the Kume genome the aligned regions are separated by a 5146-bp
+gap.
 
 (The regions align on opposite strands, so the plot looks strange if you are
 not familiar with it.)
@@ -68,8 +74,8 @@ inverted tandem.  You can see them in the alignment below, of the left-side
 boundary of the unaligned region to the reverse-complement of its right side.
 
 ```{r ROI_breaks_pair_align}
-pairwiseAlignment(getSeq(genomes$KUM.M3.7f, cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
-                  getSeq(genomes$KUM.M3.7f, cleanGaps(ROI1$query) |> flank(20, both = T, start = F)) |> reverseComplement(),
+pairwiseAlignment(getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
+                  getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = F)) |> reverseComplement(),
                   type="global") |> writePairwiseAlignments()
 ```
 
@@ -77,8 +83,8 @@ pairwiseAlignment(getSeq(genomes$KUM.M3.7f, cleanGaps(ROI1$query) |> flank(20, b
 <summary>Click here to see the full pairwise alignment between the Kume insert
 and its own reverse-complement.</summary>
 ```{r ROI_pair_align}
-pairwiseAlignment(getSeq(genomes$KUM.M3.7f, cleanGaps(ROI1$query)),
-                  getSeq(genomes$KUM.M3.7f, cleanGaps(ROI1$query)) |> reverseComplement(),
+pairwiseAlignment(getSeq(cleanGaps(ROI1$query)),
+                  getSeq(cleanGaps(ROI1$query)) |> reverseComplement(),
                   type="global") |> writePairwiseAlignments()
 ```
 </details>
@@ -88,8 +94,8 @@ the Okinawan genome, it is present as a single copy.  You can see it in the
 alignment below, where the right-side boundary was not reverse-complemented.
 
 ```{r ROI_breaks_pair_align2}
-pairwiseAlignment(getSeq(genomes$KUM.M3.7f, cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
-                  getSeq(genomes$KUM.M3.7f, cleanGaps(ROI1$query) |> flank(20, both = T, start = F)),
+pairwiseAlignment(getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = T)),
+                  getSeq(cleanGaps(ROI1$query) |> flank(20, both = T, start = F)),
                   type="global") |> writePairwiseAlignments()
 ```
 
@@ -99,9 +105,9 @@ right arms of the Kume alignments and their match to the Okinawa genome.
 ```{r ROI_breaks_pair_align3}
 # Note that genome alignment is +/- therefore the order below is counter-intuitive.
 list(
-  kum_right = getSeq(genomes$KUM.M3.7f, ROI1$query[1] |> flank(20, both = T, start = T))[[1]],
-  kum_left  = getSeq(genomes$KUM.M3.7f, ROI1$query[2] |> flank(20, both = T, start = F))[[1]],
-  oki       = getSeq(genomes$OKI2018.I69, ROI1[2] |> flank(20, both = T, start = F))[[1]]
+  kum_right = getSeq(ROI1$query[1] |> flank(20, both = T, start = T))[[1]],
+  kum_left  = getSeq(ROI1$query[2] |> flank(20, both = T, start = F))[[1]],
+  oki       = getSeq(ROI1[2]       |> flank(20, both = T, start = F))[[1]]
 ) |> as("DNAStringSet") |> msa::msaClustalW()
 ```
 
@@ -139,26 +145,26 @@ gb <- unalMap$Oki_Kum |> plyranges::filter(width == 2)
 gb$query |> width() |> summary()
 
 alignFlank <- function(gb)
-  pairwiseAlignment(getSeq(genomes$KUM.M3.7f, gb$query |> flank(20, both = T, start = T)),
-                    getSeq(genomes$KUM.M3.7f, gb$query |> flank(20, both = T, start = F)),
+  pairwiseAlignment(getSeq(gb$query |> flank(20, both = T, start = T)),
+                    getSeq(gb$query |> flank(20, both = T, start = F)),
                     type="global") |> writePairwiseAlignments()
 
 alignFlank(gb[4])
 
-alignFlank2 <- function(gb, qGenome=genomes$KUM.M3.7f, n = 8) {
+alignFlank2 <- function(gb, n = 8) {
   # Remove 1-bp padding
   gb$query <- gb$query -1
-  pairwiseAlignment(getSeq(qGenome, gb$query |> resize(n, fix = "start")),
-                    getSeq(qGenome, gb$query |> flank(n, start = F)),
+  pairwiseAlignment(getSeq(gb$query |> resize(n, fix = "start")),
+                    getSeq(gb$query |> flank(n, start = F)),
                     type="global")
 }
 alignFlank2(gb[4])
 
-msAlignFlank <- function(gb, tGenome = genomes$OKI2018.I69, qGenome=genomes$KUM.M3.7f)
+msAlignFlank <- function(gb)
 list(
-  kum_left  = getSeq(qGenome, gb$query |> flank(20, both = T, start = T))[[1]],
-  oki_left  = getSeq(tGenome, gb       |> flank(20, both = T, start = F))[[1]],
-  kum_right = getSeq(qGenome, gb$query |> flank(20, both = T, start = F))[[1]]
+  kum_left  = getSeq(gb$query |> flank(20, both = T, start = T))[[1]],
+  oki_left  = getSeq(gb       |> flank(20, both = T, start = F))[[1]],
+  kum_right = getSeq(gb$query |> flank(20, both = T, start = F))[[1]]
 ) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
 
 msAlignFlank(gb[4])
