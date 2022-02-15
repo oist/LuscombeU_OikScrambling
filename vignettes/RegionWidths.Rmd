@@ -23,7 +23,7 @@ knitr::opts_knit$set(verbose = TRUE)
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('ggplot2')
 requireNamespace('patchwork') |> suppressPackageStartupMessages()
-genomes <- OikScrambling:::loadAllGenomes()
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
 load("BreakPoints.Rdata")
 ces <- readRDS("CEs.Rds")
 ```
@@ -768,9 +768,9 @@ gg_freq_poly(widths$invs.coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ```{r width_of_inversions_gaps}
 inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
-inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$Oki)
-inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$Osa)
-inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar)
+inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$OKI2018.I69)
+inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$OSKA2016v1.9)
+inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar2.p4)
 sapply(inv.lgaps, length)
 
 widths$invs.lgaps <- makeWidthsDF(inv.lgaps) |> tibble::as_tibble()
