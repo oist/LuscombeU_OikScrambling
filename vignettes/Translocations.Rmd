@@ -29,8 +29,6 @@ Here we explore the role of translocations in scrambling _Oikopleura_ genomes.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-genomes <- OikScrambling:::loadAllGenomes(compat = F)
-reps <- OikScrambling:::loadAllRepeats(compat = F)
 load("BreakPoints.Rdata")
 ```
 
@@ -104,25 +102,11 @@ flagSmallTranslocations <- function (a) {
 }
 
 smallTransObjs <- SimpleList(
-  align = sapply(gbs, flagSmallTranslocations),
-  mapped = sapply(coa, flagSmallTranslocations),
-  map2 = sapply(coa2, flagSmallTranslocations)
+  align_s  = sapply(gbs, flagSmallTranslocations),
+  mapped_s = sapply(coa, flagSmallTranslocations),
+  tra_rm_s = sapply(coa2, flagSmallTranslocations)
 )
 
-countGbsMatchingRepsInStrans <- function(gb) {
-  if (is.null(gb$rep)) gb$rep <- NA
-  sum(sapply(gb[gb$midSmaller]$rep, \(x) ! any(is.na(x))))
-}
-
-(rbind(
-  aln = sapply(gbs, length),
-  alnStrans = sapply(smallTransObjs$align, \(gb) sum(gb$midSmaller)),
-  mapTot = sapply(coa, length),
-  alltrans = sapply(tra, length),
-  mapStrans = sapply(smallTransObjs$mapped, \(gb) sum(gb$midSmaller)),
-  map2Tot = sapply(coa2, length),
-  map2allTrans = sapply(tra2,length),
-  map2Strans = sapply(smallTransObjs$map2, \(gb) sum(gb$midSmaller)),
-  map2StransRep = sapply(smallTransObjs$map2, countGbsMatchingRepsInStrans)
-))
+cbind( trans_summary
+     , smallTransObjs |> sapply(sapply, \(gb) sum(gb$midSmaller)))
 ```
