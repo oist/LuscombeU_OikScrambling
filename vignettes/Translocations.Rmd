@@ -29,9 +29,9 @@ Here we explore the role of translocations in scrambling _Oikopleura_ genomes.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(reps <- OikScrambling:::loadAllRepeats())
-(load("BreakPoints.Rdata"))
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
+reps <- OikScrambling:::loadAllRepeats(compat = F)
+load("BreakPoints.Rdata")
 ```
 
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
@@ -56,23 +56,35 @@ Notes:
    genome.
 
 ```{r count_translocations}
-(trans_summary <- data.frame(
+trans_summary <- data.frame(
   align  = sapply(gbs,  function(gb) sum(flagTranslocations(gb)$tra)),
   mapped = sapply(coa,  function(gb) sum(flagTranslocations(gb)$tra)),
-  map2   = sapply(coa2, function(gb) sum(flagTranslocations(gb)$tra))
-))
+  tra_rm = sapply(coa2, function(gb) sum(flagTranslocations(gb)$tra))
+)
 
 trans_summary$pairname  <- OikScrambling:::compDistance(rownames(trans_summary))
+trans_summary$class     <- OikScrambling:::compDistClass(rownames(trans_summary))
+trans_summary$genus     <- OikScrambling:::compGenus(rownames(trans_summary))
 trans_summary$target    <- sub("_.*", "", rownames(trans_summary))
 
-sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, mean))
-sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, median))
-sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, sd))
-
-ggplot(trans_summary |> tidyr::pivot_longer(c("align", "mapped", "map2"))) +
-  aes(value, name) + geom_point(aes(col = pairname, pch = target)) +
-  ggtitle ("Number of translocations found after different post-processings")
+ggplot(trans_summary |> tidyr::pivot_longer(c("align", "mapped", "tra_rm"))) +
+  aes(value, name) + geom_point(aes(col = class, pch = target)) +
+  ggtitle ("Number of translocations found after different post-processings",
+           subtitle = "align: raw, mapped: collapsed, tra_rm: translocated repeats removed.") +
+  facet_wrap(~genus)
 ```
+
+<details>
+<summary>Click here to see the raw data</summary>
+```{r show_count_translocations}
+trans_summary
+```
+</details>
+
+The number of detected translocations increase after coalescing, because the
+translocated region itself may have a double gap interrupting the alignment.
+Then, it logically decreases when the repeat-associated translocations are
+removed.
 
 ## Small translocations
 
