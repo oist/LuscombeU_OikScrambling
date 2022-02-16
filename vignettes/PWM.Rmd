@@ -145,29 +145,29 @@ if(!file.exists("gadems.inv.lgaps.Rds")) {
 ## Promoters
 
 ```{r search_in_promoters}
-prom_seqs <- sapply(annots[1:3], \(gb) suppressWarnings(trim(promoters(gb)))) |>
-  sapply(getSeq_) |> SimpleList()
-sapply(prom_seqs, length)
-if (!file.exists("gadems.proms.Rds")) {
-  gadems$proms <- BiocParallel::bplapply(prom_seqs, doGadem) |> SimpleList()
-  saveRDS(gadems$proms, file = "gadems.proms.Rds")
-} else {
-  gadems$proms <- readRDS("gadems.proms.Rds")
-}
+#prom_seqs <- sapply(annots[1:3], \(gb) suppressWarnings(trim(promoters(gb)))) |>
+#  sapply(getSeq_) |> SimpleList()
+#sapply(prom_seqs, length)
+#if (!file.exists("gadems.proms.Rds")) {
+#  gadems$proms <- BiocParallel::bplapply(prom_seqs, doGadem) |> SimpleList()
+#  saveRDS(gadems$proms, file = "gadems.proms.Rds")
+#} else {
+#  gadems$proms <- readRDS("gadems.proms.Rds")
+#}
 ```
 
 ## Introns
 
 ```{r search_in_introns}
-intron_seqs <- sapply(annots[1:3], GenomicFeatures::intronicParts) |>
-  sapply(getSeq_) |> SimpleList()
-sapply(intron_seqs, length)
-if (!file.exists("gadems.introns.Rds")) {
-  gadems$introns <- BiocParallel::bplapply(intron_seqs, doGadem) |> SimpleList()
-  saveRDS(gadems$introns, file = "gadems.introns.Rds")
-} else {
-  gadems$introns <- readRDS("gadems.introns.Rds")
-}
+#intron_seqs <- sapply(annots[1:3], GenomicFeatures::intronicParts) |>
+#  sapply(getSeq_) |> SimpleList()
+#sapply(intron_seqs, length)
+#if (!file.exists("gadems.introns.Rds")) {
+#  gadems$introns <- BiocParallel::bplapply(intron_seqs, doGadem) |> SimpleList()
+#  saveRDS(gadems$introns, file = "gadems.introns.Rds")
+#} else {
+#  gadems$introns <- readRDS("gadems.introns.Rds")
+#}
 ```
 
 ## Summary
