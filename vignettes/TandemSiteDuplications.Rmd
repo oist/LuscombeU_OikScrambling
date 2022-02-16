@@ -79,9 +79,10 @@ sub                  ++++             (or ---- if rev = F)
 
 ```{r service_function_alignEnds}
 alignEnds <- function(gr, n = 20, reverseComplement = FALSE) {
+  resize_ <- function(...) resize(...) |> trim() |> suppressWarnings()
   if (isFALSE(reverseComplement)) reverseComplement <- identity
-  pairwiseAlignment(getSeq(gr |> resize(n, fix = "start")),
-                    getSeq(gr |> resize(n, fix = "end")) |> reverseComplement(),
+  pairwiseAlignment(getSeq(gr |> resize_(n, fix = "start")),
+                    getSeq(gr |> resize_(n, fix = "end")) |> reverseComplement(),
                     type="global")
 }
 ```
@@ -272,6 +273,7 @@ nameTIR <- function(gr, reps) {
 }
 
 gb$hasTIR <- sapply(seq_along(gb), \(n) checkTIR(gb$query[n], reps))
+#gb$TIRname <- sapply(seq_along(gb), \(n) nameTIR(gb$query[n], reps)) #crashes
 which(gb$hasTIR <= 4)
 
 gb$query[28] |> alignToSelf()
@@ -289,6 +291,26 @@ unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][3]$query |> searchForTSDs(20)
 unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][3]$query |> alignToSelf()
 ```
 
+```{r compute_and_plot_score_stats}
+kindOfLogScale <- 2^(0:100 / 8) |> round() |> unique()
+m <- sapply(kindOfLogScale, \(n) gb$query |> alignEnds(n, r=T) |> score())
+plot( apply(m,1, \(v) kindOfLogScale[which.max(v)])
+    , apply(m,1, \(v) max(v))
+    , xlab = "At which length did the alignment score peak?"
+    , ylab = "What was the maximum score?")
+
+plot(table( apply(m,1, \(v) kindOfLogScale[which.max(v)])))
+mm <- m[apply(m,1, \(v) max(v)) > 6,]
+plot(table( apply(mm,1, \(v) kindOfLogScale[which.max(v)])))
+
+apply(m,1, \(v) kindOfLogScale[which.max(v)]) |>
+  Filter(f=\(x) x>7) |>
+  table() |> plot(log="x", ylab = "Frequency",
+                  xlab = "Alignment length where score peaks (starting from n=8)",
+                  main = "Aproximate length of TIRs")
+
+gb$hasScorePeak <- apply(m,1, \(v) kindOfLogScale[which.max(v)]) > 8
+```
 
 ## Remaining questions
 
