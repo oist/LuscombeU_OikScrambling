@@ -1,19 +1,19 @@
 ---
-title: "Motif finding and analysis"
+title: "Motif search and analysis"
 author: 
  - "Charles Plessy"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Motif finding and analysis}
+  %\VignetteIndexEntry{Motif search and analysis}
   %\VignetteEncoding{UTF-8}
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r setup}
-knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(cache = TRUE, include = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
@@ -21,37 +21,94 @@ knitr::opts_knit$set(verbose = TRUE)
 
 Search for motifs in regions near genomic breaks.  By default the computations
 that take time are loaded from R objects.  The source code to generate them
-needs to be executed by hand when needed.
+is only executed when the object files can not be found.
 
-## Load pacakges
+# Load pacakges
 
 Core packages that provide functions we use a lot.
 
-```{r loadlib, echo=T, results='hide'}
-library('OikScrambling')   |> suppressPackageStartupMessages()
-
-(genomes <- OikScrambling:::loadAllGenomes(compat = F))
-(transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings())
-(load("BreakPoints.Rdata"))
+```{r loadlib}
+library('OikScrambling') |> suppressPackageStartupMessages()
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
+annots  <- OikScrambling:::loadAllAnnotations() |> suppressWarnings()
+load("BreakPoints.Rdata")
 
 library('ggplot2')
 
 requireNamespace("ggseqlogo")
-requireNamespace("JASPAR2020")
-requireNamespace("rGADEM")
+requireNamespace("JASPAR2020") |> suppressPackageStartupMessages()
+library("rGADEM") |> suppressPackageStartupMessages()
 ```
 
-## Genome lengths
+# Motif searches
 
-```{r genome_properties}
-(genome.lengths <- sapply(genomes, \(g) sum(seqlengths(seqinfo(g)))))
+[GADEM](https://www.niehs.nih.gov/research/resources/software/biostatistics/gadem/index.cfm)'s
+documentation states:
 
-## Genome average AT content
-(genomes.AT <- sapply(genomes, \(g)
-  weighted.mean(letterFrequency(getSeq(g), "AT", as.prob = TRUE), seqlengths(g))))
+> _The background sequences are simulated using the [a,c,g,t] frequencies in
+> the input sequences, with length matched between the two sets. The background
+> sequences are used as the random sequences for assessing motif enrichment in
+> the input data._
+
+```{r functions_for_motif_search}
+# Pass genome information through metadata
+getSeq_ <- function(x) {
+  seqs <- getSeq(x)
+  metadata(seqs)$genome <- unique(genome(x))
+  seqs
+}
+
+# Note that GADEM crashes on sequences longer than ~48 kbp.
+# Slow !
+doGadem <- function(seqs) {
+  seqs <- seqs[width(seqs) < 48000]
+  bsgenome_name <- metadata(seqs)$genome
+  bsgenome_obj <- BSgenome::getBSgenome(bsgenome_name)
+  GADEM(seqs, verbose=1, genome=bsgenome_obj)
+}
+
+gadems <- SimpleList()
 ```
 
-## Inversions
+
+## Aligned non-coalesced regions
+
+Aligned regions that do not coalesce into syntenic blocks are relatively
+depleted in genes, and show no enrichment of exons versus introns.  They are
+also depleted in repeats, and are mildly enriched in CNEs.  Altogether, they
+can not be summarised in one feature.  So let's see if there are motifs enriched
+there.
+
+See `vignette("GenomicFeatuers", package = "OikScrambling")` for details on
+these regions.
+
+```{r search_in_aln_nonCoa}
+alnNonCoa_seqs <- sapply(gbs[1:15], \(gb) gb[gb$nonCoa] |> getSeq_()) |> SimpleList()
+sapply(alnNonCoa_seqs, length)
+if(!file.exists("gadems.alnNonCoa.Rds")) {
+  gadems$alnNonCoa <- BiocParallel::bplapply(alnNonCoa_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$alnNonCoa, file = "gadems.alnNonCoa.Rds")
+} else {
+  gadems$alnNonCoa <- readRDS("gadems.alnNonCoa.Rds")
+}
+```
+
+## Unmapped
+
+There regions are not aligned and not within a synteny block.
+
+```{r search_in_unmap}
+unmap_seqs <- sapply(unmap[1:15], getSeq_) |> SimpleList()
+sapply(unmap_seqs, length)
+if(!file.exists("gadems.unmap.Rds")) {
+  gadems$unmap <- BiocParallel::bplapply(unmap_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$unmap, file = "gadems.unmap.Rds")
+} else {
+  gadems$unmap <- readRDS("gadems.unmap.Rds")
+}
+```
+
+## Unaligned regions near inversions
 
 I wanted to search search for motifs near inversions to see if they can
 lead to an explanation.
@@ -60,99 +117,244 @@ See `vignette("Inversions", package = "OikScrambling")` for details on inversion
 
 ### Isolate the left-side gaps in inversions
 
-```{r search_for_inversions}
+```{r search_in_gaps_near_inversions}
 inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
-
-data.frame(width=width(inv.lgaps$Oki_Osa)) |>
-  ggplot(aes(width)) + geom_histogram() +  scale_x_log10()
-
-inv.lgaps.Seq <- sapply(inv.lgaps[1:15], getSeq) |> SimpleList()
+inv.lgaps_seqs <- sapply(inv.lgaps[1:15], getSeq_) |> SimpleList()
+sapply(inv.lgaps_seqs, length)
+if(!file.exists("gadems.inv.lgaps.Rds")) {
+  gadems$inv.lgaps <- BiocParallel::bplapply(inv.lgaps_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$inv.lgaps, file = "gadems.inv.lgaps.Rds")
+} else {
+  gadems$inv.lgaps <- readRDS("gadems.inv.lgaps.Rds")
+}
 ```
 
-### AT richness
+## Inversions
+
+```{r search_in_inversions}
+# inv_seqs <- sapply(coa[1:15], leftInversionGaps) |> sapply(getSeq_) |> SimpleList()
+# sapply(inv_seqs, length)
+# if (!file.exists("gadems.invs.Rds")) {
+#   gadems$invs <- BiocParallel::bplapply(inv_seqs, doGadem) |> SimpleList()
+#   saveRDS(gadems$inv, file = "gadems.invs.Rds")
+# } else {
+#   gadems$invs <- readRDS("gadems.invs.Rds")
+# }
+```
+
+## Promoters
+
+```{r search_in_promoters}
+#prom_seqs <- sapply(annots[1:3], \(gb) suppressWarnings(trim(promoters(gb)))) |>
+#  sapply(getSeq_) |> SimpleList()
+#sapply(prom_seqs, length)
+#if (!file.exists("gadems.proms.Rds")) {
+#  gadems$proms <- BiocParallel::bplapply(prom_seqs, doGadem) |> SimpleList()
+#  saveRDS(gadems$proms, file = "gadems.proms.Rds")
+#} else {
+#  gadems$proms <- readRDS("gadems.proms.Rds")
+#}
+```
+
+## Introns
+
+```{r search_in_introns}
+#intron_seqs <- sapply(annots[1:3], GenomicFeatures::intronicParts) |>
+#  sapply(getSeq_) |> SimpleList()
+#sapply(intron_seqs, length)
+#if (!file.exists("gadems.introns.Rds")) {
+#  gadems$introns <- BiocParallel::bplapply(intron_seqs, doGadem) |> SimpleList()
+#  saveRDS(gadems$introns, file = "gadems.introns.Rds")
+#} else {
+#  gadems$introns <- readRDS("gadems.introns.Rds")
+#}
+```
+
+## Summary
 
 ```{r at_richness}
 ## Inverted regions are AT-rich as usual.
 invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> SimpleList()
 invSeq <-  sapply(invRegions, getSeq) |> SimpleList()
-
-sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> summary())
-genomes.AT
-
-## But gaps are a bit more AT-rich.
-sapply(inv.lgaps.Seq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> summary())
-
-## This difference is significant.
-t.test(letterFrequency(invSeq$Oki_Osa, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Oki_Osa, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Osa_Oki, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Osa_Oki, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Oki_Bar, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Oki_Bar, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Oki_Kum, "AT", as.prob = TRUE), letterFrequency(inv.lgaps.Seq$Oki_Kum, "AT", as.prob = TRUE))
 ```
 
-I was tempted to explain this difference with A/T homopolymer stetches.  But
-de novo motif prediction with rGADEM finds AT-rich motifs in any set of Oik
-sequences that I have tried.
+Number of motifs found
 
-The following code is not run by the vignette because the computation takes
-time. Its results are saved in an external file, loaded by the vignette.
-
+```{r summarise_gadems}
+sapply(gadems, sapply, \(x) length(x@motifList))
 ```
-library("rGADEM")
-# Slow !
-# Note that GADEM crashes on sequences longer than 50 kbp.
-doGadem <- function(seqs) {
-  bsgenome_name <- metadata(seqs)$genome
-  bsgenome_obj <- get(bsgenome_name)
-  seqs <- seqs[width(seqs) < 50000]
-  GADEM(seqs, verbose=1, genome=bsgenome_obj)
-}
 
-gadems.inv        <- sapply(invSeq, doGadem) |> SimpleList()
-gadems.invLeftGap <- sapply(inv.lgaps.Seq, doGadem) |> SimpleList()
+# Display
 
-saveRDS(gadems.invLeftGap, file = "gadems.invLeftGap.Rda")
-```
+Service functions.
 
 ```{r plot_all_motifs, fig.width=6}
-library("rGADEM")
-# gadems.inv        <-  readRDS("gadems.inv.Rda")
-gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
+showAllMotifs <- function(gadems) {
+  sapply(names(gadems), \(name) {
+    sapply(seq_along(gadems[[name]]@motifList), \(n) {
+      gadems[[name]][[n]]@consensus
+    })
+  })
+}
 
-gadems <- gadems.invLeftGap
-
-for (curObjName in names(gadems)) {
-  for (n in seq_along(gadems[[curObjName]]@motifList)) {
-    gadem <- gadems[[curObjName]][[n]]
-    pwm <- rGADEM::getPWM(gadem)
-    cons <- gadem@consensus
-    p <- ggseqlogo::ggseqlogo(pwm) +
-      ggtitle(paste(curObjName, cons))
-    print(p)
+plotAllMotifs <- function(gadems) {
+  for (curObjName in names(gadems)) {
+    for (n in seq_along(gadems[[curObjName]]@motifList)) {
+      p <- plotOneMotif(gadems[[curObjName]][[n]], curObjName)
+      print(p)
+    }
   }
+}
+
+plotOneMotif <- function(gadem, pairName = NULL, range = NULL) {
+  if(is.null(range)) {
+    pwm <- rGADEM::getPWM(gadem)
+    consensus <- gadem@consensus
+  } else {
+    pwm <- rGADEM::getPWM(gadem)[,range]
+    consensus <- gadem@consensus |> subseq(min(range), max(range))
+  }
+  title = paste0("Motif consensus: ", consensus)
+  if(!is.null(pairName))
+  title <- paste0("Genome pair: ", pairName, ", ", title)
+  # Suppressed warning message: `guides(<scale> = FALSE)` is deprecated. Please use `guides(<scale> = "none")` instead. 
+  p <- ggseqlogo::ggseqlogo(pwm) |> suppressWarnings()
+  p  + ggtitle(title)
 }
 ```
 
-```{r}
+## Aligned non-coalesced regions
 
-#RGadem positive control: check introns ?
-# set.seed(1664)
-# intr <- sample(intronicParts(tx_OKI), 1000)
-# intr <- BSgenome::getSeq(OKI2018_I69, intr)
-# gadem <- GADEM(intr, verbose=1, genome=OKI2018_I69)
-# > consensus(gadem)
-# [1] "nAAAAwnnwnAAAwn"
-# Also found motifs like rryCAATTbwTkCGmAkyT
+Many comparison return a motif that looks like `AAAA.....AAAA`, and some also
+return `AAGAA` (or their reverse-complement).
 
+The Oki - Kume comparison shows T-rich motifs (note that they could have been
+A-rich reverse-complement).
 
-#RGadem positive control: check promoters ?
-# set.seed(1664)
-# prom <- sample(promoters(tx_OKI), 1000)
-# prom <- BSgenome::getSeq(OKI2018_I69, prom)
-# gadem <- GADEM(prom, verbose=1, genome=OKI2018_I69)
-# consensus(gadem)
-# [1] "nAAAAwwnwnnAAAAwn" "nTTTTCTTyn"       
-# Also found motifs like TTTmAAAA
+Sometimes a weaker A-rich / T-rich motif is also found.
+
+```{r show_alnNonCoa_motifs}
+showAllMotifs(gadems$alnNonCoa)
 ```
+
+Here are a few graphical examples.
+
+```{r plot_some_alnNonCoa_motifs}
+plotOneMotif(gadems$alnNonCoa$Oki_Osa[[1]], "Okinawa - Osaka")
+plotOneMotif(gadems$alnNonCoa$Oki_Osa[[2]], "Okinawa - Osaka")
+plotOneMotif(gadems$alnNonCoa$Oki_Kum[[1]], "Okinawa - Kume")
+plotOneMotif(gadems$alnNonCoa$Oki_Kum[[2]], "Okinawa - Kume")
+plotOneMotif(gadems$alnNonCoa$Osa_Oki[[2]], "Osaka - Okinawa")
+plotOneMotif(gadems$alnNonCoa$Osa_Bar[[2]], "Osaka - Barcelona")
+```
+
+## Unaligned non-mapped regions
+
+We still find `AAAA.....AAAA`,`AAGAA`, `A`-rich (or their reverse-complement),
+but not as systematicaly.
+
+We start to see species-specific motifs:
+
+  - Variations over `GsCsCkwmGsGsC` in some Oki -> other comparisons.
+  - Variations over `GCT..GCT` in some Nor -> other comparisons (pay attention
+    the reverse complements).
+
+
+```{r show_unal_motifs}
+showAllMotifs(gadems$unmap)
+```
+
+Here are a few graphical examples.
+
+```{r plot_some_unal_motifs}
+plotOneMotif(gadems$unmap$Oki_Osa[[2]], "Okinawa - Osaka")
+plotOneMotif(gadems$unmap$Oki_Kum[[1]], "Okinawa - Kume")
+plotOneMotif(gadems$unmap$Osa_Oki[[1]], "Osaka - Okinawa")
+plotOneMotif(gadems$unmap$Bar_Osa[[1]], "Barcelona - Okinawa")
+```
+
+## Unaligned regions left to inversion
+
+  - We still find `AAAA.....AAAA`,`AAGAA`, `A`-rich (or their reverse-complement).
+  - We see palindromic motifs (`CCTGA.TCAGG`, `aaGCCGc...gCGGCtt`) in the Okinawan genome.
+  - Two other motifs are found when comparing Oki to Aom (`nGAGGCmACGmsCGTTCn`)
+    and to Nor `nACGCyCryTCATTCTwTy`).
+  - In the Osaka genome, we see a the `GCT..GCT` motif again.
+
+
+```{r show_invLeft_motifs}
+showAllMotifs(gadems$inv.lgaps)
+```
+
+
+Here are a few graphical examples.
+
+### `CCTGA.TCAGG`
+
+```{r plot_some_CCTGA.TCAGG_motifs_from_invs}
+plotOneMotif(gadems$inv.lgaps$Oki_Osa[[1]], "Okinawa - Osaka")
+plotOneMotif(gadems$inv.lgaps$Oki_Kum[[2]], "Okinawa - Kume")
+```
+
+### `aaGCCGc...gCGGCtt`
+
+```{r plot_some_aaGCCGc...gCGGCtt_motifs_from_invs}
+plotOneMotif(gadems$inv.lgaps$Oki_Osa[[3]], "Okinawa - Osaka")
+plotOneMotif(gadems$inv.lgaps$Oki_Kum[[1]], "Okinawa - Kume")
+```
+
+### Other from Okinawan genome
+
+```{r plot_some_more_motifs_from_invs}
+plotOneMotif(gadems$inv.lgaps$Oki_Aom[[6]], "Okinawa - Aomori")
+plotOneMotif(gadems$inv.lgaps$Oki_Nor[[4]], "Okinawa - Norway")
+```
+
+### `GCT..GCT`
+
+```{r plot_GCT..GCT_motifs_from_invs}
+plotOneMotif(gadems$inv.lgaps$Osa_Oki[[1]], "Osaka - Okinawa")
+plotOneMotif(gadems$inv.lgaps$Osa_Bar[[1]], "Osaka - Barcelona")
+```
+
+### `GCTTCGCTTC`
+
+
+```{r plot_GCTTCGCTTC_from_invs}
+plotOneMotif(gadems$inv.lgaps$Osa_Kum[[1]], "Osaka - Kume")
+plotOneMotif(gadems$inv.lgaps$Bar_Osa[[1]], "Barcelona - Okinawa")
+```
+
+### `CAA....TTGGTCA`
+
+```{r plot_CAA....TTGGTCA_from_invs}
+plotOneMotif(gadems$inv.lgaps$Osa_Kum[[5]], "Osaka - Kume")
+plotOneMotif(gadems$inv.lgaps$Osa_Oki[[4]], "Osaka - Okinawa")
+plotOneMotif(gadems$inv.lgaps$Osa_Nor[[2]], "Osaka - Norway")
+```
+
+# AT richness
+
+Unmapped regions have a much higher AT-richness than aligned ones.
+
+```{r at_richness2}
+rbind(
+  alnNonCoa = sapply(alnNonCoa_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  unmap     = sapply(unmap_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  inv.lgaps = sapply(inv.lgaps_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  inv       = sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean())
+)
+
+(genomes.AT <- sapply(genomes, \(g)
+  weighted.mean(letterFrequency(getSeq_(g), "AT", as.prob = TRUE), seqlengths(g))))
+
+## This difference is significant.
+t.test(letterFrequency(invSeq$Oki_Osa, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Osa, "AT", as.prob = TRUE))
+t.test(letterFrequency(invSeq$Osa_Oki, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Osa_Oki, "AT", as.prob = TRUE))
+t.test(letterFrequency(invSeq$Oki_Bar, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Bar, "AT", as.prob = TRUE))
+t.test(letterFrequency(invSeq$Oki_Kum, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Kum, "AT", as.prob = TRUE))
+```
+
 
 A palindromic (rAAGCsGCwwmkCGrCTTyn) motif is found in the left gaps.
 
@@ -168,9 +370,16 @@ On the other hand, a motif containing GCGAAGCGAA identified in Osa_Oki shows:
   Oki   Osa   Bar   Kum   Aom   Nor 
   483 21360 23340   501 21594 16413 
 ```
-  
+
+# Search for the motifs in JASPAR
+
 ```{r screenJaspar}
-checkJaspar <- function (pwm) {
+checkJaspar <- function (pwm, range=NULL) {
+  if(is.null(range))
+    PWMat <- TFBSTools::PWMatrix(ID=pwm@consensus, profileMatrix = pwm@pwm)
+  else
+    PWMat <- TFBSTools::PWMatrix(ID = subseq(pwm@consensus, min(range), max(range)),
+                                 profileMatrix = pwm@pwm[,range])
   #---- see https://compgenomr.github.io/book/motif-discovery.html
   pwmLib <- TFBSTools::getMatrixSet(
     JASPAR2020::JASPAR2020,
@@ -190,31 +399,18 @@ checkJaspar <- function (pwm) {
   pwmLibDf[order(-pwmLibDf$similarity),]
 }
 
-PWMat <- TFBSTools::PWMatrix(ID="rAAGCsGCwwmkCGrCTTyn", profileMatrix = pwm)
-pwm_res <- checkJaspar(PWMat)
-head(pwm_res)
+gadems$inv.lgaps$Oki_Osa[[1]] |> checkJaspar() |> head()
+gadems$inv.lgaps$Oki_Kum[[1]] |> checkJaspar() |> head()
 
-pwmhalf <- pwm[,2:8]
-pwmhalf_res <- checkJaspar(PWMatrix(ID="AAGCnGC", profileMatrix = pwmhalf))
-head(pwmhalf_res)
+# Let's trim the motif.
+gadems$inv.lgaps$Oki_Kum[[1]] |> plotOneMotif(range = 2:9)
+gadems$inv.lgaps$Oki_Osa[[1]] |> checkJaspar(range = 2:9) |> head()
 ```
 
 But a search in Jaspar with either the full motif or its halof did not reveal
 strong hits.  Visual inspection of PRDM9 sequence logos via Google did not show
 similarity either.
 
-### Export rAAGCsGCwwmkCGrCTTyn alignments to a file
-
-```{r pwmHitSequenceExportForGLAM2}
-# gademHitsToBS <- function(gadem, n) {
-#   alignList <- gadem[[n]]@alignList
-#   pwmSeqs <- sapply(alignList, function(align) align@seq)
-#   Biostrings::DNAStringSet(pwmSeqs)
-# }
-# 
-# pwmSeqs <- gademHitsToBS(gadem, 1)
-# writeXStringSet(pwmBS, file="firstGapsGADEMpwm.fasta")
-```
 
 ```
 # writeXStringSet(lgapsSeq_Oki_O, file="firstGaps.fasta")
@@ -238,8 +434,7 @@ with its PWM.
 # No exact match
 #vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)
 
-pwm <- rGADEM::getPWM(gadems.invLeftGap$Oki_Osa[[1]])
-gadems.invLeftGap$Oki_Osa[[1]]@consensus
+pwm <- rGADEM::getPWM(gadems$inv.lgaps$Oki_Osa[[1]])
 
 pwmHits <- sapply(genomes, matchPWM, pwm = pwm)
 sapply(pwmHits, length)
@@ -267,17 +462,17 @@ plotTracks(list(gen, a, trk))
 
 ```{r}
 
-length(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa))
-length(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa))
+length(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa))
+length(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa))
 
-hist(score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
-hist(score(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa)))
+hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
+hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)))
 
 # Scores in gaps are higher than average.
-t.test(score(pwmHits$Oki), score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
+t.test(score(pwmHits$OKI2018.I69), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # Scores in gaps and inversions are not different 
-t.test(score(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa)), score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
+t.test(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # rtracklayer::export.bed(pwmHits, "AAGCsGCwwmkCGrCTTyn.bed")
 
