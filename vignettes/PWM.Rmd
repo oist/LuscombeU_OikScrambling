@@ -267,17 +267,17 @@ plotTracks(list(gen, a, trk))
 
 ```{r}
 
-length(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa))
-length(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa))
+length(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa))
+length(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa))
 
-hist(score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
-hist(score(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa)))
+hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
+hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)))
 
 # Scores in gaps are higher than average.
-t.test(score(pwmHits$Oki), score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
+t.test(score(pwmHits$OKI2018.I69), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # Scores in gaps and inversions are not different 
-t.test(score(subsetByOverlaps(pwmHits$Oki, invRegions$Oki_Osa)), score(subsetByOverlaps(pwmHits$Oki, inv.lgaps$Oki_Osa)))
+t.test(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # rtracklayer::export.bed(pwmHits, "AAGCsGCwwmkCGrCTTyn.bed")
 
