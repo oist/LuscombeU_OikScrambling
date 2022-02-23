@@ -12,7 +12,7 @@ editor_options:
 Load packages and data
 ======================
 
-See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllTranscriptsGR`,
+See `?OikScrambling:::loadAllGenomes()`, `?OikScrambling:::loadAllTranscriptsGR()`,
 and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different objects are prepared.
 
@@ -23,26 +23,14 @@ transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarni
 load("BreakPoints.Rdata")
 ```
 
-Orthogroups
------------
-
-Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
-`OikScrambling::load_one_to_ones()` function.  Original file is in
-`/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`.
-See `news(package = "BreakpointsData")` for inspecting changes in more details.
-
-```{r load_orthogroups}
-# Example for loading all orthogroups:
-OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
-
-# Example for loading a pair
-OikScrambling:::load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
-                , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
-```
-
 
 Prepare GBreak objects
 ======================
+
+Orthogroups for _Oikopleura_ are loaded from the `BreakpointsData` package with
+the `OikScrambling::load_one_to_ones()` function.  Original file is in
+`/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`. See `news(package = "BreakpointsData")`
+for inspecting changes in more details.
 
 ```{r orthoPairs_object}
 orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOGs=NULL) {
