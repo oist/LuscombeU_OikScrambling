@@ -33,11 +33,24 @@ the `OikScrambling::load_one_to_ones()` function.  Original file is in
 for inspecting changes in more details.
 
 ```{r orthoPairs_object}
-orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOGs=NULL) {
+orthoGroupFileNames <- SimpleList(
+  AOM.5.5f      = "AOM-5-5f.prot.longest.fa_1", 
+  Bar2.p4       = "Bar2_p4.Flye.prot.longest.fa_1", 
+  Ply           = "C_int_P.prot.longest.fa_1",
+  Ros           = "C_int_R.prot.longest.fa_1",
+  Int           = "Ciona_intestinalis.Uniprot.rn.fa_1",
+  Sav           = "Ciona_savignyi.Uniprot.rn.fa_1",
+  KUM.M3.7f     = "KUM-M3-7f.prot.longest.fa_1",
+  OKI2018.I69   = "OKI2018_I69.v2.prot.longest.fa_1",
+  OSKA2016v1.9  = "OSKA2016v1.9.prot.longest.fa_1",
+  OdB3          = "OdB3.v1.0.prot.fa_1.nohaplo"
+)
+
+orthoPairToGBreaks <- function(genome1, genome2, transcripts, treeName="N19", HOGs=NULL) {
   if(is.null(HOGs))
     HOGs <- OikScrambling:::load_one_to_ones(
       system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
-      c(name1, name2))
+      c(orthoGroupFileNames[[genome1]], orthoGroupFileNames[[genome2]]))
 
   IDs2GRanges <- function (IDs, annot) {
     prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
@@ -51,58 +64,59 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOG
     gr                                                # Return the object
   }
   
-  gb       <- IDs2GRanges(HOGs[,name1], annot1)
-  gb$query <- IDs2GRanges(HOGs[,name2], annot2)
+  gb       <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome1]]], transcripts[[genome1]])
+  if (!is.null(genomes[[genome1]]))
+    seqinfo(gb) <- seqinfo(genomes[[genome1]])
+  gb$query <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome2]]], transcripts[[genome2]])
+  if (!is.null(genomes[[genome2]]))
+   seqinfo(gb$query) <- seqinfo(genomes[[genome2]])
   gb <- GenomicBreaks:::GBreaks(gb)
   gb$HOG <- HOGs$HOG
   gb$OG  <- HOGs$OG
   sort(gb)
 }
 
-flagLongShort_ <- function(gr, annot) {
-  genome <- gr |> genome() |> unique()
-  flagLongShort(gr, annot[[genome]])
+flagLongShort_ <- function(gr, transcripts) {
+  genome <- unique(genome(gr))
+  flagLongShort(gr, transcripts[[genome]])
 }
 
 orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
   orthoPairs <- SimpleList()
-  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1",   transcripts$OKI2018.I69, transcripts$OSKA2016v1.9, treeName, HOGs)
-  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$OKI2018.I69, transcripts$Bar2.p4, treeName, HOGs)
-  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$OKI2018.I69, transcripts$KUM.M3.7f, treeName, HOGs)
-  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$OKI2018.I69, transcripts$AOM.5.5f, treeName, HOGs)
-  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$OKI2018.I69, transcripts$OdB3, treeName, HOGs)
+  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018.I69", "OSKA2016v1.9",   transcripts, treeName, HOGs)
+  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018.I69", "Bar2.p4",        transcripts, treeName, HOGs)
+  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018.I69", "KUM.M3.7f",      transcripts, treeName, HOGs)
+  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018.I69", "AOM.5.5f",       transcripts, treeName, HOGs)
+  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018.I69", "OdB3",           transcripts, treeName, HOGs)
   
-  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$OSKA2016v1.9, transcripts$Bar2.p4, treeName, HOGs)
-  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$OSKA2016v1.9, transcripts$OKI2018.I69, treeName, HOGs)
-  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$OSKA2016v1.9, transcripts$KUM.M3.7f, treeName, HOGs)
-  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$OSKA2016v1.9, transcripts$AOM.5.5f, treeName, HOGs)
-  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$OSKA2016v1.9, transcripts$OdB3, treeName, HOGs)
+  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9",   "Bar2.p4",     transcripts, treeName, HOGs)
+  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9",   "OKI2018.I69", transcripts, treeName, HOGs)
+  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9",   "KUM.M3.7f",   transcripts, treeName, HOGs)
+  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9",   "AOM.5.5f",    transcripts, treeName, HOGs)
+  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9",   "OdB3",        transcripts, treeName, HOGs)
   
-  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar2.p4, transcripts$OSKA2016v1.9, treeName, HOGs)
-  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar2.p4, transcripts$OKI2018.I69, treeName, HOGs)
-  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar2.p4, transcripts$KUM.M3.7f, treeName, HOGs)
-  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar2.p4, transcripts$AOM.5.5f, treeName, HOGs)
-  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar2.p4, transcripts$OdB3, treeName, HOGs)
+  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2.p4",   "OSKA2016v1.9",     transcripts, treeName, HOGs)
+  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2.p4",   "OKI2018.I69",      transcripts, treeName, HOGs)
+  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2.p4",   "KUM.M3.7f",        transcripts, treeName, HOGs)
+  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2.p4",   "AOM.5.5f",         transcripts, treeName, HOGs)
+  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2.p4",   "OdB3",             transcripts, treeName, HOGs)
   
   orthoPairs <- sapply(orthoPairs,  flagLongShort_, longShort)
   
-  orthoPairs
+  SimpleList(orthoPairs)
 }
 
 orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
-orthoPairs$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
-                                        , transcripts$Ply, transcripts$Ros, treeName="N20")
+orthoPairs$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N20")
 
 # Same as above but using the same core orthogroups for all species.
 orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
-orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
-                                             , transcripts$Ply, transcripts$Ros, treeName="N3")
+orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N3")
 
 orthoPairs_one2oneInOiks <-
   orthoPairToGBreaks_all_Oiks(treeName = NULL,
                               HOGs = OikScrambling:::load_one_to_ones(
                                        system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")))
-
 
 sapply(orthoPairs, length)
 sapply(orthoPairs_core, length)
