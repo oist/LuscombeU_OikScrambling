@@ -24,13 +24,24 @@ load("BreakPoints.Rdata")
 ```
 
 
-Prepare GBreak objects
-======================
+Prepare GBreaks objects
+=======================
 
 Orthogroups for _Oikopleura_ are loaded from the `BreakpointsData` package with
 the `OikScrambling::load_one_to_ones()` function.  Original file is in
 `/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`. See `news(package = "BreakpointsData")`
 for inspecting changes in more details.
+
+Load Orthogroup data
+--------------------
+
+This produces `GBreaks` objects that map orthologs from between two genomes.
+In these objects, the _target_ and _query_ roles are equivalent.  The genomic
+coordinates are taken from the annotation files (see
+`?OikScrambling:::loadAllTranscriptsGR`.
+
+To maximise number of entries, we load data from the larvacean and the ascidian
+subtrees respectively.
 
 ```{r orthoPairs_object}
 orthoGroupFileNames <- SimpleList(
@@ -108,23 +119,41 @@ orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
 
 orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
 orthoPairs$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N20")
+```
 
-# Same as above but using the same core orthogroups for all species.
+We can produce similar objects, but from "core" orthogroups, that have a member
+in each species of the tunicate clade.
+
+```{r orthoPairs_core}
 orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
 orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N3")
+```
 
+Lastly we build an object for Oiks only where we require every orthologue to be
+present as a single copy in every genome.
+
+```{r orthoPairs_one2oneInOiks}
 orthoPairs_one2oneInOiks <-
   orthoPairToGBreaks_all_Oiks(treeName = NULL,
                               HOGs = OikScrambling:::load_one_to_ones(
                                        system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")))
+```
 
+Here is the number of entries in each object.
+
+```{r summary_orthoPairs}
 sapply(orthoPairs, length)
 sapply(orthoPairs_core, length)
 sapply(orthoPairs_one2oneInOiks, length)
 ```
 
-Problem: some annotations overlap
----------------------------------
+
+Remove overlapping annotations
+------------------------------
+
+Some transcript annotations overlap and this breaks the coalescing algorithm.
+
+Here we produce non-overlapping versions of the objects.
 
 ```{r fix_Bar_Osk}
 transcripts$Bar2.p4 |> length()
@@ -203,9 +232,9 @@ orthoBlocks_core <- sapply(orthoPairsFiltered_core[1:15], coalOrtho) |> SimpleLi
 orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
 orthoBlocks_core[ 1:15 ] <- sapply(orthoBlocks_core[ 1:15 ],  flagLongShort_, longShort)
 
+sapply(orthoPairs, length)
 sapply(orthoBlocks, length)
 sapply(orthoBlocks_core, length)
-
 ```
 
 
@@ -216,11 +245,11 @@ Size distribution of the blocks
 -------------------------------
 
 ```{r quick_overview}
-stem(orthoBlocks$Oki_Osa$geneNumber)
+hist(orthoBlocks$Oki_Osa$geneNumber)
 table(orthoBlocks$Oki_Osa$geneNumber)
 orthoBlocks$Oki_Osa[order(orthoBlocks$Oki_Osa$geneNumber)] |> tail(11)
 
-stem(orthoBlocks$Oki_Kum$geneNumber)
+hist(orthoBlocks$Oki_Kum$geneNumber)
 table(orthoBlocks$Oki_Kum$geneNumber)
 orthoBlocks$Oki_Kum[order(orthoBlocks$Oki_Kum$geneNumber)] |> tail(11)
 ```
@@ -240,6 +269,22 @@ apply(df, 2, \(x) {
   c(pval=tst$p.value, mx=tst$estimate[1], my=tst$estimate[2])
 }) 
 ```
+
+<details>
+<summary>Click to expand results on a microbenchmark comparing `sapply(split)`
+and `tapply`</summary>
+```
+> microbenchmark::microbenchmark(
+  times = 10,
+  sapply = sapply(split(x, paste(seqnames(x), x$Arm)), GOC),
+  tapply = tapply(x, paste(seqnames(x), x$Arm), GOC)
+)
+Unit: seconds
+   expr      min       lq     mean   median       uq      max neval
+ sapply 6.853530 6.921293 7.050267 6.949315 7.270793 7.477390    10
+ tapply 6.921118 6.923827 7.028373 6.939487 6.968288 7.431115    10
+ ```
+</details>
 
 Fraction of the genome covered or syntenic
 ------------------------------------------
