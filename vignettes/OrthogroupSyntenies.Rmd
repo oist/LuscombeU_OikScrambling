@@ -188,6 +188,12 @@ orthoPairsFiltered_core <- sapply(orthoPairs_core, function(gb) {
   gb
 }) |> SimpleList()
 
+orthoPairs_one2oneInOiks_Filtered <- sapply(orthoPairs_one2oneInOiks, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+
 sapply(orthoPairs, length) - sapply(orthoPairsFiltered, length)
 sapply(orthoPairs_core, length) - sapply(orthoPairsFiltered_core, length)
 ```
@@ -232,17 +238,20 @@ orthoBlocks_core <- sapply(orthoPairsFiltered_core[1:15], coalOrtho) |> SimpleLi
 orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
 orthoBlocks_core[ 1:15 ] <- sapply(orthoBlocks_core[ 1:15 ],  flagLongShort_, longShort)
 
+orthoBlocks_one2oneInOiks <- sapply(orthoPairs_one2oneInOiks_Filtered, coalOrtho) |> SimpleList()
+orthoBlocks_one2oneInOiks <- sapply(orthoBlocks_one2oneInOiks,  flagLongShort_, longShort) |> SimpleList()
+
 sapply(orthoPairs, length)
 sapply(orthoBlocks, length)
 sapply(orthoBlocks_core, length)
+sapply(orthoPairs_one2oneInOiks_Filtered, length)
+sapply(orthoBlocks_one2oneInOiks, length)
+sapply(orthoBlocks_one2oneInOiks, \(gb) sum(gb$geneNumber))
 ```
 
 
-Quick overview of the results
-=============================
-
 Size distribution of the blocks
--------------------------------
+===============================
 
 ```{r quick_overview}
 hist(orthoBlocks$Oki_Osa$geneNumber)
@@ -255,7 +264,7 @@ orthoBlocks$Oki_Kum[order(orthoBlocks$Oki_Kum$geneNumber)] |> tail(11)
 ```
 
 Gene Order Conservation is smaller in short arms
-------------------------------------------------
+================================================
 
 ```{r GOC}
 orthoBlocks_LSnoNA <- sapply(orthoBlocks[1:15], function(gb) gb[!is.na(gb$Arm)]) |> SimpleList()
@@ -287,7 +296,7 @@ Unit: seconds
 </details>
 
 Fraction of the genome covered or syntenic
-------------------------------------------
+==========================================
 
 ```{r fraction_aligned}
 uncov  <- BiocParallel::bplapply(orthoPairsFiltered, cleanGaps) |> SimpleList()
@@ -336,7 +345,7 @@ sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScramb
 ```
 
 Agreement with nucleotide alignments
-------------------------------------
+====================================
 
 ```{r DNA_prot_comparison}
 (gb_P <- orthoBlocks$Bar_Osa)
@@ -358,7 +367,7 @@ Question: what does interrupt the colinearity of nucleotide regions in gene-cent
 colinear regions ?
 
 XSR plot
---------
+========
 
 Ugly...
 
