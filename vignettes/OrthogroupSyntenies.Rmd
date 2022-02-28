@@ -483,6 +483,27 @@ annot <- genoPlotR::annotation(x1=start(Hox1_4e4.genes), x2=end(Hox1_4e4.genes),
 gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4), annotations = annot)
 ```
 
+# Ancestral states
+
+Prototype 1
+
+In the concept case below, B has moved in the North Atlantic clade.
+
+ - Oki: A-B-C
+ - Osa: A-B-C
+ - Bar:  A-C, and B can be found somewhere else
+ 
+As we work on alignment pairs, this translates to:
+
+ - Oki_Osa: A-B-C
+ - Oki_Bar: A, B, C
+ 
+To find such cases I search for Oki-Bar orthoblock breakpoints that fall within
+an Oki-Osa orthoblock.
+
+I can also search for orthologs that are marked "Col" in Oki_Osa and "Tra"
+in Osa_Bar.
+
 # Session information
 
 ```{r session_information}
