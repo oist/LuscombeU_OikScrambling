@@ -355,24 +355,14 @@ regions that would be colinear if there would not be a translocation separating
 them.
 
 ```{r translocated_regions, cache=TRUE, dependson="coalescing_algorithm"}
-removeTranslocations <- function(gb) {
-  if(any(gb$tra))
-    gb <- gb[-(which(gb$tra) + 1)]
-  gb
-}
-
 traGaps <- function(coa) {
   # The input MUST already be coalesced.
-  # First, flag translocations on the target genome
-  tra.target <- flagTranslocations(coa)$tra
-  # Second, do it again on the query genome
-  tra <- swap(coa) |> sort(ignore.strand = TRUE) |> flagTranslocations()
-  tra.query <- tra$tra
-  tra <- swap(tra) |> sort(ignore.strand = TRUE)
-  tra$tra <- tra.target | tra.query
+  tra <- flagTranslocations(coa)
+  # Consider both sides
+  tra$tra <- tra$tra | tra$query$tra
   # Then, remove translocated regions
-  tra <- removeTranslocations(tra)
-  # Then extract the newly "unaligned mapped" regions
+  tra <- filterTranslocations(tra, remove = TRUE)
+  # Finally, extract the newly "unaligned mapped" regions.
   # They contain the gaps left by the removal of the translocated regions.
   filterMappedUnaligned(tra)
 }
