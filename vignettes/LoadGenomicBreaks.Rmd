@@ -382,7 +382,6 @@ tra <- BiocParallel::bplapply(coa, traGaps) |> as("SimpleList")
 tra[Oik_Oik] <- BiocParallel::bplapply(tra[Oik_Oik], flagLongShort_, longShort)
 tra[Oik_Oik] <- annotateWithReps(tra[Oik_Oik], reps)
 tra[Oik_Oik] <- annotateWithTranscripts(tra[Oik_Oik], transcripts)
-tra <- sapply(tra, flagAll) |> SimpleList()
 ```
 
 Coalesce again
@@ -438,8 +437,6 @@ tra2 <- BiocParallel::bplapply(coa2, traGaps) |> as("SimpleList")
 tra2[Oik_Oik] <- BiocParallel::bplapply(tra2[Oik_Oik], flagLongShort_, longShort)
 tra2[Oik_Oik] <- annotateWithReps(tra2[Oik_Oik], reps)
 tra2[Oik_Oik] <- annotateWithTranscripts(tra2[Oik_Oik], transcripts)
-
-tra2 <- sapply(tra2, flagAll) |> SimpleList()
 ```
 
 
