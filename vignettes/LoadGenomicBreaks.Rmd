@@ -345,7 +345,6 @@ unalMap <- BiocParallel::bplapply(gbs, filterMappedUnaligned) |> as("SimpleList"
 unalMap[Oik_Oik] <- BiocParallel::bplapply(unalMap[Oik_Oik], flagLongShort_, longShort)
 unalMap[Oik_Oik] <- annotateWithReps(unalMap[Oik_Oik], reps)
 unalMap[Oik_Oik] <- annotateWithTranscripts(unalMap[Oik_Oik], transcripts)
-unalMap[Oik_Oik] <- sapply(unalMap[Oik_Oik], flagAll) |> SimpleList()
 ```
 
 Translocated regions
