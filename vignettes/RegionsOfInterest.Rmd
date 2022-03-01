@@ -140,9 +140,9 @@ x |> head() |> as.data.frame()
 ROI4_1 <- x[1]
 
 # Let's recover the flanking regions
-# (it works because the unalMap regions are expanded of 1 base on each side to avoid zero-length ranges)
-gbs$Oki_Osa |> subsetByOverlaps(ROI4_1) |> as.data.frame()
-gbs$Oki_Osa |> subsetByOverlaps(ROI4_1) |> range()
+# We expand the unalMap regions of 1 base on each side to promote overlaps with gbs regions)
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_1 + 1) |> as.data.frame()
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_1 + 1) |> range()
 # We confirm that unalmap regions can not be mapped
 pairwiseAlignment(ROI4_1)
 pairwiseAlignment(getSeq(ROI4_1), getSeq(ROI4_1$query) |> reverseComplement() ) 
@@ -168,7 +168,7 @@ pairwiseAlignment(getSeq(ROI4_2), getSeq(ROI4_2$query) |> reverseComplement() )
 # Identity of ~50% but no striking difference between strands
 
 # unaligned mapped region with flanking colinear alignments.
-gbs$Oki_Osa |> subsetByOverlaps(ROI4_2)
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_2 + 1)
 pairwiseAlignment(getSeq(ROI4_2 + 150), getSeq(ROI4_2$query + 150) |> reverseComplement(), type="global")|> writePairwiseAlignments(b=60)
 
 ```
@@ -189,7 +189,7 @@ pairwiseAlignment(getSeq(ROI4_3), getSeq(ROI4_3$query) |> reverseComplement() )
 # Identity of ~50% but no striking difference between strands
 
 # unaligned mapped region with flanking colinear alignments.
-gbs$Oki_Osa |> subsetByOverlaps(ROI4_3)
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_3 + 1)
 pairwiseAlignment(getSeq(ROI4_3 + 150), getSeq(ROI4_3$query + 150) |> reverseComplement(), type="global")|> writePairwiseAlignments(b=60)
 ```
 
@@ -456,7 +456,7 @@ ROI10_ins$query |> cleanGaps() |> as.data.frame()
 tail(ROI10_ins, 2) |> plotApairOfChrs(main = "An insertion in the Kume genome")
 tail(ROI10_ins, 2) |> swap() |> cleanGaps()
 
-(ROI10_ins_unalMap <- subsetByOverlaps(unalMap$Oki_Kum, tail(ROI10_ins, 2) )[2])
+(ROI10_ins_unalMap <- subsetByOverlaps(unalMap$Oki_Kum + 1, tail(ROI10_ins, 2) )[2])
 
 # Left side
 pairwiseAlignment(getSeq(genomes$OKI2018.I69, GRanges("PAR:83350-83550")),

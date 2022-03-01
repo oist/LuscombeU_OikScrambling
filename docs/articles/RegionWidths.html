@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
       </span>
     </div>
 
@@ -135,7 +135,7 @@
       <h1 data-toc-skip>Width of the aligned and mapped regions.</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">17 February, 2022</h4>
+            <h4 data-toc-skip class="date">01 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/RegionWidths.Rmd" class="external-link"><code>vignettes/RegionWidths.Rmd</code></a></small>
       <div class="hidden name"><code>RegionWidths.Rmd</code></div>
@@ -246,9 +246,11 @@
 
 <span class="co"># Showing all individual distributions, to demonstrate we can pool some.</span>
 <span class="va">p</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">class</span> <span class="op">+</span> <span class="va">genus</span> <span class="op">+</span> <span class="va">distS</span> <span class="op">+</span> <span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 18784 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_processing_steps-1.png" width="1152"></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Aggregating by distance class</span>
 <span class="va">p_droso</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths_all_tibble</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Drosophila"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">what</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span> <span class="op">+</span> <span class="va">class</span>, nrow <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span>
 <span class="va">p_ciona</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths_all_tibble</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Ciona"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">what</span><span class="op">)</span>      <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span> <span class="op">+</span> <span class="va">class</span>, nrow <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span>
@@ -262,9 +264,15 @@ CCC#
 
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://patchwork.data-imaginist.com" class="external-link">"patchwork"</a></span><span class="op">)</span>
 <span class="op">(</span><span class="va">p_droso</span> <span class="op">/</span> <span class="va">p_ciona</span> <span class="op">/</span> <span class="va">p_oikop</span><span class="op">)</span> <span class="op">+</span>   <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>design <span class="op">=</span> <span class="va">layout</span>, guides <span class="op">=</span> <span class="st">'collect'</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
-<span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
-<span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 914 rows containing non-finite values (stat_bin).</span>
+<span class="co">## Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 10307 rows containing non-finite values (stat_bin).</span>
+<span class="co">## Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 7561 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_processing_steps_by_class_and_genus-1.png" width="1152"></p>
 </div>
 <div class="section level1">
@@ -277,7 +285,7 @@ CCC#
 <h3 id="whole-genomes">Whole genomes<a class="anchor" aria-label="anchor" href="#whole-genomes"></a>
 </h3>
 <p><em>Aligned</em> means “before coalescing” and <em>mapped</em> means “after coalescing”.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span> <span class="op">+</span> <span class="va">class</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
@@ -285,7 +293,7 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">names_table</span><span class="op">$</span><span class="va">class</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_before_coalescing-1.png" width="960"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Oikopleura"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -293,7 +301,7 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">names_table</span><span class="op">$</span><span class="va">query</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_before_coalescing-2.png" width="960"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">class</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -306,14 +314,14 @@ CCC#
 </h3>
 <p>The distribution of widths is not the same on long and short arms.</p>
 <p>Note that for this reason, it would be unwise to filter by width on some operations such as coalescing.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of aligned region widths"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/widths_gbs_by_arm-1.png" width="700"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op">==</span> <span class="st">"chr1"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
@@ -321,7 +329,7 @@ CCC#
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/widths_gbs_by_arm-2.png" width="700"></p>
 <p>Width distribution per arm follows similar pattern on chr2 (first graph). Pairs at a similar evolutionary distance show similar profile, with the exception of Osa_Aom, where the number of alignments on short arms is higher. Nevertheless, the trend of widths being longer on long arms stay true, so we can average them in the plot below.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -334,21 +342,21 @@ CCC#
 <h2 id="unaligned-regions">Unaligned regions<a class="anchor" aria-label="anchor" href="#unaligned-regions"></a>
 </h2>
 <p>Unaligned regions show no difference of width between arms, except perhaps at the “same population” level.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unal</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of unaligned region widths"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/widths_unaligned-1.png" width="700"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unal</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op">==</span> <span class="st">"chr1"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of unaligned region widths"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/widths_unaligned-2.png" width="700"></p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unal</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -360,7 +368,7 @@ CCC#
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/widths_unaligned-3.png" width="700"></p>
 <p>Interestingly, only in Oikopleura do the width distributions from pairs of different distance peak at the same size. Could that be because the genome is very compact?</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unal</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -372,7 +380,7 @@ CCC#
 <span class="co">## replace the existing scale.</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/widths_unaligned2-1.png" width="700"></p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unal</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">class</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -395,7 +403,7 @@ CCC#
 <div class="section level4">
 <h4 id="width-distributions-">Width distributions.<a class="anchor" aria-label="anchor" href="#width-distributions-"></a>
 </h4>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Using after_stat(density) to make more meaningful comparisons between genus</span>
 <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span>
@@ -405,7 +413,7 @@ CCC#
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing-1.png" width="1152"></p>
 <p>Faceting by genus only. Why is North / North (“intermediate”) not bimodal?</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">class</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -417,11 +425,11 @@ CCC#
 <div class="section level4">
 <h4 id="empirical-cumulative-distributions">Empirical cumulative distributions<a class="anchor" aria-label="anchor" href="#empirical-cumulative-distributions"></a>
 </h4>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, col <span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/stat_ecdf.html" class="external-link">stat_ecdf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>,<span class="fl">5e6</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">class</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: Removed 13 rows containing non-finite values (stat_ecdf).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing_ecdf-1.png" width="1152"></p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, col <span class="op">=</span> <span class="va">class</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/stat_ecdf.html" class="external-link">stat_ecdf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>,<span class="fl">5e6</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: Removed 13 rows containing non-finite values (stat_ecdf).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing_ecdf-2.png" width="1152"></p>
@@ -430,14 +438,14 @@ CCC#
 <h4 id="cumulative-sums-">Cumulative sums.<a class="anchor" aria-label="anchor" href="#cumulative-sums-"></a>
 </h4>
 <p>Note: there is a bug: the lines jump between replicates instead of plotting them separately</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">width</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cumsum <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">width</span><span class="op">)</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">class</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">width</span>, y <span class="op">=</span> <span class="va">cumsum</span>, col <span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing_cumsum-1.png" width="1152"></p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">width</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span> |&gt;
@@ -450,21 +458,21 @@ CCC#
 <h3 id="by-arm">By arm<a class="anchor" aria-label="anchor" href="#by-arm"></a>
 </h3>
 <p>When faceted by chromosome and arm type, bimodality is also observed. There is a small peak under 500 bp, found on all arms except YSR. The second peak shows two different distributions for long and short arms.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths after collapsing, split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing3-1.png" width="700"></p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">flag</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths after collapsing, split by flag."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing3-2.png" width="700"></p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> <span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
@@ -472,14 +480,14 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing3-3.png" width="700"></p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths after collapsing, split by distance group"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing3-4.png" width="700"></p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">flag</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">class</span> <span class="op">+</span> <span class="va">flag</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
@@ -492,13 +500,13 @@ CCC#
 <h3 id="non-coalesced-mapped-regions">Non-coalesced mapped regions<a class="anchor" aria-label="anchor" href="#non-coalesced-mapped-regions"></a>
 </h3>
 <p>The mapped regions that are found identical in the aligned set are those that were not coalesced… Are they the small peak ?</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="focus-on-oki-north-comparisons">Focus on Oki – North comparisons<a class="anchor" aria-label="anchor" href="#focus-on-oki-north-comparisons"></a>
 </h3>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_all</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="st">"Oki – North"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -522,7 +530,7 @@ CCC#
 <h3 id="compound-pictures">Compound pictures<a class="anchor" aria-label="anchor" href="#compound-pictures"></a>
 </h3>
 <p>Let’s put into parallel “aligned”, “unaligned” and “mapped”</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_ali</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">genus</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">class</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -544,42 +552,42 @@ CCC#
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/compound1-1.png" width="700"></p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_ali2</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="st">"Oki – North"</span>, <span class="va">nonCoa</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5e5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Isolated alignments"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
 <span class="co">## replace the existing scale.</span></code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_una2</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unmap</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="st">"Oki – North"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5e5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Not aligned, not mapped"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
 <span class="co">## replace the existing scale.</span></code></pre>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_syn2</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="st">"Oki – North"</span>, <span class="op">!</span><span class="va">nonCoa</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5e5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Synteny block"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
 <span class="co">## replace the existing scale.</span></code></pre>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_map2</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="st">"Oki – North"</span>, <span class="op">!</span><span class="va">nonCoa</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5e5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Synteny alignment"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
 <span class="co">## replace the existing scale.</span></code></pre>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_unalmap2</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unalMap</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="st">"Oki – North"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5e5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Unaligned but syntenic"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
 <span class="co">## replace the existing scale.</span></code></pre>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Patchwork</span>
 <span class="op">(</span><span class="va">p_ali2</span> <span class="op">|</span> <span class="va">p_una2</span> <span class="op">|</span> <span class="va">p_syn2</span> <span class="op">|</span> <span class="va">p_map2</span> <span class="op">|</span> <span class="va">p_unalmap2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">5</span>, guides <span class="op">=</span> <span class="st">'collect'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
@@ -590,7 +598,9 @@ CCC#
 <pre><code><span class="co">## Warning: Removed 16 row(s) containing missing values (geom_path).</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <pre><code><span class="co">## Warning: Removed 16 row(s) containing missing values (geom_path).</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 1406 rows containing non-finite values (stat_bin).</span></code></pre>
 <pre><code><span class="co">## Warning: Removed 16 row(s) containing missing values (geom_path).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/compound2-1.png" width="700"></p>
 </div>
@@ -599,21 +609,21 @@ CCC#
 <h2 id="unmapped-regions">Unmapped regions<a class="anchor" aria-label="anchor" href="#unmapped-regions"></a>
 </h2>
 <p>Unmapped regions are a bit longer on the short arm in Oki – North comparisons…</p>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unmap</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of unmapped regions width after collapsing, split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_unmapped_regions-1.png" width="700"></p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unmap</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of unmapped regions width after collapsing, split by genome pair"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_unmapped_regions-2.png" width="700"></p>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unmap</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -629,21 +639,25 @@ CCC#
 <h2 id="mapped-unaligned-regions">Mapped unaligned regions<a class="anchor" aria-label="anchor" href="#mapped-unaligned-regions"></a>
 </h2>
 <p>Note the short peak when comparing pairs within the same population.</p>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unalMap</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of mapped unaligned regions, split by arm."</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 18784 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_unAlmapped_regions-1.png" width="700"></p>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unalMap</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of mapped unaligned regions, split by genome pair"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 18784 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_unAlmapped_regions-2.png" width="700"></p>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unalMap</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -651,8 +665,10 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">300</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span><span class="st">"Width (vertical bar at 300 bp)"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
-<span class="co">## replace the existing scale.</span>
-<span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<span class="co">## replace the existing scale.</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 5425 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_unAlmapped_regions-3.png" width="700"></p>
 </div>
 <div class="section level2">
@@ -662,21 +678,25 @@ CCC#
 <h3 id="whole-region">Whole region<a class="anchor" aria-label="anchor" href="#whole-region"></a>
 </h3>
 <p>Reminder: here we measure the distance between the two colinear pairs that are separated by the translocated pair.</p>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions, split by arm."</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 207 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions-1.png" width="700"></p>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions, split by genome pair"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 207 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions-2.png" width="700"></p>
-<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -684,29 +704,35 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">300</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span><span class="st">"Width (vertical bar at 300 bp)"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
-<span class="co">## replace the existing scale.</span>
-<span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<span class="co">## replace the existing scale.</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 125 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions-3.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="whole-region-after-removal">Whole region, after removal<a class="anchor" aria-label="anchor" href="#whole-region-after-removal"></a>
 </h3>
 <p>Small peak in <em>“same pop”</em> disapears by design. Total number in the main peak also decreases, because they may pass the size filter on the <em>query</em> genome.</p>
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions (after removal), split by arm."</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 9 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_rem-1.png" width="700"></p>
-<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions (after removal), split by genome pair"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 9 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_rem-2.png" width="700"></p>
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra2</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -714,14 +740,16 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">300</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span><span class="st">"Width (vertical bar at 300 bp)"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Scale for 'x' is already present. Adding another scale for 'x', which will</span>
-<span class="co">## replace the existing scale.</span>
-<span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<span class="co">## replace the existing scale.</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 2 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_rem-3.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="aligned-before-removal">Aligned, before removal<a class="anchor" aria-label="anchor" href="#aligned-before-removal"></a>
 </h3>
-<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa_aln</span>   <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="va">gb</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterTranslocations.html" class="external-link">filterTranslocations</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa_aln</span><span class="op">)</span> <span class="op">+</span>
@@ -730,14 +758,14 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions (aligned), split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_coa_aligned-1.png" width="700"></p>
-<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa_aln</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions (aligned), split by genome pair"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_coa_aligned-2.png" width="700"></p>
-<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa_aln</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -752,7 +780,7 @@ CCC#
 <div class="section level3">
 <h3 id="aligned-after-removal">Aligned, after removal<a class="anchor" aria-label="anchor" href="#aligned-after-removal"></a>
 </h3>
-<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa2_aln</span>   <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="va">gb</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterTranslocations.html" class="external-link">filterTranslocations</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa2_aln</span><span class="op">)</span> <span class="op">+</span>
@@ -761,14 +789,14 @@ CCC#
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions (aligned, after removal), split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_coa2_aligned-1.png" width="700"></p>
-<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa2_aln</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widths of translocated regions (aligned, after removal), split by genome pair"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_coa2_aligned-2.png" width="700"></p>
-<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa2_aln</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -784,21 +812,21 @@ CCC#
 <div class="section level2">
 <h2 id="double-coalesced-regions">Double-coalesced regions<a class="anchor" aria-label="anchor" href="#double-coalesced-regions"></a>
 </h2>
-<div class="sourceCode" id="cb114"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths after double-collapsing, split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/re_coalesce-1.png" width="700"></p>
-<div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb147"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of widthsof alignment widths after double-collapsing, split by genome pair"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/re_coalesce-2.png" width="700"></p>
-<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb149"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa2</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -814,7 +842,7 @@ CCC#
 <div class="section level1">
 <h1 id="paired-comparison-of-widths-in-target-and-query-genomes-">Paired comparison of widths in target and query genomes.<a class="anchor" aria-label="anchor" href="#paired-comparison-of-widths-in-target-and-query-genomes-"></a>
 </h1>
-<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb151"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">GBreaks2widthTibble</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span>, <span class="va">pair</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span>       <span class="va">df</span><span class="op">$</span><span class="va">Arm</span>        <span class="op">&lt;-</span> <span class="cn">NA</span>
@@ -838,9 +866,9 @@ CCC#
 <span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##         FALSE FALSE FALSE TRUE TRUE FALSE TRUE TRUE</span>
 <span class="co">## aligned      768648      41624      41943     52103</span>
-<span class="co">## unalMap      553642      84463      82180     35726</span>
-<span class="co">## transpo        7726       1973       2926      3016</span></code></pre>
-<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
+<span class="co">## unalMap      553741      84573      82538     35159</span>
+<span class="co">## transpo        5824       1252       3043      2782</span></code></pre>
+<div class="sourceCode" id="cb153"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ggPlotW2W</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tibble</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tibble</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">target</span>, <span class="va">query</span><span class="op">)</span> <span class="op">+</span>
@@ -853,11 +881,16 @@ CCC#
 <span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">gbs.w2w</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query aligned regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-1.png" width="700"></p>
-<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb154"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">unalMap.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query mapped unaligned regions"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 14293 rows containing non-finite values (stat_density2d).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-2.png" width="700"></p>
-<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb160"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">gbs.w2w</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">pair</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query aligned regions"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: stat_contour(): Zero contours were generated</span></code></pre>
@@ -927,7 +960,7 @@ CCC#
 <pre><code><span class="co">## Warning in min(x): no non-missing arguments to min; returning Inf</span></code></pre>
 <pre><code><span class="co">## Warning in max(x): no non-missing arguments to max; returning -Inf</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-3.png" width="700"></p>
-<div class="sourceCode" id="cb191"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">gbs.w2w</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query aligned regions"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: stat_contour(): Zero contours were generated</span></code></pre>
@@ -949,58 +982,89 @@ CCC#
 <pre><code><span class="co">## Warning in min(x): no non-missing arguments to min; returning Inf</span></code></pre>
 <pre><code><span class="co">## Warning in max(x): no non-missing arguments to max; returning -Inf</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-4.png" width="700"></p>
-<div class="sourceCode" id="cb210"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb246"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">unalMap.w2s</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">pair</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query mapped unaligned regions"</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## Warning: stat_contour(): Zero contours were generated</span></code></pre>
-<pre><code><span class="co">## Warning in min(x): no non-missing arguments to min; returning Inf</span></code></pre>
-<pre><code><span class="co">## Warning in max(x): no non-missing arguments to max; returning -Inf</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 36376 rows containing non-finite values (stat_density2d).</span></code></pre>
 <pre><code><span class="co">## Warning: stat_contour(): Zero contours were generated</span></code></pre>
 <pre><code><span class="co">## Warning in min(x): no non-missing arguments to min; returning Inf</span></code></pre>
 <pre><code><span class="co">## Warning in max(x): no non-missing arguments to max; returning -Inf</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-5.png" width="700"></p>
-<div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb255"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">pair</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 893 rows containing non-finite values (stat_density2d).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-6.png" width="700"></p>
-<div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb261"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 893 rows containing non-finite values (stat_density2d).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-7.png" width="700"></p>
-<div class="sourceCode" id="cb219"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb267"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra2.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">pair</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions (after removal)"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 62 rows containing non-finite values (stat_density2d).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-8.png" width="700"></p>
-<div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb273"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra2.w2s</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Arm</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions (after removal)"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 62 rows containing non-finite values (stat_density2d).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-9.png" width="700"></p>
-<div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb279"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">gbs.w2w</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">query.rep</span> <span class="op">+</span> <span class="va">target.rep</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query aligned regions, matching or not matching repeats"</span><span class="op">)</span></code></pre></div>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-10.png" width="700"></p>
-<div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb280"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">unalMap.w2s</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">query.rep</span> <span class="op">+</span> <span class="va">target.rep</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query mapped unaligned regions, matching or not matching repeats"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 36376 rows containing non-finite values (stat_density2d).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-11.png" width="700"></p>
-<div class="sourceCode" id="cb223"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb286"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggPlotW2W</span><span class="op">(</span><span class="va">tra.w2s</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span> <span class="op">+</span> <span class="va">query.rep</span> <span class="op">+</span> <span class="va">target.rep</span>, nrow <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Width of the target and query translocated regions, matching or not matching repeats"</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## Warning: stat_contour(): Zero contours were generated</span></code></pre>
-<pre><code><span class="co">## Warning in min(x): no non-missing arguments to min; returning Inf</span></code></pre>
-<pre><code><span class="co">## Warning in max(x): no non-missing arguments to max; returning -Inf</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous y-axis</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 1202 rows containing non-finite values (stat_density2d).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-12.png" width="700"></p>
-<div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb292"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">unalMap.w2s</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">target</span> <span class="op">/</span> <span class="va">query</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">target.rep</span>, <span class="va">query.rep</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">geom_freqpoly</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"In presence of a repeat, target width tends to be longer than query"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning: Transformation introduced infinite values in continuous x-axis</span></code></pre>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
+<pre><code><span class="co">## Warning: Removed 36376 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-13.png" width="700"></p>
 </div>
 <div class="section level1">
@@ -1011,7 +1075,7 @@ CCC#
 </h2>
 <p>We know that we can detect more inversions after coalescing and removing translocations (<code><a href="../articles/Inversions.html">vignette("Inversions", package = "OikScrambling")</a></code>).</p>
 <p>Many inversions are shorter than 1 kbp. Size may differ slightly between long and short arms.</p>
-<div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb296"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">invs.gbs</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterInversions.html" class="external-link">filterInversions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">invs.coa</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterInversions.html" class="external-link">filterInversions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">invs.coa2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterInversions.html" class="external-link">filterInversions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
@@ -1023,7 +1087,7 @@ CCC#
 <span class="co">##     597     237     608     237      19      42      58      16       0      50 </span>
 <span class="co">## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma </span>
 <span class="co">##      58      14       0     697      20      13      12</span></code></pre>
-<div class="sourceCode" id="cb231"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb298"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invs.coa</span>,  <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor </span>
 <span class="co">##     670     675     105     665     591     671     321     678      73     275 </span>
@@ -1031,7 +1095,7 @@ CCC#
 <span class="co">##     667     319     686     319      24      51      71      92       0      65 </span>
 <span class="co">## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma </span>
 <span class="co">##      70      92       0    1003      44      21      16</span></code></pre>
-<div class="sourceCode" id="cb233"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb300"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invs.coa2</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor </span>
 <span class="co">##     704     705     122     695     611     706     330     708      79     279 </span>
@@ -1039,7 +1103,7 @@ CCC#
 <span class="co">##     695     327     711     335      27      55      76      92       0      71 </span>
 <span class="co">## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma </span>
 <span class="co">##      77      92       0    1003      45      23      16</span></code></pre>
-<div class="sourceCode" id="cb235"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb302"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Sanity check that we detect inversions on both strands</span>
 <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invs.coa2</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span><span class="fu"><a href="https://rdrr.io/pkg/CNEr/man/Axt-util.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Rle-class.html" class="external-link">decode</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html" class="external-link">strand</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">}</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##   Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom</span>
@@ -1054,25 +1118,25 @@ CCC#
 <span class="co">## +       0       5       5      52       0     470      29      11       3</span>
 <span class="co">## -       0      66      72      40       0     533      16      12      13</span>
 <span class="co">## *       0       0       0       0       0       0       0       0       0</span></code></pre>
-<div class="sourceCode" id="cb237"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb304"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">invs.gbs</span>  <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">invs.gbs</span><span class="op">)</span>  |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">widths</span><span class="op">$</span><span class="va">invs.coa</span>  <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">invs.coa</span><span class="op">)</span>  |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">widths</span><span class="op">$</span><span class="va">invs.coa2</span> <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">invs.coa2</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb238"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb305"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.gbs</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using aligned regions, split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_aligned-1.png" width="700"></p>
-<div class="sourceCode" id="cb240"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb307"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.gbs</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using aligned regions, split by genome pair"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_aligned-2.png" width="700"></p>
-<div class="sourceCode" id="cb242"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb309"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.gbs</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -1083,21 +1147,21 @@ CCC#
 <span class="co">## replace the existing scale.</span>
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_aligned-3.png" width="700"></p>
-<div class="sourceCode" id="cb244"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb311"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using mapped regions, split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_mapped-1.png" width="700"></p>
-<div class="sourceCode" id="cb246"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb313"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using mapped regions, split by genome pair"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_mapped-2.png" width="700"></p>
-<div class="sourceCode" id="cb248"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb315"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -1108,21 +1172,21 @@ CCC#
 <span class="co">## replace the existing scale.</span>
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_mapped-3.png" width="700"></p>
-<div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb317"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">chr</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using doublemapped regions, split by arm."</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_doublemapped-1.png" width="700"></p>
-<div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb319"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Distribution of alignment widths for inverted regions, using doublemapped regions, split by genome pair"</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_doublemapped-2.png" width="700"></p>
-<div class="sourceCode" id="cb254"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb321"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.coa2</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">chr</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="st">"chr2"</span>, <span class="st">"PAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dist</span>, scales <span class="op">=</span> <span class="st">"free_y"</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
@@ -1137,7 +1201,7 @@ CCC#
 <div class="section level2">
 <h2 id="width-of-gaps-next-to-the-inverted-regions">Width of gaps next to the inverted regions<a class="anchor" aria-label="anchor" href="#width-of-gaps-next-to-the-inverted-regions"></a>
 </h2>
-<div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb323"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">inv.lgaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">leftInversionGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">OKI2018.I69</span><span class="op">)</span>
 <span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">OSKA2016v1.9</span><span class="op">)</span>
@@ -1149,7 +1213,7 @@ CCC#
 <span class="co">##     666     315     685     315      22      46      65      92       0      61 </span>
 <span class="co">## Rob_Ply Rob_Sav Rob_Oki Dme_Dbu Dme_Dsu Dme_Dya Dme_Dma </span>
 <span class="co">##      67      92       0    1003      44      21      14</span></code></pre>
-<div class="sourceCode" id="cb258"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb325"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">invs.lgaps</span> <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">invs.lgaps</span><span class="op">)</span> <span class="op">+</span>

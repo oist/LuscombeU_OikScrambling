@@ -102,8 +102,6 @@ sub                      +
 
 ```{r service_function_searchTSDs}
 searchForTSDs <- function(gr, n = 8) {
-  # Remove 1-bp padding
-  gr <- gr -1
   pairwiseAlignment(getSeq(gr |> resize(n, fix = "start")),
                     getSeq(gr |>  flank(n, start = F)),
                     type="global")
