@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
       </span>
     </div>
 
@@ -101,6 +101,9 @@
       <a href="../articles/TFBS.html">Transcription factor binding sites</a>
     </li>
     <li>
+      <a href="../articles/TandemSiteDuplications.html">Tandem site duplications</a>
+    </li>
+    <li>
       <a href="../articles/Translocations.html">Translocations</a>
     </li>
   </ul>
@@ -132,7 +135,7 @@
       <h1 data-toc-skip>Motif search and analysis</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">16 February, 2022</h4>
+            <h4 data-toc-skip class="date">01 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/PWM.Rmd" class="external-link"><code>vignettes/PWM.Rmd</code></a></small>
       <div class="hidden name"><code>PWM.Rmd</code></div>
@@ -142,7 +145,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, include <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <div class="section level1">
 <h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -153,6 +156,19 @@
 <h1 id="load-pacakges">Load pacakges<a class="anchor" aria-label="anchor" href="#load-pacakges"></a>
 </h1>
 <p>Core packages that provide functions we use a lot.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span>compat <span class="op">=</span> <span class="cn">F</span><span class="op">)</span>
+<span class="va">annots</span>  <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllAnnotations.html">loadAllAnnotations</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
+
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org" class="external-link">'ggplot2'</a></span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggseqlogo"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Loading required namespace: ggseqlogo</span></code></pre>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"JASPAR2020"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"rGADEM"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level1">
 <h1 id="motif-searches">Motif searches<a class="anchor" aria-label="anchor" href="#motif-searches"></a>
@@ -161,16 +177,62 @@
 <blockquote>
 <p><em>The background sequences are simulated using the [a,c,g,t] frequencies in the input sequences, with length matched between the two sets. The background sequences are used as the random sequences for assessing motif enrichment in the input data.</em></p>
 </blockquote>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Pass genome information through metadata</span>
+<span class="va">getSeq_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span><span class="op">$</span><span class="va">genome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">genome</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">seqs</span>
+<span class="op">}</span>
+
+<span class="co"># Note that GADEM crashes on sequences longer than ~48 kbp.</span>
+<span class="co"># Slow !</span>
+<span class="va">doGadem</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">seqs</span> <span class="op">&lt;-</span> <span class="va">seqs</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">48000</span><span class="op">]</span>
+  <span class="va">bsgenome_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span><span class="op">$</span><span class="va">genome</span>
+  <span class="va">bsgenome_obj</span> <span class="op">&lt;-</span> <span class="fu">BSgenome</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/available.genomes.html" class="external-link">getBSgenome</a></span><span class="op">(</span><span class="va">bsgenome_name</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/GADEM.html" class="external-link">GADEM</a></span><span class="op">(</span><span class="va">seqs</span>, verbose<span class="op">=</span><span class="fl">1</span>, genome<span class="op">=</span><span class="va">bsgenome_obj</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="va">gadems</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="section level2">
 <h2 id="aligned-non-coalesced-regions">Aligned non-coalesced regions<a class="anchor" aria-label="anchor" href="#aligned-non-coalesced-regions"></a>
 </h2>
 <p>Aligned regions that do not coalesce into syntenic blocks are relatively depleted in genes, and show no enrichment of exons versus introns. They are also depleted in repeats, and are mildly enriched in CNEs. Altogether, they can not be summarised in one feature. So let’s see if there are motifs enriched there.</p>
 <p>See <code>vignette("GenomicFeatuers", package = "OikScrambling")</code> for details on these regions.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">alnNonCoa_seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="va">gb</span><span class="op">[</span><span class="va">gb</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span> |&gt; <span class="fu">getSeq_</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">alnNonCoa_seqs</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor </span>
+<span class="co">##    4646    4435    2993    4586    4578    4620    1757    4526    2791    2321 </span>
+<span class="co">## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor </span>
+<span class="co">##    4321    1732    4346    1853    3882</span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="st">"gadems.alnNonCoa.Rds"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">alnNonCoa_seqs</span>, <span class="va">doGadem</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span>, file <span class="op">=</span> <span class="st">"gadems.alnNonCoa.Rds"</span><span class="op">)</span>
+<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+  <span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"gadems.alnNonCoa.Rds"</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="unmapped">Unmapped<a class="anchor" aria-label="anchor" href="#unmapped"></a>
 </h2>
 <p>There regions are not aligned and not within a synteny block.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">unmap_seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">unmap</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">getSeq_</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">unmap_seqs</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor </span>
+<span class="co">##    8821    8515    4119    8848    8854    8815    4034    8755    4063    5161 </span>
+<span class="co">## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor </span>
+<span class="co">##    8484    4008    8515    4129    5214</span></code></pre>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="st">"gadems.unmap.Rds"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">unmap_seqs</span>, <span class="va">doGadem</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span>, file <span class="op">=</span> <span class="st">"gadems.unmap.Rds"</span><span class="op">)</span>
+<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+  <span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"gadems.unmap.Rds"</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="unaligned-regions-near-inversions">Unaligned regions near inversions<a class="anchor" aria-label="anchor" href="#unaligned-regions-near-inversions"></a>
@@ -180,37 +242,200 @@
 <div class="section level3">
 <h3 id="isolate-the-left-side-gaps-in-inversions">Isolate the left-side gaps in inversions<a class="anchor" aria-label="anchor" href="#isolate-the-left-side-gaps-in-inversions"></a>
 </h3>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">inv.lgaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">leftInversionGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">inv.lgaps_seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">getSeq_</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps_seqs</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Oki_Osa Oki_Bar Oki_Kum Oki_Aom Oki_Nor Osa_Oki Osa_Bar Osa_Kum Osa_Aom Osa_Nor </span>
+<span class="co">##     669     675      96     665     591     669     319     678      69     274 </span>
+<span class="co">## Bar_Oki Bar_Osa Bar_Kum Bar_Aom Bar_Nor </span>
+<span class="co">##     666     315     685     315      22</span></code></pre>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="st">"gadems.inv.lgaps.Rds"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">inv.lgaps_seqs</span>, <span class="va">doGadem</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span>, file <span class="op">=</span> <span class="st">"gadems.inv.lgaps.Rds"</span><span class="op">)</span>
+<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+  <span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"gadems.inv.lgaps.Rds"</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="inversions">Inversions<a class="anchor" aria-label="anchor" href="#inversions"></a>
 </h2>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># inv_seqs &lt;- sapply(coa[1:15], leftInversionGaps) |&gt; sapply(getSeq_) |&gt; SimpleList()</span>
+<span class="co"># sapply(inv_seqs, length)</span>
+<span class="co"># if (!file.exists("gadems.invs.Rds")) {</span>
+<span class="co">#   gadems$invs &lt;- BiocParallel::bplapply(inv_seqs, doGadem) |&gt; SimpleList()</span>
+<span class="co">#   saveRDS(gadems$inv, file = "gadems.invs.Rds")</span>
+<span class="co"># } else {</span>
+<span class="co">#   gadems$invs &lt;- readRDS("gadems.invs.Rds")</span>
+<span class="co"># }</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="promoters">Promoters<a class="anchor" aria-label="anchor" href="#promoters"></a>
 </h2>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#prom_seqs &lt;- sapply(annots[1:3], \(gb) suppressWarnings(trim(promoters(gb)))) |&gt;</span>
+<span class="co">#  sapply(getSeq_) |&gt; SimpleList()</span>
+<span class="co">#sapply(prom_seqs, length)</span>
+<span class="co">#if (!file.exists("gadems.proms.Rds")) {</span>
+<span class="co">#  gadems$proms &lt;- BiocParallel::bplapply(prom_seqs, doGadem) |&gt; SimpleList()</span>
+<span class="co">#  saveRDS(gadems$proms, file = "gadems.proms.Rds")</span>
+<span class="co">#} else {</span>
+<span class="co">#  gadems$proms &lt;- readRDS("gadems.proms.Rds")</span>
+<span class="co">#}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="introns">Introns<a class="anchor" aria-label="anchor" href="#introns"></a>
 </h2>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#intron_seqs &lt;- sapply(annots[1:3], GenomicFeatures::intronicParts) |&gt;</span>
+<span class="co">#  sapply(getSeq_) |&gt; SimpleList()</span>
+<span class="co">#sapply(intron_seqs, length)</span>
+<span class="co">#if (!file.exists("gadems.introns.Rds")) {</span>
+<span class="co">#  gadems$introns &lt;- BiocParallel::bplapply(intron_seqs, doGadem) |&gt; SimpleList()</span>
+<span class="co">#  saveRDS(gadems$introns, file = "gadems.introns.Rds")</span>
+<span class="co">#} else {</span>
+<span class="co">#  gadems$introns &lt;- readRDS("gadems.introns.Rds")</span>
+<span class="co">#}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">## Inverted regions are AT-rich as usual.</span>
+<span class="va">invRegions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterInversions.html" class="external-link">filterInversions</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">invSeq</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invRegions</span>, <span class="va">getSeq</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>Number of motifs found</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gadems</span>, <span class="va">sapply</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">@</span><span class="va">motifList</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##         alnNonCoa unmap inv.lgaps</span>
+<span class="co">## Oki_Osa         2     3         6</span>
+<span class="co">## Oki_Bar         2     2         5</span>
+<span class="co">## Oki_Kum         2     2         2</span>
+<span class="co">## Oki_Aom         2     4         7</span>
+<span class="co">## Oki_Nor         2     3         5</span>
+<span class="co">## Osa_Oki         2     2         5</span>
+<span class="co">## Osa_Bar         2     2         6</span>
+<span class="co">## Osa_Kum         2     2         7</span>
+<span class="co">## Osa_Aom         1     3         4</span>
+<span class="co">## Osa_Nor         2     3         4</span>
+<span class="co">## Bar_Oki         2     5         5</span>
+<span class="co">## Bar_Osa         2     2         4</span>
+<span class="co">## Bar_Kum         2     2         4</span>
+<span class="co">## Bar_Aom         2     3         5</span>
+<span class="co">## Bar_Nor         2     4         2</span></code></pre>
 </div>
 </div>
 <div class="section level1">
 <h1 id="display">Display<a class="anchor" aria-label="anchor" href="#display"></a>
 </h1>
 <p>Service functions.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">showAllMotifs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gadems</span><span class="op">)</span> <span class="op">{</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">)</span>, \<span class="op">(</span><span class="va">name</span><span class="op">)</span> <span class="op">{</span>
+    <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">motifList</span><span class="op">)</span>, \<span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span>
+      <span class="va">gadems</span><span class="op">[[</span><span class="va">name</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">n</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">consensus</span>
+    <span class="op">}</span><span class="op">)</span>
+  <span class="op">}</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="va">plotAllMotifs</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gadems</span><span class="op">)</span> <span class="op">{</span>
+  <span class="kw">for</span> <span class="op">(</span><span class="va">curObjName</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+    <span class="kw">for</span> <span class="op">(</span><span class="va">n</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">[[</span><span class="va">curObjName</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">motifList</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+      <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">[[</span><span class="va">curObjName</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">n</span><span class="op">]</span><span class="op">]</span>, <span class="va">curObjName</span><span class="op">)</span>
+      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span>
+    <span class="op">}</span>
+  <span class="op">}</span>
+<span class="op">}</span>
+
+<span class="va">plotOneMotif</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gadem</span>, <span class="va">pairName</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">range</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
+  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">range</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+    <span class="va">pwm</span> <span class="op">&lt;-</span> <span class="fu">rGADEM</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html" class="external-link">getPWM</a></span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span>
+    <span class="va">consensus</span> <span class="op">&lt;-</span> <span class="va">gadem</span><span class="op">@</span><span class="va">consensus</span>
+  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+    <span class="va">pwm</span> <span class="op">&lt;-</span> <span class="fu">rGADEM</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html" class="external-link">getPWM</a></span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span><span class="op">[</span>,<span class="va">range</span><span class="op">]</span>
+    <span class="va">consensus</span> <span class="op">&lt;-</span> <span class="va">gadem</span><span class="op">@</span><span class="va">consensus</span> |&gt; <span class="fu">subseq</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">range</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">range</span><span class="op">)</span><span class="op">)</span>
+  <span class="op">}</span>
+  <span class="va">title</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Motif consensus: "</span>, <span class="va">consensus</span><span class="op">)</span>
+  <span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">pairName</span><span class="op">)</span><span class="op">)</span>
+  <span class="va">title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Genome pair: "</span>, <span class="va">pairName</span>, <span class="st">", "</span>, <span class="va">title</span><span class="op">)</span>
+  <span class="co"># Suppressed warning message: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; = "none")` instead. </span>
+  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggseqlogo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggseqlogo/man/ggseqlogo.html" class="external-link">ggseqlogo</a></span><span class="op">(</span><span class="va">pwm</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="op">)</span>
+  <span class="va">p</span>  <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="va">title</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
 <div class="section level2">
 <h2 id="aligned-non-coalesced-regions-1">Aligned non-coalesced regions<a class="anchor" aria-label="anchor" href="#aligned-non-coalesced-regions-1"></a>
 </h2>
 <p>Many comparison return a motif that looks like <code>AAAA.....AAAA</code>, and some also return <code>AAGAA</code> (or their reverse-complement).</p>
 <p>The Oki - Kume comparison shows T-rich motifs (note that they could have been A-rich reverse-complement).</p>
 <p>Sometimes a weaker A-rich / T-rich motif is also found.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">showAllMotifs</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## $Oki_Osa</span>
+<span class="co">## [1] "nrAAAwnnnnrAAAn" "nrAAGAArAn"     </span>
+<span class="co">## </span>
+<span class="co">## $Oki_Bar</span>
+<span class="co">## [1] "nrAAAwnnnnrAAAAn" "nyTTCTTyyn"      </span>
+<span class="co">## </span>
+<span class="co">## $Oki_Kum</span>
+<span class="co">## [1] "nTTTTTsAAn" "nwTTTTyTTn"</span>
+<span class="co">## </span>
+<span class="co">## $Oki_Aom</span>
+<span class="co">## [1] "nrAAAwnnnnAAAn" "nTyTTCTTyn"    </span>
+<span class="co">## </span>
+<span class="co">## $Oki_Nor</span>
+<span class="co">## [1] "nTTTTynwnnTTTTn" "nrAAGAArAn"     </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Oki</span>
+<span class="co">## [1] "rAAAwnwnnrAAAwn" "nrAArwnrAmrAn"  </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Bar</span>
+<span class="co">## [1] "nAAAAwwnwrAAAAwn" "nTyyTynTykwTTTyn"</span>
+<span class="co">## </span>
+<span class="co">## $Osa_Kum</span>
+<span class="co">## [1] "nwTTTnnnnwwTTTn" "nmGAArAArn"     </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Aom</span>
+<span class="co">## [1] "nAAAAwwwnnnrAAAAwn"</span>
+<span class="co">## </span>
+<span class="co">## $Osa_Nor</span>
+<span class="co">## [1] "nAAAAwnwnrAAAw"   "nTynTybwykwTTTyn"</span>
+<span class="co">## </span>
+<span class="co">## $Bar_Oki</span>
+<span class="co">## [1] "nTTTTnnwwwTTTn" "nwTyTTyTTy"    </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Osa</span>
+<span class="co">## [1] "wTTTTnwwwwTTTn"  "nTyTTynnnnwTTTn"</span>
+<span class="co">## </span>
+<span class="co">## $Bar_Kum</span>
+<span class="co">## [1] "nTTTTnnnwwTTTTn" "rAArAwrAArn"    </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Aom</span>
+<span class="co">## [1] "nTTTTwnnwwwTTTn" "nmrAArAArAn"    </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Nor</span>
+<span class="co">## [1] "nAAAAdnGCkrAGCGAAGCn" "nwTTTTTnwwwwwTTTTn"</span></code></pre>
 <p>Here are a few graphical examples.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Osaka"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_alnNonCoa_motifs-1.png" width="700"></p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Osaka"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_alnNonCoa_motifs-2.png" width="700"></p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Kume"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_alnNonCoa_motifs-3.png" width="700"></p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Kume"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_alnNonCoa_motifs-4.png" width="700"></p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Okinawa"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_alnNonCoa_motifs-5.png" width="700"></p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">alnNonCoa</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Barcelona"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_alnNonCoa_motifs-6.png" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="unaligned-non-mapped-regions">Unaligned non-mapped regions<a class="anchor" aria-label="anchor" href="#unaligned-non-mapped-regions"></a>
@@ -221,7 +446,68 @@
 <li>Variations over <code>GsCsCkwmGsGsC</code> in some Oki -&gt; other comparisons.</li>
 <li>Variations over <code>GCT..GCT</code> in some Nor -&gt; other comparisons (pay attention the reverse complements).</li>
 </ul>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">showAllMotifs</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## $Oki_Osa</span>
+<span class="co">## [1] "wTTTTyrAAn"        "GsCsCkwmGsGsCkTyn" "nTTTTTCTTn"       </span>
+<span class="co">## </span>
+<span class="co">## $Oki_Bar</span>
+<span class="co">## [1] "nwTTTTTsAn" "nTTTTThTTn"</span>
+<span class="co">## </span>
+<span class="co">## $Oki_Kum</span>
+<span class="co">## [1] "mCGsCCCkwmGGGCCGkCwmrsCCCy" "nAAAAATnAArAAAmr"          </span>
+<span class="co">## </span>
+<span class="co">## $Oki_Aom</span>
+<span class="co">## [1] "nTTTTTsAAn"         "nAArAAAAAn"         "nTTTTTCGAn"        </span>
+<span class="co">## [4] "nCGrCyykwmGGssCkkC"</span>
+<span class="co">## </span>
+<span class="co">## $Oki_Nor</span>
+<span class="co">## [1] "nTTsAAAAAn" "nTTTTTyTTn" "nwTTTTyGAn"</span>
+<span class="co">## </span>
+<span class="co">## $Osa_Oki</span>
+<span class="co">## [1] "mGCTymGCTymGCnmwTTTn" "nAAAAwwwnnAAAAAwn"   </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Bar</span>
+<span class="co">## [1] "nAAAAwwwnnnAAAAwn" "nAGCTymGCTymGCk"  </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Kum</span>
+<span class="co">## [1] "wAGCTTmGCTTCGCk"    "nwTTTTTnnnwwwTTTTn"</span>
+<span class="co">## </span>
+<span class="co">## $Osa_Aom</span>
+<span class="co">## [1] "AAAAwwwwnnnAAAAwn" "wTTTkyGmAn"        "kwGCTGAGCTGAGCT"  </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Nor</span>
+<span class="co">## [1] "nGCkrAGCkrAGCk"     "nAAAAwwwnnnAAAAAwn" "nTTTTTvAAn"        </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Oki</span>
+<span class="co">## [1] "rmGCGAAGCGAAGCwwmr"  "nwTTTTTnwwwwwTTTTn"  "wTTGGTCAyTTTyCCCGCw"</span>
+<span class="co">## [4] "wTTTTsAAAn"          "wTTTyGCyAAAAATGGCTn"</span>
+<span class="co">## </span>
+<span class="co">## $Bar_Osa</span>
+<span class="co">## [1] "wGCTTCGCTTCGCk"     "nwTTTTTnwwwwwTTTTn"</span>
+<span class="co">## </span>
+<span class="co">## $Bar_Kum</span>
+<span class="co">## [1] "mGCGAAGCGAAGCTwmrmGy" "nwTTTTkwhwwwwwwTTTy" </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Aom</span>
+<span class="co">## [1] "wGCTTCGCTTCGCky"   "nAAAwwwwnwAAAAAwn" "nykTTTTTGn"       </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Nor</span>
+<span class="co">## [1] "wGCTTCGCTTCGCkyw"     "mrAAAwwwwdhnwmAAAAwn" "wCACCCTCAm"          </span>
+<span class="co">## [4] "wwTTTnnnwwTTTn"</span></code></pre>
 <p>Here are a few graphical examples.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Osaka"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_unal_motifs-1.png" width="700"></p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Kume"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_unal_motifs-2.png" width="700"></p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Okinawa"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_unal_motifs-3.png" width="700"></p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">unmap</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Barcelona - Okinawa"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_unal_motifs-4.png" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="unaligned-regions-left-to-inversion">Unaligned regions left to inversion<a class="anchor" aria-label="anchor" href="#unaligned-regions-left-to-inversion"></a>
@@ -232,35 +518,142 @@
 <li>Two other motifs are found when comparing Oki to Aom (<code>nGAGGCmACGmsCGTTCn</code>) and to Nor <code>nACGCyCryTCATTCTwTy</code>).</li>
 <li>In the Osaka genome, we see a the <code>GCT..GCT</code> motif again.</li>
 </ul>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">showAllMotifs</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## $Oki_Osa</span>
+<span class="co">## [1] "nCCTGAsTCAGGkTyTn"     "hTTTykkkTCrdyTTyk"     "nGCCGCwwmkCGGCTTyTn"  </span>
+<span class="co">## [4] "nwTTTTyAAAn"           "nTTTTnnnnnrAAAAw"      "wTwwsrwwkTGACACCCTTAw"</span>
+<span class="co">## </span>
+<span class="co">## $Oki_Bar</span>
+<span class="co">## [1] "sGCGwrGCsGCyyykn"   "rAAArCCTGAnTCAGGnT" "wTTTTnnwnwTTTTn"   </span>
+<span class="co">## [4] "nTTTsAAAAw"         "wTTTynrnmAAAAw"    </span>
+<span class="co">## </span>
+<span class="co">## $Oki_Kum</span>
+<span class="co">## [1] "rAAGCCGCTwCGCGrCTTywywTwn" "yTTynnnAyCCTGACTCAGGTTTTy"</span>
+<span class="co">## </span>
+<span class="co">## $Oki_Aom</span>
+<span class="co">## [1] "nAAAmCCTGAsTCAGGn"  "msCykykrnkCkGmTTn"  "nTTTTynwrAAAAAAAn" </span>
+<span class="co">## [4] "nTTTsAAAAw"         "nwTTTynnnnwTTTTn"   "nGAGGCmACGmsCGTTCn"</span>
+<span class="co">## [7] "kGAyACCCTTAw"      </span>
+<span class="co">## </span>
+<span class="co">## $Oki_Nor</span>
+<span class="co">## [1] "mrAAGCCGmnnmGmrG"    "AAyCwGAGTCAGGGTy"    "wTTTTnnwnwTTTTn"    </span>
+<span class="co">## [4] "nACGCyCryTCATTCTwTy" "nTTTTynnwrAAAAAwwn" </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Oki</span>
+<span class="co">## [1] "AAAwkmGCGrAGCGAAGCTw"  "nAAAwwwmrAAwwwAAAwwTw" "nwTTTTTTynAAAww"      </span>
+<span class="co">## [4] "mCAAyTwATTGGTCAyTTTn"  "wTTTTkrCGmrn"         </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Bar</span>
+<span class="co">## [1] "nAArnTrrmwrmGCGAAGCGAAGCTwmrm" "wTTTTnkhnwTTTTTw"             </span>
+<span class="co">## [3] "wAArnkrACAAyTwATTGGTCAyTTTm"   "nTTAACCCyTGCGGr"              </span>
+<span class="co">## [5] "nGsGkGGGsGn"                   "nAAAAwTwkmwwTTTTw"            </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Kum</span>
+<span class="co">## [1] "mGCGAAGCGAAGCTw"     "AAwwTTykynwAAAAAw"   "wTTTrAAAAw"         </span>
+<span class="co">## [4] "nAAAwwnwwnAAAAww"    "mCAAyTAATTGGyCAnTTw" "nTTAACCCyTky"       </span>
+<span class="co">## [7] "nwTTTTGACGCGn"      </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Aom</span>
+<span class="co">## [1] "wAGCTAAGCTr"                       "ymAAAAAAGGGCskkAAwAkCTn"          </span>
+<span class="co">## [3] "wAwwnybnGAAATGTCywnAAATGTCmrnAwrk" "nwAAAAwwwTsAAAw"                  </span>
+<span class="co">## </span>
+<span class="co">## $Osa_Nor</span>
+<span class="co">## [1] "wAAAAknGCkrAGCGwAGCkw"               "mCAAyTwwTTGGTCAyTTTmCCCGCArrrGTTAAn"</span>
+<span class="co">## [3] "nAAAAwTwwnwAAAAAww"                  "wTCGCGTCAAAAw"                      </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Oki</span>
+<span class="co">## [1] "nTTyksrCkykwAGCTTCGCTTCGCkCwkyywkyTTy"</span>
+<span class="co">## [2] "wTTTThkhnwTTTTTn"                     </span>
+<span class="co">## [3] "wTTTwmAAAAw"                          </span>
+<span class="co">## [4] "nAAArTGAmCAATTwrTTGk"                 </span>
+<span class="co">## [5] "wTTTnwnnAAAAww"                       </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Osa</span>
+<span class="co">## [1] "TyksrCkykwAGCTTCGCTTCGCkCwkyyAkyTTy" "nTTAACyyTTGCGGGkAAArTGACCAATTwrTTGT"</span>
+<span class="co">## [3] "nAAAwTTTTwnAwwTTTTn"                 "nAGCrAAATTnAAGTk"                   </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Kum</span>
+<span class="co">## [1] "hTTyknrCkykwAGCTTCGCTTCGCkywkyywkyT" "wTTTTTnwAAAw"                       </span>
+<span class="co">## [3] "wTGGTCAyTTTyCCCGCAArrnTTAw"          "nAAAAwwnwAAAww"                     </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Aom</span>
+<span class="co">## [1] "rAArmTrrmwGmGCGAAGCGAAGCTw"          </span>
+<span class="co">## [2] "nTTAAyyyTTGCGGGkAAArTGACCAATTArTTGTy"</span>
+<span class="co">## [3] "nCGCGTCAAAAww"                       </span>
+<span class="co">## [4] "nAAwwTTTnwnAwwTTTTn"                 </span>
+<span class="co">## [5] "yTTnAATTTCGCTn"                      </span>
+<span class="co">## </span>
+<span class="co">## $Bar_Nor</span>
+<span class="co">## [1] "ArmwnnmwrmGCGAAGCGAAGCTwmG" "mmmAAAAACGGTTTysAAArwAww"</span></code></pre>
 <p>Here are a few graphical examples.</p>
 <div class="section level3">
 <h3 id="cctga-tcagg">
 <code>CCTGA.TCAGG</code><a class="anchor" aria-label="anchor" href="#cctga-tcagg"></a>
 </h3>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Osaka"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_CCTGA.TCAGG_motifs_from_invs-1.png" width="700"></p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Kume"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_CCTGA.TCAGG_motifs_from_invs-2.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="aagccgc---gcggctt">
 <code>aaGCCGc...gCGGCtt</code><a class="anchor" aria-label="anchor" href="#aagccgc---gcggctt"></a>
 </h3>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Osaka"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_aaGCCGc...gCGGCtt_motifs_from_invs-1.png" width="700"></p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Kume"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_aaGCCGc...gCGGCtt_motifs_from_invs-2.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="other-from-okinawan-genome">Other from Okinawan genome<a class="anchor" aria-label="anchor" href="#other-from-okinawan-genome"></a>
 </h3>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Aom</span><span class="op">[[</span><span class="fl">6</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Aomori"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_more_motifs_from_invs-1.png" width="700"></p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Nor</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Okinawa - Norway"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_some_more_motifs_from_invs-2.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="gct--gct">
 <code>GCT..GCT</code><a class="anchor" aria-label="anchor" href="#gct--gct"></a>
 </h3>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Okinawa"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_GCT..GCT_motifs_from_invs-1.png" width="700"></p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Barcelona"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_GCT..GCT_motifs_from_invs-2.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="gcttcgcttc">
 <code>GCTTCGCTTC</code><a class="anchor" aria-label="anchor" href="#gcttcgcttc"></a>
 </h3>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Osa_Kum</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Kume"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_GCTTCGCTTC_from_invs-1.png" width="700"></p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Barcelona - Okinawa"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_GCTTCGCTTC_from_invs-2.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="caa----ttggtca">
 <code>CAA....TTGGTCA</code><a class="anchor" aria-label="anchor" href="#caa----ttggtca"></a>
 </h3>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Osa_Kum</span><span class="op">[[</span><span class="fl">5</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Kume"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_CAA....TTGGTCA_from_invs-1.png" width="700"></p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Osa_Oki</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Okinawa"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_CAA....TTGGTCA_from_invs-2.png" width="700"></p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotOneMotif</span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Osa_Nor</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="st">"Osaka - Norway"</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/plot_CAA....TTGGTCA_from_invs-3.png" width="700"></p>
 </div>
 </div>
 </div>
@@ -268,6 +661,86 @@
 <h1 id="at-richness">AT richness<a class="anchor" aria-label="anchor" href="#at-richness"></a>
 </h1>
 <p>Unmapped regions have a much higher AT-richness than aligned ones.</p>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>
+  alnNonCoa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">alnNonCoa_seqs</span>, \<span class="op">(</span><span class="va">seq</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">seq</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,
+  unmap     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">unmap_seqs</span>, \<span class="op">(</span><span class="va">seq</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">seq</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,
+  inv.lgaps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps_seqs</span>, \<span class="op">(</span><span class="va">seq</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">seq</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,
+  inv       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">invSeq</span>, \<span class="op">(</span><span class="va">seq</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">seq</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##             Oki_Osa   Oki_Bar   Oki_Kum   Oki_Aom   Oki_Nor   Osa_Oki   Osa_Bar</span>
+<span class="co">## alnNonCoa 0.5715555 0.5655406 0.5990275 0.5700294 0.5653554 0.5663566 0.5931541</span>
+<span class="co">## unmap     0.6340679 0.6369675 0.6167209 0.6331014 0.6322788 0.6410509 0.6426714</span>
+<span class="co">## inv.lgaps 0.6384541 0.6414735 0.6249809 0.6365136 0.6402976 0.6461967 0.6708647</span>
+<span class="co">## inv       0.5714415 0.5665606 0.5831486 0.5702464 0.5664807 0.5660921 0.5956192</span>
+<span class="co">##             Osa_Kum   Osa_Aom   Osa_Nor   Bar_Oki   Bar_Osa   Bar_Kum   Bar_Aom</span>
+<span class="co">## alnNonCoa 0.5666032 0.6010758 0.5899721 0.5732667 0.6088972 0.5739199 0.6083924</span>
+<span class="co">## unmap     0.6411449 0.6128378 0.6334821 0.6619511 0.6667264 0.6618767 0.6661767</span>
+<span class="co">## inv.lgaps 0.6463511 0.6563719 0.6614430 0.6670382 0.6985237 0.6681080 0.6898977</span>
+<span class="co">## inv       0.5664901 0.5930444 0.5936795 0.5704858 0.6117783 0.5716243 0.6118009</span>
+<span class="co">##             Bar_Nor</span>
+<span class="co">## alnNonCoa 0.6124078</span>
+<span class="co">## unmap     0.6140647</span>
+<span class="co">## inv.lgaps 0.7245156</span>
+<span class="co">## inv       0.6292967</span></code></pre>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="op">(</span><span class="va">genomes.AT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">genomes</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="fu">getSeq_</span><span class="op">(</span><span class="va">g</span><span class="op">)</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##  OKI2018.I69 OSKA2016v1.9      Bar2.p4    KUM.M3.7f     AOM.5.5f         OdB3 </span>
+<span class="co">##    0.5893477    0.5831737    0.6004930    0.5891578    0.5852745    0.5686432</span></code></pre>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">## This difference is significant.</span>
+<span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">invSeq</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">inv.lgaps_seqs</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## </span>
+<span class="co">##  Welch Two Sample t-test</span>
+<span class="co">## </span>
+<span class="co">## data:  letterFrequency(invSeq$Oki_Osa, "AT", as.prob = TRUE) and letterFrequency(inv.lgaps_seqs$Oki_Osa, "AT", as.prob = TRUE)</span>
+<span class="co">## t = -23.381, df = 1198.2, p-value &lt; 2.2e-16</span>
+<span class="co">## alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="co">## 95 percent confidence interval:</span>
+<span class="co">##  -0.07263580 -0.06138932</span>
+<span class="co">## sample estimates:</span>
+<span class="co">## mean of x mean of y </span>
+<span class="co">## 0.5714415 0.6384541</span></code></pre>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">invSeq</span><span class="op">$</span><span class="va">Osa_Oki</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">inv.lgaps_seqs</span><span class="op">$</span><span class="va">Osa_Oki</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## </span>
+<span class="co">##  Welch Two Sample t-test</span>
+<span class="co">## </span>
+<span class="co">## data:  letterFrequency(invSeq$Osa_Oki, "AT", as.prob = TRUE) and letterFrequency(inv.lgaps_seqs$Osa_Oki, "AT", as.prob = TRUE)</span>
+<span class="co">## t = -25.326, df = 1170, p-value &lt; 2.2e-16</span>
+<span class="co">## alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="co">## 95 percent confidence interval:</span>
+<span class="co">##  -0.08631036 -0.07389900</span>
+<span class="co">## sample estimates:</span>
+<span class="co">## mean of x mean of y </span>
+<span class="co">## 0.5660921 0.6461967</span></code></pre>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">invSeq</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">inv.lgaps_seqs</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## </span>
+<span class="co">##  Welch Two Sample t-test</span>
+<span class="co">## </span>
+<span class="co">## data:  letterFrequency(invSeq$Oki_Bar, "AT", as.prob = TRUE) and letterFrequency(inv.lgaps_seqs$Oki_Bar, "AT", as.prob = TRUE)</span>
+<span class="co">## t = -27.122, df = 1246.1, p-value &lt; 2.2e-16</span>
+<span class="co">## alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="co">## 95 percent confidence interval:</span>
+<span class="co">##  -0.08033177 -0.06949394</span>
+<span class="co">## sample estimates:</span>
+<span class="co">## mean of x mean of y </span>
+<span class="co">## 0.5665606 0.6414735</span></code></pre>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">invSeq</span><span class="op">$</span><span class="va">Oki_Kum</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/letterFrequency.html" class="external-link">letterFrequency</a></span><span class="op">(</span><span class="va">inv.lgaps_seqs</span><span class="op">$</span><span class="va">Oki_Kum</span>, <span class="st">"AT"</span>, as.prob <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## </span>
+<span class="co">##  Welch Two Sample t-test</span>
+<span class="co">## </span>
+<span class="co">## data:  letterFrequency(invSeq$Oki_Kum, "AT", as.prob = TRUE) and letterFrequency(inv.lgaps_seqs$Oki_Kum, "AT", as.prob = TRUE)</span>
+<span class="co">## t = -2.1396, df = 106.27, p-value = 0.03468</span>
+<span class="co">## alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="co">## 95 percent confidence interval:</span>
+<span class="co">##  -0.080593766 -0.003070676</span>
+<span class="co">## sample estimates:</span>
+<span class="co">## mean of x mean of y </span>
+<span class="co">## 0.5831486 0.6249809</span></code></pre>
 <p>A palindromic (rAAGCsGCwwmkCGrCTTyn) motif is found in the left gaps.</p>
 <p>Or could it be <code>GCCGCnnnGCGGC</code> ? Its frequency in genomes is something like:</p>
 <pre><code>  Oki   Osa   Bar   Kum   Aom   Nor 
@@ -279,6 +752,62 @@
 <div class="section level1">
 <h1 id="search-for-the-motifs-in-jaspar">Search for the motifs in JASPAR<a class="anchor" aria-label="anchor" href="#search-for-the-motifs-in-jaspar"></a>
 </h1>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">checkJaspar</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">pwm</span>, <span class="va">range</span><span class="op">=</span><span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
+  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">range</span><span class="op">)</span><span class="op">)</span>
+    <span class="va">PWMat</span> <span class="op">&lt;-</span> <span class="fu">TFBSTools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/TFBSTools/man/XMatrix-class.html" class="external-link">PWMatrix</a></span><span class="op">(</span>ID<span class="op">=</span><span class="va">pwm</span><span class="op">@</span><span class="va">consensus</span>, profileMatrix <span class="op">=</span> <span class="va">pwm</span><span class="op">@</span><span class="va">pwm</span><span class="op">)</span>
+  <span class="kw">else</span>
+    <span class="va">PWMat</span> <span class="op">&lt;-</span> <span class="fu">TFBSTools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/TFBSTools/man/XMatrix-class.html" class="external-link">PWMatrix</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="fu">subseq</span><span class="op">(</span><span class="va">pwm</span><span class="op">@</span><span class="va">consensus</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">range</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">range</span><span class="op">)</span><span class="op">)</span>,
+                                 profileMatrix <span class="op">=</span> <span class="va">pwm</span><span class="op">@</span><span class="va">pwm</span><span class="op">[</span>,<span class="va">range</span><span class="op">]</span><span class="op">)</span>
+  <span class="co">#---- see https://compgenomr.github.io/book/motif-discovery.html</span>
+  <span class="va">pwmLib</span> <span class="op">&lt;-</span> <span class="fu">TFBSTools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/TFBSTools/man/getMatrixSet-methods.html" class="external-link">getMatrixSet</a></span><span class="op">(</span>
+    <span class="fu">JASPAR2020</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/JASPAR2020/man/JASPAR2020-class.html" class="external-link">JASPAR2020</a></span>,
+    opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+      collection <span class="op">=</span> <span class="st">'CORE'</span>,
+   <span class="co">#   species    = 'Homo sapiens',</span>
+      matrixtype <span class="op">=</span> <span class="st">'PWM'</span><span class="op">)</span><span class="op">)</span>
+  
+  <span class="va">pwm_sim</span> <span class="op">&lt;-</span> <span class="fu">TFBSTools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/TFBSTools/man/PWMSimilarity-methods.html" class="external-link">PWMSimilarity</a></span><span class="op">(</span> <span class="va">pwmLib</span>, <span class="va">PWMat</span>,  method <span class="op">=</span> <span class="st">'Pearson'</span><span class="op">)</span>
+
+  <span class="va">pwmLibDf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
+    ID        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">pwmLib</span>, <span class="fu">TFBSTools</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/TFBSTools/man/XMatrix-class.html" class="external-link">ID</a></span><span class="op">)</span>,
+    name      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">pwmLib</span>, <span class="fu">TFBSTools</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/TFBSTools/man/XMatrix-class.html" class="external-link">name</a></span><span class="op">)</span>,
+    row.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">pwmLib</span><span class="op">)</span>
+  <span class="op">)</span>
+  <span class="va">pwmLibDf</span><span class="op">$</span><span class="va">similarity</span> <span class="op">&lt;-</span> <span class="va">pwm_sim</span><span class="op">[</span><span class="va">pwmLibDf</span><span class="op">$</span><span class="va">ID</span><span class="op">]</span>
+  <span class="va">pwmLibDf</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">pwmLibDf</span><span class="op">$</span><span class="va">similarity</span><span class="op">)</span>,<span class="op">]</span>
+<span class="op">}</span>
+
+<span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> |&gt; <span class="fu">checkJaspar</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##            ID  name similarity</span>
+<span class="co">## 1264 MA1448.1 fos-1  0.5797724</span>
+<span class="co">## 118  MA0204.1  Six4  0.4661555</span>
+<span class="co">## 179  MA0271.1 ARG80  0.4633934</span>
+<span class="co">## 1545 MA1105.2 GRHL2  0.4390299</span>
+<span class="co">## 58   MA0121.1 ARR10  0.4387467</span>
+<span class="co">## 220  MA0312.1  HAP1  0.4259419</span></code></pre>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> |&gt; <span class="fu">checkJaspar</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##           ID      name similarity</span>
+<span class="co">## 29  MA0064.1       PBF  0.6288936</span>
+<span class="co">## 25  MA0053.1     MNB1A  0.6150059</span>
+<span class="co">## 10  MA0020.1      Dof2  0.5658530</span>
+<span class="co">## 11  MA0021.1      Dof3  0.5467948</span>
+<span class="co">## 168 MA0260.1     che-1  0.5396515</span>
+<span class="co">## 4   MA0011.1 br(var.2)  0.5194754</span></code></pre>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Let's trim the motif.</span>
+<span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> |&gt; <span class="fu">plotOneMotif</span><span class="op">(</span>range <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/screenJaspar-1.png" width="700"></p>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> |&gt; <span class="fu">checkJaspar</span><span class="op">(</span>range <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##            ID          name similarity</span>
+<span class="co">## 1325 MA1520.1           MAF  0.6236734</span>
+<span class="co">## 1326 MA1521.1          MAFA  0.6115936</span>
+<span class="co">## 1557 MA0496.3          MAFK  0.5759858</span>
+<span class="co">## 1592 MA0814.2 TFAP2C(var.2)  0.5477143</span>
+<span class="co">## 1281 MA1101.2         BACH2  0.5283591</span>
+<span class="co">## 461  MA0591.1   Bach1::Mafk  0.5239357</span></code></pre>
 <p>But a search in Jaspar with either the full motif or its halof did not reveal strong hits. Visual inspection of PRDM9 sequence logos via Google did not show similarity either.</p>
 <pre><code><span class="co"># writeXStringSet(lgapsSeq_Oki_O, file="firstGaps.fasta")</span>
 <span class="co"># I used this FASTA export to search for motifs with GLAM2, and it also</span>
@@ -289,6 +818,105 @@
 <h3 id="whole-genome-search-of-the-motif">Whole-genome search of the motif<a class="anchor" aria-label="anchor" href="#whole-genome-search-of-the-motif"></a>
 </h3>
 <p>Disappointingly, the motif is found equally in gaps and inversions when searched with its PWM.</p>
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># No exact match</span>
+<span class="co">#vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)</span>
+
+<span class="va">pwm</span> <span class="op">&lt;-</span> <span class="fu">rGADEM</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html" class="external-link">getPWM</a></span><span class="op">(</span><span class="va">gadems</span><span class="op">$</span><span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
+
+<span class="va">pwmHits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">genomes</span>, <span class="va">matchPWM</span>, pwm <span class="op">=</span> <span class="va">pwm</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">pwmHits</span>, <span class="va">length</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##  OKI2018.I69 OSKA2016v1.9      Bar2.p4    KUM.M3.7f     AOM.5.5f         OdB3 </span>
+<span class="co">##        17430         4305         2458        17618         4340         2970</span></code></pre>
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span><span class="op">$</span><span class="va">score</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/PWM_score_on_chrs-1.png" width="700"></p>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OSKA2016v1.9</span><span class="op">$</span><span class="va">score</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/PWM_score_on_chrs-2.png" width="700"></p>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">pwmHit</span> <span class="op">&lt;-</span> <span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>
+
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/ivanek/Gviz" class="external-link">"Gviz"</a></span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>ucscChromosomeNames<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>
+<span class="va">gen</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/GenomeAxisTrack-class.html" class="external-link">GenomeAxisTrack</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"genome"</span><span class="op">)</span>
+<span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/AnnotationTrack-class.html" class="external-link">AnnotationTrack</a></span><span class="op">(</span><span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span>, chromosome <span class="op">=</span> <span class="st">"chr1"</span><span class="op">)</span>
+<span class="va">trk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html" class="external-link">DataTrack</a></span><span class="op">(</span><span class="va">pwmHit</span> |&gt; <span class="op">(</span>\<span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">{</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html" class="external-link">strand</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">&lt;-</span><span class="st">"*"</span>;<span class="va">.</span><span class="op">}</span><span class="op">)</span><span class="op">(</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">"pwmHits"</span>, chromosome <span class="op">=</span> <span class="st">"chr1"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/plotTracks.html" class="external-link">plotTracks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">gen</span>, <span class="va">a</span>, <span class="va">trk</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/PWM_score_on_chrs-3.png" width="700"></p>
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/AnnotationTrack-class.html" class="external-link">AnnotationTrack</a></span><span class="op">(</span><span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span>, chromosome <span class="op">=</span> <span class="st">"chr2"</span><span class="op">)</span>
+<span class="va">trk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html" class="external-link">DataTrack</a></span><span class="op">(</span><span class="va">pwmHit</span> |&gt; <span class="op">(</span>\<span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">{</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html" class="external-link">strand</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">&lt;-</span><span class="st">"*"</span>;<span class="va">.</span><span class="op">}</span><span class="op">)</span><span class="op">(</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">"pwmHits"</span>, chromosome <span class="op">=</span> <span class="st">"chr2"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/plotTracks.html" class="external-link">plotTracks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">gen</span>, <span class="va">a</span>, <span class="va">trk</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/PWM_score_on_chrs-4.png" width="700"></p>
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/AnnotationTrack-class.html" class="external-link">AnnotationTrack</a></span><span class="op">(</span><span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span>, chromosome <span class="op">=</span> <span class="st">"PAR"</span><span class="op">)</span>
+<span class="va">trk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html" class="external-link">DataTrack</a></span><span class="op">(</span><span class="va">pwmHit</span> |&gt; <span class="op">(</span>\<span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">{</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html" class="external-link">strand</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">&lt;-</span><span class="st">"*"</span>;<span class="va">.</span><span class="op">}</span><span class="op">)</span><span class="op">(</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">"pwmHits"</span>, chromosome <span class="op">=</span> <span class="st">"PAR"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/plotTracks.html" class="external-link">plotTracks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">gen</span>, <span class="va">a</span>, <span class="va">trk</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/PWM_score_on_chrs-5.png" width="700"></p>
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/AnnotationTrack-class.html" class="external-link">AnnotationTrack</a></span><span class="op">(</span><span class="va">longShort</span><span class="op">$</span><span class="va">Oki</span>, chromosome <span class="op">=</span> <span class="st">"XSR"</span><span class="op">)</span>
+<span class="va">trk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html" class="external-link">DataTrack</a></span><span class="op">(</span><span class="va">pwmHit</span> |&gt; <span class="op">(</span>\<span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">{</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html" class="external-link">strand</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">&lt;-</span><span class="st">"*"</span>;<span class="va">.</span><span class="op">}</span><span class="op">)</span><span class="op">(</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">"pwmHits"</span>, chromosome <span class="op">=</span> <span class="st">"XSR"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/plotTracks.html" class="external-link">plotTracks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">gen</span>, <span class="va">a</span>, <span class="va">trk</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/PWM_score_on_chrs-6.png" width="700"></p>
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>, <span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 347</span></code></pre>
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>, <span class="va">invRegions</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 78</span></code></pre>
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>, <span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>, <span class="va">invRegions</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="PWM_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Scores in gaps are higher than average.</span>
+<span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>, <span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## </span>
+<span class="co">##  Welch Two Sample t-test</span>
+<span class="co">## </span>
+<span class="co">## data:  score(pwmHits$OKI2018.I69) and score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa))</span>
+<span class="co">## t = -8.2402, df = 367.62, p-value = 3.063e-15</span>
+<span class="co">## alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="co">## 95 percent confidence interval:</span>
+<span class="co">##  -0.3410320 -0.2096236</span>
+<span class="co">## sample estimates:</span>
+<span class="co">## mean of x mean of y </span>
+<span class="co">##  11.16683  11.44216</span></code></pre>
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Scores in gaps and inversions are not different </span>
+<span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>, <span class="va">invRegions</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">pwmHits</span><span class="op">$</span><span class="va">OKI2018.I69</span>, <span class="va">inv.lgaps</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## </span>
+<span class="co">##  Welch Two Sample t-test</span>
+<span class="co">## </span>
+<span class="co">## data:  score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)) and score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa))</span>
+<span class="co">## t = -1.2801, df = 107.01, p-value = 0.2033</span>
+<span class="co">## alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="co">## 95 percent confidence interval:</span>
+<span class="co">##  -0.27282923  0.05873351</span>
+<span class="co">## sample estimates:</span>
+<span class="co">## mean of x mean of y </span>
+<span class="co">##  11.33511  11.44216</span></code></pre>
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># rtracklayer::export.bed(pwmHits, "AAGCsGCwwmkCGrCTTyn.bed")</span>
+
+<span class="co"># PWM hits seem to be more abundant on short arms.</span>
+<span class="co">#OKI_longShort$pwmHitsPerMb &lt;- countOverlaps(OKI_longShort, pwmHits$Oki) / width(OKI_longShort) * 1e6</span>
+<span class="co"># But with a naive approach the difference is not statistically significant.</span>
+<span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">159</span>, <span class="fl">185</span>, <span class="fl">188</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">77</span>, <span class="fl">142</span>, <span class="fl">160</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## </span>
+<span class="co">##  Welch Two Sample t-test</span>
+<span class="co">## </span>
+<span class="co">## data:  c(159, 185, 188) and c(77, 142, 160)</span>
+<span class="co">## t = 1.9004, df = 2.5243, p-value = 0.1707</span>
+<span class="co">## alternative hypothesis: true difference in means is not equal to 0</span>
+<span class="co">## 95 percent confidence interval:</span>
+<span class="co">##  -44.27463 146.27463</span>
+<span class="co">## sample estimates:</span>
+<span class="co">## mean of x mean of y </span>
+<span class="co">##  177.3333  126.3333</span></code></pre>
 </div>
 </div>
   </div>

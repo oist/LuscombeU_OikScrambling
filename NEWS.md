@@ -1,3 +1,12 @@
+# OkiScrambling 2.0.0
+
+* Adopt semantic versionning: any backwards-incompatible change increases
+  the major version number, no matter how (un)important it is.
+
+* Use the new `GenomicBreaks::bridgeRegions()` function that produces
+  zero-width ranges instead of the local function that artificially
+  added 1nt to the ends.
+
 # OikScrambling 1.0.0
 
 * Major change in the BSgenome packages, needing the removal of the old ones

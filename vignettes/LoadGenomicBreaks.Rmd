@@ -324,28 +324,11 @@ Mapped unaligned regions
 We can pair the unaligned regions that are between two colinearly aligned regions.
 
 ```{r mappedUnaligned, cache = TRUE, dependson="GBreaks_object"}
-filterMappedUnaligned <- function(gb) {
-  colinearRegions <- filterColinearRegions(flagColinearAlignments(gb), rename = FALSE)
-  # Turning the sequence of [(TRUE)n, FALSE]n into indices.
-  idx <- c(0, head(cumsum(!colinearRegions$colinear), -1))
-  gbl <- split(colinearRegions, idx)
-  unalMap <- endoapply(gbl, \(gb) {
-    # Check strand
-    onMinus <- all(strand(gb) == "-")
-    # Need to subtract 1 because some ranges are adjacent (no gap)
-    GBreaks(target = cleanGaps(gb      - 1),
-            query  = cleanGaps(gb$query -1) |> sort(decreasing = onMinus))
-  }) |> unlist()
-  names(unalMap) <- NULL
-  unalMap
-}
-
-unalMap <- BiocParallel::bplapply(gbs, filterMappedUnaligned) |> as("SimpleList")
+unalMap <- BiocParallel::bplapply(gbs, bridgeRegions) |> as("SimpleList")
 
 unalMap[Oik_Oik] <- BiocParallel::bplapply(unalMap[Oik_Oik], flagLongShort_, longShort)
 unalMap[Oik_Oik] <- annotateWithReps(unalMap[Oik_Oik], reps)
 unalMap[Oik_Oik] <- annotateWithTranscripts(unalMap[Oik_Oik], transcripts)
-unalMap[Oik_Oik] <- sapply(unalMap[Oik_Oik], flagAll) |> SimpleList()
 ```
 
 Translocated regions
@@ -356,26 +339,16 @@ regions that would be colinear if there would not be a translocation separating
 them.
 
 ```{r translocated_regions, cache=TRUE, dependson="coalescing_algorithm"}
-removeTranslocations <- function(gb) {
-  if(any(gb$tra))
-    gb <- gb[-(which(gb$tra) + 1)]
-  gb
-}
-
 traGaps <- function(coa) {
   # The input MUST already be coalesced.
-  # First, flag translocations on the target genome
-  tra.target <- flagTranslocations(coa)$tra
-  # Second, do it again on the query genome
-  tra <- swap(coa) |> sort(ignore.strand = TRUE) |> flagTranslocations()
-  tra.query <- tra$tra
-  tra <- swap(tra) |> sort(ignore.strand = TRUE)
-  tra$tra <- tra.target | tra.query
+  tra <- flagTranslocations(coa)
+  # Consider both sides
+  tra$tra <- tra$tra | tra$query$tra
   # Then, remove translocated regions
-  tra <- removeTranslocations(tra)
-  # Then extract the newly "unaligned mapped" regions
+  tra <- filterTranslocations(tra, remove = TRUE)
+  # Finally, extract the newly "unaligned mapped" regions.
   # They contain the gaps left by the removal of the translocated regions.
-  filterMappedUnaligned(tra)
+  bridgeRegions(tra)
 }
 
 tra <- BiocParallel::bplapply(coa, traGaps) |> as("SimpleList")
@@ -383,7 +356,6 @@ tra <- BiocParallel::bplapply(coa, traGaps) |> as("SimpleList")
 tra[Oik_Oik] <- BiocParallel::bplapply(tra[Oik_Oik], flagLongShort_, longShort)
 tra[Oik_Oik] <- annotateWithReps(tra[Oik_Oik], reps)
 tra[Oik_Oik] <- annotateWithTranscripts(tra[Oik_Oik], transcripts)
-tra <- sapply(tra, flagAll) |> SimpleList()
 ```
 
 Coalesce again
@@ -439,8 +411,6 @@ tra2 <- BiocParallel::bplapply(coa2, traGaps) |> as("SimpleList")
 tra2[Oik_Oik] <- BiocParallel::bplapply(tra2[Oik_Oik], flagLongShort_, longShort)
 tra2[Oik_Oik] <- annotateWithReps(tra2[Oik_Oik], reps)
 tra2[Oik_Oik] <- annotateWithTranscripts(tra2[Oik_Oik], transcripts)
-
-tra2 <- sapply(tra2, flagAll) |> SimpleList()
 ```
 
 

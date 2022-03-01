@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
     </li>
     <li>
-      <a href="../articles/PWM.html">Motif finding and analysis</a>
+      <a href="../articles/PWM.html">Motif search and analysis</a>
     </li>
     <li>
       <a href="../articles/ParallelPlots.html">Whole-chromosome parallel plots</a>
@@ -99,6 +99,9 @@
     </li>
     <li>
       <a href="../articles/TFBS.html">Transcription factor binding sites</a>
+    </li>
+    <li>
+      <a href="../articles/TandemSiteDuplications.html">Tandem site duplications</a>
     </li>
     <li>
       <a href="../articles/Translocations.html">Translocations</a>
@@ -132,7 +135,7 @@
       <h1 data-toc-skip>Repeat regions</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">15 February, 2022</h4>
+            <h4 data-toc-skip class="date">01 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/RepeatRegions.Rmd" class="external-link"><code>vignettes/RepeatRegions.Rmd</code></a></small>
       <div class="hidden name"><code>RepeatRegions.Rmd</code></div>
@@ -238,43 +241,43 @@
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps_in_Oki.norm</span>, <span class="va">rowMeans</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               total      unal        gbs     unmap    unmap2   unalMap</span>
-<span class="co">## LowComplexity     1 0.4745682 0.54615843 0.2592019 0.2538416 0.2159619</span>
-<span class="co">## ltr-1             1 0.9098417 0.09239367 0.4839491 0.4380317 0.4278795</span>
-<span class="co">## rnd               1 0.8469141 0.15840375 0.4767686 0.4534000 0.3717560</span>
+<span class="co">## LowComplexity     1 0.4745682 0.54615843 0.2592019 0.2538416 0.2153663</span>
+<span class="co">## ltr-1             1 0.9098417 0.09239367 0.4839491 0.4380317 0.4276001</span>
+<span class="co">## rnd               1 0.8469141 0.15840375 0.4767686 0.4534000 0.3710569</span>
 <span class="co">## SINE              1 0.7780000 0.21666667 0.3073333 0.2906667 0.4713333</span>
-<span class="co">## tandem            1 0.5424133 0.46963753 0.2923270 0.2788326 0.2510592</span>
-<span class="co">## unknown           1 0.8472003 0.18038517 0.3934320 0.3749304 0.4554158</span>
+<span class="co">## tandem            1 0.5424133 0.46963753 0.2923270 0.2788326 0.2503060</span>
+<span class="co">## unknown           1 0.8472003 0.18038517 0.3934320 0.3749304 0.4545475</span>
 <span class="co">##                     map      map2        tra</span>
-<span class="co">## LowComplexity 0.7440143 0.7488982 0.04812388</span>
-<span class="co">## ltr-1         0.5061472 0.5438063 0.08543930</span>
-<span class="co">## rnd           0.5060656 0.5235500 0.06265540</span>
-<span class="co">## SINE          0.6520000 0.6660000 0.05933333</span>
-<span class="co">## tandem        0.7028401 0.7153931 0.05633140</span>
-<span class="co">## unknown       0.6103974 0.6229990 0.05839920</span></code></pre>
+<span class="co">## LowComplexity 0.7440143 0.7488982 0.05205479</span>
+<span class="co">## ltr-1         0.5061472 0.5438063 0.08329711</span>
+<span class="co">## rnd           0.5060656 0.5235500 0.06104499</span>
+<span class="co">## SINE          0.6520000 0.6660000 0.05666667</span>
+<span class="co">## tandem        0.7028401 0.7153931 0.05953240</span>
+<span class="co">## unknown       0.6103974 0.6229990 0.05708561</span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps_in_Osa.norm</span>, <span class="va">rowMeans</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               total      unal       gbs     unmap    unmap2   unalMap       map</span>
-<span class="co">## LowComplexity     1 0.3786448 0.6078029 0.1980835 0.1919233 0.1811088 0.7620808</span>
-<span class="co">## rnd               1 0.7903099 0.2380329 0.3250682 0.3085441 0.4675399 0.6365411</span>
-<span class="co">## tandem            1 0.4687947 0.5182976 0.2320251 0.2235828 0.2383046 0.7338217</span>
-<span class="co">## unknown           1 0.7687199 0.2581531 0.2702265 0.2566158 0.5006252 0.6919545</span>
+<span class="co">## LowComplexity     1 0.3786448 0.6078029 0.1980835 0.1919233 0.1808350 0.7620808</span>
+<span class="co">## rnd               1 0.7903099 0.2380329 0.3250682 0.3085441 0.4663150 0.6365411</span>
+<span class="co">## tandem            1 0.4687947 0.5182976 0.2320251 0.2235828 0.2369789 0.7338217</span>
+<span class="co">## unknown           1 0.7687199 0.2581531 0.2702265 0.2566158 0.4993748 0.6919545</span>
 <span class="co">##                    map2        tra</span>
-<span class="co">## LowComplexity 0.7663244 0.04229979</span>
-<span class="co">## rnd           0.6477715 0.04898429</span>
-<span class="co">## tandem        0.7406942 0.04011861</span>
-<span class="co">## unknown       0.7003997 0.04591575</span></code></pre>
+<span class="co">## LowComplexity 0.7663244 0.04257358</span>
+<span class="co">## rnd           0.6477715 0.05037899</span>
+<span class="co">## tandem        0.7406942 0.04678179</span>
+<span class="co">## unknown       0.7003997 0.04759660</span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps_in_Bar.norm</span>, <span class="va">rowMeans</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               total      unal       gbs     unmap    unmap2   unalMap       map</span>
-<span class="co">## LowComplexity     1 0.4195983 0.6105904 0.2225198 0.2177724 0.1979306 0.7727328</span>
-<span class="co">## rnd               1 0.8396612 0.2151969 0.4237909 0.4105560 0.4183102 0.5652549</span>
-<span class="co">## tandem            1 0.4942132 0.5121783 0.2778027 0.2751080 0.2176542 0.7055450</span>
-<span class="co">## unknown           1 0.8326723 0.2586960 0.3292053 0.3188757 0.5063204 0.6728492</span>
+<span class="co">## LowComplexity     1 0.4195983 0.6105904 0.2225198 0.2177724 0.1973220 0.7727328</span>
+<span class="co">## rnd               1 0.8396612 0.2151969 0.4237909 0.4105560 0.4170070 0.5652549</span>
+<span class="co">## tandem            1 0.4942132 0.5121783 0.2778027 0.2751080 0.2166868 0.7055450</span>
+<span class="co">## unknown           1 0.8326723 0.2586960 0.3292053 0.3188757 0.5050364 0.6728492</span>
 <span class="co">##                    map2        tra</span>
-<span class="co">## LowComplexity 0.7755326 0.03055386</span>
-<span class="co">## rnd           0.5728714 0.05200550</span>
-<span class="co">## tandem        0.7069960 0.03617205</span>
-<span class="co">## unknown       0.6781281 0.04337281</span></code></pre>
+<span class="co">## LowComplexity 0.7755326 0.03469264</span>
+<span class="co">## rnd           0.5728714 0.05364900</span>
+<span class="co">## tandem        0.7069960 0.03959233</span>
+<span class="co">## unknown       0.6781281 0.04642602</span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="summary-plots">Summary plots<a class="anchor" aria-label="anchor" href="#summary-plots"></a>
@@ -542,9 +545,9 @@
 <pre><code><span class="co">## <span style="color: #949494;"># A tibble: 3 × 10</span></span>
 <span class="co">##   dist       aligned unAligned mapped unMapped unAlMapped transposed transposed2</span>
 <span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;">1</span> In same p…   0.678     0.598  0.809    0.580      0.535      0.702       0.825</span>
-<span class="co">## <span style="color: #BCBCBC;">2</span> North – N…   0.297     0.494  0.602    0.487      0.487      0.617       0.739</span>
-<span class="co">## <span style="color: #BCBCBC;">3</span> Oki – Nor…   0.135     0.360  0.404    0.381      0.349      0.502       0.602</span>
+<span class="co">## <span style="color: #BCBCBC;">1</span> In same p…   0.678     0.598  0.809    0.580      0.531      0.808       0.840</span>
+<span class="co">## <span style="color: #BCBCBC;">2</span> North – N…   0.297     0.494  0.602    0.487      0.486      0.661       0.742</span>
+<span class="co">## <span style="color: #BCBCBC;">3</span> Oki – Nor…   0.135     0.360  0.404    0.381      0.349      0.533       0.612</span>
 <span class="co">## <span style="color: #949494;"># … with 2 more variables: mapped2 &lt;dbl&gt;, unMapped2 &lt;dbl&gt;</span></span></code></pre>
 </div>
 <div class="section level1">
@@ -554,7 +557,7 @@
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reps.reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">reduce</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co"># They are short.</span>
-<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps.reduced</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/CNEr/man/Axt-util.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps.reduced</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/CNEr/man/Axt-util.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                Oki       Osa        Bar        Kum        Aom        Nor</span>
 <span class="co">## Min.       15.0000    9.0000    12.0000    13.0000    11.0000    11.0000</span>
 <span class="co">## 1st Qu.    58.0000   66.0000    57.0000    59.0000    67.0000    63.0000</span>
@@ -642,15 +645,15 @@
 <p>We want to know if the regions of width shorter than 600 match more repeats, and to what extent the matching repeats cover them.</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">checkOverlapWithRepeatsInShortAndLongWidthRegions</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">rep</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">grl</span> <span class="op">&lt;-</span> <span class="va">gr</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">600</span><span class="op">)</span>
+  <span class="va">grl</span> <span class="op">&lt;-</span> <span class="va">gr</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">600</span><span class="op">)</span>
   <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
     `Length`                   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long <span class="op">=</span> <span class="st">"Long"</span>, Short <span class="op">=</span> <span class="st">"Short"</span><span class="op">)</span>,
     `Number of regions`        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,
                                  Short <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,
-    `Total width`              <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span>,
-                                 Short <span class="op">=</span> <span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span>  |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,
-    `Width covered by reps`    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/setops-methods.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span>, <span class="va">rep</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span>,
-                                 Short <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/setops-methods.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span>, <span class="va">rep</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+    `Total width`              <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span>,
+                                 Short <span class="op">=</span> <span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span>  |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,
+    `Width covered by reps`    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Long  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/setops-methods.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"FALSE"</span><span class="op">]</span><span class="op">]</span>, <span class="va">rep</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span>,
+                                 Short <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/setops-methods.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">grl</span><span class="op">[[</span><span class="st">"TRUE"</span><span class="op">]</span><span class="op">]</span>, <span class="va">rep</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">}</span>
 <span class="fu">checkOverlapWithRepeatsInShortAndLongWidthRegions</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">reps</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span></code></pre></div>
