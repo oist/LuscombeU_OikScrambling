@@ -44,8 +44,10 @@ In these objects, the _target_ and _query_ roles are equivalent.  The genomic
 coordinates are taken from the annotation files (see
 `?OikScrambling:::loadAllTranscriptsGR`.
 
+### Orthogroup pairs
+
 To maximise number of entries, we load data from the larvacean and the ascidian
-subtrees respectively.
+subtrees respectively.  This produces the `orthoPairs` collection of objects.
 
 ```{r orthoPairs_object, dependson="load_packages_and_data"}
 orthoGroupFileNames <- SimpleList(
@@ -125,16 +127,21 @@ orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
 orthoPairs$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N20")
 ```
 
-We can produce similar objects, but from "core" orthogroups, that have a member
-in each species of the tunicate clade.
+### Orthogroup core pairs
+
+The `orthoPairs_core` collection is built similarly, but from "core"
+orthogroups, that have a member in each species of the tunicate clade.
 
 ```{r orthoPairs_core, dependson="orthoPairs_object"}
 orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
 orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N3")
 ```
 
+### Orthogroups one-to-one in oiks.
+
 Lastly we build an object for Oiks only where we require every orthologue to be
-present as a single copy in every genome.
+present as a single copy in every genome.  This is the `orthoPairs_one2oneInOiks`
+collection.
 
 ```{r orthoPairs_one2oneInOiks, dependson="orthoPairs_object"}
 orthoPairs_one2oneInOiks <-
@@ -142,6 +149,8 @@ orthoPairs_one2oneInOiks <-
                               HOGs = OikScrambling:::load_one_to_ones(
                                        system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")))
 ```
+
+### Summary
 
 Here is the number of entries in each object.
 
