@@ -254,6 +254,18 @@ sapply(orthoBlocks_one2oneInOiks, \(gb) sum(gb$geneNumber))
 ```
 
 
+Compute bridge regions
+----------------------
+
+Let's pre-compute bridge regions with the `GenomicBreaks::bridgeRegions()`
+function.
+
+```{r bridge_regions, dependson="filtered_objects"}
+# oP_bridges               <- sapply(orthoPairsFiltered,                bridgeRegions) |> SimpleList()
+# oP_core_bridges          <- sapply(orthoPairsFiltered_core,           bridgeRegions) |> SimpleList()
+oP_one2oneInOiks_bridges <- sapply(orthoPairs_one2oneInOiks_Filtered, bridgeRegions) |> SimpleList()
+```
+
 Size distribution of the blocks
 ===============================
 
