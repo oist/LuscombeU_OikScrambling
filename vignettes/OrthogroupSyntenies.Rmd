@@ -517,6 +517,77 @@ As we work on alignment pairs, this translates to:
 To find such cases I search for Oki-Bar orthoblock breakpoints that fall within
 an Oki-Osa orthoblock.
 
+```{r}
+reIndex <- \(gb) {names(gb) <- seq_along(gb) ; gb}
+barBreaks <- get_bps(orthoBlocks_one2oneInOiks$Oki_Bar, direction = "mid")
+
+# Stringent list of ROIs based on the one2oneInOiks objects
+(ROIs <- orthoBlocks_one2oneInOiks$Oki_Osa |>
+           reIndex() |>
+           subsetByOverlaps(barBreaks) |>
+           subset(geneNumber > 2))
+
+findGene <- function(gb, gene) {
+  if(is.null(gb$geneNames)) {
+    ids <- gb$tx_name
+    index <- gb$tx_name %in% gene
+  } else {
+    ids <- gb$geneNames
+    index <- any(ids %in% gene)
+  }
+  gb[index]
+}
+
+# Genes of Interest
+
+(GoI1 <- head(ROIs$geneNames, 1) |> unlist())
+GoI2 <- c("g1205.t1", "g1208.t1", "g1209.t1", "g1210.t1") # To provide context
+
+# Exploring the region
+
+orthoBlocks$Oki_Osa |> findGene(c(GoI1, GoI2)) # g1206.t1 g1207.t1 g1208.t1 g1211.t1 are in chr1:4573346-4588029 | Chr1:402525-416983  
+orthoPairs $Oki_Osa |> findGene(c(GoI1, GoI2)) |> as.data.frame() # Individual coordinates of the genes
+orthoBlocks$Oki_Bar |> findGene(c(GoI1, GoI2)) # g1205.t1 g1206.t1 g1207.t1 g1208.t1 g1211.t1 are in chr1 4571907-4588029 | Chr1:582810-2680665
+orthoPairs $Oki_Bar |> findGene(c(GoI1, GoI2)) |> as.data.frame() # Individual coordinates of the genes
+orthoBlocks$Bar_Oki |> subsetByOverlaps(GRanges("Chr1:2669327-2680665")) |> swap()  # Let's forget about g1205.t1
+orthoBlocks$Bar_Oki |> subsetByOverlaps(GRanges("Chr1:2669327-2680665")) |> swap() |> cleanGaps() |> width()
+```
+
+```
+Oki         Osa       Bar  
+g1206.t1    g96.t1    g651.t1
+g1207.t1    g95.t1    g650.t1
+g1208.t1    g94.t1    g652.t1
+g1211.t1    g92.t1    g654.t1 
+```
+
+```{r}
+### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (unalMap)
+
+unal$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2)) # between g1207.t1 and g1208.t1 on Oki
+unal$Osa_Oki |> subsetByOverlaps(GRanges("Chr1", ( 409953 + 410741 )/2)) # between g95.t1 and g94.t1 on Osa
+# Or just:
+
+(BP1_Oki_Osa <- unalMap$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))) # between g1207.t1 and g1208.t1 on Oki
+
+
+# Now on Bar:
+gbs$Bar_Oki |> reIndex()|> subsetByOverlaps(GRanges("Chr1", (2674502 + 2675030)/2)) # between g651.t1 and  g652.t1 on Bar
+coa$Bar_Oki |> reIndex()|> subsetByOverlaps(GRanges("Chr1", (2674502 + 2675030)/2)) # between g651.t1 and  g652.t1 on Bar
+
+(BP1_Bar <- unal$Bar_Oki |> subsetByOverlaps(GRanges("Chr1", (2674538 + 2674688)/2))) # between g651.t1 and  g652.t1 on Bar according to gbs or coa
+
+# Nothing noticeable on either strand
+pairwiseAlignment(type ="local", BP1_Oki_Osa |> plyranges::mutate(strand = '-'))
+pairwiseAlignment(type ="local", BP1_Oki_Osa |> plyranges::mutate(strand = '+'))
+pairwiseAlignment(type ="local", BP1_Oki_Osa $query, BP1_Bar)
+pairwiseAlignment(type ="global", BP1_Oki_Osa $query, BP1_Bar  |> plyranges::mutate(strand = '-'))
+ 
+oP_one2oneInOiks_bridges$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))
+oP_one2oneInOiks_bridges$Oki_Bar |> subsetByOverlaps(upstreamOfg1208.t1)
+
+```
+
 I can also search for orthologs that are marked "Col" in Oki_Osa and "Tra"
 in Osa_Bar.
 
