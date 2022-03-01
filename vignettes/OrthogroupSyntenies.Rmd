@@ -9,6 +9,10 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r setup}
+knitr::opts_knit$set(cache = TRUE)
+```
+
 Load packages and data
 ======================
 
@@ -43,7 +47,7 @@ coordinates are taken from the annotation files (see
 To maximise number of entries, we load data from the larvacean and the ascidian
 subtrees respectively.
 
-```{r orthoPairs_object}
+```{r orthoPairs_object, dependson="load_packages_and_data"}
 orthoGroupFileNames <- SimpleList(
   AOM.5.5f      = "AOM-5-5f.prot.longest.fa_1", 
   Bar2.p4       = "Bar2_p4.Flye.prot.longest.fa_1", 
@@ -124,7 +128,7 @@ orthoPairs$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N2
 We can produce similar objects, but from "core" orthogroups, that have a member
 in each species of the tunicate clade.
 
-```{r orthoPairs_core}
+```{r orthoPairs_core, dependson="orthoPairs_object"}
 orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
 orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N3")
 ```
@@ -132,7 +136,7 @@ orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeNam
 Lastly we build an object for Oiks only where we require every orthologue to be
 present as a single copy in every genome.
 
-```{r orthoPairs_one2oneInOiks}
+```{r orthoPairs_one2oneInOiks, dependson="orthoPairs_object"}
 orthoPairs_one2oneInOiks <-
   orthoPairToGBreaks_all_Oiks(treeName = NULL,
                               HOGs = OikScrambling:::load_one_to_ones(
@@ -141,7 +145,7 @@ orthoPairs_one2oneInOiks <-
 
 Here is the number of entries in each object.
 
-```{r summary_orthoPairs}
+```{r summary_orthoPairs, dependson=c("orthoPairs_object", "orthoPairs_core", "orthoPairs_one2oneInOiks")}
 sapply(orthoPairs, length)
 sapply(orthoPairs_core, length)
 sapply(orthoPairs_one2oneInOiks, length)
@@ -155,7 +159,7 @@ Some transcript annotations overlap and this breaks the coalescing algorithm.
 
 Here we produce non-overlapping versions of the objects.
 
-```{r fix_Bar_Osk}
+```{r filtered_objects, dependson="summary_orthoPairs"}
 transcripts$Bar2.p4 |> length()
 transcripts$Bar2.p4 |> reduce(min = 0) |> length()
 
@@ -202,7 +206,7 @@ sapply(orthoPairs_core, length) - sapply(orthoPairsFiltered_core, length)
 Coalesce syntenic blocks and annotate them
 ------------------------------------------
 
-```{r coalesce}
+```{r coalesce, dependson="filtered_objects"}
 coalOrtho <- function(gb) {
   # Coalesce
   coal <- coalesce_contigs(gb)
