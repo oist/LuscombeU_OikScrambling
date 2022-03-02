@@ -529,13 +529,21 @@ an Oki-Osa orthoblock.
 
 ```{r}
 reIndex <- \(gb) {names(gb) <- seq_along(gb) ; gb}
-barBreaks <- get_bps(orthoBlocks_one2oneInOiks$Oki_Bar, direction = "mid")
+barBreaks <- sapply(orthoBlocks_one2oneInOiks, get_bps, direction = "mid") |> SimpleList()
 
-# Stringent list of ROIs based on the one2oneInOiks objects
-(ROIs <- orthoBlocks_one2oneInOiks$Oki_Osa |>
-           reIndex() |>
-           subsetByOverlaps(barBreaks) |>
-           subset(geneNumber > 2))
+
+ROIs <- SimpleList()
+findROIs <- function(g1, g2, g3) {
+  pair1_2 <- paste(g1, sep = '_', g2)
+  pair1_3 <- paste(g1, sep = '_', g3)
+  orthoBlocks_one2oneInOiks[[pair1_2]] |>
+                       reIndex() |>
+                       subsetByOverlaps(barBreaks[[pair1_3]]) |>
+                       subset(geneNumber > 2)
+}
+ROIs$Oki_Osa_Bar <- findROIs("Oki", "Osa", "Bar")
+ROIs$Oki_Bar_Osa <- findROIs("Oki", "Bar", "Osa")
+ROIs$Oki_Aom_Nor <- findROIs("Oki", "Aom", "Nor")
 
 findGene <- function(gb, gene) {
   if(is.null(gb$geneNames)) {
@@ -550,7 +558,7 @@ findGene <- function(gb, gene) {
 
 # Genes of Interest
 
-(GoI1 <- head(ROIs$geneNames, 1) |> unlist())
+(GoI1 <- head(ROIs$Oki_Osa_Bar$geneNames, 1) |> unlist())
 GoI2 <- c("g1205.t1", "g1208.t1", "g1209.t1", "g1210.t1") # To provide context
 
 # Exploring the region
