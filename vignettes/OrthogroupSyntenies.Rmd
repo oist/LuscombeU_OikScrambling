@@ -536,10 +536,13 @@ ROIs <- SimpleList()
 findROIs <- function(g1, g2, g3) {
   pair1_2 <- paste(g1, sep = '_', g2)
   pair1_3 <- paste(g1, sep = '_', g3)
-  orthoBlocks_one2oneInOiks[[pair1_2]] |>
-                       reIndex() |>
-                       subsetByOverlaps(barBreaks[[pair1_3]]) |>
-                       subset(geneNumber > 2)
+  gb <- orthoBlocks_one2oneInOiks[[pair1_2]] |>
+    reIndex() |>
+    subsetByOverlaps(barBreaks[[pair1_3]]) |>
+    subset(geneNumber > 2)
+  # Drop columns to ease browsing on single lines.
+  NULL -> gb$dNdS_GUIDANCE2 -> gb$dNdS_HmmCleaner -> gb$dNdS_PRANK
+  gb
 }
 ROIs$Oki_Osa_Bar <- findROIs("Oki", "Osa", "Bar")
 ROIs$Oki_Bar_Osa <- findROIs("Oki", "Bar", "Osa")
