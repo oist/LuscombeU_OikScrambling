@@ -1,0 +1,190 @@
+---
+title: "Region of interest: PAC3"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Region of interest: PAC3}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{css, echo=FALSE}
+pre, code {white-space:pre !important; overflow-x:auto}
+```
+
+```{r setup}
+knitr::opts_knit$set(cache = TRUE)
+options(width = 200)
+```
+
+Load packages and data
+======================
+
+See `?OikScrambling:::loadAllGenomes()`, `?OikScrambling:::loadAllTranscriptsGR()`,
+and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different objects are prepared.
+
+```{r load_packages_and_data}
+library('OikScrambling')   |> suppressPackageStartupMessages()
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
+load("BreakPoints.Rdata")
+```
+
+# PAC3: a gene that moved between chr1 and XSR (but ancestral state is unknown)
+
+## PAC3
+
+The gene g3146 (`Oidioi.mRNA.OKI2018_I69.chr1.g3144.t1.cds` or `CAG5107096` in
+OKI2018, `CBY24606` in OdB3) is on `chr1` in Oki and Kum but on `XSR` in Osa and
+Bar.  The OdB3 protein contains a non-specific hit for the pfam10178 (Proteasome
+assembly chaperone 3) PAC3 domain, and Psi-BLAST also discovers it.
+
+<details>
+<summary>Click here to see a provisional alignment with similar sequences in
+other larvacean genomes.  Proper attention to splicing would be needed to make
+it more accurate.</summary>
+```
+O_dio       MHPTTILREIELENEPVALSIMKFAEETLVTISDNGTFGAFHDI-DIA-EMRPGKEPLIT
+O_dio_Oska  MHPETILREVEIDNSPVALAIVKFADQTMVTISDNGTFGAFHDI-EIA-EMRPGTDPVVT
+O_van       ----SIVESTQIEGVDVSLAIMGFADCTMIAVSDTGTFGSFYKV-QVAKGGHTNQEAVVT
+O_alb       ---------LDLENADIHLAAMSFSDCLMLAVSDTGTFGSFYQV-EKSETSHQNIEPVIS
+O_lon       ---------IYLGEEKVHIAVMGFGDATMITVSDGALFGPIYKV-TKS--QKGANEPVIT
+O_lon_N     --------EIEIDNEVCYISVTQFGDTNFVTISDTGTFGSFYQV-EKK--EKMGNEPIFN
+B_sty       ---------FEIDDLVIYFSFMEFDDYVFLALSNTGTFGSFYKV-QKN--FRMDSNPIIS
+M_ery       ------IRIIVIDNTEIYLSVMKFGDCNFIVISDTGTFGSFFKI-EKN--FKMDNNPVVN
+O_ruf_Y     ------LKRLRLMSQKVHLSSMKFDDHIMLGVSDSGTFWLILSCFFKSTNQHKDKEPVFE
+
+
+O_dio       IKPF-FGYSDDFTKV------------VCRNLATSLQVKNK-LMISIGLKQEKVNKQNLD
+O_dio_Oska  VKPF-FGYSDDFAKVV-----------VCRNLATGLEVKNK-LMISIGLKQERINKNN--
+O_van       IDPI-FGINDHYFQVLIR------------------------------------------
+O_alb       IRPI-FGVDDQYFQVFLQVLPDSYFKVVCRYLGVHLAESRR-LLVSITLQKDKINKDN--
+O_lon       VDGV-FGEQHDYAQVV------------CRHLRLHCRVETEQLLASVLLKRDLVTREN--
+O_lon_N     IQPI-FGQAEDYLQVCKFQIETS--IVVCRYLCQNCTLQGPM-MVSVILSREKVNKKN--
+B_sty       TEQI-FGNKKDLLEVINK------------------------------------------
+M_ery       IEPI-FGENKDYLQV---------------------------------------------
+O_ruf_Y     IVPIFFGCDDQYFQV---------------------------------------------
+```
+</details>
+
+Private ZENBU link: <https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=nBuUjj3vMBkuTVQnE57TC;loc=OKI2018_I69_1.0::chr1:11497331..11498497+>
+
+#### PAC3 in five genome pairs
+
+```{r PAC3}
+PAC3 <- GRanges("chr1:11497331-11498497")
+PAC3_in_Kum <- GRanges("contig_3_1:3247998-3248575")
+
+coa$Oki_Osa |> subsetByOverlaps(PAC3)
+coa$Oki_Aom |> subsetByOverlaps(PAC3)
+coa$Oki_Bar |> subsetByOverlaps(PAC3)
+coa$Oki_Nor |> subsetByOverlaps(PAC3)
+coa$Oki_Kum |> subsetByOverlaps(PAC3)
+```
+
+## The bridge region of PAC3 in the "Northern" genomes.
+
+```{r PAC3_bridge}
+PAC3_bridge_Osa <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps() |> plyranges::mutate(strand = '-')
+PAC3_bridge_Aom <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps() |> plyranges::mutate(strand = '-')
+PAC3_bridge_Bar <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps()
+PAC3_bridge_Nor <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps()
+
+list( Osa = PAC3_bridge_Osa
+    , Aom = PAC3_bridge_Aom
+    , Bar = PAC3_bridge_Bar
+    , Nor = PAC3_bridge_Nor) |> lapply(\(gb) gb + 0)  |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment")
+```
+
+## The left region of PAC3 in all genomes
+
+```{r PAC3_left}
+PAC3_left_Oki_Osa  <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Kum_Osa  <- coa$Osa_Kum |> swap () |> subsetByOverlaps(PAC3_in_Kum + 1) |> sort(i=T) |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Osa      <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(1) |> get_bps("left") |> plyranges::mutate(strand = '-')
+PAC3_left_Aom      <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(1) |> get_bps("left") |> plyranges::mutate(strand = '-')
+PAC3_left_Oki_Bar  <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Bar      <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Nor      <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(1) |> get_bps("right")
+
+# Shifting Bar and Nor so that they all align well
+
+PAC3_left <- 
+list( Aom = PAC3_left_Aom
+    , Osa = PAC3_left_Osa
+    , Oki = PAC3_left_Oki_Osa
+    , Kum = PAC3_left_Kum_Osa
+    , Bar = PAC3_left_Bar |> shift(20)
+    , Nor = PAC3_left_Nor |> shift(20))
+
+PAC3_left |> lapply(\(gb) gb + 70) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment")
+```
+
+## The right region of PAC3 in all genomes
+
+Very near the alignment break (at the center), there is the `ATG` and upstream
+of it there are two conserved `AG` that may be trans-splicing sites
+(with CAGE support at least in Oki).
+
+```{r PAC3_right}
+PAC3_right_Oki_Osa  <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Kum_Osa  <- coa$Osa_Kum |> swap () |> subsetByOverlaps(PAC3_in_Kum + 1) |> sort(i=T) |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Osa      <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("right") |> plyranges::mutate(strand = '-')
+PAC3_right_Aom      <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("right") |> plyranges::mutate(strand = '-')
+PAC3_right_Oki_Bar  <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Bar      <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Nor      <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(3) |> get_bps("left")
+
+PAC3_right <-
+list( Aom = PAC3_right_Aom
+    , Osa = PAC3_right_Osa
+    , Oki = PAC3_right_Oki_Osa
+    , Kum = PAC3_right_Kum_Osa
+    , Bar = PAC3_right_Bar
+    , Nor = PAC3_right_Nor)
+PAC3_right |> lapply(\(gb) gb + 70) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
+```
+
+## Combined view of the left and right regions
+
+```{r PAC3_left_right}
+PAC3_left_right <- list(
+  Aom  = range(PAC3_left_Aom, PAC3_right_Aom),
+  Osa  = range(PAC3_left_Osa, PAC3_right_Osa),
+  OkiL = PAC3_left_Oki_Osa,
+  OkiR = PAC3_right_Oki_Osa,
+  KumL = PAC3_left_Kum_Osa,
+  KumR = PAC3_right_Kum_Osa,
+  Bar  = range(PAC3_left_Bar |> shift(20), PAC3_right_Bar),
+  Nor  = range(PAC3_left_Nor |> shift(20), PAC3_right_Nor)
+)
+PAC3_left_right.aln <- PAC3_left_right |>
+  lapply(\(gb) gb + 50) |>
+  lapply(getSeq) |>
+  lapply(unlist) |>
+  as("DNAStringSet") |>
+  msa::msaClustalOmega() |>
+  as("DNAMultipleAlignment")
+
+# Re-order based on my preference
+PAC3_left_right.aln@unmasked[c(1,2,5,6,7,8,3,4)]
+```
+
+```{r PAC3_XSR}
+PAC3_XSR_Osa    <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap() 
+PAC3_XSR_Aom    <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Bar    <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Nor    <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+
+list( Osa = PAC3_XSR_Osa
+    , Aom = PAC3_XSR_Aom
+    , Bar = PAC3_XSR_Bar
+    , Nor = PAC3_XSR_Nor) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaMuscle() |> as("DNAMultipleAlignment") |> msaR::msaR()
+```
+
+# Session information
+
+```{r session_information}
+sessionInfo()
+```
