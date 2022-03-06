@@ -68,7 +68,12 @@ O_ruf_Y     IVPIFFGCDDQYFQV---------------------------------------------
 ```
 </details>
 
-Private ZENBU link: <https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=nBuUjj3vMBkuTVQnE57TC;loc=OKI2018_I69_1.0::chr1:11497331..11498497+>
+Private ZENBU links:
+
+ - [chr1 on Oki](https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=nBuUjj3vMBkuTVQnE57TC;loc=OKI2018_I69_1.0::chr1:11497331..11498497+)
+ - [XSR on Oki](https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=nBuUjj3vMBkuTVQnE57TC;loc=OKI2018_I69_1.0::XSR:6230961..6232916+)
+ - [Chr1 on Osa](https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=lc9rquqRE5PnyllQ68DSiC;loc=OSKA2016v1.9::Chr1:8150980..8160990+)
+ - [XSR on Osa](https://fantom.gsc.riken.jp/zenbu/gLyphs/index_3.0.html#config=lc9rquqRE5PnyllQ68DSiC;loc=OSKA2016v1.9::XSR:3167071..3168763+)
 
 #### PAC3 in five genome pairs
 
@@ -132,9 +137,9 @@ PAC3_right_Oki_Osa  <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice
 PAC3_right_Kum_Osa  <- coa$Osa_Kum |> swap () |> subsetByOverlaps(PAC3_in_Kum + 1) |> sort(i=T) |> plyranges::slice(3) |> get_bps("left")
 PAC3_right_Osa      <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("right") |> plyranges::mutate(strand = '-')
 PAC3_right_Aom      <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("right") |> plyranges::mutate(strand = '-')
-PAC3_right_Oki_Bar  <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(3) |> get_bps("left")
-PAC3_right_Bar      <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(3) |> get_bps("left")
-PAC3_right_Nor      <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Oki_Bar  <- coa$Oki_Bar |> subsetByOverlaps(PAC3)           |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Bar      <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Nor      <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("left")
 
 PAC3_right <-
 list( Aom = PAC3_right_Aom
@@ -171,16 +176,88 @@ PAC3_left_right.aln <- PAC3_left_right |>
 PAC3_left_right.aln@unmasked[c(1,2,5,6,7,8,3,4)]
 ```
 
+## The PAC3 (North) or bridge region (Oki) on the XSR.
+
+In Okinawa, the bridge region contains a bidirectional promoter.
+
+Flanking genes might be a _leucine-rich repeat domain-containing protein_ on the
+left (same operon) and a _glutamine-tRNA ligase_ on the right (different strand).
+
 ```{r PAC3_XSR}
-PAC3_XSR_Osa    <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap() 
+PAC3_XSR_Osa_range <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> range()
+PAC3_XSR_Aom_range <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> range()
+PAC3_XSR_Bar_range <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> range()
+PAC3_XSR_Nor_range <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> range()
+
+PAC3_XSR_Osa    <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
 PAC3_XSR_Aom    <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
 PAC3_XSR_Bar    <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
 PAC3_XSR_Nor    <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
 
-list( Osa = PAC3_XSR_Osa
-    , Aom = PAC3_XSR_Aom
-    , Bar = PAC3_XSR_Bar
-    , Nor = PAC3_XSR_Nor) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaMuscle() |> as("DNAMultipleAlignment") |> msaR::msaR()
+
+(PAC3_XSR_Osa_Oki_triple <- coa$Osa_Oki |> subsetByOverlaps(PAC3_XSR_Osa +1000, ignore.strand = TRUE) |> sort(i=T))
+(PAC3_XSR_Osa_Kum_triple <- coa$Osa_Kum |> subsetByOverlaps(PAC3_XSR_Osa +1000, ignore.strand = TRUE) |> sort(i=T))
+(PAC3_XSR_Aom_Oki_triple <- coa$Oki_Aom |> swap () |> subsetByOverlaps(PAC3_XSR_Aom + 1000, ignore.strand=T) |> sort(i=T))
+
+# Bar-Oki alignment is in the opposite orientation
+(PAC3_XSR_Bar_Oki_triple <- coa$Bar_Oki |> subsetByOverlaps(PAC3_XSR_Bar +1000, ignore.strand = TRUE) |> sort(i=T))
+
+(PAC3_XSR_Nor_Oki_triple <- coa$Oki_Nor |> swap () |> subsetByOverlaps(PAC3_XSR_Nor + 1000, ignore.strand=T) |> sort(i=T))
+
+coa$Osa_Nor |> subsetByOverlaps(PAC3_XSR_Osa)
+
+PAC3_XSR_Osa_left  <- PAC3_XSR_Osa_Oki_triple[1] |> get_bps(dir = 'r')
+PAC3_XSR_Osa_right <- PAC3_XSR_Osa_Oki_triple[3] |> get_bps(dir = 'l')
+PAC3_XSR_Oki_left  <- PAC3_XSR_Osa_Oki_triple[1] |> swap() |> get_bps(dir = 'r')
+PAC3_XSR_Oki_right <- PAC3_XSR_Osa_Oki_triple[3] |> swap() |> get_bps(dir = 'l')
+
+PAC3_XSR_Kum_left  <- PAC3_XSR_Osa_Kum_triple[1] |> swap() |> get_bps(dir = 'r')
+PAC3_XSR_Kum_right <- PAC3_XSR_Osa_Kum_triple[3] |> swap() |> get_bps(dir = 'l')
+
+PAC3_XSR_Nor_left  <- PAC3_XSR_Nor_Oki_triple[1] |> get_bps(dir = 'r')
+PAC3_XSR_Nor_right <- PAC3_XSR_Nor_Oki_triple[3] |> get_bps(dir = 'l')
+
+# Remember that Bar-Oki alignment is in the opposite orientation
+PAC3_XSR_Bar_left  <- PAC3_XSR_Bar_Oki_triple[3] |> get_bps(dir = 'l') |> plyranges::mutate(strand = '-')
+PAC3_XSR_Bar_right <- PAC3_XSR_Bar_Oki_triple[1] |> get_bps(dir = 'r') |> plyranges::mutate(strand = '-')
+
+# Remember that Oki-Aom alignment is in the opposite orientation
+PAC3_XSR_Aom_left  <- PAC3_XSR_Aom_Oki_triple[3] |> get_bps(dir = 'l') |> plyranges::mutate(strand = '-')
+PAC3_XSR_Aom_right <- PAC3_XSR_Aom_Oki_triple[1] |> get_bps(dir = 'r') |> plyranges::mutate(strand = '-')
+
+PAC3_XSR_Aom    <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Bar    <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Nor    <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+```
+
+In Okinawa and Kume, the bridge region is ~400 bp-long; it will be hard to
+make a single alignment.
+
+```{r XSR_left}
+n <- 40
+PAC3_XSR_Osa.aln.left <- list(
+  Osa_left = PAC3_XSR_Osa_left |> shift(n),
+  Aom_left = PAC3_XSR_Aom_left |> shift(-n),
+  Oki_left = PAC3_XSR_Oki_left |> shift(n),
+  Kum_left = PAC3_XSR_Kum_left |> shift(n),
+  Nor_left = PAC3_XSR_Nor_left |> shift(n),
+  Bar_left = PAC3_XSR_Bar_left |> shift(-n))
+
+PAC3_XSR_Osa.aln.left |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
+```
+
+The right-side region is near a bidirectional promoter in both the Oki and Osa genomes.
+
+```{r XSR_right}
+PAC3_XSR_Osa.aln.right <- list(
+  Osa_right = PAC3_XSR_Osa_right,
+  Aom_right = PAC3_XSR_Aom_right,
+  Oki_right = PAC3_XSR_Oki_right,
+  Kum_right = PAC3_XSR_Kum_right,
+  Nor_right = PAC3_XSR_Nor_right |> shift(-306),
+  Bar_right = PAC3_XSR_Bar_right |> shift(306))
+
+PAC3_XSR_Osa.aln.right |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
 ```
 
 # Session information
