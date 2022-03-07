@@ -1,4 +1,8 @@
-# OkiScrambling 2.0.0
+# OikScrambling 2.1.0
+
+* Add a vignette about the movement of the PAC3 gene.
+
+# OikScrambling 2.0.0
 
 * Adopt semantic versionning: any backwards-incompatible change increases
   the major version number, no matter how (un)important it is.
