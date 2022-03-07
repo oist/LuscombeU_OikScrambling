@@ -21,9 +21,8 @@ options(width = 200)
 Load packages and data
 ======================
 
-See `?OikScrambling:::loadAllGenomes()`, `?OikScrambling:::loadAllTranscriptsGR()`,
-and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
-different objects are prepared.
+See `?OikScrambling:::loadAllGenomes()` and `vignette("LoadGenomicBreaks",
+package = "OikScrambling")` for how the different objects are prepared.
 
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
@@ -31,9 +30,12 @@ genomes <- OikScrambling:::loadAllGenomes(compat = F)
 load("BreakPoints.Rdata")
 ```
 
-# PAC3: a gene that moved between chr1 and XSR (but ancestral state is unknown)
+# PAC3 moved between chr1 and XSR; its ancestral state is unknown
 
-## PAC3
+Annotated versions of the alignments can be found in the `PAC3.svg` file that
+should be in the same directory as the `PAC3.Rmd` source file of this document.
+
+## General information.
 
 The gene g3146 (`Oidioi.mRNA.OKI2018_I69.chr1.g3144.t1.cds` or `CAG5107096` in
 OKI2018, `CBY24606` in OdB3) is on `chr1` in Oki and Kum but on `XSR` in Osa and
@@ -67,6 +69,7 @@ M_ery       IEPI-FGENKDYLQV---------------------------------------------
 O_ruf_Y     IVPIFFGCDDQYFQV---------------------------------------------
 ```
 </details>
+<br></br>
 
 Private ZENBU links:
 
@@ -75,7 +78,10 @@ Private ZENBU links:
  - [Chr1 on Osa](https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=lc9rquqRE5PnyllQ68DSiC;loc=OSKA2016v1.9::Chr1:8150980..8160990+)
  - [XSR on Osa](https://fantom.gsc.riken.jp/zenbu/gLyphs/index_3.0.html#config=lc9rquqRE5PnyllQ68DSiC;loc=OSKA2016v1.9::XSR:3167071..3168763+)
 
-#### PAC3 in five genome pairs
+## PAC3 in five genome pairs
+
+PAC3 is on range number 2 in all pairs except for Oki_Kum since these two are
+syntenic.
 
 ```{r PAC3}
 PAC3 <- GRanges("chr1:11497331-11498497")
@@ -88,7 +94,16 @@ coa$Oki_Nor |> subsetByOverlaps(PAC3)
 coa$Oki_Kum |> subsetByOverlaps(PAC3)
 ```
 
-## The bridge region of PAC3 in the "Northern" genomes.
+# PAC3 on chr1
+
+## The bridge region in the "Northern" genomes.
+
+On chromosome 1, PAC3 is flanked by _UBXN6_ and a gene ressembling _mediator
+of RNA polymerase II transcription subunit 30_.  In genomes where PAC3 is on the
+XSR, these flanking genes are separated by a short bridge region, where
+little similarity remains between the Atlantic and Pacific branches of the "North"
+species.  The conserved `AG` residues are trans-splicing sites according to
+CAGE data.
 
 ```{r PAC3_bridge}
 PAC3_bridge_Osa <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps() |> plyranges::mutate(strand = '-')
@@ -103,6 +118,11 @@ list( Osa = PAC3_bridge_Osa
 ```
 
 ## The left region of PAC3 in all genomes
+
+Alignment of 70 nucleotides flanking the alignment breakpoint on the left
+side of PAC3 illustrates the conservation in all 6 genomes (upstream)
+and the lack of similarity between the "Oki" sequences and the "North" bridge
+region.
 
 ```{r PAC3_left}
 PAC3_left_Oki_Osa  <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(1) |> get_bps("right")
@@ -126,11 +146,11 @@ list( Aom = PAC3_left_Aom
 PAC3_left |> lapply(\(gb) gb + 70) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment")
 ```
 
-## The right region of PAC3 in all genomes
+## The right region of PAC3 on in all genomes
 
-Very near the alignment break (at the center), there is the `ATG` and upstream
-of it there are two conserved `AG` that may be trans-splicing sites
-(with CAGE support at least in Oki).
+Same story on the right side.  Very near the alignment break (at the center),
+there is the `ATG` and upstream of it there are two conserved `AG` that may be
+trans-splicing sites (with CAGE support at least in Oki).
 
 ```{r PAC3_right}
 PAC3_right_Oki_Osa  <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(3) |> get_bps("left")
@@ -152,6 +172,9 @@ PAC3_right |> lapply(\(gb) gb + 70) |> lapply(getSeq) |> lapply(unlist) |> as("D
 ```
 
 ## Combined view of the left and right regions
+
+The combined view shows that the sequence on the left and right of PAC3 do not
+have visible similarity with each other or with the bridge region.
 
 ```{r PAC3_left_right}
 PAC3_left_right <- list(
@@ -175,6 +198,8 @@ PAC3_left_right.aln <- PAC3_left_right |>
 # Re-order based on my preference
 PAC3_left_right.aln@unmasked[c(1,2,5,6,7,8,3,4)]
 ```
+
+# PAC3 on the X-specific region of chrX (XSR)
 
 ## The PAC3 (North) or bridge region (Oki) on the XSR.
 
@@ -230,11 +255,13 @@ PAC3_XSR_Bar    <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(2) 
 PAC3_XSR_Nor    <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
 ```
 
-In Okinawa and Kume, the bridge region is ~400 bp-long; it will be hard to
-make a single alignment.
+## Left side
+
+In Okinawa and Kume, the bridge region is ~400 bp-long.  It will not be possible
+to make a combined left-right alignment like on chr1.
 
 ```{r XSR_left}
-n <- 40
+n <- -40
 PAC3_XSR_Osa.aln.left <- list(
   Osa_left = PAC3_XSR_Osa_left |> shift(n),
   Aom_left = PAC3_XSR_Aom_left |> shift(-n),
@@ -246,7 +273,10 @@ PAC3_XSR_Osa.aln.left <- list(
 PAC3_XSR_Osa.aln.left |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
 ```
 
-The right-side region is near a bidirectional promoter in both the Oki and Osa genomes.
+## Right side
+
+The right-side region is near a bidirectional promoter in both the Oki and Osa
+genomes.
 
 ```{r XSR_right}
 PAC3_XSR_Osa.aln.right <- list(
