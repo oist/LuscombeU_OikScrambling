@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -78,6 +78,9 @@
     </li>
     <li>
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
+      <a href="../articles/PAC3.html">Region of interest: PAC3</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif search and analysis</a>
@@ -135,7 +138,7 @@
       <h1 data-toc-skip>Repeat regions</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">01 March, 2022</h4>
+            <h4 data-toc-skip class="date">08 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/RepeatRegions.Rmd" class="external-link"><code>vignettes/RepeatRegions.Rmd</code></a></small>
       <div class="hidden name"><code>RepeatRegions.Rmd</code></div>
@@ -147,14 +150,14 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div class="section level1">
-<h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h1>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>Regions matching repeat annotations in the <em>target</em> or the <em>query</em> genome.</p>
 </div>
-<div class="section level1">
-<h1 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
-</h1>
+<div class="section level2">
+<h2 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
+</h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -170,12 +173,12 @@
 <span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "wgo"       "longShort"</span></code></pre>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are prepared.</p>
 </div>
-<div class="section level1">
-<h1 id="repeats-intersecting-with-gbreaks-regions">Repeats intersecting with GBreaks regions<a class="anchor" aria-label="anchor" href="#repeats-intersecting-with-gbreaks-regions"></a>
-</h1>
 <div class="section level2">
-<h2 id="compute">Compute<a class="anchor" aria-label="anchor" href="#compute"></a>
+<h2 id="repeats-intersecting-with-gbreaks-regions">Repeats intersecting with GBreaks regions<a class="anchor" aria-label="anchor" href="#repeats-intersecting-with-gbreaks-regions"></a>
 </h2>
+<div class="section level3">
+<h3 id="compute">Compute<a class="anchor" aria-label="anchor" href="#compute"></a>
+</h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reps_in</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">Oki_pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Oki_Osa"</span>, <span class="st">"Oki_Bar"</span>, <span class="st">"Oki_Kum"</span>, <span class="st">"Oki_Aom"</span>, <span class="st">"Oki_Nor"</span><span class="op">)</span>
@@ -235,9 +238,9 @@
 <span class="va">reps_in_Osa.norm.long</span> <span class="op">&lt;-</span> <span class="fu">toLong.reps</span><span class="op">(</span><span class="va">reps_in_Osa.norm</span><span class="op">)</span>
 <span class="va">reps_in_Bar.norm.long</span> <span class="op">&lt;-</span> <span class="fu">toLong.reps</span><span class="op">(</span><span class="va">reps_in_Bar.norm</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="summary-numbers">Summary numbers<a class="anchor" aria-label="anchor" href="#summary-numbers"></a>
-</h2>
+<div class="section level3">
+<h3 id="summary-numbers">Summary numbers<a class="anchor" aria-label="anchor" href="#summary-numbers"></a>
+</h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps_in_Oki.norm</span>, <span class="va">rowMeans</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               total      unal        gbs     unmap    unmap2   unalMap</span>
@@ -279,9 +282,9 @@
 <span class="co">## tandem        0.7069960 0.03959233</span>
 <span class="co">## unknown       0.6781281 0.04642602</span></code></pre>
 </div>
-<div class="section level2">
-<h2 id="summary-plots">Summary plots<a class="anchor" aria-label="anchor" href="#summary-plots"></a>
-</h2>
+<div class="section level3">
+<h3 id="summary-plots">Summary plots<a class="anchor" aria-label="anchor" href="#summary-plots"></a>
+</h3>
 <p>Note that Oki has more repeat classes.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Here, the outlier is the same-species comparison, Okinawa – Kume</span>
@@ -310,14 +313,14 @@
 <p><img src="RepeatRegions_files/figure-html/summary_plots-3.png" width="960"></p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="tracking-repeats-across-genome-pairs">Tracking repeats across genome pairs<a class="anchor" aria-label="anchor" href="#tracking-repeats-across-genome-pairs"></a>
-</h1>
+<div class="section level2">
+<h2 id="tracking-repeats-across-genome-pairs">Tracking repeats across genome pairs<a class="anchor" aria-label="anchor" href="#tracking-repeats-across-genome-pairs"></a>
+</h2>
 <p>The <a href="https://vcg.github.io/upset/" class="external-link">upset</a> plots below show whether a repeat in the Okinawa or the Osaka genome as <em>target</em> genome is located in an given region in respect to one or many of the <em>query</em> genomes.</p>
 <p><em>Note:</em> Some repeat annotations overlap.</p>
-<div class="section level2">
-<h2 id="aligned">Aligned<a class="anchor" aria-label="anchor" href="#aligned"></a>
-</h2>
+<div class="section level3">
+<h3 id="aligned">Aligned<a class="anchor" aria-label="anchor" href="#aligned"></a>
+</h3>
 <p>More than 10,000 repeat annotations are in regions aligned to the same-population control genome, demonstrating that they are mapable in principle.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">isPresent</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">r</span>, <span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">countOverlaps</a></span><span class="op">(</span><span class="va">r</span>,<span class="va">gb</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>
@@ -352,9 +355,9 @@
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">alignedRepsBar</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_align-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="unaligned">Unaligned<a class="anchor" aria-label="anchor" href="#unaligned"></a>
-</h2>
+<div class="section level3">
+<h3 id="unaligned">Unaligned<a class="anchor" aria-label="anchor" href="#unaligned"></a>
+</h3>
 <p>~40,000 repeat annotations are in regions that are not aligned to a different-population_query_ genome. This might be caused by insertions and deletions.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalignedRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
@@ -387,9 +390,9 @@
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">alignedRepsBar</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unal-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="mapped">Mapped<a class="anchor" aria-label="anchor" href="#mapped"></a>
-</h2>
+<div class="section level3">
+<h3 id="mapped">Mapped<a class="anchor" aria-label="anchor" href="#mapped"></a>
+</h3>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mappedRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   mapped_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
@@ -421,9 +424,9 @@
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">mappedRepsBar</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_mapped-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="unmapped">Unmapped<a class="anchor" aria-label="anchor" href="#unmapped"></a>
-</h2>
+<div class="section level3">
+<h3 id="unmapped">Unmapped<a class="anchor" aria-label="anchor" href="#unmapped"></a>
+</h3>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmappedRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unmapped_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unmap</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
@@ -455,9 +458,9 @@
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unmappedRepsBar</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unmapped-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="unaligned-but-mapped-by-flanking-colinear-blocks">Unaligned but mapped by flanking colinear blocks<a class="anchor" aria-label="anchor" href="#unaligned-but-mapped-by-flanking-colinear-blocks"></a>
-</h2>
+<div class="section level3">
+<h3 id="unaligned-but-mapped-by-flanking-colinear-blocks">Unaligned but mapped by flanking colinear blocks<a class="anchor" aria-label="anchor" href="#unaligned-but-mapped-by-flanking-colinear-blocks"></a>
+</h3>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unalMapRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   unalMap_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">unalMap</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
@@ -489,9 +492,9 @@
 <span class="fu">UpSetR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/UpSetR/man/upset.html" class="external-link">upset</a></span><span class="op">(</span><span class="va">unalMapRepsBar</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/upset_plot_unalMap-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="transposed">Transposed<a class="anchor" aria-label="anchor" href="#transposed"></a>
-</h2>
+<div class="section level3">
+<h3 id="transposed">Transposed<a class="anchor" aria-label="anchor" href="#transposed"></a>
+</h3>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">traRepsOki</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   tra_Osa <span class="op">=</span> <span class="fu">isPresent</span><span class="op">(</span><span class="va">reps</span><span class="op">$</span><span class="va">Oki</span>, <span class="va">tra</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>,
@@ -524,9 +527,9 @@
 <p><img src="RepeatRegions_files/figure-html/upset_plot_tra-3.png" width="700"></p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="repeat-annotation-of-the-gbreaks-objects">Repeat annotation of the GBreaks objects<a class="anchor" aria-label="anchor" href="#repeat-annotation-of-the-gbreaks-objects"></a>
-</h1>
+<div class="section level2">
+<h2 id="repeat-annotation-of-the-gbreaks-objects">Repeat annotation of the GBreaks objects<a class="anchor" aria-label="anchor" href="#repeat-annotation-of-the-gbreaks-objects"></a>
+</h2>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are annotated.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">countGbsMatchingReps</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">rep</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -550,9 +553,9 @@
 <span class="co">## <span style="color: #BCBCBC;">3</span> Oki – Nor…   0.135     0.360  0.404    0.381      0.349      0.533       0.612</span>
 <span class="co">## <span style="color: #949494;"># … with 2 more variables: mapped2 &lt;dbl&gt;, unMapped2 &lt;dbl&gt;</span></span></code></pre>
 </div>
-<div class="section level1">
-<h1 id="reduced-repeat-set">Reduced repeat set<a class="anchor" aria-label="anchor" href="#reduced-repeat-set"></a>
-</h1>
+<div class="section level2">
+<h2 id="reduced-repeat-set">Reduced repeat set<a class="anchor" aria-label="anchor" href="#reduced-repeat-set"></a>
+</h2>
 <p>Old plots; they show that the above is also true if we merge overlapping repeats.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reps.reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">reduce</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
@@ -566,9 +569,9 @@
 <span class="co">## 3rd Qu.   281.0000  286.0000   267.0000   292.0000   282.0000   330.0000</span>
 <span class="co">## Max.    25734.0000 9208.0000 62015.0000 24020.0000 41142.0000 17402.0000</span></code></pre>
 </div>
-<div class="section level1">
-<h1 id="colinearity-interruptors-unmapped-regions">Colinearity interruptors (unmapped regions ?)<a class="anchor" aria-label="anchor" href="#colinearity-interruptors-unmapped-regions"></a>
-</h1>
+<div class="section level2">
+<h2 id="colinearity-interruptors-unmapped-regions">Colinearity interruptors (unmapped regions ?)<a class="anchor" aria-label="anchor" href="#colinearity-interruptors-unmapped-regions"></a>
+</h2>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps_coa</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
     pairname    <span class="op">=</span> <span class="va">Oki_pairs</span>,
@@ -598,9 +601,9 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pairname</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/unaligned_regions2-1.png" width="700"></p>
 </div>
-<div class="section level1">
-<h1 id="unaligned-regions">Unaligned regions<a class="anchor" aria-label="anchor" href="#unaligned-regions"></a>
-</h1>
+<div class="section level2">
+<h2 id="unaligned-regions">Unaligned regions<a class="anchor" aria-label="anchor" href="#unaligned-regions"></a>
+</h2>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">reps_gbs</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
     pairname   <span class="op">=</span> <span class="va">Oki_pairs</span>,
@@ -630,9 +633,9 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">pairname</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="RepeatRegions_files/figure-html/unaligned_regions-1.png" width="700"></p>
 </div>
-<div class="section level1">
-<h1 id="repeat-annotation-of-the-shortest-mapped-regions">Repeat annotation of the shortest mapped regions<a class="anchor" aria-label="anchor" href="#repeat-annotation-of-the-shortest-mapped-regions"></a>
-</h1>
+<div class="section level2">
+<h2 id="repeat-annotation-of-the-shortest-mapped-regions">Repeat annotation of the shortest mapped regions<a class="anchor" aria-label="anchor" href="#repeat-annotation-of-the-shortest-mapped-regions"></a>
+</h2>
 <p>In Oki – North comparisons, the distribution of mapped region widths is bimodal and the two peaks are best separated around 600 bp. See <code><a href="../articles/RegionWidths.html">vignette("RegionWidths", package = "OikScrambling")</a></code> for details.</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>w_short <span class="op">=</span> <span class="va">width</span> <span class="op">&lt;</span> <span class="fl">600</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> |&gt;
@@ -697,7 +700,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

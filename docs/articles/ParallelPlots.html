@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -78,6 +78,9 @@
     </li>
     <li>
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
+      <a href="../articles/PAC3.html">Region of interest: PAC3</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif search and analysis</a>
@@ -135,7 +138,7 @@
       <h1 data-toc-skip>Whole-chromosome parallel plots</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">01 March, 2022</h4>
+            <h4 data-toc-skip class="date">08 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/ParallelPlots.Rmd" class="external-link"><code>vignettes/ParallelPlots.Rmd</code></a></small>
       <div class="hidden name"><code>ParallelPlots.Rmd</code></div>
@@ -147,19 +150,19 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div class="section level1">
-<h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h1>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>In this vignette I plot whole chromosomes in parallel to reflect synteny and the difference of scrambling between short and long arms.</p>
 <p>The core functions used here are maintained in our <em>GenomicBreaks</em> R package, which is fully documented at: <a href="https://oist.github.io/GenomicBreaks" class="external-link uri">https://oist.github.io/GenomicBreaks</a>.</p>
+<div class="section level3">
+<h3 id="load-pacakges">Load pacakges<a class="anchor" aria-label="anchor" href="#load-pacakges"></a>
+</h3>
+</div>
+</div>
 <div class="section level2">
-<h2 id="load-pacakges">Load pacakges<a class="anchor" aria-label="anchor" href="#load-pacakges"></a>
+<h2 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
 </h2>
-</div>
-</div>
-<div class="section level1">
-<h1 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
-</h1>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -169,9 +172,9 @@
 <code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      </span>
 <span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "wgo"       "longShort"</span></code></pre>
-<div class="section level3">
-<h3 id="phylogenetic-cladogram">Phylogenetic cladogram<a class="anchor" aria-label="anchor" href="#phylogenetic-cladogram"></a>
-</h3>
+<div class="section level4">
+<h4 id="phylogenetic-cladogram">Phylogenetic cladogram<a class="anchor" aria-label="anchor" href="#phylogenetic-cladogram"></a>
+</h4>
 <p>We assume that the <em>North Pacific</em> and the <em>Atlantic</em> species are more related to each other than to the <em>Okinawan</em> species.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ade4"</span><span class="op">)</span>
@@ -210,12 +213,12 @@
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/phylogenetic_tree-1.svg" width="576"></p>
 </div>
-<div class="section level2">
-<h2 id="genome-plots-with-genoplotr">Genome plots with genoPlotR<a class="anchor" aria-label="anchor" href="#genome-plots-with-genoplotr"></a>
-</h2>
 <div class="section level3">
-<h3 id="pairs-of-chromosome-1s-">Pairs of chromosome 1s.<a class="anchor" aria-label="anchor" href="#pairs-of-chromosome-1s-"></a>
+<h3 id="genome-plots-with-genoplotr">Genome plots with genoPlotR<a class="anchor" aria-label="anchor" href="#genome-plots-with-genoplotr"></a>
 </h3>
+<div class="section level4">
+<h4 id="pairs-of-chromosome-1s-">Pairs of chromosome 1s.<a class="anchor" aria-label="anchor" href="#pairs-of-chromosome-1s-"></a>
+</h4>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki vs Bar"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/Oki_Bar_chr1-1.png" width="1440"></p>
@@ -250,9 +253,9 @@
 <p><img src="ParallelPlots_files/figure-html/coa2_based2-1.png" width="1440"></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="plot-chr1-in-three-species">Plot chr1 in three species<a class="anchor" aria-label="anchor" href="#plot-chr1-in-three-species"></a>
-</h2>
+<div class="section level3">
+<h3 id="plot-chr1-in-three-species">Plot chr1 in three species<a class="anchor" aria-label="anchor" href="#plot-chr1-in-three-species"></a>
+</h3>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">doubleSubset</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span>, <span class="va">a</span>, <span class="va">b</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">==</span> <span class="va">a</span><span class="op">]</span>
@@ -275,9 +278,9 @@
                          main <span class="op">=</span> <span class="st">"Chromosome 1 in three Oikopleura genome assemblies"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/plot_intersect_GBs_with_tree-1.png" width="1440"></p>
 </div>
-<div class="section level2">
-<h2 id="plot-chr1-in-four-species-double-collapsed">Plot chr1 in four species (double-collapsed)<a class="anchor" aria-label="anchor" href="#plot-chr1-in-four-species-double-collapsed"></a>
-</h2>
+<div class="section level3">
+<h3 id="plot-chr1-in-four-species-double-collapsed">Plot chr1 in four species (double-collapsed)<a class="anchor" aria-label="anchor" href="#plot-chr1-in-four-species-double-collapsed"></a>
+</h3>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">KumChr1</span> <span class="op">&lt;-</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span>
 <span class="va">KumChr1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">KumChr1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span><span class="op">)</span>
@@ -302,9 +305,9 @@
                          main <span class="op">=</span> <span class="st">"Chromosome 1 in four Oikopleura genome assemblies"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/plot_intersect_GBs_with_tree_with_Kume-1.svg" width="1440"></p>
 </div>
-<div class="section level2">
-<h2 id="region-that-is-conserved-between-osaka-and-barcelona">Region that is conserved between Osaka and Barcelona<a class="anchor" aria-label="anchor" href="#region-that-is-conserved-between-osaka-and-barcelona"></a>
-</h2>
+<div class="section level3">
+<h3 id="region-that-is-conserved-between-osaka-and-barcelona">Region that is conserved between Osaka and Barcelona<a class="anchor" aria-label="anchor" href="#region-that-is-conserved-between-osaka-and-barcelona"></a>
+</h3>
 <p>Since Okinawa is the outgroup, let’s look for regions of it that are aligned on both the Osaka and the Barcelona genomes.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
@@ -383,12 +386,12 @@
 <p><img src="ParallelPlots_files/figure-html/combine_GBs-1.png" width="700"></p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="other-species">Other species<a class="anchor" aria-label="anchor" href="#other-species"></a>
-</h1>
 <div class="section level2">
-<h2 id="ciona">Ciona<a class="anchor" aria-label="anchor" href="#ciona"></a>
+<h2 id="other-species">Other species<a class="anchor" aria-label="anchor" href="#other-species"></a>
 </h2>
+<div class="section level3">
+<h3 id="ciona">Ciona<a class="anchor" aria-label="anchor" href="#ciona"></a>
+</h3>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Ply_Ros</span>, <span class="st">"BNJZ01000001.1"</span>, main <span class="op">=</span> <span class="st">"Ciona intestinalis Plymouth vs Roscoff"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/Ciona_Ply_Ros_chr1-1.png" width="700"></p>
@@ -401,9 +404,9 @@
 <p><img src="ParallelPlots_files/figure-html/Ciona_Ply_Sav_chr1-1.png" width="700"></p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
-</h1>
+<div class="section level2">
+<h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
+</h2>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
@@ -433,9 +436,9 @@
 <span class="co">##  [4] BSgenome.Oidioi.OIST.Bar2.p4_1.0.1     </span>
 <span class="co">##  [5] BSgenome.Oidioi.OIST.OSKA2016v1.9_1.0.0</span>
 <span class="co">##  [6] BSgenome.Oidioi.OIST.OKI2018.I69_1.0.1 </span>
-<span class="co">##  [7] OikScrambling_2.0.0                    </span>
+<span class="co">##  [7] OikScrambling_2.1.0                    </span>
 <span class="co">##  [8] ggplot2_3.3.5                          </span>
-<span class="co">##  [9] GenomicBreaks_0.13.0                   </span>
+<span class="co">##  [9] GenomicBreaks_0.13.1                   </span>
 <span class="co">## [10] BSgenome_1.62.0                        </span>
 <span class="co">## [11] rtracklayer_1.54.0                     </span>
 <span class="co">## [12] Biostrings_2.62.0                      </span>
@@ -457,10 +460,10 @@
 <span class="co">##  [15] memoise_2.0.1               cluster_2.1.2              </span>
 <span class="co">##  [17] tzdb_0.2.0                  readr_2.1.2                </span>
 <span class="co">##  [19] annotate_1.72.0             matrixStats_0.61.0         </span>
-<span class="co">##  [21] R.utils_2.11.0              pkgdown_2.0.1              </span>
+<span class="co">##  [21] R.utils_2.11.0              pkgdown_2.0.2              </span>
 <span class="co">##  [23] jpeg_0.1-9                  colorspace_2.0-3           </span>
 <span class="co">##  [25] blob_1.2.2                  textshaping_0.3.6          </span>
-<span class="co">##  [27] xfun_0.29                   dplyr_1.0.8                </span>
+<span class="co">##  [27] xfun_0.30                   dplyr_1.0.8                </span>
 <span class="co">##  [29] crayon_1.5.0                RCurl_1.98-1.6             </span>
 <span class="co">##  [31] jsonlite_1.8.0              lme4_1.1-28                </span>
 <span class="co">##  [33] survival_3.2-13             glue_1.6.2                 </span>
@@ -476,9 +479,9 @@
 <span class="co">##  [53] ellipsis_0.3.2              mice_3.14.0                </span>
 <span class="co">##  [55] pkgconfig_2.0.3             XML_3.99-0.9               </span>
 <span class="co">##  [57] R.methodsS3_1.8.1           nnet_7.3-16                </span>
-<span class="co">##  [59] sass_0.4.0                  locfit_1.5-9.4             </span>
+<span class="co">##  [59] sass_0.4.0                  locfit_1.5-9.5             </span>
 <span class="co">##  [61] utf8_1.2.2                  tidyselect_1.1.2           </span>
-<span class="co">##  [63] rlang_1.0.1                 reshape2_1.4.4             </span>
+<span class="co">##  [63] rlang_1.0.2                 reshape2_1.4.4             </span>
 <span class="co">##  [65] AnnotationDbi_1.56.2        munsell_0.5.0              </span>
 <span class="co">##  [67] tools_4.1.2                 cachem_1.0.6               </span>
 <span class="co">##  [69] cli_3.2.0                   generics_0.1.2             </span>
@@ -491,11 +494,11 @@
 <span class="co">##  [83] purrr_0.3.4                 heatmaps_1.18.0            </span>
 <span class="co">##  [85] KEGGREST_1.34.0             nlme_3.1-153               </span>
 <span class="co">##  [87] R.oo_1.24.0                 poweRlaw_0.70.6            </span>
-<span class="co">##  [89] pracma_2.3.6                compiler_4.1.2             </span>
+<span class="co">##  [89] pracma_2.3.8                compiler_4.1.2             </span>
 <span class="co">##  [91] rstudioapi_0.13             png_0.1-7                  </span>
 <span class="co">##  [93] tibble_3.1.6                bslib_0.3.1                </span>
 <span class="co">##  [95] stringi_1.7.6               highr_0.9                  </span>
-<span class="co">##  [97] desc_1.4.0                  lattice_0.20-45            </span>
+<span class="co">##  [97] desc_1.4.1                  lattice_0.20-45            </span>
 <span class="co">##  [99] CNEr_1.30.0                 Matrix_1.4-0               </span>
 <span class="co">## [101] nloptr_1.2.2.3              vctrs_0.3.8                </span>
 <span class="co">## [103] pillar_1.7.0                lifecycle_1.0.1            </span>
@@ -507,7 +510,7 @@
 <span class="co">## [115] gtools_3.9.2                MASS_7.3-54                </span>
 <span class="co">## [117] assertthat_0.2.1            SummarizedExperiment_1.24.0</span>
 <span class="co">## [119] rprojroot_2.0.2             rjson_0.2.21               </span>
-<span class="co">## [121] withr_2.4.3                 GenomicAlignments_1.30.0   </span>
+<span class="co">## [121] withr_2.5.0                 GenomicAlignments_1.30.0   </span>
 <span class="co">## [123] Rsamtools_2.10.0            GenomeInfoDbData_1.2.7     </span>
 <span class="co">## [125] parallel_4.1.2              hms_1.1.1                  </span>
 <span class="co">## [127] EBImage_4.36.0              grid_4.1.2                 </span>
@@ -535,7 +538,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

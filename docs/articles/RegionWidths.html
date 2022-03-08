@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -78,6 +78,9 @@
     </li>
     <li>
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
+      <a href="../articles/PAC3.html">Region of interest: PAC3</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif search and analysis</a>
@@ -135,7 +138,7 @@
       <h1 data-toc-skip>Width of the aligned and mapped regions.</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">01 March, 2022</h4>
+            <h4 data-toc-skip class="date">08 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/RegionWidths.Rmd" class="external-link"><code>vignettes/RegionWidths.Rmd</code></a></small>
       <div class="hidden name"><code>RegionWidths.Rmd</code></div>
@@ -147,9 +150,9 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div class="section level1">
-<h1 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
-</h1>
+<div class="section level2">
+<h2 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
+</h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://ggplot2.tidyverse.org" class="external-link">'ggplot2'</a></span><span class="op">)</span>
@@ -159,9 +162,9 @@
 <span class="va">ces</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"CEs.Rds"</span><span class="op">)</span></code></pre></div>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are prepared.</p>
 </div>
-<div class="section level1">
-<h1 id="precompute-widths">Precompute widths<a class="anchor" aria-label="anchor" href="#precompute-widths"></a>
-</h1>
+<div class="section level2">
+<h2 id="precompute-widths">Precompute widths<a class="anchor" aria-label="anchor" href="#precompute-widths"></a>
+</h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">makeWidthsDF</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">objList</span><span class="op">)</span> <span class="op">{</span>
@@ -213,9 +216,9 @@
   query     <span class="op">=</span> <span class="va">pairnames</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span>pat<span class="op">=</span><span class="st">".*_"</span>, rep<span class="op">=</span><span class="st">""</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
 </div>
-<div class="section level1">
-<h1 id="plot-all-width-distributions">Plot all width distributions<a class="anchor" aria-label="anchor" href="#plot-all-width-distributions"></a>
-</h1>
+<div class="section level2">
+<h2 id="plot-all-width-distributions">Plot all width distributions<a class="anchor" aria-label="anchor" href="#plot-all-width-distributions"></a>
+</h2>
 <p>This is useful to verify by eye that collections of distributions in the same distance group resemble each other.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gg_freq_poly</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tibble</span><span class="op">)</span> <span class="op">{</span>
@@ -275,15 +278,15 @@ CCC#
 <pre><code><span class="co">## Warning: Removed 7561 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_processing_steps_by_class_and_genus-1.png" width="1152"></p>
 </div>
-<div class="section level1">
-<h1 id="width-distribution-of-aligned-and-mapped-regions">Width distribution of aligned and mapped regions<a class="anchor" aria-label="anchor" href="#width-distribution-of-aligned-and-mapped-regions"></a>
-</h1>
 <div class="section level2">
-<h2 id="aligned-regions">Aligned regions<a class="anchor" aria-label="anchor" href="#aligned-regions"></a>
+<h2 id="width-distribution-of-aligned-and-mapped-regions">Width distribution of aligned and mapped regions<a class="anchor" aria-label="anchor" href="#width-distribution-of-aligned-and-mapped-regions"></a>
 </h2>
 <div class="section level3">
-<h3 id="whole-genomes">Whole genomes<a class="anchor" aria-label="anchor" href="#whole-genomes"></a>
+<h3 id="aligned-regions">Aligned regions<a class="anchor" aria-label="anchor" href="#aligned-regions"></a>
 </h3>
+<div class="section level4">
+<h4 id="whole-genomes">Whole genomes<a class="anchor" aria-label="anchor" href="#whole-genomes"></a>
+</h4>
 <p><em>Aligned</em> means “before coalescing” and <em>mapped</em> means “after coalescing”.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span><span class="op">)</span> <span class="op">+</span>
@@ -309,9 +312,9 @@ CCC#
 <pre><code><span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_before_coalescing2-1.png" width="576"></p>
 </div>
-<div class="section level3">
-<h3 id="faceted-by-arms">Faceted by arms<a class="anchor" aria-label="anchor" href="#faceted-by-arms"></a>
-</h3>
+<div class="section level4">
+<h4 id="faceted-by-arms">Faceted by arms<a class="anchor" aria-label="anchor" href="#faceted-by-arms"></a>
+</h4>
 <p>The distribution of widths is not the same on long and short arms.</p>
 <p>Note that for this reason, it would be unwise to filter by width on some operations such as coalescing.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -338,9 +341,9 @@ CCC#
 <p><img src="RegionWidths_files/figure-html/widths_gbs2_by_arm-1.png" width="700"></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="unaligned-regions">Unaligned regions<a class="anchor" aria-label="anchor" href="#unaligned-regions"></a>
-</h2>
+<div class="section level3">
+<h3 id="unaligned-regions">Unaligned regions<a class="anchor" aria-label="anchor" href="#unaligned-regions"></a>
+</h3>
 <p>Unaligned regions show no difference of width between arms, except perhaps at the “same population” level.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unal</span><span class="op">)</span> <span class="op">+</span>
@@ -392,17 +395,17 @@ CCC#
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/widths_unaligned2-2.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="mapped-coalesced-regions">Mapped (coalesced) regions<a class="anchor" aria-label="anchor" href="#mapped-coalesced-regions"></a>
-</h2>
+<div class="section level3">
+<h3 id="mapped-coalesced-regions">Mapped (coalesced) regions<a class="anchor" aria-label="anchor" href="#mapped-coalesced-regions"></a>
+</h3>
 <p>After coalescing, some width distribution become clearly bimodal. The distributions are hard to compare between genera and between evolutionary distance groups, and even within group for the “same population” <em>Oikopleura</em>.</p>
 <p>The plots below display the data in details for the reader to make their opinion about the above statement.</p>
-<div class="section level3">
-<h3 id="whole-data">Whole data<a class="anchor" aria-label="anchor" href="#whole-data"></a>
-</h3>
 <div class="section level4">
-<h4 id="width-distributions-">Width distributions.<a class="anchor" aria-label="anchor" href="#width-distributions-"></a>
+<h4 id="whole-data">Whole data<a class="anchor" aria-label="anchor" href="#whole-data"></a>
 </h4>
+<div class="section level5">
+<h5 id="width-distributions-">Width distributions.<a class="anchor" aria-label="anchor" href="#width-distributions-"></a>
+</h5>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Using after_stat(density) to make more meaningful comparisons between genus</span>
 <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span>
@@ -422,9 +425,9 @@ CCC#
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing2-1.png" width="768"></p>
 <p>What is in the first peak of the bimodal distributions ?</p>
 </div>
-<div class="section level4">
-<h4 id="empirical-cumulative-distributions">Empirical cumulative distributions<a class="anchor" aria-label="anchor" href="#empirical-cumulative-distributions"></a>
-</h4>
+<div class="section level5">
+<h5 id="empirical-cumulative-distributions">Empirical cumulative distributions<a class="anchor" aria-label="anchor" href="#empirical-cumulative-distributions"></a>
+</h5>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">width</span>, col <span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/stat_ecdf.html" class="external-link">stat_ecdf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>,<span class="fl">5e6</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">class</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: Removed 13 rows containing non-finite values (stat_ecdf).</span></code></pre>
@@ -434,9 +437,9 @@ CCC#
 <pre><code><span class="co">## Warning: Removed 13 rows containing non-finite values (stat_ecdf).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing_ecdf-2.png" width="1152"></p>
 </div>
-<div class="section level4">
-<h4 id="cumulative-sums-">Cumulative sums.<a class="anchor" aria-label="anchor" href="#cumulative-sums-"></a>
-</h4>
+<div class="section level5">
+<h5 id="cumulative-sums-">Cumulative sums.<a class="anchor" aria-label="anchor" href="#cumulative-sums-"></a>
+</h5>
 <p>Note: there is a bug: the lines jump between replicates instead of plotting them separately</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt;
@@ -454,9 +457,9 @@ CCC#
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing_cumsum-2.png" width="1152"></p>
 </div>
 </div>
-<div class="section level3">
-<h3 id="by-arm">By arm<a class="anchor" aria-label="anchor" href="#by-arm"></a>
-</h3>
+<div class="section level4">
+<h4 id="by-arm">By arm<a class="anchor" aria-label="anchor" href="#by-arm"></a>
+</h4>
 <p>When faceted by chromosome and arm type, bimodality is also observed. There is a small peak under 500 bp, found on all arms except YSR. The second peak shows two different distributions for long and short arms.</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">)</span> <span class="op">+</span>
@@ -496,16 +499,16 @@ CCC#
 <p><img src="RegionWidths_files/figure-html/width_after_coalescing3-5.png" width="700"></p>
 <p>Therefore, if the first peak represented events that we do not want to consider breaking synteny (either alignment artefacts or insertion/transpositions of short mobile elements), we could re-coalesce once after removing the shortest intervals. We tried some width cutoffs on the coalescing step, but at 500 bp, the coverage of the genome by the resulting mapped regions is already decreasing (<code><a href="../articles/CoalescingCutoffs.html">vignette("CoalescingCutoffs", package = "OikScrambling")</a></code>).</p>
 </div>
-<div class="section level3">
-<h3 id="non-coalesced-mapped-regions">Non-coalesced mapped regions<a class="anchor" aria-label="anchor" href="#non-coalesced-mapped-regions"></a>
-</h3>
+<div class="section level4">
+<h4 id="non-coalesced-mapped-regions">Non-coalesced mapped regions<a class="anchor" aria-label="anchor" href="#non-coalesced-mapped-regions"></a>
+</h4>
 <p>The mapped regions that are found identical in the aligned set are those that were not coalesced… Are they the small peak ?</p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">coa</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="focus-on-oki-north-comparisons">Focus on Oki – North comparisons<a class="anchor" aria-label="anchor" href="#focus-on-oki-north-comparisons"></a>
-</h3>
+<div class="section level4">
+<h4 id="focus-on-oki-north-comparisons">Focus on Oki – North comparisons<a class="anchor" aria-label="anchor" href="#focus-on-oki-north-comparisons"></a>
+</h4>
 <div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_all</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dist</span> <span class="op">==</span> <span class="st">"Oki – North"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">name</span><span class="op">)</span> <span class="op">+</span>
@@ -526,9 +529,9 @@ CCC#
 <p>The short-width mapped peak is made of aligned regions that can not be coalesced.</p>
 <p>We know from <code><a href="../articles/RepeatRegions.html">vignette("RepeatRegions", package = "OikScrambling")</a></code> that these short mapped regions are not repeats.</p>
 </div>
-<div class="section level3">
-<h3 id="compound-pictures">Compound pictures<a class="anchor" aria-label="anchor" href="#compound-pictures"></a>
-</h3>
+<div class="section level4">
+<h4 id="compound-pictures">Compound pictures<a class="anchor" aria-label="anchor" href="#compound-pictures"></a>
+</h4>
 <p>Let’s put into parallel “aligned”, “unaligned” and “mapped”</p>
 <div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">p_ali</span> <span class="op">&lt;-</span> <span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">gbs</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">genus</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -605,9 +608,9 @@ CCC#
 <p><img src="RegionWidths_files/figure-html/compound2-1.png" width="700"></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="unmapped-regions">Unmapped regions<a class="anchor" aria-label="anchor" href="#unmapped-regions"></a>
-</h2>
+<div class="section level3">
+<h3 id="unmapped-regions">Unmapped regions<a class="anchor" aria-label="anchor" href="#unmapped-regions"></a>
+</h3>
 <p>Unmapped regions are a bit longer on the short arm in Oki – North comparisons…</p>
 <div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unmap</span><span class="op">)</span> <span class="op">+</span>
@@ -635,9 +638,9 @@ CCC#
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_unmapped_regions-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="mapped-unaligned-regions">Mapped unaligned regions<a class="anchor" aria-label="anchor" href="#mapped-unaligned-regions"></a>
-</h2>
+<div class="section level3">
+<h3 id="mapped-unaligned-regions">Mapped unaligned regions<a class="anchor" aria-label="anchor" href="#mapped-unaligned-regions"></a>
+</h3>
 <p>Note the short peak when comparing pairs within the same population.</p>
 <div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">unalMap</span><span class="op">)</span> <span class="op">+</span>
@@ -671,12 +674,12 @@ CCC#
 <pre><code><span class="co">## Warning: Removed 5425 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_unAlmapped_regions-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="translocated-regions">Translocated regions<a class="anchor" aria-label="anchor" href="#translocated-regions"></a>
-</h2>
 <div class="section level3">
-<h3 id="whole-region">Whole region<a class="anchor" aria-label="anchor" href="#whole-region"></a>
+<h3 id="translocated-regions">Translocated regions<a class="anchor" aria-label="anchor" href="#translocated-regions"></a>
 </h3>
+<div class="section level4">
+<h4 id="whole-region">Whole region<a class="anchor" aria-label="anchor" href="#whole-region"></a>
+</h4>
 <p>Reminder: here we measure the distance between the two colinear pairs that are separated by the translocated pair.</p>
 <div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span> <span class="op">+</span>
@@ -710,9 +713,9 @@ CCC#
 <pre><code><span class="co">## Warning: Removed 125 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions-3.png" width="700"></p>
 </div>
-<div class="section level3">
-<h3 id="whole-region-after-removal">Whole region, after removal<a class="anchor" aria-label="anchor" href="#whole-region-after-removal"></a>
-</h3>
+<div class="section level4">
+<h4 id="whole-region-after-removal">Whole region, after removal<a class="anchor" aria-label="anchor" href="#whole-region-after-removal"></a>
+</h4>
 <p>Small peak in <em>“same pop”</em> disapears by design. Total number in the main peak also decreases, because they may pass the size filter on the <em>query</em> genome.</p>
 <div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">tra2</span><span class="op">)</span> <span class="op">+</span>
@@ -746,9 +749,9 @@ CCC#
 <pre><code><span class="co">## Warning: Removed 2 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_rem-3.png" width="700"></p>
 </div>
-<div class="section level3">
-<h3 id="aligned-before-removal">Aligned, before removal<a class="anchor" aria-label="anchor" href="#aligned-before-removal"></a>
-</h3>
+<div class="section level4">
+<h4 id="aligned-before-removal">Aligned, before removal<a class="anchor" aria-label="anchor" href="#aligned-before-removal"></a>
+</h4>
 <div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa_aln</span>   <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="va">gb</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterTranslocations.html" class="external-link">filterTranslocations</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 
@@ -777,9 +780,9 @@ CCC#
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_coa_aligned-3.png" width="700"></p>
 </div>
-<div class="section level3">
-<h3 id="aligned-after-removal">Aligned, after removal<a class="anchor" aria-label="anchor" href="#aligned-after-removal"></a>
-</h3>
+<div class="section level4">
+<h4 id="aligned-after-removal">Aligned, after removal<a class="anchor" aria-label="anchor" href="#aligned-after-removal"></a>
+</h4>
 <div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">widths</span><span class="op">$</span><span class="va">tra_coa2_aln</span>   <span class="op">&lt;-</span> <span class="fu">makeWidthsDF</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="va">gb</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/filterTranslocations.html" class="external-link">filterTranslocations</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span>
 
@@ -809,9 +812,9 @@ CCC#
 <p><img src="RegionWidths_files/figure-html/width_of_translocated_regions_coa2_aligned-3.png" width="700"></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="double-coalesced-regions">Double-coalesced regions<a class="anchor" aria-label="anchor" href="#double-coalesced-regions"></a>
-</h2>
+<div class="section level3">
+<h3 id="double-coalesced-regions">Double-coalesced regions<a class="anchor" aria-label="anchor" href="#double-coalesced-regions"></a>
+</h3>
 <div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">gg_freq_poly</span><span class="op">(</span><span class="va">widths</span><span class="op">$</span><span class="va">coa2</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col<span class="op">=</span><span class="va">Arm</span><span class="op">)</span> <span class="op">+</span>
@@ -839,9 +842,9 @@ CCC#
 <p><img src="RegionWidths_files/figure-html/re_coalesce-3.png" width="700"></p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="paired-comparison-of-widths-in-target-and-query-genomes-">Paired comparison of widths in target and query genomes.<a class="anchor" aria-label="anchor" href="#paired-comparison-of-widths-in-target-and-query-genomes-"></a>
-</h1>
+<div class="section level2">
+<h2 id="paired-comparison-of-widths-in-target-and-query-genomes-">Paired comparison of widths in target and query genomes.<a class="anchor" aria-label="anchor" href="#paired-comparison-of-widths-in-target-and-query-genomes-"></a>
+</h2>
 <div class="sourceCode" id="cb151"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">GBreaks2widthTibble</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span>, <span class="va">pair</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
@@ -1067,12 +1070,12 @@ CCC#
 <pre><code><span class="co">## Warning: Removed 36376 rows containing non-finite values (stat_bin).</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/paired_width_analysis-13.png" width="700"></p>
 </div>
-<div class="section level1">
-<h1 id="structural-variants">Structural variants<a class="anchor" aria-label="anchor" href="#structural-variants"></a>
-</h1>
 <div class="section level2">
-<h2 id="width-of-inverted-regions">Width of inverted regions<a class="anchor" aria-label="anchor" href="#width-of-inverted-regions"></a>
+<h2 id="structural-variants">Structural variants<a class="anchor" aria-label="anchor" href="#structural-variants"></a>
 </h2>
+<div class="section level3">
+<h3 id="width-of-inverted-regions">Width of inverted regions<a class="anchor" aria-label="anchor" href="#width-of-inverted-regions"></a>
+</h3>
 <p>We know that we can detect more inversions after coalescing and removing translocations (<code><a href="../articles/Inversions.html">vignette("Inversions", package = "OikScrambling")</a></code>).</p>
 <p>Many inversions are shorter than 1 kbp. Size may differ slightly between long and short arms.</p>
 <div class="sourceCode" id="cb296"><pre class="downlit sourceCode r">
@@ -1198,9 +1201,9 @@ CCC#
 <span class="co">## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre>
 <p><img src="RegionWidths_files/figure-html/inversion_width_doublemapped-3.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="width-of-gaps-next-to-the-inverted-regions">Width of gaps next to the inverted regions<a class="anchor" aria-label="anchor" href="#width-of-gaps-next-to-the-inverted-regions"></a>
-</h2>
+<div class="section level3">
+<h3 id="width-of-gaps-next-to-the-inverted-regions">Width of gaps next to the inverted regions<a class="anchor" aria-label="anchor" href="#width-of-gaps-next-to-the-inverted-regions"></a>
+</h3>
 <div class="sourceCode" id="cb323"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">inv.lgaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">leftInversionGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">inv.lgaps</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,  <span class="va">flagLongShort</span>, <span class="va">longShort</span><span class="op">$</span><span class="va">OKI2018.I69</span><span class="op">)</span>
@@ -1244,7 +1247,7 @@ CCC#
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -78,6 +78,9 @@
     </li>
     <li>
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
+      <a href="../articles/PAC3.html">Region of interest: PAC3</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif search and analysis</a>
@@ -135,7 +138,7 @@
       <h1 data-toc-skip>Inversions</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">01 March, 2022</h4>
+            <h4 data-toc-skip class="date">08 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/Inversions.Rmd" class="external-link"><code>vignettes/Inversions.Rmd</code></a></small>
       <div class="hidden name"><code>Inversions.Rmd</code></div>
@@ -147,15 +150,15 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div class="section level1">
-<h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h1>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>After coalescing colinear alignments, removing translocations of repeat-containing sequences and re-coalescing, colinearity is still broken hundreds of time.</p>
 <p>Here we explore the role of inversions in scrambling <em>Oikopleura</em> genomes.</p>
 </div>
-<div class="section level1">
-<h1 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
-</h1>
+<div class="section level2">
+<h2 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
+</h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span>
@@ -163,17 +166,17 @@
 <span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span></code></pre></div>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are prepared.</p>
 </div>
-<div class="section level1">
-<h1 id="trivial-inversions">Trivial inversions<a class="anchor" aria-label="anchor" href="#trivial-inversions"></a>
-</h1>
 <div class="section level2">
-<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+<h2 id="trivial-inversions">Trivial inversions<a class="anchor" aria-label="anchor" href="#trivial-inversions"></a>
 </h2>
+<div class="section level3">
+<h3 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h3>
 <p>Details can be found in <code><a href="https://oist.github.io/GenomicBreaks/articles/GenomicBreaks.html" class="external-link">vignette("GenomicBreaks", package = "GenomicBreaks")</a></code>, in <code><a href="https://oist.github.io/GenomicBreaks/articles/StructuralVariants.html" class="external-link">vignette("StructuralVariants", package = "GenomicBreaks")</a></code>, and <code><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">?GenomicBreaks::flagInversions</a></code></p>
 </div>
-<div class="section level2">
-<h2 id="number-of-trivial-inversions">Number of trivial inversions<a class="anchor" aria-label="anchor" href="#number-of-trivial-inversions"></a>
-</h2>
+<div class="section level3">
+<h3 id="number-of-trivial-inversions">Number of trivial inversions<a class="anchor" aria-label="anchor" href="#number-of-trivial-inversions"></a>
+</h3>
 <p>More inversions are found after coalescing colinear blocks because of situations where <code>+ - +</code> was <code>+ - - +</code> before collapsing.</p>
 <p>The number of detected inversions is further increased after double-coalescing, but not much.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -271,9 +274,9 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span> <span class="op">(</span><span class="st">"Number of inversions found in mapped regions"</span><span class="op">)</span> </code></pre></div>
 <p><img src="Inversions_files/figure-html/number_of_inversions-1.svg" width="672"></p>
 </div>
-<div class="section level2">
-<h2 id="motif-search">Motif search<a class="anchor" aria-label="anchor" href="#motif-search"></a>
-</h2>
+<div class="section level3">
+<h3 id="motif-search">Motif search<a class="anchor" aria-label="anchor" href="#motif-search"></a>
+</h3>
 <p>Enrichment for motifs is being searched in <code><a href="../articles/PWM.html">vignette("PWM", package = "OikScrambling")</a></code>.</p>
 </div>
 </div>
@@ -296,7 +299,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

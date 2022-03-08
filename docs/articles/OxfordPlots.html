@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -78,6 +78,9 @@
     </li>
     <li>
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
+      <a href="../articles/PAC3.html">Region of interest: PAC3</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif search and analysis</a>
@@ -135,7 +138,7 @@
       <h1 data-toc-skip>Whole-genome dot-plots</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">01 March, 2022</h4>
+            <h4 data-toc-skip class="date">08 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/OxfordPlots.Rmd" class="external-link"><code>vignettes/OxfordPlots.Rmd</code></a></small>
       <div class="hidden name"><code>OxfordPlots.Rmd</code></div>
@@ -146,20 +149,20 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div class="section level1">
-<h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h1>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>In this vignette I dot-plot pairs of genomes in parallel to illustrate differences in the extend of scrambling in Oikopleura compared to equivalent pairs in other genera.</p>
 <p>The core functions used here are maintained in our <em>GenomicBreaks</em> R package, which is fully documented at: <a href="https://oist.github.io/GenomicBreaks" class="external-link uri">https://oist.github.io/GenomicBreaks</a>.</p>
 <p>See <code><a href="../articles/ParallelPlots.html">vignette("ParallelPlots", package = "OikScrambling")</a></code> for parallel comparisons of homologous chromosomes in more than one species.</p>
+<div class="section level3">
+<h3 id="load-pacakges">Load pacakges<a class="anchor" aria-label="anchor" href="#load-pacakges"></a>
+</h3>
+</div>
+</div>
 <div class="section level2">
-<h2 id="load-pacakges">Load pacakges<a class="anchor" aria-label="anchor" href="#load-pacakges"></a>
+<h2 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
 </h2>
-</div>
-</div>
-<div class="section level1">
-<h1 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
-</h1>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
 <span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -170,12 +173,12 @@
 <pre><code><span class="co">##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      </span>
 <span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "wgo"       "longShort"</span></code></pre>
 </div>
-<div class="section level1">
-<h1 id="oikopleura">Oikopleura<a class="anchor" aria-label="anchor" href="#oikopleura"></a>
-</h1>
 <div class="section level2">
-<h2 id="oki-vs-bar">Oki vs Bar<a class="anchor" aria-label="anchor" href="#oki-vs-bar"></a>
+<h2 id="oikopleura">Oikopleura<a class="anchor" aria-label="anchor" href="#oikopleura"></a>
 </h2>
+<div class="section level3">
+<h3 id="oki-vs-bar">Oki vs Bar<a class="anchor" aria-label="anchor" href="#oki-vs-bar"></a>
+</h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, diag <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Oki_Bar_all-1.png" width="700"></p>
@@ -205,9 +208,9 @@
 <code class="sourceCode R"><span class="fu">mkOxPlotWindow</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Oki_Bar_win-1.svg" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="osa-vs-bar">Osa vs Bar<a class="anchor" aria-label="anchor" href="#osa-vs-bar"></a>
-</h2>
+<div class="section level3">
+<h3 id="osa-vs-bar">Osa vs Bar<a class="anchor" aria-label="anchor" href="#osa-vs-bar"></a>
+</h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span>, diag <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Osa_bar-1.png" width="700"></p>
@@ -215,9 +218,9 @@
 <code class="sourceCode R"><span class="fu">mkOxPlotWindow</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Osa_Bar_win-1.svg" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="oki-vs-kum">Oki vs Kum<a class="anchor" aria-label="anchor" href="#oki-vs-kum"></a>
-</h2>
+<div class="section level3">
+<h3 id="oki-vs-kum">Oki vs Kum<a class="anchor" aria-label="anchor" href="#oki-vs-kum"></a>
+</h3>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Oki_Kum-1.png" width="700"></p>
@@ -271,13 +274,13 @@
 <p><img src="OxfordPlots_files/figure-html/Osa_Kum_win-1.svg" width="700"></p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="ciona">Ciona<a class="anchor" aria-label="anchor" href="#ciona"></a>
-</h1>
 <div class="section level2">
-<h2 id="ciona-intestinalis-plymouth-vs-roscoff">
-<em>Ciona intestinalis</em> (Plymouth vs Roscoff)<a class="anchor" aria-label="anchor" href="#ciona-intestinalis-plymouth-vs-roscoff"></a>
+<h2 id="ciona">Ciona<a class="anchor" aria-label="anchor" href="#ciona"></a>
 </h2>
+<div class="section level3">
+<h3 id="ciona-intestinalis-plymouth-vs-roscoff">
+<em>Ciona intestinalis</em> (Plymouth vs Roscoff)<a class="anchor" aria-label="anchor" href="#ciona-intestinalis-plymouth-vs-roscoff"></a>
+</h3>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Ciona intestinalis Plymouth vs Roscoff"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Ply_Ros-1.png" width="700"></p>
@@ -285,10 +288,10 @@
 <code class="sourceCode R"><span class="fu">mkOxPlotWindow</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Ciona intestinalis Plymouth vs Roscoff"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Ply_Ros_win-1.svg" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="ciona-intestinalis-plymouth-vs-ciona-robusta">
+<div class="section level3">
+<h3 id="ciona-intestinalis-plymouth-vs-ciona-robusta">
 <em>Ciona intestinalis</em> (Plymouth) vs <em>Ciona robusta</em><a class="anchor" aria-label="anchor" href="#ciona-intestinalis-plymouth-vs-ciona-robusta"></a>
-</h2>
+</h3>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Ply_Rob</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Ciona intestinalis Plymouth vs Ciona robusta"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Ply_Rob-1.png" width="700"></p>
@@ -296,9 +299,9 @@
 <code class="sourceCode R"><span class="fu">mkOxPlotWindow</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Ply_Rob</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Ciona intestinalis Plymouth vs Ciona robusta"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Ply_Rob_win-1.svg" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="troubleshoot-of-grid-pattern">Troubleshoot of grid pattern<a class="anchor" aria-label="anchor" href="#troubleshoot-of-grid-pattern"></a>
-</h2>
+<div class="section level3">
+<h3 id="troubleshoot-of-grid-pattern">Troubleshoot of grid pattern<a class="anchor" aria-label="anchor" href="#troubleshoot-of-grid-pattern"></a>
+</h3>
 <p>We see horizontal patterns what are they? I think they may be pericentromeric regions.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Ply_Rob</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Ciona intestinalis Plymouth vs Ciona robusta"</span><span class="op">)</span></code></pre></div>
@@ -328,10 +331,10 @@
   <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"C. int. P vs C. rob., subset near (closer) BJTB01000004.1 and BNJZ01000012.1"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Ply_Rob_subset4-1.png" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="ciona-intestinalis-plymouth-vs-ciona-savignyi">
+<div class="section level3">
+<h3 id="ciona-intestinalis-plymouth-vs-ciona-savignyi">
 <em>Ciona intestinalis</em> (Plymouth) vs <em>Ciona savignyi</em><a class="anchor" aria-label="anchor" href="#ciona-intestinalis-plymouth-vs-ciona-savignyi"></a>
-</h2>
+</h3>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Ply_Sav</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Ciona intestinalis Plymouth vs Ciona savignyi"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Ply_Sav-1.png" width="700"></p>
@@ -382,12 +385,12 @@
 <p><img src="OxfordPlots_files/figure-html/Ply_Sav_win-1.svg" width="700"></p>
 </div>
 </div>
-<div class="section level1">
-<h1 id="drosophila">Drosophila<a class="anchor" aria-label="anchor" href="#drosophila"></a>
-</h1>
 <div class="section level2">
-<h2 id="vs-drosophila-mauritania">vs Drosophila mauritania<a class="anchor" aria-label="anchor" href="#vs-drosophila-mauritania"></a>
+<h2 id="drosophila">Drosophila<a class="anchor" aria-label="anchor" href="#drosophila"></a>
 </h2>
+<div class="section level3">
+<h3 id="vs-drosophila-mauritania">vs Drosophila mauritania<a class="anchor" aria-label="anchor" href="#vs-drosophila-mauritania"></a>
+</h3>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Dme_Dma</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Dmel vs Dmau"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Dmel_Dmau-1.png" width="700"></p>
@@ -395,9 +398,9 @@
 <code class="sourceCode R"><span class="fu">mkOxPlotWindow</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Dme_Dma</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Drosophila melanogaster vs Drosophila mauritania"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Dmel_Dmau_win-1.svg" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="vs-drosophila-yakuba">vs Drosophila yakuba<a class="anchor" aria-label="anchor" href="#vs-drosophila-yakuba"></a>
-</h2>
+<div class="section level3">
+<h3 id="vs-drosophila-yakuba">vs Drosophila yakuba<a class="anchor" aria-label="anchor" href="#vs-drosophila-yakuba"></a>
+</h3>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Dme_Dya</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Dmel vs Dyak"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Dmel_Dyak-1.png" width="700"></p>
@@ -405,9 +408,9 @@
 <code class="sourceCode R"><span class="fu">mkOxPlotWindow</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Dme_Dya</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Drosophila melanogaster vs Drosophila yakuba"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Dmel_Dyak_win-1.svg" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="vs-drosophila-subpulchrella">vs Drosophila subpulchrella<a class="anchor" aria-label="anchor" href="#vs-drosophila-subpulchrella"></a>
-</h2>
+<div class="section level3">
+<h3 id="vs-drosophila-subpulchrella">vs Drosophila subpulchrella<a class="anchor" aria-label="anchor" href="#vs-drosophila-subpulchrella"></a>
+</h3>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Dme_Dsu</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Dmel vs Dsub"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Dmel_Dsub-1.png" width="700"></p>
@@ -415,9 +418,9 @@
 <code class="sourceCode R"><span class="fu">mkOxPlotWindow</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Dme_Dsu</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Drosophila melanogaster vs Drosophila subpulchrella"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Dmel_Dsub_win-1.svg" width="700"></p>
 </div>
-<div class="section level2">
-<h2 id="vs-drosophila-buskii">vs Drosophila buskii<a class="anchor" aria-label="anchor" href="#vs-drosophila-buskii"></a>
-</h2>
+<div class="section level3">
+<h3 id="vs-drosophila-buskii">vs Drosophila buskii<a class="anchor" aria-label="anchor" href="#vs-drosophila-buskii"></a>
+</h3>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Dme_Dbu</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Dmel vs Dbus"</span><span class="op">)</span></code></pre></div>
 <p><img src="OxfordPlots_files/figure-html/Dmel_Dbus-1.png" width="700"></p>
@@ -445,7 +448,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

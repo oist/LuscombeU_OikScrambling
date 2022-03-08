@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -78,6 +78,9 @@
     </li>
     <li>
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+    </li>
+    <li>
+      <a href="../articles/PAC3.html">Region of interest: PAC3</a>
     </li>
     <li>
       <a href="../articles/PWM.html">Motif search and analysis</a>
@@ -135,7 +138,7 @@
       <h1 data-toc-skip>Tandem site duplications</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">01 March, 2022</h4>
+            <h4 data-toc-skip class="date">08 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/TandemSiteDuplications.Rmd" class="external-link"><code>vignettes/TandemSiteDuplications.Rmd</code></a></small>
       <div class="hidden name"><code>TandemSiteDuplications.Rmd</code></div>
@@ -146,9 +149,9 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<div class="section level1">
-<h1 id="load-pacakges-and-data">Load pacakges and data<a class="anchor" aria-label="anchor" href="#load-pacakges-and-data"></a>
-</h1>
+<div class="section level2">
+<h2 id="load-pacakges-and-data">Load pacakges and data<a class="anchor" aria-label="anchor" href="#load-pacakges-and-data"></a>
+</h2>
 <p>See the <code><a href="../articles/OikScrambling.html">vignette("OikScrambling", package = "OikScrambling")</a></code> for general details on package and data load.</p>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different <code>GBreaks</code> objects are prepared.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -163,9 +166,9 @@
 <span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllRepeats.html">loadAllRepeats</a></span><span class="op">(</span>compat <span class="op">=</span> <span class="cn">F</span><span class="op">)</span>
 <span class="va">transcripts</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllTranscriptsGR.html">loadAllTranscriptsGR</a></span><span class="op">(</span>compat <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level1">
-<h1 id="purpose">Purpose<a class="anchor" aria-label="anchor" href="#purpose"></a>
-</h1>
+<div class="section level2">
+<h2 id="purpose">Purpose<a class="anchor" aria-label="anchor" href="#purpose"></a>
+</h2>
 <p>Here we explore regions of interest that feature an insertion-deletion site flanked by a <em>tandem site duplication</em>.</p>
 <p>In our <em>genomic breaks</em> objects, representing <em>one-to-one</em> alignments, one copy of the tandem-duplicated site is part of the alignment, and the other is not.</p>
 <pre><code>                   TSD
@@ -174,12 +177,12 @@ alignment    ...............              .............
 target      …──────────━━━━━              ─────────────…
 </code></pre>
 </div>
-<div class="section level1">
-<h1 id="service-functions">Service functions<a class="anchor" aria-label="anchor" href="#service-functions"></a>
-</h1>
 <div class="section level2">
-<h2 id="align-breakpoints">Align breakpoints<a class="anchor" aria-label="anchor" href="#align-breakpoints"></a>
+<h2 id="service-functions">Service functions<a class="anchor" aria-label="anchor" href="#service-functions"></a>
 </h2>
+<div class="section level3">
+<h3 id="align-breakpoints">Align breakpoints<a class="anchor" aria-label="anchor" href="#align-breakpoints"></a>
+</h3>
 <pre><code>pat          ++++
 range  --------==========----------
 sub                    ++++             (or ---- if rev = F)
@@ -192,9 +195,9 @@ sub                    ++++             (or ---- if rev = F)
                     type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="align-ends">Align ends<a class="anchor" aria-label="anchor" href="#align-ends"></a>
-</h2>
+<div class="section level3">
+<h3 id="align-ends">Align ends<a class="anchor" aria-label="anchor" href="#align-ends"></a>
+</h3>
 <pre><code>pat            ++++
 range  --------==========----------
 sub                  ++++             (or ---- if rev = F)
@@ -208,9 +211,9 @@ sub                  ++++             (or ---- if rev = F)
                     type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="search-for-tsds">Search for TSDs<a class="anchor" aria-label="anchor" href="#search-for-tsds"></a>
-</h2>
+<div class="section level3">
+<h3 id="search-for-tsds">Search for TSDs<a class="anchor" aria-label="anchor" href="#search-for-tsds"></a>
+</h3>
 <pre><code>pat            +
 range  --------==========----------
 sub                      +         </code></pre>
@@ -221,9 +224,9 @@ sub                      +         </code></pre>
                     type<span class="op">=</span><span class="st">"global"</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="align-indels">Align indels<a class="anchor" aria-label="anchor" href="#align-indels"></a>
-</h2>
+<div class="section level3">
+<h3 id="align-indels">Align indels<a class="anchor" aria-label="anchor" href="#align-indels"></a>
+</h3>
 <pre><code>                          ++++          ++++
 query       …──────────────────────────────────────────…
 target      …───────────────              ─────────────…
@@ -237,9 +240,9 @@ target      …───────────────              ──
   <span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html" class="external-link">as</a></span><span class="op">(</span><span class="st">"DNAStringSet"</span><span class="op">)</span> |&gt; <span class="fu">msa</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/msa/man/msaClustalW.html" class="external-link">msaClustalW</a></span><span class="op">(</span>order <span class="op">=</span> <span class="st">"input"</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="align-to-self">Align to self<a class="anchor" aria-label="anchor" href="#align-to-self"></a>
-</h2>
+<div class="section level3">
+<h3 id="align-to-self">Align to self<a class="anchor" aria-label="anchor" href="#align-to-self"></a>
+</h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">alignToSelf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/pairwiseAlignment.html" class="external-link">pairwiseAlignment</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span>,
@@ -248,12 +251,12 @@ target      …───────────────              ──
 <span class="op">}</span></code></pre></div>
 </div>
 </div>
-<div class="section level1">
-<h1 id="roi1-composite-transposon-and-tandem-site-duplication-">ROI1: composite transposon and tandem site duplication.<a class="anchor" aria-label="anchor" href="#roi1-composite-transposon-and-tandem-site-duplication-"></a>
-</h1>
 <div class="section level2">
-<h2 id="details-on-the-region">Details on the region<a class="anchor" aria-label="anchor" href="#details-on-the-region"></a>
+<h2 id="roi1-composite-transposon-and-tandem-site-duplication-">ROI1: composite transposon and tandem site duplication.<a class="anchor" aria-label="anchor" href="#roi1-composite-transposon-and-tandem-site-duplication-"></a>
 </h2>
+<div class="section level3">
+<h3 id="details-on-the-region">Details on the region<a class="anchor" aria-label="anchor" href="#details-on-the-region"></a>
+</h3>
 <p><em>ROI1</em> identified and analysed by Martin Frith. Here I am just transposing the finding in Bioconductor’s context.</p>
 <p>In <code>contig_27_1</code> (which is most of Kume genome’s chr1’s short arm), there is an indel region where the aligned regions in the Okinawa genome are directly in contact, but on the Kume genome the aligned regions are separated by a 5146-bp gap.</p>
 <p>(The regions align on opposite strands, so the plot looks strange if you are not familiar with it.)</p>
@@ -294,7 +297,7 @@ target      …───────────────              ──
 <code class="sourceCode R"><span class="va">ROI1</span><span class="op">$</span><span class="va">query</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/cleanGaps.html" class="external-link">cleanGaps</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">alignToSelf</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/PairwiseAlignments-io.html" class="external-link">writePairwiseAlignments</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## ########################################</span>
 <span class="co">## # Program: Biostrings (version 2.62.0), a Bioconductor package</span>
-<span class="co">## # Rundate: Tue Mar  1 15:03:42 2022</span>
+<span class="co">## # Rundate: Tue Mar  8 17:03:15 2022</span>
 <span class="co">## ########################################</span>
 <span class="co">## #=======================================</span>
 <span class="co">## #</span>
@@ -794,9 +797,9 @@ target      …───────────────              ──
 <pre><code><span class="co">##  OKI2018.I69 OSKA2016v1.9      Bar2.p4    KUM.M3.7f     AOM.5.5f         OdB3 </span>
 <span class="co">##         1478         1334         1485         1493         1324         1730</span></code></pre>
 </div>
-<div class="section level2">
-<h2 id="how-often-do-we-see-tandem-site-duplication-in-similar-indel-configurations">How often do we see tandem site duplication in similar indel configurations ?<a class="anchor" aria-label="anchor" href="#how-often-do-we-see-tandem-site-duplication-in-similar-indel-configurations"></a>
-</h2>
+<div class="section level3">
+<h3 id="how-often-do-we-see-tandem-site-duplication-in-similar-indel-configurations">How often do we see tandem site duplication in similar indel configurations ?<a class="anchor" aria-label="anchor" href="#how-often-do-we-see-tandem-site-duplication-in-similar-indel-configurations"></a>
+</h3>
 <p>The <code>unalMap</code> objects contain unaligned regions flanked by colinear regions. Let’s search for other situations where one of the regions has a width of zero.</p>
 <p>Note: <em>in order to represent zero-width intervals in this object, which would be impossible with <code>GRanges</code> objects, the unaligned regions were arbitrarly added one base of each flanking aligned regions</em>.</p>
 <p>These regions are rare in between-species alignments (at most a few percents), and common in within-population alignments (14–28 percents).</p>
@@ -880,9 +883,9 @@ target      …───────────────              ──
 <code class="sourceCode R"><span class="va">gb</span><span class="op">[</span><span class="va">gb</span><span class="op">$</span><span class="va">nedit</span><span class="op">==</span><span class="fl">0</span><span class="op">]</span><span class="op">$</span><span class="va">consensus</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] 15</span></code></pre>
 </div>
-<div class="section level2">
-<h2 id="how-frequent-is-the-inverted-pair-of-repeats-that-we-see">How frequent is the inverted pair of repeats that we see?<a class="anchor" aria-label="anchor" href="#how-frequent-is-the-inverted-pair-of-repeats-that-we-see"></a>
-</h2>
+<div class="section level3">
+<h3 id="how-frequent-is-the-inverted-pair-of-repeats-that-we-see">How frequent is the inverted pair of repeats that we see?<a class="anchor" aria-label="anchor" href="#how-frequent-is-the-inverted-pair-of-repeats-that-we-see"></a>
+</h3>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">checkTIR</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">reps</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">genome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">genome</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span>
@@ -978,9 +981,9 @@ target      …───────────────              ──
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gb</span><span class="op">$</span><span class="va">hasScorePeak</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">m</span>,<span class="fl">1</span>, \<span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">kindOfLogScale</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">8</span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="remaining-questions">Remaining questions<a class="anchor" aria-label="anchor" href="#remaining-questions"></a>
-</h2>
+<div class="section level3">
+<h3 id="remaining-questions">Remaining questions<a class="anchor" aria-label="anchor" href="#remaining-questions"></a>
+</h3>
 <p>Questions:</p>
 <ul>
 <li>Is there any hint of functionality for the sequence in the gap?</li>
@@ -989,9 +992,9 @@ target      …───────────────              ──
 </ul>
 </div>
 </div>
-<div class="section level1">
-<h1 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
-</h1>
+<div class="section level2">
+<h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
+</h2>
 <div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
@@ -1027,7 +1030,7 @@ target      …───────────────              ──
 <span class="co">## [10] XVector_0.34.0                         </span>
 <span class="co">## [11] BreakpointsData_3.8.0                  </span>
 <span class="co">## [12] ggplot2_3.3.5                          </span>
-<span class="co">## [13] GenomicBreaks_0.13.0                   </span>
+<span class="co">## [13] GenomicBreaks_0.13.1                   </span>
 <span class="co">## [14] GenomicRanges_1.46.1                   </span>
 <span class="co">## [15] GenomeInfoDb_1.30.1                    </span>
 <span class="co">## [16] IRanges_2.28.0                         </span>
@@ -1046,10 +1049,10 @@ target      …───────────────              ──
 <span class="co">##  [17] cluster_2.1.2               tzdb_0.2.0                 </span>
 <span class="co">##  [19] readr_2.1.2                 annotate_1.72.0            </span>
 <span class="co">##  [21] matrixStats_0.61.0          R.utils_2.11.0             </span>
-<span class="co">##  [23] pkgdown_2.0.1               prettyunits_1.1.1          </span>
+<span class="co">##  [23] pkgdown_2.0.2               prettyunits_1.1.1          </span>
 <span class="co">##  [25] jpeg_0.1-9                  colorspace_2.0-3           </span>
 <span class="co">##  [27] rappdirs_0.3.3              blob_1.2.2                 </span>
-<span class="co">##  [29] textshaping_0.3.6           xfun_0.29                  </span>
+<span class="co">##  [29] textshaping_0.3.6           xfun_0.30                  </span>
 <span class="co">##  [31] dplyr_1.0.8                 crayon_1.5.0               </span>
 <span class="co">##  [33] RCurl_1.98-1.6              jsonlite_1.8.0             </span>
 <span class="co">##  [35] lme4_1.1-28                 survival_3.2-13            </span>
@@ -1067,14 +1070,14 @@ target      …───────────────              ──
 <span class="co">##  [59] mice_3.14.0                 pkgconfig_2.0.3            </span>
 <span class="co">##  [61] XML_3.99-0.9                R.methodsS3_1.8.1          </span>
 <span class="co">##  [63] dbplyr_2.1.1                nnet_7.3-16                </span>
-<span class="co">##  [65] sass_0.4.0                  locfit_1.5-9.4             </span>
+<span class="co">##  [65] sass_0.4.0                  locfit_1.5-9.5             </span>
 <span class="co">##  [67] utf8_1.2.2                  tidyselect_1.1.2           </span>
-<span class="co">##  [69] rlang_1.0.1                 reshape2_1.4.4             </span>
+<span class="co">##  [69] rlang_1.0.2                 reshape2_1.4.4             </span>
 <span class="co">##  [71] AnnotationDbi_1.56.2        munsell_0.5.0              </span>
 <span class="co">##  [73] tools_4.1.2                 cachem_1.0.6               </span>
 <span class="co">##  [75] cli_3.2.0                   generics_0.1.2             </span>
 <span class="co">##  [77] RSQLite_2.2.10              ade4_1.7-18                </span>
-<span class="co">##  [79] broom_0.7.12                OikScrambling_2.0.0        </span>
+<span class="co">##  [79] broom_0.7.12                OikScrambling_2.1.0        </span>
 <span class="co">##  [81] evaluate_0.15               stringr_1.4.0              </span>
 <span class="co">##  [83] fastmap_1.1.0               fftwtools_0.9-11           </span>
 <span class="co">##  [85] yaml_2.3.5                  ragg_1.2.1                 </span>
@@ -1083,13 +1086,13 @@ target      …───────────────              ──
 <span class="co">##  [91] heatmaps_1.18.0             KEGGREST_1.34.0            </span>
 <span class="co">##  [93] nlme_3.1-153                R.oo_1.24.0                </span>
 <span class="co">##  [95] poweRlaw_0.70.6             xml2_1.3.3                 </span>
-<span class="co">##  [97] pracma_2.3.6                biomaRt_2.50.3             </span>
+<span class="co">##  [97] pracma_2.3.8                biomaRt_2.50.3             </span>
 <span class="co">##  [99] compiler_4.1.2              rstudioapi_0.13            </span>
 <span class="co">## [101] filelock_1.0.2              curl_4.3.2                 </span>
 <span class="co">## [103] png_0.1-7                   msa_1.26.0                 </span>
 <span class="co">## [105] tibble_3.1.6                bslib_0.3.1                </span>
 <span class="co">## [107] stringi_1.7.6               highr_0.9                  </span>
-<span class="co">## [109] GenomicFeatures_1.46.4      desc_1.4.0                 </span>
+<span class="co">## [109] GenomicFeatures_1.46.5      desc_1.4.1                 </span>
 <span class="co">## [111] lattice_0.20-45             CNEr_1.30.0                </span>
 <span class="co">## [113] Matrix_1.4-0                nloptr_1.2.2.3             </span>
 <span class="co">## [115] vctrs_0.3.8                 pillar_1.7.0               </span>
@@ -1101,7 +1104,7 @@ target      …───────────────              ──
 <span class="co">## [127] boot_1.3-28                 gtools_3.9.2               </span>
 <span class="co">## [129] MASS_7.3-54                 assertthat_0.2.1           </span>
 <span class="co">## [131] SummarizedExperiment_1.24.0 rprojroot_2.0.2            </span>
-<span class="co">## [133] rjson_0.2.21                withr_2.4.3                </span>
+<span class="co">## [133] rjson_0.2.21                withr_2.5.0                </span>
 <span class="co">## [135] GenomicAlignments_1.30.0    Rsamtools_2.10.0           </span>
 <span class="co">## [137] GenomeInfoDbData_1.2.7      parallel_4.1.2             </span>
 <span class="co">## [139] hms_1.1.1                   EBImage_4.36.0             </span>
@@ -1130,7 +1133,7 @@ target      …───────────────              ──
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
