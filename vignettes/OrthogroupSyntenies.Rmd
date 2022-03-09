@@ -531,8 +531,7 @@ an Oki-Osa orthoblock.
 
 ```{r}
 reIndex <- \(gb) {names(gb) <- seq_along(gb) ; gb}
-barBreaks <- sapply(orthoBlocks_one2oneInOiks, get_bps, direction = "mid") |> SimpleList()
-
+midBreaks <- sapply(orthoBlocks_one2oneInOiks, get_bps, direction = "mid") |> SimpleList()
 
 ROIs <- SimpleList()
 findROIs <- function(g1, g2, g3) {
@@ -540,7 +539,7 @@ findROIs <- function(g1, g2, g3) {
   pair1_3 <- paste(g1, sep = '_', g3)
   gb <- orthoBlocks_one2oneInOiks[[pair1_2]] |>
     reIndex() |>
-    subsetByOverlaps(barBreaks[[pair1_3]]) |>
+    subsetByOverlaps(midBreaks[[pair1_3]]) |>
     subset(geneNumber > 2)
   # Drop columns to ease browsing on single lines.
   NULL -> gb$dNdS_GUIDANCE2 -> gb$dNdS_HmmCleaner -> gb$dNdS_PRANK
