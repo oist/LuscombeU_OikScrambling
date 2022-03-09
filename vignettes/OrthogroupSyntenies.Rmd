@@ -228,6 +228,8 @@ coalOrtho <- function(gb) {
   coal$geneNames <- CharacterList(split(names(gb)[subjectHits(ov)], queryHits(ov))) |> unname()
   # We can use the `ov` object for query ranges as well because of the way `coal` was constructed.
   coal$query$geneNames <- CharacterList(split(names(gb$query)[subjectHits(ov)], queryHits(ov))) |> unname()
+  # HOG names
+  coal$HOGs <- CharacterList(split(gb$HOG[subjectHits(ov)], queryHits(ov))) |> unname()
   
   # Extract dNdS values
   coal$dNdS_GUIDANCE2  <- NumericList(split(gb$dNdS_GUIDANCE2 [subjectHits(ov)], queryHits(ov)))
