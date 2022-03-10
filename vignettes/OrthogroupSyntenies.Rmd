@@ -608,8 +608,20 @@ pairwiseAlignment(type ="global", BP1_Oki_Osa $query, BP1_Bar  |> plyranges::mut
 oP_one2oneInOiks_bridges$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))
 ```
 
-I can also search for orthologs that are marked "Col" in Oki_Osa and "Tra"
-in Osa_Bar.
+I can not search for orthologs that are marked "Col" in Oki_Osa and "Tra"
+in Osa_Bar, because the transposition flagging does not work on strandless ranges.
+
+```{r}
+a <- orthoBlocks$Oki_Osa$HOGs |> Filter(f = \(x) length(x) > 1)
+b <- orthoBlocks$Oki_Bar$HOGs |> Filter(f = \(x) length(x) > 1)
+
+makePairs.vector <- function(v) {
+  L <- GenomicBreaks::zipWithNext(x) |> as("List")
+  L <- L[1:(length(L) -1)]
+  l <- lapply(L, \(x) paste(first(x), second(x)))
+  unlist(l)
+}
+```
 
 # Session information
 
