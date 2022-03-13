@@ -48,10 +48,7 @@ makeOxfordPlots(coa$Oki_Bar, diag = FALSE)
 
 ```{r mkOxPlotWindow_function}
 mkOxPlotWindow <- function(gb, win = 5e6) {
-  if (all(is.na(seqlengths(gb))))
-    seqlengths(gb) <- tapply(end(gb), seqnames(gb), max) |> as.vector()
-  if (all(is.na(seqlengths(gb$query))))
-    seqlengths(gb$query) <- tapply(end(gb$query), seqnames(gb$query), max) |> as.vector()
+  gb <- forceSeqLengths(gb)
   longest_target_seq <- seqlengths(gb) |> sort() |> tail(1) |> names()
   target_centre <- round(seqlengths(gb)[longest_target_seq] / 2)
   best_query_match   <- gb[seqnames(gb) == longest_target_seq]$query |> seqnames() |> table() |> sort() |> tail(1) |> names()
