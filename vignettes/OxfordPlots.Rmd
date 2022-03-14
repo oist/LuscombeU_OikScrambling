@@ -56,7 +56,7 @@ makeOxfordPlots(coa$Oki_Bar, diag = FALSE)
 #   })
 # }
 
-mkOxPlotWindow <- function(gb, win = 5e6) {
+mkOxPlotWindow <- function(gb, win = 5e6, size = 2, ...) {
   gb <- forceSeqLengths(gb)
   longest_target_seq <- seqlengths(gb) |> sort() |> tail(1) |> names()
   target_centre <- round(seqlengths(gb)[longest_target_seq] / 2)
@@ -71,7 +71,7 @@ mkOxPlotWindow <- function(gb, win = 5e6) {
     end(query) < query_centre + win
   )
   # score(gb) <- stringDist_GBreaks(gb) / width(gb)
-  makeOxfordPlots(gb, col = "strand") +
+  makeOxfordPlots(gb, col = "strand", size = size, ...) +
     theme_bw() +
     theme(legend.position="none")
 }
