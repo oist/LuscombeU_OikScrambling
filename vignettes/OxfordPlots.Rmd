@@ -247,7 +247,8 @@ makeOxfordPlots(coa$Dme_Dma) + ggtitle("Dmel vs Dmau")
 ```
 
 ```{r Dmel_Dmau_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Dme_Dma) + ggtitle("Drosophila melanogaster vs Drosophila mauritania")
+# Force strand flipping for aesthetic purpose
+mkOxPlotWindow(gbs$Dme_Dma |> forceSeqLengths() |> reverse()) + ggtitle("Drosophila melanogaster vs Drosophila mauritania")
 ```
 
 ## vs Drosophila yakuba
