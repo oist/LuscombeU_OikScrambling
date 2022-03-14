@@ -268,7 +268,8 @@ makeOxfordPlots(coa$Dme_Dsu) + ggtitle("Dmel vs Dsub")
 ```
 
 ```{r Dmel_Dsub_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Dme_Dsu) + ggtitle("Drosophila melanogaster vs Drosophila subpulchrella")
+# Blacklist 3R as the algorithm does not find an nicely square window on it.
+mkOxPlotWindow(gbs$Dme_Dsu |> plyranges::filter(seqnames != "3R")) + ggtitle("Drosophila melanogaster vs Drosophila subpulchrella")
 ```
 
 ## vs Drosophila buskii
