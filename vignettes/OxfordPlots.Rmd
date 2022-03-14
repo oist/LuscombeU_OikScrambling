@@ -47,21 +47,31 @@ makeOxfordPlots(coa$Oki_Bar, diag = FALSE)
 ```
 
 ```{r mkOxPlotWindow_function}
+# stringDist_GBreaks <- function(x, method = "levenshtein", ignoreCase = FALSE, diag = FALSE, upper = FALSE, ...) {
+#   targetS <- getSeq(x)
+#   queryS  <- getSeq(x$query)
+#   seqs <- Pairs(targetS, queryS)
+#   sapply(seqs, \(pair){
+#     stringDist(c(first(pair), second(pair)))
+#   })
+# }
+
 mkOxPlotWindow <- function(gb, win = 5e6) {
   gb <- forceSeqLengths(gb)
   longest_target_seq <- seqlengths(gb) |> sort() |> tail(1) |> names()
   target_centre <- round(seqlengths(gb)[longest_target_seq] / 2)
   best_query_match   <- gb[seqnames(gb) == longest_target_seq]$query |> seqnames() |> table() |> sort() |> tail(1) |> names()
   query_centre <- round(seqlengths(gb$query)[best_query_match] / 2)
-  gb |> plyranges::filter(
+  gb <- gb |> plyranges::filter(
     seqnames == longest_target_seq,
     seqnames(query) == best_query_match,
     start > target_centre - win,
     end < target_centre + win,
     start(query) > query_centre - win,
     end(query) < query_centre + win
-  ) |>
-    makeOxfordPlots(type = "l") +
+  )
+  # score(gb) <- stringDist_GBreaks(gb) / width(gb)
+  makeOxfordPlots(gb, col = "strand") +
     theme_bw() +
     theme(legend.position="none")
 }
