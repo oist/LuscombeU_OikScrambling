@@ -1,3 +1,10 @@
+# OikScrambling 2.2.0
+
+* Strand-colored version of the 10-Mb window Oxford plots.  Needs
+  `GenomicBreaks` version `0.13.1` or superior.
+* Human-mouse 10-Mb window Oxford plot.  Needs `BreakpointsData`
+  version `3.9.0` or superior.
+
 # OikScrambling 2.1.0
 
 * Add a vignette about the movement of the PAC3 gene.

@@ -56,12 +56,20 @@ makeOxfordPlots(coa$Oki_Bar, diag = FALSE)
 #   })
 # }
 
-mkOxPlotWindow <- function(gb, win = 5e6, size = 2, ...) {
+mkOxPlotWindow <- function(gb, win = 5e6, size = 2, centre = c('midpoint', 'maxwidth'), ...) {
+  centre <- match.arg(centre)
   gb <- forceSeqLengths(gb)
   longest_target_seq <- seqlengths(gb) |> sort() |> tail(1) |> names()
-  target_centre <- round(seqlengths(gb)[longest_target_seq] / 2)
   best_query_match   <- gb[seqnames(gb) == longest_target_seq]$query |> seqnames() |> table() |> sort() |> tail(1) |> names()
-  query_centre <- round(seqlengths(gb$query)[best_query_match] / 2)
+  if (centre == 'midpoint') {
+    target_centre <- round(seqlengths(gb)[longest_target_seq]     / 2)
+    query_centre  <- round(seqlengths(gb$query)[best_query_match] / 2)
+  } else {
+    gb_coa <- coalesce_contigs(gb)
+    maxwidth <- which.max(width(gb_coa))
+    target_centre <- gb_coa[maxwidth]       |> resize(1, fix = "center") |> start()
+    query_centre  <- gb_coa$query[maxwidth] |> resize(1, fix = "center") |> start()
+  }
   gb <- gb |> plyranges::filter(
     seqnames == longest_target_seq,
     seqnames(query) == best_query_match,
@@ -281,4 +289,20 @@ makeOxfordPlots(coa$Dme_Dbu) + ggtitle("Dmel vs Dbus")
 
 ```{r Dmel_Dbus_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(gbs$Dme_Dbu) + ggtitle("Drosophila melanogaster vs Drosophila buskii")
+```
+
+# Mammals
+
+## Human versus mouse
+
+Chromosome 18 was chosen because it is small and it has the same name in both
+species.  Region was centered on the alignment with the longest width, as
+otherwise the window out of target.
+
+Still, most of the region is not aligned.  The syntenic regions only look
+contiguous because the dots need to be thick to be easy to see.
+
+```{r hg38_mm10, dev='svg', fig.ext='svg'}
+hgmm <- load_genomic_breaks(system.file(("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3"), package = "BreakpointsData"))
+mkOxPlotWindow(hgmm, centre = 'maxwidth') + ggtitle("Homo sapiens vs Mus musculus")
 ```
