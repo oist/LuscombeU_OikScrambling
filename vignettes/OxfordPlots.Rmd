@@ -89,6 +89,34 @@ mkOxPlotWindow <- function(gb, win = 5e6, size = 2, centre = c('midpoint', 'maxw
 mkOxPlotWindow(gbs$Oki_Bar)
 ```
 
+## Oki vs Osa
+
+Dot plot intended for panel A of figure 1.
+
+```{r Oki_Osa, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+makeOxfordPlots(coa$Oki_Osa, diag = FALSE) + theme_bw() + theme(legend.position="none")
+```
+
+The plot below is based on aligned regions (before coalescing).  It is displayed
+to demonstrate that it is visually similar to the one above made on mapped
+regions (object after coalescing).
+
+```{r Oki_Osa_gbs}
+makeOxfordPlots(gbs$Oki_Osa, diag = FALSE) + theme_bw() + theme(legend.position="none")
+```
+
+Oxford plot colored by strand.
+
+```{r Oki_Osa_strand, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+makeOxfordPlots(coa$Oki_Osa, diag = FALSE, col = "strand") + theme_bw() + theme(legend.position="none")
+```
+
+10-Mb square window plot.
+
+```{r Oki_Osa_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Oki_Osa)
+```
+
 ## Osa vs Bar
 
 ```{r Osa_bar}
