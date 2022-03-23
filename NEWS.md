@@ -1,3 +1,7 @@
+# OikScrambling 2.2.1
+
+* New Oki-Osa Oxford plots for Figure 1.
+
 # OikScrambling 2.2.0
 
 * Strand-colored version of the 10-Mb window Oxford plots.  Needs
