@@ -94,25 +94,56 @@ plotApairOfChrs(coa$Osa_Bar, "Chr1", main = "Osa vs Bar")
 plotApairOfChrs(coa2$Osa_Bar, "Chr1", main = "Osa vs Bar (double-collapsed")
 ```
 
+## Scaffolding of Kume chromosomes
+
+### Chromosome 1
+
 Kume's `chr1` is mostly comprised of 4 large contigs.
 
-```{r coa_based, fig.width=15}
+```{r Kum_chr1_coa, fig.width=15}
 x <- coa$Oki_Kum
 x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
 x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
 
-x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "new_scaffold")
+x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "chr1")
 plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE, main = "Oki vs Kum")
 ```
 
-```{r coa2_based2, fig.width=15}
+```{r Kum_chr1_coa2, fig.width=15}
 x <- coa2$Oki_Kum
 x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
 x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
 
-x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "new_scaffold")
+x$query <- mergeSeqLevels(x$query, c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1"), "chr1")
 plotApairOfChrs(x, "chr1", dna_seg_scale=TRUE, main = "Oki vs Kum (double-collapsed")
 ```
+
+### Chromosome 2
+
+Chromosome 2 is mostly comprised of `contig_16_1`, `contig_24_1` on the short arm,
+and the reverse complement of `contig_79_1`, `contig_37_1`, `contig_81_1` on the
+long arm.
+
+```{r Kum_chr2_coa, fig.width=15}
+x <- coa$Oki_Kum
+x[seqnames(x$query) == "contig_81_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_81_1"])
+x[seqnames(x$query) == "contig_79_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_79_1"])
+x[seqnames(x$query) == "contig_37_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_37_1"])
+
+x$query <- mergeSeqLevels(x$query, c("contig_16_1", "contig_24_1", "contig_79_1", "contig_37_1", "contig_81_1"), "chr2")
+plotApairOfChrs(x, "chr2", dna_seg_scale=TRUE, main = "Oki vs Kum")
+```
+
+```{r Kum_chr2_coa2, fig.width=15}
+x <- coa2$Oki_Kum
+x[seqnames(x$query) == "contig_81_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_81_1"])
+x[seqnames(x$query) == "contig_79_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_79_1"])
+x[seqnames(x$query) == "contig_37_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_37_1"])
+
+x$query <- mergeSeqLevels(x$query, c("contig_16_1", "contig_24_1", "contig_79_1", "contig_37_1", "contig_81_1"), "chr2")
+plotApairOfChrs(x, "chr2", dna_seg_scale=TRUE, main = "Oki vs Kum")
+```
+
 
 ## Plot chr1 in three species
 
