@@ -17,25 +17,22 @@ knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
-# Introduction
+# Purpose
 
-In this vignette I plot whole chromosomes in parallel to reflect synteny and
-the difference of scrambling between short and long arms.
-
-The core functions used here are maintained in our _GenomicBreaks_ R package,
-which is fully documented at: <https://oist.github.io/GenomicBreaks>.
-
-## Load pacakges
+Pairwise alignments between whole chromosomes are plotted in parallel in order
+to reflect synteny and the difference of scrambling between short and long arms.
 
 # Load R pacakges and data
 
+## Load pacakges
+
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(load("BreakPoints.Rdata"))
+genomes <- OikScrambling:::loadAllGenomes()
+load("BreakPoints.Rdata")
 ```
 
-### Phylogenetic cladogram
+## Phylogenetic cladogram
 
 We assume that the _North Pacific_ and the _Atlantic_ species are more related
 to each other than to the _Okinawan_ species.
@@ -77,9 +74,9 @@ tree <-
 plot(ade4::newick2phylog(tree))
 ```
 
-## Genome plots with genoPlotR
+# Genome plots with genoPlotR
 
-### Pairs of chromosome 1s.
+## Pairs of chromosome 1s.
 
 ```{r Oki_Bar_chr1, cache=TRUE, fig.width=15}
 plotApairOfChrs(coa$Oki_Bar, "chr1", main = "Oki vs Bar")
