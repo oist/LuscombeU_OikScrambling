@@ -29,6 +29,7 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 # Load R packages and data
 
 ```{r load_packages_and_data}
+library('GenomicBreaks') |> suppressPackageStartupMessages()
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('dplyr')
 library('ggplot2')
@@ -79,8 +80,9 @@ genomeGRToWindows <- function(gr, windowSize=10000) {
   gr <- makeGRangesFromDataFrame(chr)
   gr
 }
-tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
-(tmp)
+#tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
+#(tmp)
+(genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows())
 
 # Generate counts and stats for a column within mcol(GRanges)
 mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
@@ -102,8 +104,9 @@ mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
   df
 }
 # Picked a random line with a dN/dS value (65) 
-tmp2 <- mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65,])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner')
-(tmp2)
+#tmp2 <- mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65,])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner')
+#(tmp2)
+(mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65,])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner'))
 
 # Wrapper to calculate stats (i.e., mcolStats) on every column in a metadata GRanges
 mcolStatsArray <- function(meta, windowSize=10000, includeMetaCols=NULL) {
@@ -148,7 +151,8 @@ mcolBlankArray <- function(meta, includeMetaCols=NULL){
   mcolSA <- do.call(cbind, mcolSA)  |> DataFrame()
   mcolSA
 }
-(mcolBlankArray(subsetByOverlaps(transcripts$Oki, tmp[30,])))
+tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
+(mcolBlankArray(subsetByOverlaps(transcripts$Oki, tmp[30:32,])))
 
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
@@ -169,20 +173,33 @@ metaPerWindow <- function(genomeWindows, meta, windowSize=10000, includeMetaCols
       cur_window
     }
   })
-  gwl #<- as(gwl, "GRangesList") # |> unlist() # unlist(as(l3, "GRangesList"))
+  gr <- do.call('c', gwl) # Change list of GRanges to a single GRanges
+  gr
 }
-tmp3 <- metaPerWindow(genomeWindows=genomeGRToWindows(BSgenomeToGR(genomes$Oki))[10:60,], transcripts$Oki, windowSize=10000)
+(metaPerWindow(genomeWindows=genomeGRToWindows(BSgenomeToGR(genomes$Oki))[10:60,], transcripts$Oki, windowSize=10000)[[1]])
 
 # Function to do everything
 grWindows <- function(genome=NULL, meta=NULL, windowSize=10000, includeMetaCols=NULL){
   genome <- BSgenomeToGR(genome)                             # Make GRanges from genome
   genome <- genomeGRToWindows(genome, windowSize=windowSize) # Make a windowed GRange from chromosome GRanges
-  mpw <- metaPerWindow(genome, meta, windowSize=windowSize, includeMetaCols=includeMetaCols) # if 
+  mpw <- metaPerWindow(genome, meta, windowSize=windowSize, includeMetaCols=includeMetaCols)
+  mpw
 }
-tmp <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=10000)
+
+windowSize = 10000
+chrw <- SimpleList()
+chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize)
+chrw$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
+chrw$Osa <- grWindows(genome=genomes$Osa, meta=transcripts$Osa, windowSize=windowSize)
+chrw$Osa <- flagLongShort(chrw$Osa, longShort$OSKA2016v1.9)
+chrw$Bar <- grWindows(genome=genomes$Bar, meta=transcripts$Bar, windowSize=windowSize)
+chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
+
 ```
 
-
+```{r chromosome_plots_1, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(as.data.frame(chrw$Oki)  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
+```
 
 # Session information
 
