@@ -98,17 +98,20 @@ plotApairOfChrs(coa2$Osa_Bar, "Chr1", main = "Osa vs Bar (double-collapsed")
 
 ### Chromosome 1
 
-Kume's `chr1` is mostly comprised of 4 large contigs.
+Construction of a `GRanges` object representing the contigs to merge and whether
+they have to be reverse-complemented or not.
 
 ```{r Kum_chr1_contigs_to_merge}
-contigsToMerge        <- c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1")
+contigsToMerge        <- c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1", "contig_87_1", "contig_63_1")
 contigsToMerge_start  <- c(1, cumsum(seqlengths(x$query)[contigsToMerge]))    |> unname() |> head(-1)
 contigsToMerge_end    <-     (cumsum(seqlengths(x$query)[contigsToMerge]) -1) |> unname()
 contigsToMerge_oldPos <- GRanges("chr1", IRanges(contigsToMerge_start, contigsToMerge_end))
 names(contigsToMerge_oldPos)  <- contigsToMerge
-strand(contigsToMerge_oldPos) <- c('+', '-', '+', '-')
+strand(contigsToMerge_oldPos) <- c('+', '-', '+', '-', '+', '+')
 contigsToMerge_oldPos
 ```
+
+#### Plot with coalesced objects
 
 ```{r Kum_chr1_coa, fig.width=15}
 x <- coa$Oki_Kum
@@ -120,6 +123,8 @@ annot <- genoPlotR::annotation(x1=start(contigsToMerge_oldPos), x2=end(contigsTo
 
 plotApairOfChrs(x |> swap(), "chr1", dna_seg_scale=TRUE, main = "Kum vs Oki", annotations = annot)
 ```
+
+#### Plot with double-coalesced objects
 
 ```{r Kum_chr1_coa2, fig.width=15}
 x <- coa2$Oki_Kum
@@ -134,23 +139,24 @@ plotApairOfChrs(x |> swap(), "chr1", dna_seg_scale=TRUE, main = "Kum vs Oki (dou
 
 ### Chromosome 2
 
-Chromosome 2 is mostly comprised of `contig_16_1`, on the short arm, and
-`contig_24_1` followed by the reverse complement of `contig_79_1`,
-`contig_37_1`, `contig_81_1` on the long arm.
+Construction of a `GRanges` object representing the contigs to merge and whether
+they have to be reverse-complemented or not.
 
 ```{r Kum_chr2_contigs_to_merge}
-contigsToMerge        <- c("contig_16_1", "contig_24_1", "contig_79_1", "contig_37_1", "contig_81_1")
+contigsToMerge        <- c("contig_36_1", "contig_16_1", "contig_24_1", "contig_79_1", "contig_37_1", "contig_81_1")
 contigsToMerge_start  <- c(1, cumsum(seqlengths(x$query)[contigsToMerge]))    |> unname() |> head(-1)
 contigsToMerge_end    <-     (cumsum(seqlengths(x$query)[contigsToMerge]) -1) |> unname()
 contigsToMerge_oldPos <- GRanges("chr2", IRanges(contigsToMerge_start, contigsToMerge_end))
 names(contigsToMerge_oldPos)  <- contigsToMerge
-strand(contigsToMerge_oldPos) <- c('+', '+', '-', '-', '-')
+strand(contigsToMerge_oldPos) <- c('-', '+', '+', '-', '-', '-')
 contigsToMerge_oldPos
 ```
 
+#### Plot with coalesced objects
 
 ```{r Kum_chr2_coa, fig.width=15}
 x <- coa$Oki_Kum
+x[seqnames(x$query) == "contig_36_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_36_1"])
 x[seqnames(x$query) == "contig_81_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_81_1"])
 x[seqnames(x$query) == "contig_79_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_79_1"])
 x[seqnames(x$query) == "contig_37_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_37_1"])
@@ -161,8 +167,11 @@ annot <- genoPlotR::annotation(x1=start(contigsToMerge_oldPos), x2=end(contigsTo
 plotApairOfChrs(x |> swap(), "chr2", dna_seg_scale=TRUE, main = "Kum vs Oki", annotations = annot)
 ```
 
+#### Plot with double-coalesced objects
+
 ```{r Kum_chr2_coa2, fig.width=15}
 x <- coa2$Oki_Kum
+x[seqnames(x$query) == "contig_36_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_36_1"])
 x[seqnames(x$query) == "contig_81_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_81_1"])
 x[seqnames(x$query) == "contig_79_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_79_1"])
 x[seqnames(x$query) == "contig_37_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_37_1"])
