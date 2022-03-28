@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.2.1</span>
       </span>
     </div>
 
@@ -138,7 +138,7 @@
       <h1 data-toc-skip>Whole-chromosome parallel plots</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">08 March, 2022</h4>
+            <h4 data-toc-skip class="date">28 March, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/ParallelPlots.Rmd" class="external-link"><code>vignettes/ParallelPlots.Rmd</code></a></small>
       <div class="hidden name"><code>ParallelPlots.Rmd</code></div>
@@ -151,32 +151,26 @@
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <div class="section level2">
-<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+<h2 id="purpose">Purpose<a class="anchor" aria-label="anchor" href="#purpose"></a>
 </h2>
-<p>In this vignette I plot whole chromosomes in parallel to reflect synteny and the difference of scrambling between short and long arms.</p>
-<p>The core functions used here are maintained in our <em>GenomicBreaks</em> R package, which is fully documented at: <a href="https://oist.github.io/GenomicBreaks" class="external-link uri">https://oist.github.io/GenomicBreaks</a>.</p>
-<div class="section level3">
-<h3 id="load-pacakges">Load pacakges<a class="anchor" aria-label="anchor" href="#load-pacakges"></a>
-</h3>
-</div>
+<p>Pairwise alignments between whole chromosomes are plotted in parallel in order to reflect synteny and the difference of scrambling between short and long arms.</p>
 </div>
 <div class="section level2">
 <h2 id="load-r-pacakges-and-data">Load R pacakges and data<a class="anchor" aria-label="anchor" href="#load-r-pacakges-and-data"></a>
 </h2>
+<div class="section level3">
+<h3 id="load-pacakges">Load pacakges<a class="anchor" aria-label="anchor" href="#load-pacakges"></a>
+</h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## List of length 6</span>
-<span class="co">## names(6): Oki Osa Bar Kum Aom Nor</span></code></pre>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      </span>
-<span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "wgo"       "longShort"</span></code></pre>
-<div class="section level4">
-<h4 id="phylogenetic-cladogram">Phylogenetic cladogram<a class="anchor" aria-label="anchor" href="#phylogenetic-cladogram"></a>
-</h4>
+<span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="phylogenetic-cladogram">Phylogenetic cladogram<a class="anchor" aria-label="anchor" href="#phylogenetic-cladogram"></a>
+</h3>
 <p>We assume that the <em>North Pacific</em> and the <em>Atlantic</em> species are more related to each other than to the <em>Okinawan</em> species.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ade4"</span><span class="op">)</span>
 <span class="va">treeLeaf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">length</span><span class="op">=</span><span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
   <span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">length</span><span class="op">)</span><span class="op">)</span> <span class="va">length</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">':'</span>, <span class="va">length</span><span class="op">)</span>
@@ -213,106 +207,191 @@
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/phylogenetic_tree-1.svg" width="576"></p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="genome-plots-with-genoplotr">Genome plots with genoPlotR<a class="anchor" aria-label="anchor" href="#genome-plots-with-genoplotr"></a>
+</h2>
 <div class="section level3">
-<h3 id="genome-plots-with-genoplotr">Genome plots with genoPlotR<a class="anchor" aria-label="anchor" href="#genome-plots-with-genoplotr"></a>
+<h3 id="pairs-of-chromosome-1s-">Pairs of chromosome 1s.<a class="anchor" aria-label="anchor" href="#pairs-of-chromosome-1s-"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki vs Bar"</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Oki_Bar_chr1-1.png" width="1440"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki vs Osa"</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Oki_Osa_chr1-1.png" width="1440"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Oki</span>, <span class="st">"Chr1"</span>, main <span class="op">=</span> <span class="st">"Osa vs Oki"</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Osa_Oki_chr1-1.png" width="1440"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, main <span class="op">=</span> <span class="st">"Osa vs Bar"</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Osa_Bar_chr1-1.png" width="1440"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, main <span class="op">=</span> <span class="st">"Osa vs Bar (double-collapsed"</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Oki_Bar_chr1_coa2-1.png" width="1440"></p>
+</div>
+<div class="section level3">
+<h3 id="scaffolding-of-kume-chromosomes">Scaffolding of Kume chromosomes<a class="anchor" aria-label="anchor" href="#scaffolding-of-kume-chromosomes"></a>
 </h3>
 <div class="section level4">
-<h4 id="pairs-of-chromosome-1s-">Pairs of chromosome 1s.<a class="anchor" aria-label="anchor" href="#pairs-of-chromosome-1s-"></a>
+<h4 id="chromosome-1">Chromosome 1<a class="anchor" aria-label="anchor" href="#chromosome-1"></a>
 </h4>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki vs Bar"</span><span class="op">)</span></code></pre></div>
-<p><img src="ParallelPlots_files/figure-html/Oki_Bar_chr1-1.png" width="1440"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"chr1"</span>, main <span class="op">=</span> <span class="st">"Oki vs Osa"</span><span class="op">)</span></code></pre></div>
-<p><img src="ParallelPlots_files/figure-html/Oki_Osa_chr1-1.png" width="1440"></p>
+<p>Construction of a <code>GRanges</code> object representing the contigs to merge and whether they have to be reverse-complemented or not.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Oki</span>, <span class="st">"Chr1"</span>, main <span class="op">=</span> <span class="st">"Osa vs Oki"</span><span class="op">)</span></code></pre></div>
-<p><img src="ParallelPlots_files/figure-html/Osa_Oki_chr1-1.png" width="1440"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, main <span class="op">=</span> <span class="st">"Osa vs Bar"</span><span class="op">)</span></code></pre></div>
-<p><img src="ParallelPlots_files/figure-html/Osa_Bar_chr1-1.png" width="1440"></p>
+<code class="sourceCode R"><span class="va">contigsToMerge</span>        <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contig_27_1"</span>, <span class="st">"contig_90_1"</span>, <span class="st">"contig_3_1"</span>, <span class="st">"contig_88_1"</span>, <span class="st">"contig_87_1"</span>, <span class="st">"contig_63_1"</span><span class="op">)</span>
+<span class="va">contigsToMerge_start</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu">seqlengths</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">[</span><span class="va">contigsToMerge</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>    |&gt; <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
+<span class="va">contigsToMerge_end</span>    <span class="op">&lt;-</span>     <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu">seqlengths</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">[</span><span class="va">contigsToMerge</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">contigsToMerge_oldPos</span> <span class="op">&lt;-</span> <span class="fu">GRanges</span><span class="op">(</span><span class="st">"chr1"</span>, <span class="fu">IRanges</span><span class="op">(</span><span class="va">contigsToMerge_start</span>, <span class="va">contigsToMerge_end</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>  <span class="op">&lt;-</span> <span class="va">contigsToMerge</span>
+<span class="fu">strand</span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'+'</span>, <span class="st">'-'</span>, <span class="st">'+'</span>, <span class="st">'-'</span>, <span class="st">'+'</span>, <span class="st">'+'</span><span class="op">)</span>
+<span class="va">contigsToMerge_oldPos</span></code></pre></div>
+<pre><code><span class="co">## GRanges object with 6 ranges and 0 metadata columns:</span>
+<span class="co">##               seqnames            ranges strand</span>
+<span class="co">##                  &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt;</span>
+<span class="co">##   contig_27_1     chr1         1-4780084      +</span>
+<span class="co">##   contig_90_1     chr1   4780085-7534138      -</span>
+<span class="co">##    contig_3_1     chr1  7534139-12219121      +</span>
+<span class="co">##   contig_88_1     chr1 12219122-13349956      -</span>
+<span class="co">##   contig_87_1     chr1 13349957-13492925      +</span>
+<span class="co">##   contig_63_1     chr1 13492926-13839560      +</span>
+<span class="co">##   -------</span>
+<span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></code></pre>
+<div class="section level5">
+<h5 id="plot-with-coalesced-objects">Plot with coalesced objects<a class="anchor" aria-label="anchor" href="#plot-with-coalesced-objects"></a>
+</h5>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, main <span class="op">=</span> <span class="st">"Osa vs Bar (double-collapsed"</span><span class="op">)</span></code></pre></div>
-<p><img src="ParallelPlots_files/figure-html/Oki_Bar_chr1_coa2-1.png" width="1440"></p>
-<p>Kume’s <code>chr1</code> is mostly comprised of 4 large contigs.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span>
-<span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span><span class="op">)</span>
-<span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span><span class="op">)</span>
 
-<span class="va">x</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/mergeSeqLevels.html" class="external-link">mergeSeqLevels</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span>, <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contig_27_1"</span>, <span class="st">"contig_90_1"</span>, <span class="st">"contig_3_1"</span>, <span class="st">"contig_88_1"</span><span class="op">)</span>, <span class="st">"new_scaffold"</span><span class="op">)</span>
-<span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"chr1"</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span>, main <span class="op">=</span> <span class="st">"Oki vs Kum"</span><span class="op">)</span></code></pre></div>
-<p><img src="ParallelPlots_files/figure-html/coa_based-1.png" width="1440"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<span class="va">x</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu">mergeSeqLevels</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span>, <span class="va">contigsToMerge</span>, <span class="st">"chr1"</span><span class="op">)</span>
+<span class="va">annot</span> <span class="op">&lt;-</span> <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/annotation.html" class="external-link">annotation</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, text<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, rot<span class="op">=</span><span class="fl">30</span><span class="op">)</span>
+
+<span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">x</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span>, <span class="st">"chr1"</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span>, main <span class="op">=</span> <span class="st">"Kum vs Oki"</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Kum_chr1_coa-1.png" width="1440"></p>
+</div>
+<div class="section level5">
+<h5 id="plot-with-double-coalesced-objects">Plot with double-coalesced objects<a class="anchor" aria-label="anchor" href="#plot-with-double-coalesced-objects"></a>
+</h5>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span>
-<span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span><span class="op">)</span>
-<span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span><span class="op">)</span>
 
-<span class="va">x</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/mergeSeqLevels.html" class="external-link">mergeSeqLevels</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span>, <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contig_27_1"</span>, <span class="st">"contig_90_1"</span>, <span class="st">"contig_3_1"</span>, <span class="st">"contig_88_1"</span><span class="op">)</span>, <span class="st">"new_scaffold"</span><span class="op">)</span>
-<span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"chr1"</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span>, main <span class="op">=</span> <span class="st">"Oki vs Kum (double-collapsed"</span><span class="op">)</span></code></pre></div>
-<p><img src="ParallelPlots_files/figure-html/coa2_based2-1.png" width="1440"></p>
+<span class="va">x</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu">mergeSeqLevels</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span>, <span class="va">contigsToMerge</span>, <span class="st">"chr1"</span><span class="op">)</span>
+<span class="va">annot</span> <span class="op">&lt;-</span> <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/annotation.html" class="external-link">annotation</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, text<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, rot<span class="op">=</span><span class="fl">30</span><span class="op">)</span>
+
+<span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">x</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span>, <span class="st">"chr1"</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span>, main <span class="op">=</span> <span class="st">"Kum vs Oki (double-coalesced)"</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Kum_chr1_coa2-1.png" width="1440"></p>
+</div>
+</div>
+<div class="section level4">
+<h4 id="chromosome-2">Chromosome 2<a class="anchor" aria-label="anchor" href="#chromosome-2"></a>
+</h4>
+<p>Construction of a <code>GRanges</code> object representing the contigs to merge and whether they have to be reverse-complemented or not.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">contigsToMerge</span>        <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contig_36_1"</span>, <span class="st">"contig_16_1"</span>, <span class="st">"contig_24_1"</span>, <span class="st">"contig_79_1"</span>, <span class="st">"contig_37_1"</span>, <span class="st">"contig_81_1"</span><span class="op">)</span>
+<span class="va">contigsToMerge_start</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu">seqlengths</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">[</span><span class="va">contigsToMerge</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>    |&gt; <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
+<span class="va">contigsToMerge_end</span>    <span class="op">&lt;-</span>     <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu">seqlengths</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">[</span><span class="va">contigsToMerge</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">contigsToMerge_oldPos</span> <span class="op">&lt;-</span> <span class="fu">GRanges</span><span class="op">(</span><span class="st">"chr2"</span>, <span class="fu">IRanges</span><span class="op">(</span><span class="va">contigsToMerge_start</span>, <span class="va">contigsToMerge_end</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>  <span class="op">&lt;-</span> <span class="va">contigsToMerge</span>
+<span class="fu">strand</span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'-'</span>, <span class="st">'+'</span>, <span class="st">'+'</span>, <span class="st">'-'</span>, <span class="st">'-'</span>, <span class="st">'-'</span><span class="op">)</span>
+<span class="va">contigsToMerge_oldPos</span></code></pre></div>
+<pre><code><span class="co">## GRanges object with 6 ranges and 0 metadata columns:</span>
+<span class="co">##               seqnames            ranges strand</span>
+<span class="co">##                  &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt;</span>
+<span class="co">##   contig_36_1     chr2          1-319811      -</span>
+<span class="co">##   contig_16_1     chr2    319812-5523357      +</span>
+<span class="co">##   contig_24_1     chr2   5523358-9335672      +</span>
+<span class="co">##   contig_79_1     chr2  9335673-12065686      -</span>
+<span class="co">##   contig_37_1     chr2 12065687-12853372      -</span>
+<span class="co">##   contig_81_1     chr2 12853373-15214355      -</span>
+<span class="co">##   -------</span>
+<span class="co">##   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span></code></pre>
+<div class="section level5">
+<h5 id="plot-with-coalesced-objects-1">Plot with coalesced objects<a class="anchor" aria-label="anchor" href="#plot-with-coalesced-objects-1"></a>
+</h5>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_36_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_36_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_81_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_81_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_79_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_79_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_37_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">x</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_37_1"</span><span class="op">]</span><span class="op">)</span>
+
+<span class="va">x</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu">mergeSeqLevels</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">query</span>, <span class="va">contigsToMerge</span>, <span class="st">"chr2"</span><span class="op">)</span>
+<span class="va">annot</span> <span class="op">&lt;-</span> <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/annotation.html" class="external-link">annotation</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, text<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, rot<span class="op">=</span><span class="fl">30</span><span class="op">)</span>
+
+<span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">x</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span>, <span class="st">"chr2"</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span>, main <span class="op">=</span> <span class="st">"Kum vs Oki"</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Kum_chr2_coa-1.png" width="1440"></p>
+</div>
+<div class="section level5">
+<h5 id="plot-with-double-coalesced-objects-1">Plot with double-coalesced objects<a class="anchor" aria-label="anchor" href="#plot-with-double-coalesced-objects-1"></a>
+</h5>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">KumChr2</span> <span class="op">&lt;-</span> <span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span>
+<span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_36_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_36_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_81_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_81_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_79_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_79_1"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_37_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">reverse</span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">KumChr2</span><span class="op">[</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_37_1"</span><span class="op">]</span><span class="op">)</span>
+
+<span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu">mergeSeqLevels</span><span class="op">(</span><span class="va">KumChr2</span><span class="op">$</span><span class="va">query</span>, <span class="va">contigsToMerge</span>, <span class="st">"chr2"</span><span class="op">)</span>
+<span class="va">annot</span> <span class="op">&lt;-</span> <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/annotation.html" class="external-link">annotation</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, text<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">contigsToMerge_oldPos</span><span class="op">)</span>, rot<span class="op">=</span><span class="fl">30</span><span class="op">)</span>
+
+<span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">KumChr2</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span>, <span class="st">"chr2"</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span>, main <span class="op">=</span> <span class="st">"Kum vs Oki (double-collapsed)"</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
+<p><img src="ParallelPlots_files/figure-html/Kum_chr2_coa2-1.png" width="1440"></p>
+</div>
 </div>
 </div>
 <div class="section level3">
-<h3 id="plot-chr1-in-three-species">Plot chr1 in three species<a class="anchor" aria-label="anchor" href="#plot-chr1-in-three-species"></a>
+<h3 id="plot-chr2-in-three-species">Plot chr2 in three species<a class="anchor" aria-label="anchor" href="#plot-chr2-in-three-species"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">doubleSubset</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span>, <span class="va">a</span>, <span class="va">b</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">==</span> <span class="va">a</span><span class="op">]</span>
-  <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">gb</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="va">b</span><span class="op">]</span>
-  <span class="va">gb</span>
-<span class="op">}</span>
-
-<span class="va">dsList</span> <span class="op">&lt;-</span>   <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    OKI <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-    OSA <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-    BAR <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Bar_Osa</span>, <span class="st">"Chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>
+<p>We chose chr2 because it has <em>Hox4</em>.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">dsList</span> <span class="op">&lt;-</span>   <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    OKI <span class="op">=</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>,
+    OSA <span class="op">=</span> <span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'Chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>,
+    BAR <span class="op">=</span> <span class="va">coa</span><span class="op">$</span><span class="va">Bar_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'Chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="va">compList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>,
-    Osa_Bar <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>
+    <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span> |&gt; <span class="fu">gb2comp</span><span class="op">(</span><span class="op">)</span>,
+    Osa_Bar <span class="op">=</span> <span class="va">coa</span><span class="op">$</span><span class="va">Osa_Bar</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'Chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span> |&gt; <span class="fu">gb2comp</span><span class="op">(</span><span class="op">)</span>
   <span class="op">)</span>
 
 <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/plot_gene_map.html" class="external-link">plot_gene_map</a></span><span class="op">(</span><span class="va">dsList</span>, <span class="va">compList</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span>, tree<span class="op">=</span><span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="fu">addRoot</span><span class="op">(</span><span class="fu">treeNode</span><span class="op">(</span><span class="st">"OKI"</span>, <span class="fu">treeNode</span><span class="op">(</span><span class="st">"OSA"</span>, <span class="st">"BAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                         main <span class="op">=</span> <span class="st">"Chromosome 1 in three Oikopleura genome assemblies"</span><span class="op">)</span></code></pre></div>
+                         main <span class="op">=</span> <span class="st">"Chromosome 2 in three Oikopleura genome assemblies"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/plot_intersect_GBs_with_tree-1.png" width="1440"></p>
 </div>
 <div class="section level3">
-<h3 id="plot-chr1-in-four-species-double-collapsed">Plot chr1 in four species (double-collapsed)<a class="anchor" aria-label="anchor" href="#plot-chr1-in-four-species-double-collapsed"></a>
+<h3 id="plot-chr2-in-four-species-double-collapsed">Plot chr2 in four species (double-collapsed)<a class="anchor" aria-label="anchor" href="#plot-chr2-in-four-species-double-collapsed"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">KumChr1</span> <span class="op">&lt;-</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Kum</span>
-<span class="va">KumChr1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">KumChr1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_90_1"</span><span class="op">]</span><span class="op">)</span>
-<span class="va">KumChr1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/reverse.html" class="external-link">reverse</a></span><span class="op">(</span>query <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">KumChr1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">"contig_88_1"</span><span class="op">]</span><span class="op">)</span>
-<span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/mergeSeqLevels.html" class="external-link">mergeSeqLevels</a></span><span class="op">(</span><span class="va">KumChr1</span><span class="op">$</span><span class="va">query</span>, <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contig_27_1"</span>, <span class="st">"contig_90_1"</span>, <span class="st">"contig_3_1"</span>, <span class="st">"contig_88_1"</span><span class="op">)</span>, <span class="st">"Chr1"</span><span class="op">)</span>
-
-<span class="va">dsList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    KUM <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">KumChr1</span>,     <span class="st">"chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-    OKI <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-    OSA <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-    BAR <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Bar_Osa</span>, <span class="st">"Chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">dsList4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    KUM <span class="op">=</span> <span class="va">KumChr2</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'chr2'</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>,
+    OKI <span class="op">=</span> <span class="va">KumChr2</span>           |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'chr2'</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>,
+    OSA <span class="op">=</span> <span class="va">dsList</span><span class="op">[[</span><span class="st">"OSA"</span><span class="op">]</span><span class="op">]</span>,
+    BAR <span class="op">=</span> <span class="va">dsList</span><span class="op">[[</span><span class="st">"BAR"</span><span class="op">]</span><span class="op">]</span>
 <span class="op">)</span>
 
-<span class="va">compList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    Oki_Kum <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">KumChr1</span>,     <span class="st">"chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>,
-    Oki_Osa <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="st">"chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>,
-    Osa_Bar <span class="op">=</span> <span class="fu">doubleSubset</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"Chr1"</span>, <span class="st">"Chr1"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">compList4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Oki_Kum <span class="op">=</span> <span class="va">KumChr2</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'chr2'</span><span class="op">)</span> |&gt; <span class="fu">gb2comp</span><span class="op">(</span><span class="op">)</span>,
+    Oki_Osa <span class="op">=</span> <span class="va">compList</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,
+    Osa_Bar <span class="op">=</span> <span class="va">compList</span><span class="op">[[</span><span class="st">"Osa_Bar"</span><span class="op">]</span><span class="op">]</span>
   <span class="op">)</span>
 
-<span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/plot_gene_map.html" class="external-link">plot_gene_map</a></span><span class="op">(</span><span class="va">dsList</span>, <span class="va">compList</span>, dna_seg_scale <span class="op">=</span> <span class="cn">TRUE</span>,
+<span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/plot_gene_map.html" class="external-link">plot_gene_map</a></span><span class="op">(</span><span class="va">dsList4</span>, <span class="va">compList4</span>, dna_seg_scale <span class="op">=</span> <span class="cn">FALSE</span>,
                          tree <span class="op">=</span> <span class="fu">ade4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ade4/man/newick2phylog.html" class="external-link">newick2phylog</a></span><span class="op">(</span><span class="fu">addRoot</span><span class="op">(</span><span class="fu">treeNode</span><span class="op">(</span><span class="fu">treeNode</span><span class="op">(</span><span class="st">"OKI"</span>, <span class="st">"KUM"</span><span class="op">)</span>, <span class="fu">treeNode</span><span class="op">(</span><span class="st">"OSA"</span>, <span class="st">"BAR"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
-                         main <span class="op">=</span> <span class="st">"Chromosome 1 in four Oikopleura genome assemblies"</span><span class="op">)</span></code></pre></div>
+                         main <span class="op">=</span> <span class="st">"Chromosome 2 in four Oikopleura genome assemblies"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/plot_intersect_GBs_with_tree_with_Kume-1.svg" width="1440"></p>
 </div>
 <div class="section level3">
 <h3 id="region-that-is-conserved-between-osaka-and-barcelona">Region that is conserved between Osaka and Barcelona<a class="anchor" aria-label="anchor" href="#region-that-is-conserved-between-osaka-and-barcelona"></a>
 </h3>
 <p>Since Okinawa is the outgroup, let’s look for regions of it that are aligned on both the Osaka and the Barcelona genomes.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
-<span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">findOverlapPairs</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu">granges</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
+<span class="va">y</span> <span class="op">&lt;-</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span>, <span class="fu">granges</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span>
+<span class="fu">findOverlapPairs</span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Pairs object with 4 pairs and 0 metadata columns:</span>
 <span class="co">##                          first                   second</span>
 <span class="co">##                      &lt;GBreaks&gt;                &lt;GBreaks&gt;</span>
@@ -320,8 +399,8 @@
 <span class="co">##   [2] chr2:13895789-14003399:- chr2:13895789-14003408:-</span>
 <span class="co">##   [3]  PAR:15193293-15358116:-  PAR:15193294-15358116:-</span>
 <span class="co">##   [4]  XSR:10090052-10210973:-  XSR:10090052-10210972:-</span></code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">gaps</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu">gaps</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">width</span> <span class="op">&gt;</span> <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 16 ranges and 6 metadata columns:</span>
 <span class="co">##        seqnames            ranges strand |                  query      Arm</span>
 <span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;factor&gt;</span>
@@ -364,22 +443,26 @@
 <span class="co">##   [16]        &lt;NA&gt;</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></code></pre>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">a</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr2:10000000-11000000"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">doubleSubset</span><span class="op">(</span><span class="st">"chr2"</span>, <span class="st">"Chr2"</span><span class="op">)</span>
-<span class="va">b</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr2:10000000-11000000"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">doubleSubset</span><span class="op">(</span><span class="st">"chr2"</span>, <span class="st">"Chr2"</span><span class="op">)</span>
-<span class="va">c</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Bar_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">range</a></span><span class="op">(</span><span class="va">b</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">)</span>                    |&gt; <span class="fu">doubleSubset</span><span class="op">(</span><span class="st">"Chr2"</span>, <span class="st">"Chr2"</span><span class="op">)</span>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">ROI</span> <span class="op">&lt;-</span> <span class="fu">GRanges</span><span class="op">(</span><span class="st">"chr2:4686018-4687168"</span><span class="op">)</span>   <span class="op">+</span> <span class="fl">1e4</span> <span class="co"># Hox4</span>
+<span class="va">ROI</span> <span class="op">&lt;-</span> <span class="fu">GRanges</span><span class="op">(</span><span class="st">"chr2:14331701-14339427"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e4</span> <span class="co">#Hox1</span>
+<span class="va">ROI</span> <span class="op">&lt;-</span> <span class="fu">GRanges</span><span class="op">(</span><span class="st">"chr2:10000000-11000000"</span><span class="op">)</span>
+
+<span class="va">a</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span>
+<span class="va">b</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span> |&gt; <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">ROI</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span>
+<span class="va">c</span> <span class="op">&lt;-</span> <span class="va">coa</span><span class="op">$</span><span class="va">Bar_Osa</span> |&gt; <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">b</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">)</span>                    |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">'Chr2'</span>, <span class="fu">seqnames</span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">==</span> <span class="st">'Chr2'</span><span class="op">)</span>
 
 <span class="va">dsList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  OSA <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-  OKI <span class="op">=</span> <span class="va">a</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-  BAR <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>,
-  Osa <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="va">c</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span>
+  OSA <span class="op">=</span> <span class="fu">swap</span><span class="op">(</span><span class="va">a</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>,
+  OKI <span class="op">=</span> <span class="va">a</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>,
+  BAR <span class="op">=</span> <span class="fu">swap</span><span class="op">(</span><span class="va">b</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>,
+  Osa <span class="op">=</span> <span class="fu">swap</span><span class="op">(</span><span class="va">c</span><span class="op">)</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="va">compList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  <span class="va">a</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">b</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">c</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2comp.html" class="external-link">gb2comp</a></span><span class="op">(</span><span class="op">)</span>
+  <span class="va">a</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">gb2comp</span><span class="op">(</span><span class="op">)</span>,
+  <span class="va">b</span> |&gt; <span class="fu">gb2comp</span><span class="op">(</span><span class="op">)</span>,
+  <span class="va">c</span> |&gt; <span class="fu">gb2comp</span><span class="op">(</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/plot_gene_map.html" class="external-link">plot_gene_map</a></span><span class="op">(</span><span class="va">dsList</span>, <span class="va">compList</span>, dna_seg_scale<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -392,22 +475,22 @@
 <div class="section level3">
 <h3 id="ciona">Ciona<a class="anchor" aria-label="anchor" href="#ciona"></a>
 </h3>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Ply_Ros</span>, <span class="st">"BNJZ01000001.1"</span>, main <span class="op">=</span> <span class="st">"Ciona intestinalis Plymouth vs Roscoff"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Ply_Ros</span>, <span class="st">"BNJZ01000001.1"</span>, main <span class="op">=</span> <span class="st">"Ciona intestinalis Plymouth vs Roscoff"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/Ciona_Ply_Ros_chr1-1.png" width="700"></p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Ply_Rob</span>, <span class="st">"BNJZ01000001.1"</span>, main <span class="op">=</span> <span class="st">"Ciona intestinalis Plymouth vs Ciona robusta"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Ply_Rob</span>, <span class="st">"BNJZ01000001.1"</span>, main <span class="op">=</span> <span class="st">"Ciona intestinalis Plymouth vs Ciona robusta"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/Ciona_Ply_Rob_chr1-1.png" width="700"></p>
 <p>Unfortunately, <em>C. savignyi</em>’s genome assembly is too fragmented. Here is a plot with the largest fragment.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Ply_Sav</span>, <span class="st">"BNJZ01000001.1"</span>, main <span class="op">=</span> <span class="st">"Ciona intestinalis Plymouth vs Ciona savigny"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Ply_Sav</span>, <span class="st">"BNJZ01000001.1"</span>, main <span class="op">=</span> <span class="st">"Ciona intestinalis Plymouth vs Ciona savigny"</span><span class="op">)</span></code></pre></div>
 <p><img src="ParallelPlots_files/figure-html/Ciona_Ply_Sav_chr1-1.png" width="700"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
 <span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span>
@@ -436,7 +519,7 @@
 <span class="co">##  [4] BSgenome.Oidioi.OIST.Bar2.p4_1.0.1     </span>
 <span class="co">##  [5] BSgenome.Oidioi.OIST.OSKA2016v1.9_1.0.0</span>
 <span class="co">##  [6] BSgenome.Oidioi.OIST.OKI2018.I69_1.0.1 </span>
-<span class="co">##  [7] OikScrambling_2.1.0                    </span>
+<span class="co">##  [7] OikScrambling_1.0.0                    </span>
 <span class="co">##  [8] ggplot2_3.3.5                          </span>
 <span class="co">##  [9] GenomicBreaks_0.13.1                   </span>
 <span class="co">## [10] BSgenome_1.62.0                        </span>
@@ -468,56 +551,57 @@
 <span class="co">##  [31] jsonlite_1.8.0              lme4_1.1-28                </span>
 <span class="co">##  [33] survival_3.2-13             glue_1.6.2                 </span>
 <span class="co">##  [35] gtable_0.3.0                zlibbioc_1.40.0            </span>
-<span class="co">##  [37] DelayedArray_0.20.0         weights_1.0.4              </span>
-<span class="co">##  [39] abind_1.4-5                 scales_1.1.1               </span>
-<span class="co">##  [41] DBI_1.1.2                   Rcpp_1.0.8                 </span>
-<span class="co">##  [43] plotrix_3.8-2               genoPlotR_0.8.11           </span>
-<span class="co">##  [45] xtable_1.8-4                htmlTable_2.4.0            </span>
-<span class="co">##  [47] foreign_0.8-81              bit_4.0.4                  </span>
-<span class="co">##  [49] Formula_1.2-4               htmlwidgets_1.5.4          </span>
-<span class="co">##  [51] httr_1.4.2                  RColorBrewer_1.1-2         </span>
-<span class="co">##  [53] ellipsis_0.3.2              mice_3.14.0                </span>
-<span class="co">##  [55] pkgconfig_2.0.3             XML_3.99-0.9               </span>
-<span class="co">##  [57] R.methodsS3_1.8.1           nnet_7.3-16                </span>
-<span class="co">##  [59] sass_0.4.0                  locfit_1.5-9.5             </span>
-<span class="co">##  [61] utf8_1.2.2                  tidyselect_1.1.2           </span>
-<span class="co">##  [63] rlang_1.0.2                 reshape2_1.4.4             </span>
-<span class="co">##  [65] AnnotationDbi_1.56.2        munsell_0.5.0              </span>
-<span class="co">##  [67] tools_4.1.2                 cachem_1.0.6               </span>
-<span class="co">##  [69] cli_3.2.0                   generics_0.1.2             </span>
-<span class="co">##  [71] RSQLite_2.2.10              ade4_1.7-18                </span>
-<span class="co">##  [73] broom_0.7.12                evaluate_0.15              </span>
-<span class="co">##  [75] stringr_1.4.0               fastmap_1.1.0              </span>
-<span class="co">##  [77] fftwtools_0.9-11            yaml_2.3.5                 </span>
-<span class="co">##  [79] ragg_1.2.1                  knitr_1.37                 </span>
-<span class="co">##  [81] bit64_4.0.5                 fs_1.5.2                   </span>
-<span class="co">##  [83] purrr_0.3.4                 heatmaps_1.18.0            </span>
-<span class="co">##  [85] KEGGREST_1.34.0             nlme_3.1-153               </span>
-<span class="co">##  [87] R.oo_1.24.0                 poweRlaw_0.70.6            </span>
-<span class="co">##  [89] pracma_2.3.8                compiler_4.1.2             </span>
-<span class="co">##  [91] rstudioapi_0.13             png_0.1-7                  </span>
-<span class="co">##  [93] tibble_3.1.6                bslib_0.3.1                </span>
-<span class="co">##  [95] stringi_1.7.6               highr_0.9                  </span>
-<span class="co">##  [97] desc_1.4.1                  lattice_0.20-45            </span>
-<span class="co">##  [99] CNEr_1.30.0                 Matrix_1.4-0               </span>
-<span class="co">## [101] nloptr_1.2.2.3              vctrs_0.3.8                </span>
-<span class="co">## [103] pillar_1.7.0                lifecycle_1.0.1            </span>
-<span class="co">## [105] jquerylib_0.1.4             data.table_1.14.2          </span>
-<span class="co">## [107] bitops_1.0-7                R6_2.5.1                   </span>
-<span class="co">## [109] BiocIO_1.4.0                latticeExtra_0.6-29        </span>
-<span class="co">## [111] KernSmooth_2.23-20          gridExtra_2.3              </span>
-<span class="co">## [113] codetools_0.2-18            boot_1.3-28                </span>
-<span class="co">## [115] gtools_3.9.2                MASS_7.3-54                </span>
-<span class="co">## [117] assertthat_0.2.1            SummarizedExperiment_1.24.0</span>
-<span class="co">## [119] rprojroot_2.0.2             rjson_0.2.21               </span>
-<span class="co">## [121] withr_2.5.0                 GenomicAlignments_1.30.0   </span>
-<span class="co">## [123] Rsamtools_2.10.0            GenomeInfoDbData_1.2.7     </span>
-<span class="co">## [125] parallel_4.1.2              hms_1.1.1                  </span>
-<span class="co">## [127] EBImage_4.36.0              grid_4.1.2                 </span>
-<span class="co">## [129] rpart_4.1-15                minqa_1.2.4                </span>
-<span class="co">## [131] tidyr_1.2.0                 rmarkdown_2.11             </span>
-<span class="co">## [133] MatrixGenerics_1.6.0        Biobase_2.54.0             </span>
-<span class="co">## [135] base64enc_0.1-3             restfulr_0.0.13</span></code></pre>
+<span class="co">##  [37] DelayedArray_0.20.0         plyranges_1.14.0           </span>
+<span class="co">##  [39] weights_1.0.4               abind_1.4-5                </span>
+<span class="co">##  [41] scales_1.1.1                DBI_1.1.2                  </span>
+<span class="co">##  [43] Rcpp_1.0.8.3                plotrix_3.8-2              </span>
+<span class="co">##  [45] genoPlotR_0.8.11            xtable_1.8-4               </span>
+<span class="co">##  [47] htmlTable_2.4.0             foreign_0.8-81             </span>
+<span class="co">##  [49] bit_4.0.4                   Formula_1.2-4              </span>
+<span class="co">##  [51] htmlwidgets_1.5.4           httr_1.4.2                 </span>
+<span class="co">##  [53] RColorBrewer_1.1-2          ellipsis_0.3.2             </span>
+<span class="co">##  [55] mice_3.14.0                 pkgconfig_2.0.3            </span>
+<span class="co">##  [57] XML_3.99-0.9                R.methodsS3_1.8.1          </span>
+<span class="co">##  [59] nnet_7.3-16                 sass_0.4.0                 </span>
+<span class="co">##  [61] locfit_1.5-9.5              utf8_1.2.2                 </span>
+<span class="co">##  [63] tidyselect_1.1.2            rlang_1.0.2                </span>
+<span class="co">##  [65] reshape2_1.4.4              AnnotationDbi_1.56.2       </span>
+<span class="co">##  [67] munsell_0.5.0               tools_4.1.2                </span>
+<span class="co">##  [69] cachem_1.0.6                cli_3.2.0                  </span>
+<span class="co">##  [71] generics_0.1.2              RSQLite_2.2.10             </span>
+<span class="co">##  [73] ade4_1.7-18                 broom_0.7.12               </span>
+<span class="co">##  [75] evaluate_0.15               stringr_1.4.0              </span>
+<span class="co">##  [77] fastmap_1.1.0               fftwtools_0.9-11           </span>
+<span class="co">##  [79] yaml_2.3.5                  ragg_1.2.1                 </span>
+<span class="co">##  [81] knitr_1.37                  bit64_4.0.5                </span>
+<span class="co">##  [83] fs_1.5.2                    purrr_0.3.4                </span>
+<span class="co">##  [85] heatmaps_1.18.0             KEGGREST_1.34.0            </span>
+<span class="co">##  [87] nlme_3.1-153                R.oo_1.24.0                </span>
+<span class="co">##  [89] poweRlaw_0.70.6             pracma_2.3.8               </span>
+<span class="co">##  [91] compiler_4.1.2              rstudioapi_0.13            </span>
+<span class="co">##  [93] png_0.1-7                   tibble_3.1.6               </span>
+<span class="co">##  [95] bslib_0.3.1                 stringi_1.7.6              </span>
+<span class="co">##  [97] highr_0.9                   desc_1.4.1                 </span>
+<span class="co">##  [99] lattice_0.20-45             CNEr_1.30.0                </span>
+<span class="co">## [101] Matrix_1.4-0                nloptr_1.2.2.3             </span>
+<span class="co">## [103] vctrs_0.3.8                 pillar_1.7.0               </span>
+<span class="co">## [105] lifecycle_1.0.1             jquerylib_0.1.4            </span>
+<span class="co">## [107] data.table_1.14.2           bitops_1.0-7               </span>
+<span class="co">## [109] R6_2.5.1                    BiocIO_1.4.0               </span>
+<span class="co">## [111] latticeExtra_0.6-29         KernSmooth_2.23-20         </span>
+<span class="co">## [113] gridExtra_2.3               codetools_0.2-18           </span>
+<span class="co">## [115] boot_1.3-28                 gtools_3.9.2               </span>
+<span class="co">## [117] MASS_7.3-54                 assertthat_0.2.1           </span>
+<span class="co">## [119] SummarizedExperiment_1.24.0 rprojroot_2.0.2            </span>
+<span class="co">## [121] rjson_0.2.21                withr_2.5.0                </span>
+<span class="co">## [123] GenomicAlignments_1.30.0    Rsamtools_2.10.0           </span>
+<span class="co">## [125] GenomeInfoDbData_1.2.7      parallel_4.1.2             </span>
+<span class="co">## [127] hms_1.1.1                   EBImage_4.36.0             </span>
+<span class="co">## [129] grid_4.1.2                  rpart_4.1-15               </span>
+<span class="co">## [131] minqa_1.2.4                 tidyr_1.2.0                </span>
+<span class="co">## [133] rmarkdown_2.11              MatrixGenerics_1.6.0       </span>
+<span class="co">## [135] Biobase_2.54.0              base64enc_0.1-3            </span>
+<span class="co">## [137] restfulr_0.0.13</span></code></pre>
 </div>
   </div>
 
