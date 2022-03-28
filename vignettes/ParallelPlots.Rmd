@@ -103,8 +103,8 @@ they have to be reverse-complemented or not.
 
 ```{r Kum_chr1_contigs_to_merge}
 contigsToMerge        <- c("contig_27_1", "contig_90_1", "contig_3_1", "contig_88_1", "contig_87_1", "contig_63_1")
-contigsToMerge_start  <- c(1, cumsum(seqlengths(x$query)[contigsToMerge]))    |> unname() |> head(-1)
-contigsToMerge_end    <-     (cumsum(seqlengths(x$query)[contigsToMerge]) -1) |> unname()
+contigsToMerge_start  <- c(1, cumsum(seqlengths(coa$Oki_Kum$query)[contigsToMerge]))    |> unname() |> head(-1)
+contigsToMerge_end    <-     (cumsum(seqlengths(coa$Oki_Kum$query)[contigsToMerge]) -1) |> unname()
 contigsToMerge_oldPos <- GRanges("chr1", IRanges(contigsToMerge_start, contigsToMerge_end))
 names(contigsToMerge_oldPos)  <- contigsToMerge
 strand(contigsToMerge_oldPos) <- c('+', '-', '+', '-', '+', '+')
@@ -144,8 +144,8 @@ they have to be reverse-complemented or not.
 
 ```{r Kum_chr2_contigs_to_merge}
 contigsToMerge        <- c("contig_36_1", "contig_16_1", "contig_24_1", "contig_79_1", "contig_37_1", "contig_81_1")
-contigsToMerge_start  <- c(1, cumsum(seqlengths(x$query)[contigsToMerge]))    |> unname() |> head(-1)
-contigsToMerge_end    <-     (cumsum(seqlengths(x$query)[contigsToMerge]) -1) |> unname()
+contigsToMerge_start  <- c(1, cumsum(seqlengths(coa$Oki_Kum$query)[contigsToMerge]))    |> unname() |> head(-1)
+contigsToMerge_end    <-     (cumsum(seqlengths(coa$Oki_Kum$query)[contigsToMerge]) -1) |> unname()
 contigsToMerge_oldPos <- GRanges("chr2", IRanges(contigsToMerge_start, contigsToMerge_end))
 names(contigsToMerge_oldPos)  <- contigsToMerge
 strand(contigsToMerge_oldPos) <- c('-', '+', '+', '-', '-', '-')
@@ -206,13 +206,15 @@ genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick
 ## Plot chr2 in four species (double-collapsed)
 
 ```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
-dsList4 <- c(
-    list(KUM = KumChr2 |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg()),
-    dsList
+dsList4 <- list(
+    KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
+    OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
+    OSA = dsList[["OSA"]],
+    BAR = dsList[["BAR"]]
 )
 
 compList4 <- list(
-    Oki_Kum = KumChr2 |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gb2comp(),
+    Oki_Kum = KumChr2 |> swap() |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gb2comp(),
     Oki_Osa = compList[[1]],
     Osa_Bar = compList[["Osa_Bar"]]
   )
