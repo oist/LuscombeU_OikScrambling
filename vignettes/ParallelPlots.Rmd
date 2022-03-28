@@ -205,7 +205,7 @@ genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick
 
 ## Plot chr2 in four species (double-collapsed)
 
-```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev="svg", fig.ext="svg"}
+```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 dsList4 <- list(
     KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
     OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
