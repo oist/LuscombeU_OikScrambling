@@ -235,9 +235,9 @@ y <- subsetByOverlaps(coa2$Oki_Bar, granges(coa2$Oki_Osa)) |> subset(width > 1e5
 findOverlapPairs(x,y)
 subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar)) |> subset(width > 1e5)
 
-a <- coa$Oki_Osa |> subsetByOverlaps(GRanges("chr2:10000000-11000000")) |> doubleSubset("chr2", "Chr2")
-b <- coa$Oki_Bar |> subsetByOverlaps(GRanges("chr2:10000000-11000000")) |> doubleSubset("chr2", "Chr2")
-c <- coa$Bar_Osa |> subsetByOverlaps(range(b$query))                    |> doubleSubset("Chr2", "Chr2")
+a <- coa$Oki_Osa |> subsetByOverlaps(GRanges("chr2:10000000-11000000")) |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2')
+b <- coa$Oki_Bar |> subsetByOverlaps(GRanges("chr2:10000000-11000000")) |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2')
+c <- coa$Bar_Osa |> subsetByOverlaps(range(b$query))                    |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2')
 
 dsList <- list(
   OSA = swap(a) |> gr2dna_seg(),
