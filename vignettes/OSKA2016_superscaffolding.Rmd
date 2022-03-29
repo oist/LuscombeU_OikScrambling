@@ -104,8 +104,8 @@ genome(O97f$query) <- "O97f"
 O35f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-5f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, type = "match") |> coalesce_contigs()
 genome(O35f) <- "O35f"
 
-OSK421f <- load_genomic_breaks("~/FromSango/OSKA2016__OSK42-2f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, type = "match") |> coalesce_contigs()
-genome(OSK421f$query) <- "OSK421f"
+OSK42_2f <- load_genomic_breaks("~/FromSango/OSKA2016__OSK42-2f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, type = "match") |> coalesce_contigs()
+genome(OSK42_2f$query) <- "OSK42_2f"
 ```
 
 ## Individuals captured in Aomori prefecture
@@ -287,10 +287,10 @@ names(O35f.cc) <- paste("O35f", names(O35f.cc), sep = "_")
 ## OSK42
 
 ```{r}
-OSK421f.c  <- longestMatchesInTarget(OSK421f)
-OSK421f.cc <- strandNames(OSK421f.c, query = TRUE)
-names(OSK421f.cc) <- paste("OSK421f", names(OSK421f.cc), sep = "_")
-OSK421f.all  <- longestMatchesInTarget(OSK421f, min.width = 0, min.matches = 1) |> strandNames(q=T)
+OSK42_2f.c  <- longestMatchesInTarget(OSK42_2f)
+OSK42_2f.cc <- strandNames(OSK42_2f.c, query = TRUE)
+names(OSK42_2f.cc) <- paste("OSK42_2f", names(OSK42_2f.cc), sep = "_")
+OSK42_2f.all  <- longestMatchesInTarget(OSK42_2f, min.width = 0, min.matches = 1) |> strandNames(q=T)
 ```
 
 ## AOM5
@@ -462,9 +462,9 @@ A re-assembly using the _superior_ basecall model might increase support for
 the long-arm assembly of the other chromosomes.
 
 ```{r OSK_42}
-OSK421f.cc |> grepByContigName(name = "S10+")
-assemble(OSK421f, "XSR", XSR) |> plotApairOfChrs()
-assemble(OSK421f, "XSR", XSR) |> makeOxfordPlots()
+OSK42_2f.cc |> grepByContigName(name = "S10+")
+assemble(OSK42_2f, "XSR", XSR) |> plotApairOfChrs()
+assemble(OSK42_2f, "XSR", XSR) |> makeOxfordPlots()
 ```
 
 ### AOM5
@@ -475,7 +475,7 @@ O35f.cc |> grepByContigName("S9+")
 O35f.cc |> grepByContigName("S1+")
 
 XSR
-OSK421f.all |> flipStrandNames() |> grepByContigName(name = "S10+")
+OSK42_2f.all  |> grepByContigName(name = "S10+")
 AOM5.5f.all |> grepByContigName(name = "S10+")
 O97f.all |> flipStrandNames |> grepByContigName("S9+")
 O35f.all |> grepByContigName("S9+")
@@ -497,7 +497,7 @@ Summary:
 
 ```
 XSR.old     "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"
-OSK421f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8+"  "S1+" 
+OSK42_2f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8+"  "S1+" 
 AOM5.5f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+" 
 O97f.cc            "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"  "S18+"
 O35f.cc            "S9+"  "S32+" "S84-" "S59+"
@@ -512,7 +512,7 @@ The table below is made with "longest matches" only.
 
 ```
 XSR                          "S10+"          "S9+"           "S32+"          "S84-"         "S59+"          "S8-"                           "S1+" 
-OSK421f.all                  "S10+"  "S246+" "S9+"           "S32+"  "S195+" "S84-"         "S59+"  "S494+" "S8+"           "S477+"         "S1+"   "S462-" "S510+" "S564-" "S391+"
+OSK42_2f.all                  "S10+"  "S246+" "S9+"           "S32+"  "S195+" "S84-"         "S59+"  "S494+" "S8+"           "S477+"         "S1+"   "S462-" "S510+" "S564-" "S391+"
 AOM5.5f.all  "S307-" "S273-" "S10+"  "S176-" "S9+"           "S32+"          "S84-"         "S59+"          "S8-"   "S366-" "S477+" "S478-" "S1+"   "S517-" "S510+" "S491+" "S66-"  "S481+" "S154+"
 O97f.all                                     "S9+"   "S116-" "S32+"  "S494-" "S84-"         "S59+"  "S477+" "S8-"                           "S1+"           "S510+" "S395+" "S346-" "S542-" "S528-" "S456+" "S509-" "S507-" "S236-" "S417-" "S18+" 
 O35f.all                             "S246+" "S9+"           "S32+"          "S84-" "S494-" "S59+" 
@@ -539,7 +539,7 @@ AOM5.5f.cc |> grepByContigName("S31")
 O97f.cc |> grepByContigName("S31")
 O33f.cc |> grepByContigName("S31")
 O35f.cc |> grepByContigName("S31")
-OSK421f.cc |> grepByContigName("S31")
+OSK42_2f.cc |> grepByContigName("S31")
 
 O35f.cc |> grepByContigName("S31")
 O97f.cc |> grepByContigName("S31")
@@ -658,12 +658,12 @@ O33f |> subset(seqnames == "S60" & width > 100)|> as.data.frame() |> head
 O33f |> subset(seqnames(query) == "scaffold_2" & width > 1000) |> sortQ |> as.data.frame()   |> tail
 
 
-OSK421f.cc |> grepByContigName("S82")
+OSK42_2f.cc |> grepByContigName("S82")
 
 AOM5.5f.cc |> grepByContigName("S17")
 O97f.cc |> grepByContigName("S17")
 O35f.cc |> grepByContigName("S17")
-OSK421f.cc |> grepByContigName("S17")
+OSK42_2f.cc |> grepByContigName("S17")
 
 
 AOM5.5f.cc |> grepByContigName("S4+")
@@ -699,7 +699,7 @@ O35f,2, 5e4                                                            "S4+"    
 
 ```{r}
 AOM5.5f.cc |> grepByContigName("S11")
-OSK421f.cc |> grepByContigName("S33")
+OSK42_2f.cc |> grepByContigName("S33")
 O97f.cc |> grepByContigName("S33")
 O35f.cc |> grepByContigName("S33")
 O33f.cc |> flipStrandNames() |> grepByContigName("S57")
@@ -729,7 +729,7 @@ O33f |> subset(seqnames == "S25" & width > 10000)
 O33f |> subset(seqnames(query) == "contig_13" & width > 1000) |> sortQ
 
 AOM5.5f.cc |> grepByContigName("S25")
-OSK421f.cc |> grepByContigName("S25")
+OSK42_2f.cc |> grepByContigName("S25")
 O97f.cc |> grepByContigName("S25")
 O35f.cc |> grepByContigName("S25")
 O33f.cc |> grepByContigName("S25")
@@ -822,7 +822,7 @@ O33f.pc |> subset(seqnames(query) == "contig_67" & width > 5) |> sortQ
 O33f.pc |> subset(seqnames == "S52" & width > 1)
 O97f.cc |> flipStrandNames |> grepByContigName("S13")
 AOM5.5f.cc |> grepByContigName("S13")
-OSK421f.cc |> grepByContigName("S13")
+OSK42_2f.cc |> grepByContigName("S13")
 
 # Search connections with S52
 
@@ -856,7 +856,7 @@ O97f |> subset(seqnames(query) == "contig_58" & width > 10000) |> sortQ |> stran
 #Or could there be a misassembly in S2 ?
 
 AOM5.5f.cc |> grepByContigName("S18")
-OSK421f.cc |> grepByContigName("S23")
+OSK42_2f.cc |> grepByContigName("S23")
 O97f.cc |> grepByContigName("S18")
 O35f.cc |> grepByContigName("S18")
 O35f.cc |> grepByContigName("S23")
@@ -864,7 +864,7 @@ O35f.cc |> grepByContigName("S23")
 O33f.pc |> subset(seqnames == "S52" & width > 1)
 O97f.cc |> flipStrandNames |> grepByContigName("S13")
 AOM5.5f.cc |> grepByContigName("S13")
-OSK421f.cc |> grepByContigName("S13")
+OSK42_2f.cc |> grepByContigName("S13")
 
 ```
 
@@ -877,7 +877,7 @@ YSR has changed too much outside Osaka lab strain…
 ```{r}
 YSR
 O33f.cc$O35f_contig_4  # Published in OSKA2016 paper.
-OSK421f.cc |>  flipStrandNames |> grepByContigName("S26")
+OSK42_2f.cc |>  flipStrandNames |> grepByContigName("S26")
 AOM5.5f.cc |> flipStrandNames |> grepByContigName("S26")
 O97f.cc |> flipStrandNames |> grepByContigName("S26")
 O35f.cc |> grepByContigName("S26")
@@ -903,8 +903,8 @@ O33f |> subset(seqnames(query) == "contig_3" & width > 1000) |> sortQ |> as.data
 O97f |> subset(seqnames == "S51" & width > 1000)
 O97f |> subset(seqnames(query) == "contig_54" & width > 1000) |> sortQ |> as.data.frame()
 
-OSK421f |> subset(seqnames == "S51" & width > 1000)
-OSK421f |> subset(seqnames(query) == "contig_306" & width > 2000) |> sortQ |> as.data.frame()
+OSK42_2f |> subset(seqnames == "S51" & width > 1000)
+OSK42_2f |> subset(seqnames(query) == "contig_306" & width > 2000) |> sortQ |> as.data.frame()
 ```
 
 
@@ -919,8 +919,8 @@ O33f |> subset(seqnames(query) == "contig_70" & width > 5000) |> sortQ |> as.dat
 O97f |> subset(seqnames == "S67" & width > 1000)
 O97f |> subset(seqnames(query) == "contig_280" & width > 1000) |> sortQ |> as.data.frame()
 
-OSK421f |> subset(seqnames == "S67" & width > 1000)
-OSK421f |> subset(seqnames(query) == "contig_5" & width > 2000) |> sortQ |> as.data.frame()
+OSK42_2f |> subset(seqnames == "S67" & width > 1000)
+OSK42_2f |> subset(seqnames(query) == "contig_5" & width > 2000) |> sortQ |> as.data.frame()
 ```
 
 
@@ -938,9 +938,9 @@ O33f |> subset(seqnames == "S37" & width > 1000)  |> as.data.frame()
 O97f |> subset(seqnames == "S99" & width > 100)
 O97f |> subset(seqnames(query) == "contig_524" & width > 1000) |> sortQ |> as.data.frame()
 
-OSK421f |> subset(seqnames == "S99" & width > 100)
-OSK421f |> subset(seqnames(query) == "contig_98" & width > 1000) |> sortQ |> as.data.frame()
-OSK421f |> subset(seqnames(query) == "contig_3" & width > 1000) |> sortQ |> as.data.frame()
+OSK42_2f |> subset(seqnames == "S99" & width > 100)
+OSK42_2f |> subset(seqnames(query) == "contig_98" & width > 1000) |> sortQ |> as.data.frame()
+OSK42_2f |> subset(seqnames(query) == "contig_3" & width > 1000) |> sortQ |> as.data.frame()
 ```
 
 # Summary
