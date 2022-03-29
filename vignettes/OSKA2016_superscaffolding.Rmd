@@ -327,7 +327,7 @@ substr(orientedSeqNames, nchar(orientedSeqNames), nchar(orientedSeqNames))
 
 newname       <- "XSR"
 
-scaffold <- function(seqinfo, newname, seqnames, orientations) {
+scaffold <- function(seqinfo, newname, orientedSeqNames) {
   if (!class(seqinfo) %in% "Seqinfo")
     seqinfo <- seqinfo(seqinfo)
   listofnames   <- substr(orientedSeqNames, 1                      , nchar(orientedSeqNames) -1)
@@ -340,15 +340,15 @@ scaffold <- function(seqinfo, newname, seqnames, orientations) {
   scaffold
 }
 
-scaffold <- scaffold(O97f, "XSR", listofnames, orientations)
+scaffold(O97f, "XSR", orientedSeqNames)
 
 gr <- O97f
 newname <- "XSR"
 scaffold
 
-assemble <- function(gr, scaffold) {
-  newname <- unique(seqnames(scaffold)) |> as.character()
+assemble <- function(gr, newname, orientedSeqNames, newGenomeName = NA) {
   if(length(newname) != 1) stop ("Invalid scaffold with more than one seqnames")
+  scaffold <- scaffold(gr, newname, orientedSeqNames)
   
   flipScaffold <- function(gr, scaffold) {
     gr[seqnames(gr) == scaffold] <- reverse(gr[seqnames(gr) == scaffold])
@@ -360,10 +360,12 @@ assemble <- function(gr, scaffold) {
   for (seqname in toFlip) {
     gr <- flipScaffold(gr, seqname)
   }
-  mergeSeqLevels(gr, names(scaffold), newname)
+  gr <- mergeSeqLevels(gr, names(scaffold), newname)
+  genome(gr) <- newGenomeName
+  gr
 }
 
-assemble(O97f, scaffold)
+assemble(O97f, "XSR", XSR.old)
 ```
 
 # Superscaffolding chromosome arms and sex-specific regions
