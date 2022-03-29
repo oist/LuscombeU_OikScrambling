@@ -1,3 +1,8 @@
+# OikScrambling 2.2.2
+
+* Parallel plot of chr2
+* Export aggregated numbers about segment widths.
+
 # OikScrambling 2.2.1
 
 * New Oki-Osa Oxford plots for Figure 1.
