@@ -29,7 +29,7 @@ suppressPackageStartupMessages({
 })
 genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
-library("BSgenome.Odioica.local.OSKA2016")
+library("BSgenome.Oidioi.Aniseed.OSKA2016")
 ```
 
 # Prior information
@@ -85,28 +85,34 @@ grepByContigName <- function (l, name) {
 
 # North pacific group
 
-```{r}
+## Related to lab strain
+
+```{r load_Osk}
 # O95f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-5f/OSKA2016__O9-5f.gff3", target_bsgenome = OSKA2016, type = "match")
 # genome(O95f$query) <- "O95f"
 # O96f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-6f/OSKA2016__O9-6f.gff3", target_bsgenome = OSKA2016, type = "match")
 # genome(O96f$query) <- "O96f"
 
 # As maf-convert was not run with -J for these genomes, `type="match"` is needed.
-O97f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-7f.gff.gz", target_bsgenome = OSKA2016, type = "match") |> coalesce_contigs()
+O97f <- load_genomic_breaks("~/FromSango/OSKA2016__O9-7f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, type = "match") |> coalesce_contigs()
 genome(O97f$query) <- "O97f"
 
 # O33f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-3f/OSKA2016__O3-3f.gff3", target_bsgenome = OSKA2016, type = "match")
 # genome(O33f$query) <- "O33f"
 # O34f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-4f/OSKA2016__O3-4f.gff3", target_bsgenome = OSKA2016, type = "match")
 # genome(O34f$query) <- "O34f"
-O35f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-5f.gff.gz", target_bsgenome = OSKA2016, type = "match") |> coalesce_contigs()
+O35f <- load_genomic_breaks("~/FromSango/OSKA2016__O3-5f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, type = "match") |> coalesce_contigs()
 genome(O35f) <- "O35f"
 
-OSK421f <- load_genomic_breaks("~/FromSango/OSKA2016__OSK42-2f.gff.gz", target_bsgenome = OSKA2016, type = "match") |> coalesce_contigs()
+OSK421f <- load_genomic_breaks("~/FromSango/OSKA2016__OSK42-2f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, type = "match") |> coalesce_contigs()
 genome(OSK421f$query) <- "OSK421f"
+```
 
-AOM5.5f  <- load_genomic_breaks("~/FromSango/OSKA2016__AOM-5-5f.gff.gz", target_bsgenome = OSKA2016, query_bsgenome = BSgenome.Odioica.local.AOM.5, type = "match") |> coalesce_contigs()
-AOM10.2f <- load_genomic_breaks("~/FromSango/OSKA2016__AOM-10-2f.gff.gz", target_bsgenome = OSKA2016, type = "match") |> coalesce_contigs()
+## Individuals captured in Aomori prefecture
+
+```{r load_Aom}
+AOM5.5f  <- load_genomic_breaks("~/FromSango/OSKA2016__AOM-5-5f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, query_bsgenome = BSgenome.Oidioi.OIST.AOM.5.5f, type = "match") |> coalesce_contigs()
+AOM10.2f <- load_genomic_breaks("~/FromSango/OSKA2016__AOM-10-2f.gff.gz", target_bsgenome = BSgenome.Oidioi.Aniseed.OSKA2016, type = "match") |> coalesce_contigs()
 genome(AOM10.2f$query) <- "AOM10.2f"
 ```
 
@@ -116,8 +122,8 @@ Comparisons with more distant genomes that have a chromosomal assembly allow to
 verify that we attribute scaffolds to the correct linkage group.
 
 ```{r load_outgroup_alignments}
-OKI  <- load_genomic_breaks("~/FromSango/OSKA2016__OKI2018_I69_1.0.gff.gz", t = OSKA2016, q = BSgenome.Odioica.local.OKI2018.I69, type = "match") |> coalesce_contigs()
-BAR  <- load_genomic_breaks("~/FromSango/OSKA2016__Bar2_p4.gff.gz",         t = OSKA2016, q = BSgenome.Odioica.local.Bar2.p4,     type = "match") |> coalesce_contigs()
+OKI  <- load_genomic_breaks("~/FromSango/OSKA2016__OKI2018_I69_1.0.gff.gz", t = BSgenome.Oidioi.Aniseed.OSKA2016, q = BSgenome.Oidioi.OIST.OKI2018.I69, type = "match") |> coalesce_contigs()
+BAR  <- load_genomic_breaks("~/FromSango/OSKA2016__Bar2_p4.gff.gz",         t = BSgenome.Oidioi.Aniseed.OSKA2016, q = BSgenome.Oidioi.OIST.Bar2.p4,     type = "match") |> coalesce_contigs()
 ```
 
 # Telomeres
