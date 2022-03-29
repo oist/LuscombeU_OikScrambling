@@ -207,7 +207,7 @@ $contig_136
 # }
 # 
 # shortNamesList <- function(gb, n, names = FALSE, minwidth = 8e4) {
-#   l <- sapply(1:n, function(n) superScaf(gb, n, minwidth) %>% shortNames())
+#   l <- sapply(1:n, function(n) superScaf(gb, n, minwidth) |> shortNames())
 #   if (isTRUE(names)) {
 #     names(l) <- names(bigScaff(gb, n))
 #   }
@@ -257,31 +257,31 @@ names(O35f.cc) <- paste("O35f", names(O35f.cc), sep = "_")
 #   x
 # }
 # O33f.pc <- mendoapply(normRanges, O33f.pc, seqlengths(OSKA2016)[names(O33f.pc)])
-# O33f.pc %<>% unlist %>% sort
+# O33f.pc %<>% unlist |> sort
 # 
 # O33f.1000 <- O33f[width(O33f) > 1000]
 # O33f.c  <- longestMatchesInTarget(O33f)
 # O33f.cc <- queryStrandNames(O33f.c)
 # names(O33f.cc) <- paste("O33f", names(O33f.cc), sep = "_")
-# O33f.all  <- longestMatchesInTarget(O33f, min.width = 0, min.matches = 0) %>% queryStrandNames()
+# O33f.all  <- longestMatchesInTarget(O33f, min.width = 0, min.matches = 0) |> queryStrandNames()
 # 
 # 
 # 
 # O33f.tel <- possibleTelomeres("~/FromSango/O3-3f.tantan.gff3")
-# O33f.tel %>% as.data.frame()
-# O33f.telnames  <- O35f.tel %>% seqnames() %>% unique() %>% as.character()
-# O33f.telnames2 <- O35f.tel %>% seqnames() %>% unique() %>% paste0("O35f_", .)
+# O33f.tel |> as.data.frame()
+# O33f.telnames  <- O35f.tel |> seqnames() |> unique() |> as.character()
+# O33f.telnames2 <- O35f.tel |> seqnames() |> unique() |> paste0("O35f_", .)
 # 
-# O33f.all[O33f.telnames %>% Filter (function(X) X %in% names(O33f.all), .)]
-# O33f.cc[O33f.telnames2 %>% Filter (function(X) X %in% names(O33f.cc), .)]
+# O33f.all[O33f.telnames |> Filter (function(X) X %in% names(O33f.all), .)]
+# O33f.cc[O33f.telnames2 |> Filter (function(X) X %in% names(O33f.cc), .)]
 # 
 # O35f.tel <- possibleTelomeres("~/projects/GenomicBreaks/inst/extdata/O3-5f.tantan.gff3")
-# O35f.tel %>% as.data.frame()
-# O35f.telnames  <- O35f.tel %>% seqnames() %>% unique() %>% as.character()
-# O35f.telnames2 <- O35f.tel %>% seqnames() %>% unique() %>% paste0("O35f_", .)
+# O35f.tel |> as.data.frame()
+# O35f.telnames  <- O35f.tel |> seqnames() |> unique() |> as.character()
+# O35f.telnames2 <- O35f.tel |> seqnames() |> unique() |> paste0("O35f_", .)
 # 
-# O35f.all[O35f.telnames %>% Filter (function(X) X %in% names(O35f.all), .)]
-# O35f.cc[O35f.telnames2 %>% Filter (function(X) X %in% names(O35f.cc), .)]
+# O35f.all[O35f.telnames |> Filter (function(X) X %in% names(O35f.all), .)]
+# O35f.cc[O35f.telnames2 |> Filter (function(X) X %in% names(O35f.cc), .)]
 ```
 
 ## OSK42
@@ -299,14 +299,14 @@ OSK421f.all  <- longestMatchesInTarget(OSK421f, min.width = 0, min.matches = 1) 
 AOM5.5f.c  <- longestMatchesInTarget(AOM5.5f)
 AOM5.5f.cc <- strandNames(AOM5.5f.c, query = TRUE)
 names(AOM5.5f.cc) <- paste("AOM5.5f", names(AOM5.5f.cc), sep = "_")
-AOM5.5f.all  <- longestMatchesInTarget(AOM5.5f, min.width = 0, min.matches = 1) %>% strandNames(q=T)
+AOM5.5f.all  <- longestMatchesInTarget(AOM5.5f, min.width = 0, min.matches = 1) |> strandNames(q=T)
 # 
 # 
 # shortNamesList(AOM5.5f, 20, min = 1e4)
 # 
 # 
 # # Contains telomere ?
-# superScafByName(AOM5.5f,"contig_178", 1e4) %>% shortNames()
+# superScafByName(AOM5.5f,"contig_178", 1e4) |> shortNames()
 # #[1] "S25+" "S11-" "S29-"
 ```
 
@@ -471,16 +471,16 @@ assemble(OSK421f, "XSR", XSR) |> makeOxfordPlots()
 
 ```{r XSR_AOM5}
 AOM5.5f.cc |> grepByContigName(name = "S10+")
-O35f.cc %>% grepByContigName("S9+")
-O35f.cc %>% grepByContigName("S1+")
+O35f.cc |> grepByContigName("S9+")
+O35f.cc |> grepByContigName("S1+")
 
 XSR
-OSK421f.all %>% flipStrandNames() |> grepByContigName(name = "S10+")
-AOM5.5f.all %>% grepByContigName(name = "S10+")
-O97f.all %>% flipStrandNames %>% grepByContigName("S9+")
-O35f.all %>% grepByContigName("S9+")
-O35f.all %>% flipStrandNames %>% grepByContigName("S10+")
-O35f.all %>% grepByContigName("S1+")
+OSK421f.all |> flipStrandNames() |> grepByContigName(name = "S10+")
+AOM5.5f.all |> grepByContigName(name = "S10+")
+O97f.all |> flipStrandNames |> grepByContigName("S9+")
+O35f.all |> grepByContigName("S9+")
+O35f.all |> flipStrandNames |> grepByContigName("S10+")
+O35f.all |> grepByContigName("S1+")
 
 # Sanity check
 sort(XSR)
@@ -489,8 +489,8 @@ longestMatchesInTarget(BAR, min.width = 1000, min.matches = 1)["XSR"] |> strandN
 
 
 #S66
-O33f %>% subset(seqnames == "S66" & width > 100)%>% as.data.frame()
-O33f %>% subset(seqnames(query) == "scaffold_16" & width > 1000) %>% sortQ %>% as.data.frame()   %>% tail
+O33f |> subset(seqnames == "S66" & width > 100)|> as.data.frame()
+O33f |> subset(seqnames(query) == "scaffold_16" & width > 1000) |> sortQ |> as.data.frame()   |> tail
 ```
 
 Summary:
@@ -528,47 +528,47 @@ grepAllContigsFromScaff <- function(scaf, l) {
 }
 
 # Example command for exploration
-# grepAllContigsFromScaff(chr1, O35f.cc %>% flipStrandNames())
+# grepAllContigsFromScaff(chr1, O35f.cc |> flipStrandNames())
 
 chr1
-O35f.cc %>% grepByContigName("S37")
-O97f.cc %>% flipStrandNames() %>% grepByContigName("S37")
-O97f.cc %>% grepByContigName("S38")
+O35f.cc |> grepByContigName("S37")
+O97f.cc |> flipStrandNames() |> grepByContigName("S37")
+O97f.cc |> grepByContigName("S38")
 
-AOM5.5f.cc %>% grepByContigName("S31")
-O97f.cc %>% grepByContigName("S31")
-O33f.cc %>% grepByContigName("S31")
-O35f.cc %>% grepByContigName("S31")
-OSK421f.cc %>% grepByContigName("S31")
+AOM5.5f.cc |> grepByContigName("S31")
+O97f.cc |> grepByContigName("S31")
+O33f.cc |> grepByContigName("S31")
+O35f.cc |> grepByContigName("S31")
+OSK421f.cc |> grepByContigName("S31")
 
-O35f.cc %>% grepByContigName("S31")
-O97f.cc %>% grepByContigName("S31")
-O97f.cc %>% flipStrandNames %>% grepByContigName("S44")
-AOM5.5f.cc %>% grepByContigName("S37")
+O35f.cc |> grepByContigName("S31")
+O97f.cc |> grepByContigName("S31")
+O97f.cc |> flipStrandNames |> grepByContigName("S44")
+AOM5.5f.cc |> grepByContigName("S37")
 
 # On dotplots, S28 does not align neatly.  Maybe there is residual heterozygocity in the Nanopore assemblies.
-O35f %>% subset(seqnames == "S28" & width > 2000)
-O35f %>% subset(seqnames == "S36" & width > 1000) # contig_164 - ... - contig_68
-O35f %>% subset(seqnames(query) == "contig_164" & width > 1000) %>% sortQ %>% as.data.frame()  # S6- ... S36 +
-O35f %>% subset(seqnames(query) == "contig_68" & width > 1000) %>% sortQ %>% as.data.frame()  # S6+ S36 + S76+ S58+ S6+
+O35f |> subset(seqnames == "S28" & width > 2000)
+O35f |> subset(seqnames == "S36" & width > 1000) # contig_164 - ... - contig_68
+O35f |> subset(seqnames(query) == "contig_164" & width > 1000) |> sortQ |> as.data.frame()  # S6- ... S36 +
+O35f |> subset(seqnames(query) == "contig_68" & width > 1000) |> sortQ |> as.data.frame()  # S6+ S36 + S76+ S58+ S6+
 
-O97f %>% subset(seqnames == "S28" & width > 2000) %>% as.data.frame()
-O97f %>% subset(seqnames == "S36" & width > 1000) # contig_187 - ... - contig_189
-O97f %>% subset(seqnames(query) == "contig_187" & width > 1000) %>% sortQ %>% as.data.frame()  # S6+ ... S36 - ... S6 +
-O97f %>% subset(seqnames(query) == "contig_189" & width > 1000) %>% sortQ %>% as.data.frame()  # S6+ S36 + S76+ S58+
-O97f %>% subset(seqnames == "S58" & width > 2000) # contig_189 - ... - contig_102
-O97f %>% subset(seqnames(query) == "contig_102" & width > 1000) %>% sortQ %>% as.data.frame()  # S6+ S36 + S76+ S58+
+O97f |> subset(seqnames == "S28" & width > 2000) |> as.data.frame()
+O97f |> subset(seqnames == "S36" & width > 1000) # contig_187 - ... - contig_189
+O97f |> subset(seqnames(query) == "contig_187" & width > 1000) |> sortQ |> as.data.frame()  # S6+ ... S36 - ... S6 +
+O97f |> subset(seqnames(query) == "contig_189" & width > 1000) |> sortQ |> as.data.frame()  # S6+ S36 + S76+ S58+
+O97f |> subset(seqnames == "S58" & width > 2000) # contig_189 - ... - contig_102
+O97f |> subset(seqnames(query) == "contig_102" & width > 1000) |> sortQ |> as.data.frame()  # S6+ S36 + S76+ S58+
 
 
 
-O35f.all %>% grepByContigName("S3")
-O97f.cc %>% grepByContigName("S7")
-O97f.cc %>% flipStrandNames %>% grepByContigName("S7")
-AOM5.5f.cc %>% grepByContigName("S7")
+O35f.all |> grepByContigName("S3")
+O97f.cc |> grepByContigName("S7")
+O97f.cc |> flipStrandNames |> grepByContigName("S7")
+AOM5.5f.cc |> grepByContigName("S7")
 
 # S7+ -- S5-
-O33f.10000[seqnames(O33f.10000$query) == "contig_353"] %>% swap() %>% sort %>% as.data.frame() 
-O33f.10000[seqnames(O33f.10000$query) == "contig_56"] %>% swap() %>% sort %>% as.data.frame()
+O33f.10000[seqnames(O33f.10000$query) == "contig_353"] |> swap() |> sort |> as.data.frame() 
+O33f.10000[seqnames(O33f.10000$query) == "contig_56"] |> swap() |> sort |> as.data.frame()
 ```
 
 ```
@@ -591,43 +591,43 @@ O97f,13, 1e4                                                    "S3-" "S5+"
 ```{r}
 chr2
 
-AOM5.5f.cc %>% grepByContigName("S82")
-O97f.cc %>% grepByContigName("S82")
-O35f.cc %>% flipStrandNames %>% grepByContigName("S82")
-O33f.cc %>% grepByContigName("S82")
+AOM5.5f.cc |> grepByContigName("S82")
+O97f.cc |> grepByContigName("S82")
+O35f.cc |> flipStrandNames |> grepByContigName("S82")
+O33f.cc |> grepByContigName("S82")
 
 # O35f contig2 ends with a telomere.  That area matches S82
-O35f %>% subset(seqnames == "S82" & width > 10000)
+O35f |> subset(seqnames == "S82" & width > 10000)
 # S30 follows
-O35f %>% subset(seqnames(query) == "contig_2" & width > 10000) %>% sortQ
-O35f %>% subset(seqnames == "S30" & width > 10000) 
+O35f |> subset(seqnames(query) == "contig_2" & width > 10000) |> sortQ
+O35f |> subset(seqnames == "S30" & width > 10000) 
 # Then S15, S50, S41, S17 and a piece of S12
-O35f %>% subset(seqnames(query) == "contig_37" & width > 10000) %>% sortQ %>% as.data.frame()
+O35f |> subset(seqnames(query) == "contig_37" & width > 10000) |> sortQ |> as.data.frame()
 
 # But unfortunately it is at the centre of S12...
 
 # S16 and S20 are also obviously part of chr2 given synteny with Oki.
 # Fortunately, they are together.
-O33f %>% subset(seqnames == "S20" & width > 50000)
-O33f %>% subset(seqnames(query) == "contig_263" & width > 50000) %>% sortQ
-O33f %>% subset(seqnames == "S16" & width > 50000) %>% as.data.frame()
-O33f %>% subset(seqnames(query) == "contig_456" & width > 50000) %>% sortQ 
+O33f |> subset(seqnames == "S20" & width > 50000)
+O33f |> subset(seqnames(query) == "contig_263" & width > 50000) |> sortQ
+O33f |> subset(seqnames == "S16" & width > 50000) |> as.data.frame()
+O33f |> subset(seqnames(query) == "contig_456" & width > 50000) |> sortQ 
 # And that leads to S17 !
-O33f %>% subset(seqnames == "S17" & width > 10000) %>% as.data.frame()
-O33f %>% subset(seqnames(query) == "contig_30" & width > 1000) %>% sortQ %>% as.data.frame()
+O33f |> subset(seqnames == "S17" & width > 10000) |> as.data.frame()
+O33f |> subset(seqnames(query) == "contig_30" & width > 1000) |> sortQ |> as.data.frame()
 
 
-O35f.cc %>% grepByContigName("S15")
+O35f.cc |> grepByContigName("S15")
 
-O35f %>% subset(seqnames == "S12" & width > 10000)%>% as.data.frame()
-O35f %>% subset(seqnames(query) == "contig_127" & width > 10000) %>% sortQ
-O35f %>% subset(seqnames == "S21" & width > 10000)
+O35f |> subset(seqnames == "S12" & width > 10000)|> as.data.frame()
+O35f |> subset(seqnames(query) == "contig_127" & width > 10000) |> sortQ
+O35f |> subset(seqnames == "S21" & width > 10000)
 
-O35f %>% subset(seqnames == "S54" & width > 10000)
+O35f |> subset(seqnames == "S54" & width > 10000)
 
-O35f.cc %>% flipStrandNames %>% grepByContigName("S82")
-O35f.cc %>% grepByContigName("S15")
-O35f.cc %>% flipStrandNames %>% grepByContigName("S12")
+O35f.cc |> flipStrandNames |> grepByContigName("S82")
+O35f.cc |> grepByContigName("S15")
+O35f.cc |> flipStrandNames |> grepByContigName("S12")
 
 
 ```
@@ -645,30 +645,30 @@ O35f_contig_37                "S15-" "S50-" "S41+" "S17+"
 #Luckily, O33f's scaffold 2 is the whole long arm of Chr2.
 
 flipStrandNames(O33f.cc)$O33f_scaffold_2
-O33f %>% subset(seqnames(query) == "scaffold_2" & width > 100000) %>% sortQ %>% as.data.frame()
+O33f |> subset(seqnames(query) == "scaffold_2" & width > 100000) |> sortQ |> as.data.frame()
 
 # And S4's tail aligns to a contig ending with a telomere !
-O33f %>% subset(seqnames == "S4" & width > 100000)%>% as.data.frame()
+O33f |> subset(seqnames == "S4" & width > 100000)|> as.data.frame()
 
 # Dead end on the other side.
-O33f %>% subset(seqnames == "S14" & width > 100000)%>% as.data.frame()
+O33f |> subset(seqnames == "S14" & width > 100000)|> as.data.frame()
 
 # But it allows to place S60, although with low confidence
-O33f %>% subset(seqnames == "S60" & width > 100)%>% as.data.frame() %>% head
-O33f %>% subset(seqnames(query) == "scaffold_2" & width > 1000) %>% sortQ %>% as.data.frame()   %>% tail
+O33f |> subset(seqnames == "S60" & width > 100)|> as.data.frame() |> head
+O33f |> subset(seqnames(query) == "scaffold_2" & width > 1000) |> sortQ |> as.data.frame()   |> tail
 
 
-OSK421f.cc %>% grepByContigName("S82")
+OSK421f.cc |> grepByContigName("S82")
 
-AOM5.5f.cc %>% grepByContigName("S17")
-O97f.cc %>% grepByContigName("S17")
-O35f.cc %>% grepByContigName("S17")
-OSK421f.cc %>% grepByContigName("S17")
+AOM5.5f.cc |> grepByContigName("S17")
+O97f.cc |> grepByContigName("S17")
+O35f.cc |> grepByContigName("S17")
+OSK421f.cc |> grepByContigName("S17")
 
 
-AOM5.5f.cc %>% grepByContigName("S4+")
-O97f.cc %>% grepByContigName("S4+")
-O35f.cc %>% grepByContigName("S4+")
+AOM5.5f.cc |> grepByContigName("S4+")
+O97f.cc |> grepByContigName("S4+")
+O35f.cc |> grepByContigName("S4+")
 ```
 
 ```
@@ -698,14 +698,14 @@ O35f,2, 5e4                                                            "S4+"    
 ### Short arm
 
 ```{r}
-AOM5.5f.cc %>% grepByContigName("S11")
-OSK421f.cc %>% grepByContigName("S33")
-O97f.cc %>% grepByContigName("S33")
-O35f.cc %>% grepByContigName("S33")
-O33f.cc %>% flipStrandNames() %>% grepByContigName("S57")
+AOM5.5f.cc |> grepByContigName("S11")
+OSK421f.cc |> grepByContigName("S33")
+O97f.cc |> grepByContigName("S33")
+O35f.cc |> grepByContigName("S33")
+O33f.cc |> flipStrandNames() |> grepByContigName("S57")
 
-O97f.cc %>% grepByContigName("S29")
-O35f.cc %>% grepByContigName("S29")
+O97f.cc |> grepByContigName("S29")
+O35f.cc |> grepByContigName("S29")
 ```
 
 This suggests S11 comes before S33
@@ -721,31 +721,31 @@ O97f_scaffold_105             "S29+" "S49-"
 
 ```{r}
 # S11 may be misassembled...
-O33f %>% subset(seqnames == "S11" & width > 10000)
-O33f %>% subset(seqnames(query) == "contig_70" & width > 5000) %>% sortQ %>% as.data.frame()
-O33f %>% subset(seqnames(query) == "contig_13" & width > 5000) %>% sortQ %>% as.data.frame()
+O33f |> subset(seqnames == "S11" & width > 10000)
+O33f |> subset(seqnames(query) == "contig_70" & width > 5000) |> sortQ |> as.data.frame()
+O33f |> subset(seqnames(query) == "contig_13" & width > 5000) |> sortQ |> as.data.frame()
 
-O33f %>% subset(seqnames == "S25" & width > 10000)
-O33f %>% subset(seqnames(query) == "contig_13" & width > 1000) %>% sortQ
+O33f |> subset(seqnames == "S25" & width > 10000)
+O33f |> subset(seqnames(query) == "contig_13" & width > 1000) |> sortQ
 
-AOM5.5f.cc %>% grepByContigName("S25")
-OSK421f.cc %>% grepByContigName("S25")
-O97f.cc %>% grepByContigName("S25")
-O35f.cc %>% grepByContigName("S25")
-O33f.cc %>% grepByContigName("S25")
+AOM5.5f.cc |> grepByContigName("S25")
+OSK421f.cc |> grepByContigName("S25")
+O97f.cc |> grepByContigName("S25")
+O35f.cc |> grepByContigName("S25")
+O33f.cc |> grepByContigName("S25")
 
 # O33f does not tell us where to place S25
-O33f %>% subset(seqnames == "S25" & width > 1000)
+O33f |> subset(seqnames == "S25" & width > 1000)
 # contig_13 aligns with an internal part of S11 ; let's ignore that.
 # contig_13 aligns with an internal part of S19 ; let's ignore that.
 # But then, contig_13 is a dead end.
-O33f %>% subset(seqnames(query) == "contig_13" & width > 2000) %>% sortQ %>% as.data.frame()
+O33f |> subset(seqnames(query) == "contig_13" & width > 2000) |> sortQ |> as.data.frame()
 
 # What does O9 tell us about S25 ?
-O97f %>% subset(seqnames == "S25" & width > 1000) %>% as.data.frame()
-O97f %>% subset(seqnames(query) == "contig_46" & width > 1000) %>% sortQ %>% as.data.frame()
+O97f |> subset(seqnames == "S25" & width > 1000) |> as.data.frame()
+O97f |> subset(seqnames(query) == "contig_46" & width > 1000) |> sortQ |> as.data.frame()
 # contig_546 suggests S25+ S11+
-O97f %>% subset(seqnames(query) == "contig_546" & width > 2000) %>% sortQ %>% as.data.frame()
+O97f |> subset(seqnames(query) == "contig_546" & width > 2000) |> sortQ |> as.data.frame()
 
 # So O97f suggests S25 comes before S11
 ```
@@ -754,24 +754,24 @@ O97f %>% subset(seqnames(query) == "contig_546" & width > 2000) %>% sortQ %>% as
 ```{r}
 #But we wtill miss 21, 12
 
-O97f.cc %>% grepByContigName("S12")
-O35f.cc %>% grepByContigName("S12")
+O97f.cc |> grepByContigName("S12")
+O35f.cc |> grepByContigName("S12")
 
 # S21 is followed by S12...
 
 # S21 ends with contig_72 and a piece of contig_4. Is it near rRNA and sex-specific region ?
-O33f %>% subset(seqnames == "S21" & width > 10000) %>% as.data.frame()
+O33f |> subset(seqnames == "S21" & width > 10000) |> as.data.frame()
 
 # contig_26 says that S92 is followed by S21
-O33f %>% subset(seqnames(query) == "contig_26" & width > 1000) %>% sortQ %>% as.data.frame() %>% head(10)
-O35f %>% subset(seqnames(query) == "contig_35" & width > 1000) %>% sortQ %>% as.data.frame() %>% tail(10)
+O33f |> subset(seqnames(query) == "contig_26" & width > 1000) |> sortQ |> as.data.frame() |> head(10)
+O35f |> subset(seqnames(query) == "contig_35" & width > 1000) |> sortQ |> as.data.frame() |> tail(10)
 
-O33f %>% subset(seqnames == "S92" & width > 100) %>% as.data.frame()
-O35f %>% subset(seqnames == "S92" & width > 100) %>% as.data.frame()
+O33f |> subset(seqnames == "S92" & width > 100) |> as.data.frame()
+O35f |> subset(seqnames == "S92" & width > 100) |> as.data.frame()
 
 
-O33f %>% subset(seqnames == "S54" & width > 100) %>% as.data.frame()
-O35f %>% subset(seqnames == "S54" & width > 100) %>% as.data.frame()
+O33f |> subset(seqnames == "S54" & width > 100) |> as.data.frame()
+O35f |> subset(seqnames == "S54" & width > 100) |> as.data.frame()
 ```
 
 ```
@@ -784,16 +784,16 @@ O97f_scaffold_105             "S29+" "S49-"
 ```
 
 ```{r}
-O33f %>% subset(seqnames(query) == "contig_72" & width > 1000)
+O33f |> subset(seqnames(query) == "contig_72" & width > 1000)
 # A piece of S12 alignes on a different contig, that also contains S11 and S74
-O33f %>% subset(seqnames(query) == "contig_70" & width > 3000) %>% sortQ %>% seqnames() %>% Rle
-O33f %>% subset(seqnames(query) == "contig_70" & width > 3000) %>% sortQ %>% as.data.frame() 
+O33f |> subset(seqnames(query) == "contig_70" & width > 3000) |> sortQ |> seqnames() |> Rle
+O33f |> subset(seqnames(query) == "contig_70" & width > 3000) |> sortQ |> as.data.frame() 
 
 # S12+, S79+, S89+, S53+,  S54-, S11-, S74+
 
 # S11 and S74 seems mixed ?
-O33f %>% subset(seqnames == "S11" & width > 1000) %>% as.data.frame()
-O33f %>% subset(seqnames == "S74" & width > 100)
+O33f |> subset(seqnames == "S11" & width > 1000) |> as.data.frame()
+O33f |> subset(seqnames == "S74" & width > 100)
 
 #Let's put S25- after S11-/S74+...
 
@@ -817,54 +817,54 @@ PAR
 # Telomeric region
 
 #  "S52-" "S70-" "S13-" supported by O9 and O3
-O33f.pc %>% subset(seqnames == "S13" & width > 10)
-O33f.pc %>% subset(seqnames(query) == "contig_67" & width > 5) %>% sortQ
-O33f.pc %>% subset(seqnames == "S52" & width > 1)
-O97f.cc %>% flipStrandNames %>% grepByContigName("S13")
-AOM5.5f.cc %>% grepByContigName("S13")
-OSK421f.cc %>% grepByContigName("S13")
+O33f.pc |> subset(seqnames == "S13" & width > 10)
+O33f.pc |> subset(seqnames(query) == "contig_67" & width > 5) |> sortQ
+O33f.pc |> subset(seqnames == "S52" & width > 1)
+O97f.cc |> flipStrandNames |> grepByContigName("S13")
+AOM5.5f.cc |> grepByContigName("S13")
+OSK421f.cc |> grepByContigName("S13")
 
 # Search connections with S52
 
 # Dead end in O3-3f
-O33f %>% subset(seqnames == "S52" & width > 10)
-O33f %>% subset(seqnames(query) == "contig_67" & width > 5) %>% sortQ
+O33f |> subset(seqnames == "S52" & width > 10)
+O33f |> subset(seqnames(query) == "contig_67" & width > 5) |> sortQ
 
 # Connects with S23+ in O3-5f
-O35f %>% subset(seqnames == "S52" & width > 10)
-O35f %>% subset(seqnames(query) == "scaffold_181" & width > 5) %>% sortQ %>% as.data.frame()
+O35f |> subset(seqnames == "S52" & width > 10)
+O35f |> subset(seqnames(query) == "scaffold_181" & width > 5) |> sortQ |> as.data.frame()
 
 # S2 etc.
 
 # In O3-3f, S2 is fully in contig_227
-O33f %>% subset(seqnames == "S2" & width > 10000)
+O33f |> subset(seqnames == "S2" & width > 10000)
 # S2 S18 S73 S23
-O33f %>% subset(seqnames(query) == "contig_227" & width > 10000) %>% sortQ %>% strandNames() %>% Rle()
-O33f %>% subset(seqnames == "S23" & width > 10000) %>% queryStrandNames() %>% Rle()
-O33f %>% subset(seqnames(query) == "contig_62" & width > 1000) %>% sortQ %>% strandNames() %>% Rle()
+O33f |> subset(seqnames(query) == "contig_227" & width > 10000) |> sortQ |> strandNames() |> Rle()
+O33f |> subset(seqnames == "S23" & width > 10000) |> queryStrandNames() |> Rle()
+O33f |> subset(seqnames(query) == "contig_62" & width > 1000) |> sortQ |> strandNames() |> Rle()
 # Check S34 because of O9
 
 
-O97f %>% subset(seqnames == "S2" & width > 100000)
-O97f %>% subset(seqnames(query) == "contig_48" & width > 10000) %>% sortQ %>% strandNames() %>% Rle()
+O97f |> subset(seqnames == "S2" & width > 100000)
+O97f |> subset(seqnames(query) == "contig_48" & width > 10000) |> sortQ |> strandNames() |> Rle()
 # The above suggests S2 between S1 and S18.  Or is there a second rRNA locus on PAR ?
 
-O97f %>% subset(seqnames(query) == "contig_58" & width > 10000) %>% sortQ %>% strandNames() %>% Rle()
+O97f |> subset(seqnames(query) == "contig_58" & width > 10000) |> sortQ |> strandNames() |> Rle()
 # S2+ Connects to S94+ and S34+ on the other end.
 
 #Is S2 on the short arm ???  Not according to the alignment to OKI
 #Or could there be a misassembly in S2 ?
 
-AOM5.5f.cc %>% grepByContigName("S18")
-OSK421f.cc %>% grepByContigName("S23")
-O97f.cc %>% grepByContigName("S18")
-O35f.cc %>% grepByContigName("S18")
-O35f.cc %>% grepByContigName("S23")
+AOM5.5f.cc |> grepByContigName("S18")
+OSK421f.cc |> grepByContigName("S23")
+O97f.cc |> grepByContigName("S18")
+O35f.cc |> grepByContigName("S18")
+O35f.cc |> grepByContigName("S23")
 
-O33f.pc %>% subset(seqnames == "S52" & width > 1)
-O97f.cc %>% flipStrandNames %>% grepByContigName("S13")
-AOM5.5f.cc %>% grepByContigName("S13")
-OSK421f.cc %>% grepByContigName("S13")
+O33f.pc |> subset(seqnames == "S52" & width > 1)
+O97f.cc |> flipStrandNames |> grepByContigName("S13")
+AOM5.5f.cc |> grepByContigName("S13")
+OSK421f.cc |> grepByContigName("S13")
 
 ```
 
@@ -877,10 +877,10 @@ YSR has changed too much outside Osaka lab strain…
 ```{r}
 YSR
 O33f.cc$O35f_contig_4  # Published in OSKA2016 paper.
-OSK421f.cc %>%  flipStrandNames %>% grepByContigName("S26")
-AOM5.5f.cc %>% flipStrandNames %>% grepByContigName("S26")
-O97f.cc %>% flipStrandNames %>% grepByContigName("S26")
-O35f.cc %>% grepByContigName("S26")
+OSK421f.cc |>  flipStrandNames |> grepByContigName("S26")
+AOM5.5f.cc |> flipStrandNames |> grepByContigName("S26")
+O97f.cc |> flipStrandNames |> grepByContigName("S26")
+O35f.cc |> grepByContigName("S26")
 
 ```
 
@@ -897,14 +897,14 @@ AOM5.5f.cc                                             "S48-" "S55+"            
 
 ```{r}
 
-O33f %>% subset(seqnames == "S51" & width > 1000)
-O33f %>% subset(seqnames(query) == "contig_3" & width > 1000) %>% sortQ %>% as.data.frame()
+O33f |> subset(seqnames == "S51" & width > 1000)
+O33f |> subset(seqnames(query) == "contig_3" & width > 1000) |> sortQ |> as.data.frame()
 
-O97f %>% subset(seqnames == "S51" & width > 1000)
-O97f %>% subset(seqnames(query) == "contig_54" & width > 1000) %>% sortQ %>% as.data.frame()
+O97f |> subset(seqnames == "S51" & width > 1000)
+O97f |> subset(seqnames(query) == "contig_54" & width > 1000) |> sortQ |> as.data.frame()
 
-OSK421f %>% subset(seqnames == "S51" & width > 1000)
-OSK421f %>% subset(seqnames(query) == "contig_306" & width > 2000) %>% sortQ %>% as.data.frame()
+OSK421f |> subset(seqnames == "S51" & width > 1000)
+OSK421f |> subset(seqnames(query) == "contig_306" & width > 2000) |> sortQ |> as.data.frame()
 ```
 
 
@@ -912,15 +912,15 @@ OSK421f %>% subset(seqnames(query) == "contig_306" & width > 2000) %>% sortQ %>%
 
 ```{r}
 
-O33f %>% subset(seqnames == "S67" & width > 1000)
-O33f %>% subset(seqnames(query) == "contig_586" & width > 1000) %>% sortQ %>% as.data.frame()
-O33f %>% subset(seqnames(query) == "contig_70" & width > 5000) %>% sortQ %>% as.data.frame()
+O33f |> subset(seqnames == "S67" & width > 1000)
+O33f |> subset(seqnames(query) == "contig_586" & width > 1000) |> sortQ |> as.data.frame()
+O33f |> subset(seqnames(query) == "contig_70" & width > 5000) |> sortQ |> as.data.frame()
 
-O97f %>% subset(seqnames == "S67" & width > 1000)
-O97f %>% subset(seqnames(query) == "contig_280" & width > 1000) %>% sortQ %>% as.data.frame()
+O97f |> subset(seqnames == "S67" & width > 1000)
+O97f |> subset(seqnames(query) == "contig_280" & width > 1000) |> sortQ |> as.data.frame()
 
-OSK421f %>% subset(seqnames == "S67" & width > 1000)
-OSK421f %>% subset(seqnames(query) == "contig_5" & width > 2000) %>% sortQ %>% as.data.frame()
+OSK421f |> subset(seqnames == "S67" & width > 1000)
+OSK421f |> subset(seqnames(query) == "contig_5" & width > 2000) |> sortQ |> as.data.frame()
 ```
 
 
@@ -928,19 +928,19 @@ OSK421f %>% subset(seqnames(query) == "contig_5" & width > 2000) %>% sortQ %>% a
 
 ```{r}
 
-O33f %>% subset(seqnames == "S99" & width > 1000)
-O33f %>% subset(seqnames(query) == "scaffold_82" & width > 1000) %>% sortQ %>% as.data.frame()
-O33f %>% subset(seqnames(query) == "scaffold_82" & width > 1000) %>% sortQ %>% strandNames()
+O33f |> subset(seqnames == "S99" & width > 1000)
+O33f |> subset(seqnames(query) == "scaffold_82" & width > 1000) |> sortQ |> as.data.frame()
+O33f |> subset(seqnames(query) == "scaffold_82" & width > 1000) |> sortQ |> strandNames()
 # (edited) -> S38-, S85+, S38-, S77-, (S38-, S61-) a couple times, S61-, S44-, S37-, S99-, S37- again, S109+, S3-
-O33f %>% subset(seqnames == "S37" & width > 1000)  %>% as.data.frame()
+O33f |> subset(seqnames == "S37" & width > 1000)  |> as.data.frame()
 
 
-O97f %>% subset(seqnames == "S99" & width > 100)
-O97f %>% subset(seqnames(query) == "contig_524" & width > 1000) %>% sortQ %>% as.data.frame()
+O97f |> subset(seqnames == "S99" & width > 100)
+O97f |> subset(seqnames(query) == "contig_524" & width > 1000) |> sortQ |> as.data.frame()
 
-OSK421f %>% subset(seqnames == "S99" & width > 100)
-OSK421f %>% subset(seqnames(query) == "contig_98" & width > 1000) %>% sortQ %>% as.data.frame()
-OSK421f %>% subset(seqnames(query) == "contig_3" & width > 1000) %>% sortQ %>% as.data.frame()
+OSK421f |> subset(seqnames == "S99" & width > 100)
+OSK421f |> subset(seqnames(query) == "contig_98" & width > 1000) |> sortQ |> as.data.frame()
+OSK421f |> subset(seqnames(query) == "contig_3" & width > 1000) |> sortQ |> as.data.frame()
 ```
 
 # Summary
