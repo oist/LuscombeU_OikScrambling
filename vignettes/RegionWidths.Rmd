@@ -140,6 +140,22 @@ library("patchwork")
 (p_droso / p_ciona / p_oikop) +   plot_layout(design = layout, guides = 'collect')
 ```
 
+
+# Saving width distributions and some statistics
+Below, I take the `widths_all_tibble` and perform some statistical operations on it for later. Click below to view.
+
+## Details 
+<details>
+<summary> Click here to view the full table with many summary statistics for width distributions.</summary>
+```{r saving_width_statistics_for_later, dependson="pre_compute_widths_object", fig.width=12, fig.height=8}
+widths_stats <- widths_all_tibble %>%
+    group_by(genus, class, dist, distS, what, name, nonCoa, chr, Arm) %>%
+    summarise(across(width, list(n=~n(), min=min, q25 = ~quantile(., 0.25),  median=median, q75 = ~quantile(., 0.75), max=max, mean=mean, sd=sd, var=var)))
+(widths_stats)
+```
+</details>
+
+
 # Width distribution of aligned and mapped regions
 
 ## Aligned regions
