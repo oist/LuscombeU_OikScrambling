@@ -319,14 +319,6 @@ The `scaffold` object is a `GRanges` object that describes in which order
 and orientation the selected `seqlevels` have to be merged in a new one.
 
 ```{r def_assemble}
-
-seqinfo <- O97f
-orientedSeqNames <- c("S10+", "S9+", "S32+", "S84-", "S59+", "S8-", "S1+", "S66-")
-
-substr(orientedSeqNames, nchar(orientedSeqNames), nchar(orientedSeqNames))
-
-newname       <- "XSR"
-
 scaffold <- function(seqinfo, newname, orientedSeqNames) {
   if (!class(seqinfo) %in% "Seqinfo")
     seqinfo <- seqinfo(seqinfo)
@@ -339,12 +331,6 @@ scaffold <- function(seqinfo, newname, orientedSeqNames) {
   strand(scaffold) <- orientations
   scaffold
 }
-
-scaffold(O97f, "XSR", orientedSeqNames)
-
-gr <- O97f
-newname <- "XSR"
-scaffold
 
 assemble <- function(gr, newname, orientedSeqNames, newGenomeName = NA) {
   if(length(newname) != 1) stop ("Invalid scaffold with more than one seqnames")
@@ -364,8 +350,6 @@ assemble <- function(gr, newname, orientedSeqNames, newGenomeName = NA) {
   genome(gr) <- newGenomeName
   gr
 }
-
-assemble(O97f, "XSR", XSR.old)
 ```
 
 # Superscaffolding chromosome arms and sex-specific regions
@@ -449,9 +433,10 @@ O35f |> plotApairOfChrs(chrT= "S1", chrQ = "contig_48")
 O35f |> plotApairOfChrs(chrT= "S2", chrQ = "contig_48")
 
 O35f |> plyranges::filter(seqnames %in% c("S10", "S9", "S32", "S84", "S59", "S8", "S1", "S2")) |> makeOxfordPlots()
+assemble(O35f, "XSR", XSR) |> makeOxfordPlots()
 ```
 
-### OSK42-1f
+### OSK42-2f
 
 The OSK-42 individual was sampled in the same region as the Osaka lab strain.
 As it is a wild animal, its diploid regions are much harder to assemble.
@@ -652,34 +637,63 @@ O35f_contig_37                "S15-" "S50-" "S41+" "S17+"
 
 ### Long arm
 
-```{r chr2_long}
-#Luckily, O33f's scaffold 2 is the whole long arm of Chr2.
+#### O3
 
-flipStrandNames(O33f.cc)$O33f_scaffold_2
-O33f |> subset(seqnames(query) == "scaffold_2" & width > 100000) |> sortQ |> as.data.frame()
+Luckily, O35f's scaffold 48 is the whole long arm of Chr2.
+
+```{r chr2_long_O3}
+flipStrandNames(O35f.cc)$O35f_scaffold_48
+O35f |> subset(seqnames(query) == "scaffold_48" & width > 100000) |> sortQ() |> as.data.frame()
 
 # And S4's tail aligns to a contig ending with a telomere !
-O33f |> subset(seqnames == "S4" & width > 100000)|> as.data.frame()
+O35f |> subset(seqnames == "S4" & width > 100000)|> as.data.frame()
 
 # Dead end on the other side.
-O33f |> subset(seqnames == "S14" & width > 100000)|> as.data.frame()
+O35f |> subset(seqnames == "S14" & width > 100000)|> as.data.frame()
 
 # But it allows to place S60, although with low confidence
-O33f |> subset(seqnames == "S60" & width > 100)|> as.data.frame() |> head
-O33f |> subset(seqnames(query) == "scaffold_2" & width > 1000) |> sortQ |> as.data.frame()   |> tail
+O35f |> subset(seqnames == "S60" & width > 100)|> as.data.frame() |> head()
+O35f |> subset(seqnames(query) == "scaffold_48" & width > 1000) |> sortQ() |> as.data.frame()   |> tail()
 
 
-OSK42_2f.cc |> grepByContigName("S82")
+assemble(O35f, "XSR", XSR) |>
+  assemble("chr2", c("S4+", "S19-", "S24+", "S75+", "S27-", "S40-", "S72+", "S46-", "S35-", "S22+", "S14+")) |>
+  plyranges::filter(score > 1e4) |> swap()|> makeOxfordPlots()
+```
 
-AOM5.5f.cc |> grepByContigName("S17")
-O97f.cc |> grepByContigName("S17")
-O35f.cc |> grepByContigName("S17")
-OSK42_2f.cc |> grepByContigName("S17")
+#### AOM5.5f
 
-
+```{r chr2_long_AOM5}
 AOM5.5f.cc |> grepByContigName("S4+")
+AOM5.5f.cc |> grepByContigName("S17")
+assemble(AOM5.5f, "XSR", XSR) |>
+  assemble("chr2", c("S4+", "S19-", "S24+", "S75+", "S27-", "S40-", "S72+", "S46-", "S35-", "S22+", "S14+")) |>
+  plyranges::filter(score > 1e4) |> swap()|> makeOxfordPlots()
+```
+
+#### AOM10.2f
+
+```{r chr2_long_AOM5}
+assemble(AOM10.2f, "XSR", XSR) |>
+  assemble("chr2", c("S4+", "S19-", "S24+", "S75+", "S27-", "S40-", "S72+", "S46-", "S35-", "S22+", "S14+")) |>
+  plyranges::filter(score > 1e4) |> swap()|> makeOxfordPlots()
+```
+
+#### OSK42_2f
+
+```{r chr2_long}
+OSK42_2f.cc |> grepByContigName("S82")
+OSK42_2f.cc |> grepByContigName("S17")
+```
+
+#### O9
+
+```{r chr2_long}
+O97f.cc |> grepByContigName("S17")
 O97f.cc |> grepByContigName("S4+")
-O35f.cc |> grepByContigName("S4+")
+assemble(O97f, "XSR", XSR) |>
+  assemble("chr2", c("S4+", "S19-", "S24+", "S75+", "S27-", "S40-", "S72+", "S46-", "S35-", "S22+", "S14+")) |>
+  plyranges::filter(score > 1e4) |> swap()|> makeOxfordPlots()
 ```
 
 ```
@@ -977,6 +991,22 @@ chr2 <- c( # Short arm – good confidence
            "S82-", "S30+", "S15-", "S50-", "S41+", "S17+", "S16-", "S20+",
            # Long arm – high confidence
           "S60-", "S14-", "S90-", "S22-", "S35+", "S118+", "S46+", "S102-", "S72-", "S104+", "S40+", "S27+", "S75-", "S24-", "S19+", "S101+", "S4-")
+
+assembleAll <- \(gb) gb |>
+  assemble("XSR", XSR)   |> assemble("YSR", YSR) |> assemble("PAR", PAR) |>
+  assemble("chr1", chr1) |> assemble("chr2", chr2)
+```
+
+## O9
+
+```{r summary_O9}
+O97f |> assembleAll() |> plyranges::filter(score > 1e4) |> makeOxfordPlots()
+```
+
+## O3
+
+```{r summary_O9}
+O35f |> assembleAll() |> plyranges::filter(score > 1e4) |> makeOxfordPlots()
 ```
 
 # Roadmap towards OSKA2016v2
