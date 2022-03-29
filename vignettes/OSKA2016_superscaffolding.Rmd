@@ -304,6 +304,62 @@ AOM5.5f.all  <- longestMatchesInTarget(AOM5.5f, min.width = 0, min.matches = 1) 
 # #[1] "S25+" "S11-" "S29-"
 ```
 
+# Function to assemble
+
+Takes a `GRanges` object and returns a `GRanges` object.  BSgenome information
+is erased.
+
+The `scaffold` object is a `GRanges` object that describes in which order
+and orientation the selected `seqlevels` have to be merged in a new one.
+
+```{r def_assemble}
+
+seqinfo <- O97f
+orientedSeqNames <- c("S10+", "S9+", "S32+", "S84-", "S59+", "S8-", "S1+", "S66-")
+
+substr(orientedSeqNames, nchar(orientedSeqNames), nchar(orientedSeqNames))
+
+newname       <- "XSR"
+
+scaffold <- function(seqinfo, newname, seqnames, orientations) {
+  if (!class(seqinfo) %in% "Seqinfo")
+    seqinfo <- seqinfo(seqinfo)
+  listofnames   <- substr(orientedSeqNames, 1                      , nchar(orientedSeqNames) -1)
+  orientations  <- substr(orientedSeqNames, nchar(orientedSeqNames), nchar(orientedSeqNames)   )
+  contigsToMerge_start  <- c(1, cumsum(seqlengths(seqinfo)[listofnames]))    |> unname() |> head(-1)
+  contigsToMerge_end    <-     (cumsum(seqlengths(seqinfo)[listofnames]) -1) |> unname()
+  scaffold         <- GRanges(newname, IRanges(contigsToMerge_start, contigsToMerge_end))
+  names(scaffold)  <- listofnames
+  strand(scaffold) <- orientations
+  scaffold
+}
+
+scaffold <- scaffold(O97f, "XSR", listofnames, orientations)
+
+gr <- O97f
+newname <- "XSR"
+scaffold
+
+assemble <- function(gr, scaffold) {
+  newname <- unique(seqnames(scaffold)) |> as.character()
+  if(length(newname) != 1) stop ("Invalid scaffold with more than one seqnames")
+  
+  flipScaffold <- function(gr, scaffold) {
+    gr[seqnames(gr) == scaffold] <- reverse(gr[seqnames(gr) == scaffold])
+    gr
+  }
+  
+  toFlip <- names(scaffold[strand(scaffold) == '-'])
+  
+  for (seqname in toFlip) {
+    gr <- flipScaffold(gr, seqname)
+  }
+  mergeSeqLevels(gr, names(scaffold), newname)
+}
+
+assemble(O97f, scaffold)
+```
+
 # Superscaffolding chromosome arms and sex-specific regions
 
 ## XSR
