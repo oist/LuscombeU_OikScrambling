@@ -246,7 +246,7 @@ O97f.all <-  longestMatchesInTarget(O97f, min.width = 0, min.matches = 1) |> str
 O35f.c  <- longestMatchesInTarget(O35f)
 O35f.cc <- strandNames(O35f.c, query = TRUE)
 names(O35f.cc) <- paste("O35f", names(O35f.cc), sep = "_")
-# O35f.all  <- longestMatchesInTarget(O35f, min.width = 0, min.matches = 0) |> strandNames(q=T)
+O35f.all  <- longestMatchesInTarget(O35f, min.width = 0, min.matches = 0) |> strandNames(q=T)
 # 
 # O33f.pc <- O33f
 # O33f.pc %<>% split(seqnames(O33f.pc)) 
@@ -462,7 +462,7 @@ A re-assembly using the _superior_ basecall model might increase support for
 the long-arm assembly of the other chromosomes.
 
 ```{r OSK_42}
-OSK42_2f.cc |> grepByContigName(name = "S10+")
+OSK42_2f.cc  |> grepByContigName(name = "S10+")
 assemble(OSK42_2f, "XSR", XSR) |> plotApairOfChrs()
 assemble(OSK42_2f, "XSR", XSR) |> makeOxfordPlots()
 ```
@@ -473,31 +473,42 @@ assemble(OSK42_2f, "XSR", XSR) |> makeOxfordPlots()
 AOM5.5f.cc |> grepByContigName(name = "S10+")
 O35f.cc |> grepByContigName("S9+")
 O35f.cc |> grepByContigName("S1+")
+```
 
-XSR
-OSK42_2f.all  |> grepByContigName(name = "S10+")
-AOM5.5f.all |> grepByContigName(name = "S10+")
-O97f.all |> flipStrandNames |> grepByContigName("S9+")
-O35f.all |> grepByContigName("S9+")
-O35f.all |> flipStrandNames |> grepByContigName("S10+")
-O35f.all |> grepByContigName("S1+")
+### Sanity check
 
-# Sanity check
+```{r XSR_check}
 sort(XSR)
 longestMatchesInTarget(OKI, min.width = 1000, min.matches = 1)["XSR"] |> strandNames(q=T) |> unlist() |> sort()
 longestMatchesInTarget(BAR, min.width = 1000, min.matches = 1)["XSR"] |> strandNames(q=T) |> unlist() |> sort()
-
-
-#S66
-O33f |> subset(seqnames == "S66" & width > 100)|> as.data.frame()
-O33f |> subset(seqnames(query) == "scaffold_16" & width > 1000) |> sortQ |> as.data.frame()   |> tail
 ```
 
-Summary:
+### S66
+
+```{r XSR_S66}
+O35f |> subset(seqnames == "S66" & width > 100)|> as.data.frame()
+O35f |> subset(seqnames(query) == "scaffold_16" & width > 1000) |> sortQ() |> as.data.frame()   |> tail()
+```
+
+### Can we add more ?
+
+```{r XSR_more}
+O97f.all     |> flipStrandNames() |> grepByContigName("S9+")
+OSK42_2f.all                      |> grepByContigName(name = "S10+")
+AOM5.5f.all  |> flipStrandNames() |> grepByContigName(name = "S10-")
+O35f.all |> grepByContigName("S9+")
+O35f.all |> flipStrandNames() |> grepByContigName("S10+")
+O35f.all |> grepByContigName("S1+")
+wannaAdd <- c("S366", "S477", "S510")
+O97f |> plyranges::filter(seqnames %in% wannaAdd)
+seqlengths(BSgenome.Oidioi.Aniseed.OSKA2016)[wannaAdd]
+```
+
+### Summary:
 
 ```
 XSR.old     "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"
-OSK42_2f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8+"  "S1+" 
+OSK42_2f.cc "S10+" "S9+"  "S32+" "S84-" "S59+" "S8+"  "S1+" 
 AOM5.5f.cc  "S10+" "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+" 
 O97f.cc            "S9+"  "S32+" "S84-" "S59+" "S8-"  "S1+"  "S18+"
 O35f.cc            "S9+"  "S32+" "S84-" "S59+"
