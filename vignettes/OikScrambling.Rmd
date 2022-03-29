@@ -13,11 +13,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup}
-knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
-knitr::opts_knit$set(verbose = TRUE)
-```
-
 # Introduction
 
 This package contains a collection of vignettes to perform the analysis of
@@ -28,25 +23,29 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 
 ## How to build this site
 
-As some of the computations take time, I build the vignettes on _Deigo_ using
-the `?pkgdown::build_site` function, in a Git clone on my subdirectory
-on `/flash`.
+As some of the computations take time, we build the vignettes on OIST's HPC
+cluster _Deigo_ using the `?pkgdown::build_site` function, in a Git clone in a
+subdirectory of the `/flash` filesytem.
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"
 ```
+
+## How to install or update the necessary packages
+
+### OikScrambling and GenomicBreaks
 
 Sometimes it is necessary to upgrade the OikScrambling package; this is done with:
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif R CMD INSTALL .
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif R CMD INSTALL .
 ```
 
 And before, it may be needed to update `GenomicBreaks` or `BreakpointsData`:
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.9.1.sif Rscript -e "install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
 ```
 
 The trick is that the `GenomicBreaks` singularity images are hardcoded to
@@ -57,6 +56,29 @@ Command to recompute the `BreakPoints.Rdata` file
 
 ```
 srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "pkgdown::build_article('LoadGenomicBreaks')"
+```
+
+### Data packages
+
+#### BSgenome packages
+
+We need the sequences of the studied genomes.  They are provided in a _drat_
+repository: <https://oist.github.io/plessy_oikgenomes_drat/>.
+
+Example command to install one _Oikopleura_ BSgenome package if you do not yet
+have it:
+
+```
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "install.packages('BSgenome.Odioica.local.OKI2018.I69', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
+```
+
+#### Genome annotations
+
+The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
+distributed in the same drat repository as the alignment data.
+
+```
+install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')
 ```
 
 ## Load pacakges
@@ -75,18 +97,6 @@ requireNamespace("rGADEM")
 requireNamespace("ggseqlogo")
 ```
 
-### BSgenome packages
-
-We need the sequences of the studied genomes.  They are provided in a _drat_
-repository: <https://oist.github.io/plessy_oikgenomes_drat/>.
-
-Example command to install one _Oikopleura_ BSgenome package if you do not yet
-have it:
-
-```
-install.packages("BSgenome.Odioica.local.OKI2018.I69", repos="https://oist.github.io/plessy_oikgenomes_drat/")
-```
-
 The accessory function `OikScrambling:::loadAllGenomes()` attaches `BSgenome`
 packages in the session and outputs a `SimpleList` containing references to
 the `BSgenome` objects for convenience, such as easy looping, and tab-completion
@@ -95,7 +105,7 @@ to show the available objects.
 ```{r load_genomes}
 OikScrambling:::loadAllGenomes
 
-genomes <- (genomes <- OikScrambling:::loadAllGenomes())
+(genomes <- OikScrambling:::loadAllGenomes())
 
 ## Genome lengths
 (genome.lengths <- sapply(genomes, \(g) sum(seqlengths(seqinfo(g)))))
@@ -107,19 +117,9 @@ genomes <- (genomes <- OikScrambling:::loadAllGenomes())
 
 ## Load data
 
-### Genome annotations
-
-The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
-distributed in the same drat repository as the alignment data.
-
-```
-install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')
-```
-
 The `OikScrambling:::loadAllAnnotations()` function returns `TxDB` objects.
 Be careful that they are broken each time the R session restarts, because they
 rely on local file storage.
-
 
 ```{r load_TxDb, warning=FALSE}
 (annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())

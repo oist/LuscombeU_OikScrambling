@@ -13,13 +13,13 @@ editor_options:
 ---
 
 ```{r setup}
-knitr::opts_knit$set(verbose = TRUE)
+knitr::opts_knit$set(cache = TRUE)
 ```
 
 # Introduction
 
-In this vignette I dot-plot pairs of genomes in parallel to illustrate
-differences in the extend of scrambling in Oikopleura compared to equivalent
+This vignette produces alignment line plots of pairs of genomes to illustrate
+differences in the extent of scrambling in _Oikopleura_ compared to equivalent
 pairs in other genera.
 
 The core functions used here are maintained in our _GenomicBreaks_ R package,
@@ -34,8 +34,8 @@ comparisons of homologous chromosomes in more than one species.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(load("BreakPoints.Rdata"))
+genomes <- OikScrambling:::loadAllGenomes()
+load("BreakPoints.Rdata")
 ```
 
 # Oikopleura
@@ -47,24 +47,39 @@ makeOxfordPlots(coa$Oki_Bar, diag = FALSE)
 ```
 
 ```{r mkOxPlotWindow_function}
-mkOxPlotWindow <- function(gb, win = 5e6) {
-  if (all(is.na(seqlengths(gb))))
-    seqlengths(gb) <- tapply(end(gb), seqnames(gb), max) |> as.vector()
-  if (all(is.na(seqlengths(gb$query))))
-    seqlengths(gb$query) <- tapply(end(gb$query), seqnames(gb$query), max) |> as.vector()
+# stringDist_GBreaks <- function(x, method = "levenshtein", ignoreCase = FALSE, diag = FALSE, upper = FALSE, ...) {
+#   targetS <- getSeq(x)
+#   queryS  <- getSeq(x$query)
+#   seqs <- Pairs(targetS, queryS)
+#   sapply(seqs, \(pair){
+#     stringDist(c(first(pair), second(pair)))
+#   })
+# }
+
+mkOxPlotWindow <- function(gb, win = 5e6, size = 2, centre = c('midpoint', 'maxwidth'), ...) {
+  centre <- match.arg(centre)
+  gb <- forceSeqLengths(gb)
   longest_target_seq <- seqlengths(gb) |> sort() |> tail(1) |> names()
-  target_centre <- round(seqlengths(gb)[longest_target_seq] / 2)
   best_query_match   <- gb[seqnames(gb) == longest_target_seq]$query |> seqnames() |> table() |> sort() |> tail(1) |> names()
-  query_centre <- round(seqlengths(gb$query)[best_query_match] / 2)
-  gb |> plyranges::filter(
+  if (centre == 'midpoint') {
+    target_centre <- round(seqlengths(gb)[longest_target_seq]     / 2)
+    query_centre  <- round(seqlengths(gb$query)[best_query_match] / 2)
+  } else {
+    gb_coa <- coalesce_contigs(gb)
+    maxwidth <- which.max(width(gb_coa))
+    target_centre <- gb_coa[maxwidth]       |> resize(1, fix = "center") |> start()
+    query_centre  <- gb_coa$query[maxwidth] |> resize(1, fix = "center") |> start()
+  }
+  gb <- gb |> plyranges::filter(
     seqnames == longest_target_seq,
     seqnames(query) == best_query_match,
     start > target_centre - win,
     end < target_centre + win,
     start(query) > query_centre - win,
     end(query) < query_centre + win
-  ) |>
-    makeOxfordPlots(type = "l") +
+  )
+  # score(gb) <- stringDist_GBreaks(gb) / width(gb)
+  makeOxfordPlots(gb, col = "strand", size = size, ...) +
     theme_bw() +
     theme(legend.position="none")
 }
@@ -72,6 +87,34 @@ mkOxPlotWindow <- function(gb, win = 5e6) {
 
 ```{r Oki_Bar_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(gbs$Oki_Bar)
+```
+
+## Oki vs Osa
+
+Dot plot intended for panel A of figure 1.
+
+```{r Oki_Osa, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+makeOxfordPlots(coa$Oki_Osa, diag = FALSE) + theme_bw() + theme(legend.position="none")
+```
+
+The plot below is based on aligned regions (before coalescing).  It is displayed
+to demonstrate that it is visually similar to the one above made on mapped
+regions (object after coalescing).
+
+```{r Oki_Osa_gbs}
+makeOxfordPlots(gbs$Oki_Osa, diag = FALSE) + theme_bw() + theme(legend.position="none")
+```
+
+Oxford plot colored by strand.
+
+```{r Oki_Osa_strand, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+makeOxfordPlots(coa$Oki_Osa, diag = FALSE, col = "strand") + theme_bw() + theme(legend.position="none")
+```
+
+10-Mb square window plot.
+
+```{r Oki_Osa_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Oki_Osa)
 ```
 
 ## Osa vs Bar
@@ -126,7 +169,7 @@ seqlevels(Oki_Kum_PAR$query) <- seqlevels(Oki_Kum_PAR$query)[orderQuerySeqLevels
 Oki_Kum_PAR$query <- mergeSeqLevels(Oki_Kum_PAR$query, seqlevels(Oki_Kum_PAR$query), "PAR")
 ```
 
-```{r Osa_Kum_win, dev='svg', fig.ext='svg'}
+```{r Oki_Kum_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(Oki_Kum_PAR)
 ```
 
@@ -240,7 +283,8 @@ makeOxfordPlots(coa$Dme_Dma) + ggtitle("Dmel vs Dmau")
 ```
 
 ```{r Dmel_Dmau_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Dme_Dma) + ggtitle("Drosophila melanogaster vs Drosophila mauritania")
+# Force strand flipping for aesthetic purpose
+mkOxPlotWindow(gbs$Dme_Dma |> forceSeqLengths() |> reverse()) + ggtitle("Drosophila melanogaster vs Drosophila mauritania")
 ```
 
 ## vs Drosophila yakuba
@@ -260,7 +304,8 @@ makeOxfordPlots(coa$Dme_Dsu) + ggtitle("Dmel vs Dsub")
 ```
 
 ```{r Dmel_Dsub_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Dme_Dsu) + ggtitle("Drosophila melanogaster vs Drosophila subpulchrella")
+# Blacklist 3R as the algorithm does not find an nicely square window on it.
+mkOxPlotWindow(gbs$Dme_Dsu |> plyranges::filter(seqnames != "3R")) + ggtitle("Drosophila melanogaster vs Drosophila subpulchrella")
 ```
 
 ## vs Drosophila buskii
@@ -272,4 +317,20 @@ makeOxfordPlots(coa$Dme_Dbu) + ggtitle("Dmel vs Dbus")
 
 ```{r Dmel_Dbus_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(gbs$Dme_Dbu) + ggtitle("Drosophila melanogaster vs Drosophila buskii")
+```
+
+# Mammals
+
+## Human versus mouse
+
+Chromosome 18 was chosen because it is small and it has the same name in both
+species.  Region was centered on the alignment with the longest width, as
+otherwise the window out of target.
+
+Still, most of the region is not aligned.  The syntenic regions only look
+contiguous because the dots need to be thick to be easy to see.
+
+```{r hg38_mm10, dev='svg', fig.ext='svg'}
+hgmm <- load_genomic_breaks(system.file(("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3"), package = "BreakpointsData"))
+mkOxPlotWindow(hgmm, centre = 'maxwidth') + ggtitle("Homo sapiens vs Mus musculus")
 ```

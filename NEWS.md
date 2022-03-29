@@ -1,3 +1,70 @@
+# OikScrambling 2.2.1
+
+* New Oki-Osa Oxford plots for Figure 1.
+
+# OikScrambling 2.2.0
+
+* Strand-colored version of the 10-Mb window Oxford plots.  Needs
+  `GenomicBreaks` version `0.13.1` or superior.
+* Human-mouse 10-Mb window Oxford plot.  Needs `BreakpointsData`
+  version `3.9.0` or superior.
+
+# OikScrambling 2.1.0
+
+* Add a vignette about the movement of the PAC3 gene.
+
+# OikScrambling 2.0.0
+
+* Adopt semantic versionning: any backwards-incompatible change increases
+  the major version number, no matter how (un)important it is.
+
+* Use the new `GenomicBreaks::bridgeRegions()` function that produces
+  zero-width ranges instead of the local function that artificially
+  added 1nt to the ends.
+
+# OikScrambling 1.0.0
+
+* Major change in the BSgenome packages, needing the removal of the old ones
+  and the recomputation of the data.  The new packages allow to much easier
+  link the GBreaks objects to their genome sequence or annotations.
+
+# OikScrambling 0.8.3
+
+* Move some regions of interest in a separate vignette.
+
+# OikScrambling 0.8.2
+
+* Added a new `SegmentMovements` vignette.
+
+# OikScrambling 0.8.1
+
+* Added a new `wgo` whole-genome object indicating if a base is part of a
+  syntenic block, or just aligned, or unaligned.
+
+# OikScrambling 0.8.0
+
+* Added `nonCoa` flags to the `gbs`, `unal` and `coa` objects.
+
+# OikScrambling 0.7.1
+
+* Created compound plots of width distribution for Figure 2.
+
+# OikScrambling 0.7.0
+
+* Overlap with repeats on both strands.  The difference is not so massive,
+  considering that the unaligned and unmapped regions are already strandless
+  anyway.
+
+# OikScrambling 0.6.6
+
+* New functions `OikScrambling:::compDistClass()` and
+  `OikScrambling:::compDistClass()`, and new option `short` for
+  `OikScrambling:::compDistance()`, to produce more compact summary graphs.
+
+# OikScrambling 0.6.5
+
+* Identify the flipped repeat as MITE and search for other copies.
+
 # OikScrambling 0.6.4
 
 * Add regions of interest with repeat flipping and insertion.

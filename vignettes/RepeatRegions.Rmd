@@ -33,7 +33,9 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different GBreaks objects are prepared.
 
-# Repeat
+# Repeats intersecting with GBreaks regions
+
+## Compute
 
 ```{r repeat_annotations}
 reps_in <- list()
@@ -95,7 +97,7 @@ reps_in_Osa.norm.long <- toLong.reps(reps_in_Osa.norm)
 reps_in_Bar.norm.long <- toLong.reps(reps_in_Bar.norm)
 ```
 
-Summary numbers.
+## Summary numbers
 
 ```{r summary_numbers}
 sapply(reps_in_Oki.norm, rowMeans)
@@ -103,46 +105,32 @@ sapply(reps_in_Osa.norm, rowMeans)
 sapply(reps_in_Bar.norm, rowMeans)
 ```
 
-```{r summary_plots}
+## Summary plots
+
+Note that Oki has more repeat classes.
+
+```{r summary_plots, fig.width=10}
+# Here, the outlier is the same-species comparison, Okinawa – Kume
 ggplot(reps_in_Oki.long) + aes(Region, value) +
-  geom_point(aes(col = name)) +  geom_boxplot() +
+  geom_boxplot() + geom_point(aes(col = name)) +
   facet_grid(~Class, scales = "free") + coord_flip()
 
-ggplot(reps_in_Osa.long) + aes(Region, value) +
-  geom_point(aes(col = name)) +  geom_boxplot() +
+# There, the outliers are the same-species comparison, Bar – Nor and Osa – Aom.
+ggplot(rbind(reps_in_Osa.long, reps_in_Bar.long)) + aes(Region, value) +
+  geom_boxplot() + geom_point(aes(col = name)) +
   facet_grid(~Class, scales = "free") + coord_flip()
 
-ggplot(reps_in_Bar.long) + aes(Region, value) +
-  geom_point(aes(col = name)) +  geom_boxplot() +
-  facet_grid(~Class, scales = "free") + coord_flip()
-
-ggplot(reps_in_Oki.norm.long) + aes(Region, value) +
-  geom_boxplot() + geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
-  ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Oki)")
-
-ggplot(reps_in_Osa.norm.long) + aes(Region, value) +
-  geom_boxplot() + geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
-  ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Osa)")
-
-ggplot(reps_in_Bar.norm.long) + aes(Region, value) +
-  geom_boxplot() + geom_point(aes(col = name)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
-  ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (Bar)")
-
+# Summary plot combining all comparisons
 ggplot(rbind(
   reps_in_Oki.norm.long,
   reps_in_Osa.norm.long,
   reps_in_Bar.norm.long
-  ) |> dplyr::mutate(Distance = OikScrambling:::compDistance(name))) + aes(Region, value) +
+  ) |> dplyr::mutate(Distance = OikScrambling:::compDistance(name))) +
+  aes(x="", value) + xlab("") + 
   geom_boxplot() + geom_point(aes(col = Distance)) +
-  facet_grid(~Class, scales = "free") + coord_flip() +
+  facet_grid(~Class ~Region, scales = "free") + coord_flip() +
   ylab("Fraction overlaping") +
-  ggtitle("Repeats overlaping with (un)aligned/mapped regions (all)")
+  ggtitle("Repeats overlaping with computed regions")
 ```
 
 # Tracking repeats across genome pairs
@@ -426,3 +414,40 @@ ggplot(reps_gbs |> tidyr::pivot_longer(c("aligned", "unaligned"))) +
   geom_boxplot() +
   geom_point(aes(col = pairname))
 ```
+
+# Repeat annotation of the shortest mapped regions
+
+In Oki – North comparisons, the distribution of mapped region widths is bimodal
+and the two peaks are best separated around 600 bp.  See
+`vignette("RegionWidths", package = "OikScrambling")` for details.
+
+```{r example_width_dist_for_oki_osa}
+coa$Oki_Osa |> plyranges::mutate(w_short = width < 600) |> as.data.frame() |> tibble::as_tibble() |>
+  ggplot() + aes(width, col =Arm) +
+  geom_freqpoly() + scale_x_log10() +
+  geom_vline(xintercept = 600) +
+  ggtitle("Example width distribution of mapped regions (Oki_Osa)")
+```
+
+We want to know if the regions of width shorter than 600 match more repeats, and
+to what extent the matching repeats cover them.
+
+```{r}
+checkOverlapWithRepeatsInShortAndLongWidthRegions <- function(gr, rep) {
+  grl <- gr |> split(width(gr) < 600)
+  tibble::tibble(
+    `Length`                   = c(Long = "Long", Short = "Short"),
+    `Number of regions`        = c(Long  = length(grl[["FALSE"]]),
+                                 Short = length(grl[["TRUE"]])),
+    `Total width`              = c(Long  = grl[["FALSE"]] |> reduce() |> width() |> sum(),
+                                 Short = grl[["TRUE"]]  |> reduce() |> width() |> sum()),
+    `Width covered by reps`    = c(Long  = intersect(grl[["FALSE"]], rep) |> reduce() |> width() |> sum(),
+                                 Short = intersect(grl[["TRUE"]], rep)  |> reduce() |> width() |> sum())
+  )
+}
+checkOverlapWithRepeatsInShortAndLongWidthRegions(coa$Oki_Osa, reps$Oki)
+checkOverlapWithRepeatsInShortAndLongWidthRegions(coa$Osa_Oki, reps$Osa)
+checkOverlapWithRepeatsInShortAndLongWidthRegions(coa$Bar_Oki, reps$Bar)
+```
+
+In conclusion, most of the short mapped regions are not mapped repeats.

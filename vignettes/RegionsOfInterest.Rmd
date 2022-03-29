@@ -1,0 +1,668 @@
+---
+title: "Regions of interest"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Regions of interest}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+# Load pacakges and data
+
+See the `vignette("OikScrambling", package = "OikScrambling")` for general
+details on package and data load.
+
+See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different `GBreaks` objects are prepared.
+
+```{r load_pacakges_and_data}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  library('ggplot2')
+  library("BreakpointsData")
+  library("Biostrings")
+})
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
+load("BreakPoints.Rdata")
+reps <- OikScrambling:::loadAllRepeats(compat = F)
+transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F)
+```
+
+# The problem:
+
+The plot below shows high colinearity between Oki and Kum, but the
+`GenomicBreaks` objects are still scattered in small pieces.  What is
+interrupting colinearity?
+
+```{r parallel_chr_plots_Oki_Kum}
+plotApairOfChrs(coa$Oki_Kum, "chr1", main = "Oki – Kum")
+```
+
+In this vignette, we look at a couple of example regions in details.  These
+regions helped me to decide how to process the data in _Load Genomic Breaks_
+(`vignette("LoadGenomicBreaks", package = "OikScrambling")` and to decide
+which analysis to prioritise elsewhere.
+
+# Alignments are real (Region of Interest 1)
+
+```{r ROI1}
+# The best Kume contig matching ot chr1 is contig_3_1
+bestMatch <- function(gb)
+  tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
+
+coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
+
+# contig_3_1 appears to map roughly in the 8,000,000 – 13,000,000 region
+coa$Oki_Kum |> flagAll() |> plyranges::filter(seqnames(query) == "contig_3_1") |>
+  plyranges::arrange(start(query))
+```
+
+How about the second alignment pair, mapping 226 bases of `contig_3_1` to the
+short arm?
+
+```{r re_align_a_clolinearity_breaker}
+ROI1 <- coa$Oki_Kum |>
+  plyranges::filter(seqnames(query) == "contig_3_1", end(query) <= 21079) |>
+  plyranges::arrange(start(query))
+ROI1
+coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = gb2xlim(ROI1[-2]), main = "chr1 vs contig_3_1 at ROI 1")
+coa$Oki_Kum |> plotApairOfChrs("chr1", "contig_3_1", xlim = list(c(3838658, 3881203), c(1, 21079)), main = "chr1 matching contig_3_1 in the short arm")
+```
+
+Is the alignment convincing ?
+
+```{r pairwise_seq_alignments}
+# Good match where reported
+pairwiseAlignment(ROI1[2])
+```
+
+<details>
+<summary>See the full alignment with 50 bp of flanking regions added to contrast</summary>
+```{r pairwise_seq_alignments_details}
+pairwiseAlignment(ROI1[2] + 50, ROI1[2]$query + 50) |> writePairwiseAlignments()
+```
+</details>
+
+No good match between the flanking pairs.
+
+```{r pairwise_seq_alignments2}
+pairwiseAlignment(getSeq(ROI1[2]$query), genomes$OKI2018.I69$chr1[8086429:8104950], type="local")
+pairwiseAlignment(getSeq(genomes$KUM.M3.7f, GRanges("contig_3_1:16561-16812:-")), genomes$OKI2018.I69$chr1[8086429:8104950], type="local")
+```
+
+Yes, the alignment looks real!
+
+# Colinearity interrupted by inversions and translocations (Region of Interest 2)
+
+Let's look at the area `chr1:8080000-12900000` covered by `contig_3_1`.  Can
+we coalesce it once we only keep the paired matches?  The answer is no…
+
+```{r ROI2}
+coa$Oki_Kum |> flagAll() |> plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000)
+
+# Even removing all but the best match on the query is not enough to collapse all
+coa$Oki_Kum |>
+  plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000) |>
+  plyranges::filter(seqnames(query) == "contig_3_1") |>
+  coalesce_contigs() |> flagAll() |> head(10)
+
+coa$Oki_Kum |>
+  plyranges::filter(seqnames == "chr1", start > 8080000, end < 12900000) |>
+  plyranges::filter(seqnames(query) == "contig_3_1")|>
+  coalesce_contigs() |>  plotApairOfChrs()
+```
+
+Colinearity appears to be interrupted by many inversions and translocations.
+
+# Well-aligned repeats are kept in the one-to-one graph (Region of interest 3)
+
+```{r ROI3}
+gbs$Oki_Kum[1] |> as.data.frame()
+pairwiseAlignment(gbs$Oki_Kum[1])
+subsetByOverlaps(reps$OKI2018.I69, gbs$Oki_Kum[1])
+```
+
+# Unaligned mapped region: ROI4
+
+Let's check examples of unaligned mapped regions in function of presence of repeats.
+
+## FALSE/TRUE
+
+```{r ROI4_1}
+unalMap$Oki_Osa -> x
+x$Class <- paste(!sapply(x$rep, anyNA), !sapply(x$query$rep, anyNA))
+x |> head() |> as.data.frame()
+ROI4_1 <- x[1]
+
+# Let's recover the flanking regions
+# We expand the unalMap regions of 1 base on each side to promote overlaps with gbs regions)
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_1 + 1) |> as.data.frame()
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_1 + 1) |> range()
+# We confirm that unalmap regions can not be mapped
+pairwiseAlignment(ROI4_1)
+pairwiseAlignment(getSeq(ROI4_1), getSeq(ROI4_1$query) |> reverseComplement() ) 
+# We confirm that flanking regions map well
+pairwiseAlignment(getSeq(ROI4_1 + 100), getSeq(ROI4_1$query + 100) |> reverseComplement(), type="global")
+# Only one hit
+#vmatchPattern(genomes$Osa$Chr1[1730795:1731145], genomes$Osa, with.indels = TRUE, max.mismatch = 10)
+```
+
+## FALSE/FALSE
+
+```{r ROI4_2}
+ROI4_2 <- x[5]
+# As character for convenience of BLAST searching.
+getSeq(ROI4_2)      |> as.character()  # Only one perfect BLAST hit at the NCBI, to the Oki genome.
+getSeq(ROI4_2$query)|> as.character()  # No relevant BLAST hit at the NCBI (evalues >= 1e-4)
+
+vmatchPattern(genomes$OKI2018.I69$chr1[554365:554546], genomes$OKI2018.I69)
+
+# unaligned mapped region (+ / -)
+pairwiseAlignment(ROI4_2)
+pairwiseAlignment(getSeq(ROI4_2), getSeq(ROI4_2$query) |> reverseComplement() )
+# Identity of ~50% but no striking difference between strands
+
+# unaligned mapped region with flanking colinear alignments.
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_2 + 1)
+pairwiseAlignment(getSeq(ROI4_2 + 150), getSeq(ROI4_2$query + 150) |> reverseComplement(), type="global")|> writePairwiseAlignments(b=60)
+
+```
+
+## TRUE/TRUE
+
+```{r ROI4_3}
+ROI4_3 <- x[12]
+ROI4_3 |> data.frame()
+
+# As character for convenience of BLAST searching.
+getSeq(ROI4_3)      |> as.character()  # Only one perfect BLAST hit at the NCBI, to the Oki genome.
+getSeq(ROI4_3$query)|> as.character()  # No relevant BLAST hit at the NCBI (evalues >= 1e-4)
+
+# unaligned mapped region (+ / -)
+pairwiseAlignment(ROI4_3)
+pairwiseAlignment(getSeq(ROI4_3), getSeq(ROI4_3$query) |> reverseComplement() )
+# Identity of ~50% but no striking difference between strands
+
+# unaligned mapped region with flanking colinear alignments.
+gbs$Oki_Osa |> subsetByOverlaps(ROI4_3 + 1)
+pairwiseAlignment(getSeq(ROI4_3 + 150), getSeq(ROI4_3$query + 150) |> reverseComplement(), type="global")|> writePairwiseAlignments(b=60)
+```
+
+# What still interrupts colinearity once repeats are ruled out ? (ROI5)
+
+We start with a random region
+
+```{r ROI5_overview}
+coa$Oki_Kum |> flagAll() |> plyranges::slice(200:210) |> as.data.frame()
+```
+
+Let's focus on alignments between chr1 and contig_27_1:
+
+```{r ROI5}
+ROI5.range <- coa$Oki_Kum[200:210] |> dplyr::filter(seqnames == "chr1", seqnames(query) == "contig_27_1") |> range()
+ROI5.range
+
+ROI5 <- subsetByOverlaps(coa$Oki_Kum, ROI5.range) |> sort(ignore.strand=T)
+
+# Let's capture all the pairs that overlap that range:
+ROI5 |> sort(ignore.strand=T) |> as.data.frame()
+ROI5 |> dplyr::arrange(query) |> as.data.frame()
+ROI5 |> plotApairOfChrs(xlim = gb2xlim(ROI5.range))
+```
+
+Very short gaps between successive ranges in ROI5
+
+```{r ROI5_cleanGaps}
+cleanGaps(ROI5) |> as.data.frame()
+
+ROI5 |> flagAll() |> dist2next( ignore.strand = TRUE) |> as.data.frame()
+ROI5 |> swap() |> sort(ignore.strand = TRUE) |> flagAll()|> dist2next( ignore.strand = TRUE, step =2)  |> as.data.frame()
+```
+
+Can we coalesce better by removing the translocations ?
+
+```{r ROI5_removeTranslocations}
+removeTranslocations <- function(gb) {
+  gb <- flagTranslocations(gb)
+  if(any(gb$tra))
+    gb <- gb[-(which(gb$tra) + 1)]
+  gb
+}
+
+ROI5 |> removeTranslocations() |> coalesce_contigs() |>
+  swap() |> sort(i=T) |> removeTranslocations() |> coalesce_contigs() |>
+  swap() |> sort(i=T) |> plotApairOfChrs()
+```
+
+This is now implemented in the `coa2` objects, with a size treshold of 200.
+
+```{r ROI5_coa2}
+subsetByOverlaps(coa2$Oki_Kum, ROI5.range) |> plotApairOfChrs(xlim = gb2xlim(ROI5.range))
+```
+
+# What still interrupts colinearity once translocations are removed ? (ROI6)
+
+Inversions …
+
+```{r ROI6}
+# We start with a broader random region
+(ROI6 <- coa2$Oki_Kum |> flagAll() |> dplyr::slice(160:200))
+ROI6 |> plotApairOfChrs()
+coa2$Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Double-collapsed")
+coa $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Collapsed")
+gbs $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Mapped")
+
+# Sometimes, everything that remains is inversions
+ROI6[1:6] |> plotApairOfChrs()
+ROI6[1:6] |> dplyr::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChrs()
+```
+
+
+# Multiple inversions in a row (ROI7)
+
+```{r}
+ROI7 <- coa$Oki_Osa |> flagInversions() |> dist2next(ignore.strand = TRUE)
+
+showInversions(ROI7)
+
+ROI7[35:45] |> as.data.frame()
+ROI7[37:43] |> plotApairOfChrs()
+
+## Annotations
+ROI7.reps <- reps$OKI2018.I69 |> subsetByOverlaps(ROI7[37:43] |> range())
+mids <- ROI7.reps |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- ROI7.reps$Class |> as.character()
+annot <- genoPlotR::annotation(x1=mids, text=text, rot=30)
+ROI7[37:43] |> plotApairOfChrs(annotations = annot)
+
+## Genes
+ROI7.genes <- transcripts$OKI2018.I69 |> subsetByOverlaps(ROI7[37:43] |> range())
+mids <- ROI7.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
+text <- ROI7.genes$tx_name |> as.character()
+annot <- genoPlotR::annotation(x1=start(ROI7.genes), x2=end(ROI7.genes), text=text, rot=30)
+ROI7[37:43] |> plotApairOfChrs(annotations = annot)
+```
+
+
+# Double inversions
+
+In these examples, the inversions happened on the _target_ genome, therefore
+only in this genome the names of the ranges were changed.
+
+```{r ROI8.T}
+exampleDoubleInversion |> plotApairOfChrs()
+
+x0 <- GBreaks(target = GRanges(c("T:1:+", "T:2:+", "T:3:+")),
+              query  = GRanges(c("Q:1",   "Q:2",   "Q:3")))
+
+x1 <- GBreaks(target = GRanges(c("T:1:-", "T:2:-", "T:3:+")),
+              query  = GRanges(c("Q:2",   "Q:1",   "Q:3")))
+
+x2 <- GBreaks(target = GRanges(c("T:1:-", "T:2:+", "T:3:-")),
+              query  = GRanges(c("Q:2",   "Q:3",   "Q:1")))
+
+y0 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:+", C="T:30-35:+")),
+              query  = GRanges(c(A="Q:10-15",   B="Q:20-25",   C="Q:30-35")))
+
+y1 <- GBreaks(target = GRanges(c(A="T:10-15:-", B="T:20-25:-", C="T:30-35:+")),
+              query  = GRanges(c(B="Q:20-25",   A="Q:10-15",   C="Q:30-35")))
+
+y2 <- GBreaks(target = GRanges(c(A="T:10-15:-", B="T:20-25:+", C="T:30-35:-")),
+              query  = GRanges(c(B="Q:20-25",   C="Q:30-35",   A="Q:10-15")))
+
+
+a0 <- GBreaks(target = GRanges(c(`ABC+`="T:10-39:+")),
+              query  = GRanges(c(`ABC+`="Q:10-39"  )))
+
+a1 <- GBreaks(target = GRanges(c(`AB+`="T:10-29:-", `C+`="T:30-39:+")),
+              query  = GRanges(c(`BA-`="Q:10-29",   `C+`="Q:30-39")))
+
+a2 <- GBreaks(target = GRanges(c(`A+`="T:10-19:+", `B+`="T:20-29:-", `C+`="T:30-39:-")),
+              query  = GRanges(c(`A+`="Q:30-39",   `B-`="Q:10-19",   `C-`="Q:20-29")))
+
+```
+
+Let's start with a simpler example, where the inversions happen on the
+_query_ genome.
+
+```{r ROI8.Q}
+exampleDoubleInversion |> plotApairOfChrs()
+
+# Start colinear
+z0 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:+", C="T:30-35:+")),
+              query  = GRanges(c(A="Q:10-15",   B="Q:20-25",   C="Q:30-35")))
+
+# Swap coordinates of A and B on the query and flip strands
+z1 <- GBreaks(target = GRanges(c(A="T:10-15:-", B="T:20-25:-", C="T:30-35:+")),
+              query  = GRanges(c(A="Q:20-25",   B="Q:10-15",   C="Q:30-35")))
+
+# Now query order is B - A - C.  Swap A and C and flip strands
+z2 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:-", C="T:30-35:-")),
+              query  = GRanges(c(A="Q:30-35",   B="Q:10-15",   C="Q:20-25")))
+
+# We have the same configuration, plus flanking regions, in exampleDoubleInversion
+exampleDoubleInversion
+
+ROI8 <- coa2$Oki_Osa[1420:1430]
+ROI8 |> flagAll()
+ROI8 |> plotApairOfChrs()
+ROI8 |> reverse() |> sort(i=T) |> plotApairOfChrs()
+ROI8 |> reverse() |> sort(i=T) |> flagAll()
+```
+
+# Filling inversions to better see the rest (ROI9)
+
+We will not fill inversions in objects we analyse, because we do not want
+to erase their breakpoints.
+
+```{r}
+fillInversions <- function(gb) {
+  Invs <- which(flagInversions(gb)$inv) + 1
+  strand(gb)[Invs] <- ifelse(strand(gb)[Invs] == "+", "-", "+")
+  coalesce_contigs(gb)
+}
+
+ROI9.all <- fillInversions(coa2$Oki_Kum)
+
+ROI9 <- ROI9.all |>
+  plyranges::filter(seqnames(query) == "contig_3_1") |>
+  plyranges::arrange(start(query)) |>
+  plyranges::slice(10:20)
+
+ROI9.range <- range(ROI9)[1]
+
+plotApairOfChrs(ROI9)
+plotApairOfChrs(ROI9.all, xlim = gb2xlim(ROI9.range))
+
+subsetByOverlaps(ROI9.all, granges(ROI9.range)) |> flagAll() |> as.data.frame()
+
+subsetByOverlaps(ROI9.all |> swap(), ROI9.range$query)
+```
+
+
+```{r}
+
+x <- rbind(
+  sapply(gbs, \(gb) table(flagPairs(gb)$pairs))
+)
+
+
+```
+
+# ROI 10: small unaligned inversion in Oki-Kum alignment
+
+## The small unaligned inversion
+
+Martin reported a small unaligned inversion at PAR:80769-81032 in the Oki – Kum
+alignment (version 3).  Note that it will not be visible on the plot if this
+vignette is rebuilt with an alignment updated to include these inversions.
+
+```{r ROI10}
+ROI10 <- GRanges("PAR:80769-81032:-")
+ROI10_inv <- subsetByOverlaps(gbs$Oki_Kum, ROI10 + 1e2)
+
+ROI10_inv |> plotApairOfChrs(main = "A short unaligned region that is actually an inversion within the inversion.")
+ROI10_inv       |> cleanGaps() |> as.character()
+ROI10_inv$query |> cleanGaps() |> as.character()
+
+ROI10_unal <- subsetByOverlaps(unalMap$Oki_Kum, ROI10 + 1e2)
+```
+
+Interestingly, this small inversion is flanked by an inverted repeat.
+
+```{r ROI10_pairwise}
+pairwiseAlignment(getSeq(ROI10_unal  ),
+                  getSeq(ROI10_unal$query )) |> writePairwiseAlignments()
+
+pairwiseAlignment(getSeq(ROI10_unal  ),
+                  getSeq(ROI10_unal$query )|> reverseComplement()) |> writePairwiseAlignments()
+
+pairwiseAlignment(getSeq(ROI10_unal  ),
+                  getSeq(ROI10_unal )|> reverseComplement()) |> writePairwiseAlignments()
+
+
+getSeq(genomes$OKI2018.I69, GRanges("PAR:80523-80834")) |> as.character()
+```
+
+This sequence matches `MITE_oki2018_i69_4_20065_S1_MITE#DNA/MITE` in Sasha's
+repeat annotation.
+
+~20 matches on the Okinawa genome.  Uncomment to check.
+
+```{r search_MITE}
+#vmatchPattern(genomes$OKI2018.I69$PAR[80523:80834], genomes$OKI2018.I69, with.indels = TRUE, max.mismatch = 20) |> sort(ignore.strand = TRUE) |> as.data.frame()
+```
+
+## Other interesting things in the area
+
+Expanding the area broader, there is this interesting pattern where there is
+only one gap on the _Oki_ side and two gaps on the _Kum_ side.  This is because
+the alignments on the _Oki_ side are directly contacting each other.
+
+(Note: in the meantime this was explored further in `vignette("TandemSiteDuplications", package = "OikScrambling")` )
+
+```{r ROI10_insertion}
+ROI10_ins <- subsetByOverlaps(gbs$Oki_Kum, ROI10 + 3e3)
+ROI10_ins |> plotApairOfChrs()
+ROI10_ins |> as.data.frame()
+ROI10_ins |> cleanGaps() |> as.data.frame()
+ROI10_ins$query |> cleanGaps() |> as.data.frame()
+
+tail(ROI10_ins, 2) |> plotApairOfChrs(main = "An insertion in the Kume genome")
+tail(ROI10_ins, 2) |> swap() |> cleanGaps()
+
+(ROI10_ins_unalMap <- subsetByOverlaps(unalMap$Oki_Kum + 1, tail(ROI10_ins, 2) )[2])
+
+# Left side
+pairwiseAlignment(getSeq(genomes$OKI2018.I69, GRanges("PAR:83350-83550")),
+                  getSeq(genomes$KUM.M3.7f, GRanges("contig_57_1:55548-55748")) |> reverseComplement(),
+                  type = "global") |> writePairwiseAlignments()
+
+# Right side
+pairwiseAlignment(getSeq(genomes$OKI2018.I69, GRanges("PAR:83351-83551")),
+                  getSeq(genomes$KUM.M3.7f, GRanges("contig_57_1:55236-55436")) |> reverseComplement(),
+                  type = "global") |> writePairwiseAlignments()
+
+# Both sides
+pairwiseAlignment(getSeq(ROI10_ins_unalMap + 100),
+                  getSeq(ROI10_ins_unalMap$query + 100) |> reverseComplement(),
+                  type = "global") 
+
+getSeq(ROI10_ins_unalMap$query) |> as.character()
+```
+
+Exemplar from the Okinawa genome (found by BLASTing the sequence output by
+`getSeq` above).
+
+```
+>RepeatInsertion
+AAgggggggCGGGCGGCCACGGTACAAAAGTGGAATTTGTACCGCGGGTACAAATTTTGT
+ACCGCCGGTACAAAAAATCGCAATTGTTTTGACAATAAAAACCGATTTCTACCCATTATA
+ATGCTCACTTTTGAACAGAACTCCACCTCAGCTATACCAGTAAGGAGTTTCCATCAATTC
+TAGCGCGAAGCGCACACTTTTTCCTTGATTCTATTTTTGTCTTGTACCGGCGGTACAAAA
+ATTTTTGTACCGGCGTTACAAATTTGTACCGCCGTTACAAATTTGTACCGTCGCCGCCCT
+ACACCC
+```
+
+# ROI 11: highly conserved regions
+
+Many mapped regions have a width shorter than 600 and form a distinct peak
+in width distribution plot (see
+`vignette("RegionWidths", package = "OikScrambling")` for details).
+
+Surprisingly they appear to be very conserved.
+
+
+```{r ROI11_1, fig.height=12, fig.width=9}
+library(msa)
+library(ggmsa)
+
+x <- coa$Oki_Osa |> plyranges::filter(width < 600) |> sort(i=T)
+
+roi <- x[4]
+getSeq(roi)
+
+pairwiseAlignment(getSeq(roi + 100),
+                  getSeq(roi$query + 100),
+                  type = "global") |> writePairwiseAlignments()
+
+roi <- x[10]
+getSeq(roi)       |> as.character()
+getSeq(roi$query) |> as.character()
+
+
+seqs <- c(
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))                             |> getSeq(),
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))$query                       |> getSeq(),
+  subsetByOverlaps(coa$Oki_Aom, granges(roi), ignore.strand = TRUE)$query |> getSeq() |> reverseComplement(),
+  subsetByOverlaps(coa$Oki_Bar, granges(roi))$query                       |> getSeq(),
+  subsetByOverlaps(coa$Oki_Nor, granges(roi))$query                       |> getSeq()
+)
+
+names(seqs) <- c("Oki", "Osa", "Aom", "Bar", "Nor")
+
+(seqs_aln <- msa::msaMuscle(seqs) |> as("DNAMultipleAlignment"))
+```
+
+```{r aln_txt_output}
+#from Biostrings:::.write.MultAlign
+showMultiAlign <- function (x, invertColMask = F, showRowNames = T, hideMaskedCols = T) 
+{
+        msk <- colmask(x)
+        dims <- dim(x)
+        if (invertColMask == FALSE) {
+            msk <- gaps(msk, start = 1, end = dims[2])
+        }
+        if (hideMaskedCols) {
+            hasMask <- FALSE
+        }
+        else {
+            colmask(x) <- NULL
+            if (length(msk) > 0) {
+                hasMask <- TRUE
+            }
+            else {
+                hasMask <- FALSE
+            }
+        }
+        if (hasMask) {
+            dims[1] <- dims[1] + 1
+        }
+        ch <- as.character(x)
+        ch <- unlist(lapply(ch, Biostrings:::.insertSpaces))
+        if (hasMask) {
+            mskInd <- as.integer(msk)
+            mskCh <- paste(as.character(replace(rep(1, dim(x)[2]), 
+                mskInd, 0)), collapse = "")
+            mskCh <- Biostrings:::.insertSpaces(mskCh)
+        }
+        names <- names(ch)
+        ch <- sapply(ch, Biostrings:::.strChop, chopsize = 55, simplify = FALSE)
+        if (hasMask) {
+            mskCh <- .strChop(mskCh, chopsize = 55)
+            ch <- c(list(Mask = mskCh), ch)
+        }
+        maxLen <- max(nchar(names(ch)))
+        stockSpc <- paste(rep(" ", maxLen), collapse = "")
+        bufferSpacing <- function(name) {
+            spc <- paste(rep(" ", maxLen - nchar(name)), collapse = "")
+            paste(name, spc, sep = "")
+        }
+        ch <- c(ch, list(rep("", length(ch[[1]]))))
+        output <- character(length(ch[[1]]) * length(ch))
+        for (i in seq_len(length(ch[[1]]))) {
+            for (j in seq_len(length(ch))) {
+                if (i == 1) {
+                  output[j] <- paste(unlist(lapply(names(ch[j]), 
+                    bufferSpacing)), "   ", ch[[j]][i], sep = "")
+                }
+                else {
+                  if (showRowNames) {
+                    output[(length(ch) * (i - 1)) + j] <- paste(unlist(lapply(names(ch[j]), 
+                      bufferSpacing)), "   ", ch[[j]][i], sep = "")
+                  }
+                  else {
+                    output[(length(ch) * (i - 1)) + j] <- paste(stockSpc, 
+                      "   ", ch[[j]][i], sep = "")
+                  }
+                }
+            }
+        }
+        output <- gsub("\\s+$", "", output)
+        output <- output[1:length(output) - 1]
+        if (hasMask) {
+            output <- c(paste("", paste(c(dims, ""), collapse = " "), 
+                collapse = " "), output)
+        }
+        else {
+            output <- c(paste("", paste(dims, collapse = " "), 
+                collapse = " "), output)
+        }
+        output
+}
+seqs_aln |> showMultiAlign()
+```
+
+```{r ROI11_2, fig.height=12, fig.width=9}
+roi <- x[11]
+seqs <- c(
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))                             |> getSeq(),
+  subsetByOverlaps(coa$Oki_Osa, granges(roi))$query                       |> getSeq(),
+  subsetByOverlaps(coa$Oki_Aom, granges(roi), ignore.strand = TRUE)$query |> getSeq() |> reverseComplement(),
+  subsetByOverlaps(coa$Oki_Bar, granges(roi))$query |> resize(300, fix="start") |> getSeq(),
+  subsetByOverlaps(coa$Oki_Nor, granges(roi))$query                       |> getSeq()
+)
+
+names(seqs) <- c("Oki", "Osa", "Aom", "Bar", "Nor")
+
+(seqs_aln <- msa::msaMuscle(seqs) |> as("DNAMultipleAlignment"))
+seqs_aln |> showMultiAlign()
+```
+
+## Autocorrelations
+
+There appears to be a small tendency that short width regions are followed by
+short width regions, but I am not sure if I understand the statistics well.
+
+```{r autocorrelations}
+plot(width(coa$Oki_Osa), c(tail(width(coa$Oki_Osa), -1), NA), log = 'xy', pch='.')
+acf(width(coa$Oki_Osa), lag.max = 1000)
+acf(sample(width(coa$Oki_Osa)), lag.max = 1000)
+pacf(width(coa$Oki_Osa), lag.max = 100)
+pacf(sample(width(coa$Oki_Osa)), lag.max = 100)
+```
+
+# Plots of unalmap regions
+
+Section to be moved to a more proper place later.
+
+Here we plot the regions that are *not* aligned, but that could be mapped
+because they are flanked by colinear regions.
+
+We see indels, but we also see blocks of some length that do not align.  Are
+they CNVs ?
+
+Regions of interest were cherry picked for being syntenic, but scrambled regions
+also exist.
+
+```{r unalmap_plots}
+unalMap$Oki_Kum[20:30]   |> plotApairOfChrs(main = "Oki–Kum")
+unalMap$Oki_Osa[405:413] |> plotApairOfChrs(main = "Oki–Osa")
+unalMap$Osa_Aom[40:50]   |> plotApairOfChrs(main = "Osa–Aom")
+```
+
+# Kume's contig_11_1
+
+It does not seem to be syntenic with anything on Oki
+
+```{r Kum_contig_11_1}
+gbs$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_11_1") |> plotApairOfChrs(chrT = "chr1")
+gbs$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_11_1") |> plotApairOfChrs(chrT = "chr2")
+gbs$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_11_1") |> plotApairOfChrs(chrT = "PAR")
+gbs$Oki_Kum |> plyranges::filter(seqnames(query) == "contig_11_1") |> plotApairOfChrs(chrT = "XSR")
+```

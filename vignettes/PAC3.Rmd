@@ -1,0 +1,297 @@
+---
+title: "Region of interest: PAC3"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Region of interest: PAC3}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{css, echo=FALSE}
+pre, code {white-space:pre !important; overflow-x:auto}
+```
+
+```{r setup}
+knitr::opts_knit$set(cache = TRUE)
+options(width = 200)
+```
+
+Load packages and data
+======================
+
+See `?OikScrambling:::loadAllGenomes()` and `vignette("LoadGenomicBreaks",
+package = "OikScrambling")` for how the different objects are prepared.
+
+```{r load_packages_and_data}
+library('OikScrambling')   |> suppressPackageStartupMessages()
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
+load("BreakPoints.Rdata")
+```
+
+# PAC3 moved between chr1 and XSR; its ancestral state is unknown
+
+Annotated versions of the alignments can be found in the `PAC3.svg` file that
+should be in the same directory as the `PAC3.Rmd` source file of this document.
+
+## General information.
+
+The gene g3146 (`Oidioi.mRNA.OKI2018_I69.chr1.g3144.t1.cds` or `CAG5107096` in
+OKI2018, `CBY24606` in OdB3) is on `chr1` in Oki and Kum but on `XSR` in Osa and
+Bar.  The OdB3 protein contains a non-specific hit for the pfam10178 (Proteasome
+assembly chaperone 3) PAC3 domain, and Psi-BLAST also discovers it.
+
+<details>
+<summary>Click here to see a provisional alignment with similar sequences in
+other larvacean genomes.  Proper attention to splicing would be needed to make
+it more accurate.</summary>
+```
+O_dio       MHPTTILREIELENEPVALSIMKFAEETLVTISDNGTFGAFHDI-DIA-EMRPGKEPLIT
+O_dio_Oska  MHPETILREVEIDNSPVALAIVKFADQTMVTISDNGTFGAFHDI-EIA-EMRPGTDPVVT
+O_van       ----SIVESTQIEGVDVSLAIMGFADCTMIAVSDTGTFGSFYKV-QVAKGGHTNQEAVVT
+O_alb       ---------LDLENADIHLAAMSFSDCLMLAVSDTGTFGSFYQV-EKSETSHQNIEPVIS
+O_lon       ---------IYLGEEKVHIAVMGFGDATMITVSDGALFGPIYKV-TKS--QKGANEPVIT
+O_lon_N     --------EIEIDNEVCYISVTQFGDTNFVTISDTGTFGSFYQV-EKK--EKMGNEPIFN
+B_sty       ---------FEIDDLVIYFSFMEFDDYVFLALSNTGTFGSFYKV-QKN--FRMDSNPIIS
+M_ery       ------IRIIVIDNTEIYLSVMKFGDCNFIVISDTGTFGSFFKI-EKN--FKMDNNPVVN
+O_ruf_Y     ------LKRLRLMSQKVHLSSMKFDDHIMLGVSDSGTFWLILSCFFKSTNQHKDKEPVFE
+
+
+O_dio       IKPF-FGYSDDFTKV------------VCRNLATSLQVKNK-LMISIGLKQEKVNKQNLD
+O_dio_Oska  VKPF-FGYSDDFAKVV-----------VCRNLATGLEVKNK-LMISIGLKQERINKNN--
+O_van       IDPI-FGINDHYFQVLIR------------------------------------------
+O_alb       IRPI-FGVDDQYFQVFLQVLPDSYFKVVCRYLGVHLAESRR-LLVSITLQKDKINKDN--
+O_lon       VDGV-FGEQHDYAQVV------------CRHLRLHCRVETEQLLASVLLKRDLVTREN--
+O_lon_N     IQPI-FGQAEDYLQVCKFQIETS--IVVCRYLCQNCTLQGPM-MVSVILSREKVNKKN--
+B_sty       TEQI-FGNKKDLLEVINK------------------------------------------
+M_ery       IEPI-FGENKDYLQV---------------------------------------------
+O_ruf_Y     IVPIFFGCDDQYFQV---------------------------------------------
+```
+</details>
+<br></br>
+
+Private ZENBU links:
+
+ - [chr1 on Oki](https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=nBuUjj3vMBkuTVQnE57TC;loc=OKI2018_I69_1.0::chr1:11497331..11498497+)
+ - [XSR on Oki](https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=nBuUjj3vMBkuTVQnE57TC;loc=OKI2018_I69_1.0::XSR:6230961..6232916+)
+ - [Chr1 on Osa](https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=lc9rquqRE5PnyllQ68DSiC;loc=OSKA2016v1.9::Chr1:8150980..8160990+)
+ - [XSR on Osa](https://fantom.gsc.riken.jp/zenbu/gLyphs/index_3.0.html#config=lc9rquqRE5PnyllQ68DSiC;loc=OSKA2016v1.9::XSR:3167071..3168763+)
+
+## PAC3 in five genome pairs
+
+PAC3 is on range number 2 in all pairs except for Oki_Kum since these two are
+syntenic.
+
+```{r PAC3}
+PAC3 <- GRanges("chr1:11497331-11498497")
+PAC3_in_Kum <- GRanges("contig_3_1:3247998-3248575")
+
+coa$Oki_Osa |> subsetByOverlaps(PAC3)
+coa$Oki_Aom |> subsetByOverlaps(PAC3)
+coa$Oki_Bar |> subsetByOverlaps(PAC3)
+coa$Oki_Nor |> subsetByOverlaps(PAC3)
+coa$Oki_Kum |> subsetByOverlaps(PAC3)
+```
+
+# PAC3 on chr1
+
+## The bridge region in the "Northern" genomes.
+
+On chromosome 1, PAC3 is flanked by _UBXN6_ and a gene ressembling _mediator
+of RNA polymerase II transcription subunit 30_.  In genomes where PAC3 is on the
+XSR, these flanking genes are separated by a short bridge region, where
+little similarity remains between the Atlantic and Pacific branches of the "North"
+species.  The conserved `AG` residues are trans-splicing sites according to
+CAGE data.
+
+```{r PAC3_bridge}
+PAC3_bridge_Osa <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps() |> plyranges::mutate(strand = '-')
+PAC3_bridge_Aom <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps() |> plyranges::mutate(strand = '-')
+PAC3_bridge_Bar <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps()
+PAC3_bridge_Nor <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap() |> cleanGaps()
+
+list( Osa = PAC3_bridge_Osa
+    , Aom = PAC3_bridge_Aom
+    , Bar = PAC3_bridge_Bar
+    , Nor = PAC3_bridge_Nor) |> lapply(\(gb) gb + 0)  |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment")
+```
+
+## The left region of PAC3 in all genomes
+
+Alignment of 70 nucleotides flanking the alignment breakpoint on the left
+side of PAC3 illustrates the conservation in all 6 genomes (upstream)
+and the lack of similarity between the "Oki" sequences and the "North" bridge
+region.
+
+```{r PAC3_left}
+PAC3_left_Oki_Osa  <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Kum_Osa  <- coa$Osa_Kum |> swap () |> subsetByOverlaps(PAC3_in_Kum + 1) |> sort(i=T) |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Osa      <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(1) |> get_bps("left") |> plyranges::mutate(strand = '-')
+PAC3_left_Aom      <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(1) |> get_bps("left") |> plyranges::mutate(strand = '-')
+PAC3_left_Oki_Bar  <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Bar      <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(1) |> get_bps("right")
+PAC3_left_Nor      <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap()  |> plyranges::slice(1) |> get_bps("right")
+
+# Shifting Bar and Nor so that they all align well
+
+PAC3_left <- 
+list( Aom = PAC3_left_Aom
+    , Osa = PAC3_left_Osa
+    , Oki = PAC3_left_Oki_Osa
+    , Kum = PAC3_left_Kum_Osa
+    , Bar = PAC3_left_Bar |> shift(20)
+    , Nor = PAC3_left_Nor |> shift(20))
+
+PAC3_left |> lapply(\(gb) gb + 70) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment")
+```
+
+## The right region of PAC3 on in all genomes
+
+Same story on the right side.  Very near the alignment break (at the center),
+there is the `ATG` and upstream of it there are two conserved `AG` that may be
+trans-splicing sites (with CAGE support at least in Oki).
+
+```{r PAC3_right}
+PAC3_right_Oki_Osa  <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Kum_Osa  <- coa$Osa_Kum |> swap () |> subsetByOverlaps(PAC3_in_Kum + 1) |> sort(i=T) |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Osa      <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("right") |> plyranges::mutate(strand = '-')
+PAC3_right_Aom      <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("right") |> plyranges::mutate(strand = '-')
+PAC3_right_Oki_Bar  <- coa$Oki_Bar |> subsetByOverlaps(PAC3)           |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Bar      <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("left")
+PAC3_right_Nor      <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> swap() |> plyranges::slice(3) |> get_bps("left")
+
+PAC3_right <-
+list( Aom = PAC3_right_Aom
+    , Osa = PAC3_right_Osa
+    , Oki = PAC3_right_Oki_Osa
+    , Kum = PAC3_right_Kum_Osa
+    , Bar = PAC3_right_Bar
+    , Nor = PAC3_right_Nor)
+PAC3_right |> lapply(\(gb) gb + 70) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
+```
+
+## Combined view of the left and right regions
+
+The combined view shows that the sequence on the left and right of PAC3 do not
+have visible similarity with each other or with the bridge region.
+
+```{r PAC3_left_right}
+PAC3_left_right <- list(
+  Aom  = range(PAC3_left_Aom, PAC3_right_Aom),
+  Osa  = range(PAC3_left_Osa, PAC3_right_Osa),
+  OkiL = PAC3_left_Oki_Osa,
+  OkiR = PAC3_right_Oki_Osa,
+  KumL = PAC3_left_Kum_Osa,
+  KumR = PAC3_right_Kum_Osa,
+  Bar  = range(PAC3_left_Bar |> shift(20), PAC3_right_Bar),
+  Nor  = range(PAC3_left_Nor |> shift(20), PAC3_right_Nor)
+)
+PAC3_left_right.aln <- PAC3_left_right |>
+  lapply(\(gb) gb + 50) |>
+  lapply(getSeq) |>
+  lapply(unlist) |>
+  as("DNAStringSet") |>
+  msa::msaClustalOmega() |>
+  as("DNAMultipleAlignment")
+
+# Re-order based on my preference
+PAC3_left_right.aln@unmasked[c(1,2,5,6,7,8,3,4)]
+```
+
+# PAC3 on the X-specific region of chrX (XSR)
+
+## The PAC3 (North) or bridge region (Oki) on the XSR.
+
+In Okinawa, the bridge region contains a bidirectional promoter.
+
+Flanking genes might be a _leucine-rich repeat domain-containing protein_ on the
+left (same operon) and a _glutamine-tRNA ligase_ on the right (different strand).
+
+```{r PAC3_XSR}
+PAC3_XSR_Osa_range <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> range()
+PAC3_XSR_Aom_range <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> range()
+PAC3_XSR_Bar_range <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> range()
+PAC3_XSR_Nor_range <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> range()
+
+PAC3_XSR_Osa    <- coa$Oki_Osa |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Aom    <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Bar    <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Nor    <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+
+
+(PAC3_XSR_Osa_Oki_triple <- coa$Osa_Oki |> subsetByOverlaps(PAC3_XSR_Osa +1000, ignore.strand = TRUE) |> sort(i=T))
+(PAC3_XSR_Osa_Kum_triple <- coa$Osa_Kum |> subsetByOverlaps(PAC3_XSR_Osa +1000, ignore.strand = TRUE) |> sort(i=T))
+(PAC3_XSR_Aom_Oki_triple <- coa$Oki_Aom |> swap () |> subsetByOverlaps(PAC3_XSR_Aom + 1000, ignore.strand=T) |> sort(i=T))
+
+# Bar-Oki alignment is in the opposite orientation
+(PAC3_XSR_Bar_Oki_triple <- coa$Bar_Oki |> subsetByOverlaps(PAC3_XSR_Bar +1000, ignore.strand = TRUE) |> sort(i=T))
+
+(PAC3_XSR_Nor_Oki_triple <- coa$Oki_Nor |> swap () |> subsetByOverlaps(PAC3_XSR_Nor + 1000, ignore.strand=T) |> sort(i=T))
+
+coa$Osa_Nor |> subsetByOverlaps(PAC3_XSR_Osa)
+
+PAC3_XSR_Osa_left  <- PAC3_XSR_Osa_Oki_triple[1] |> get_bps(dir = 'r')
+PAC3_XSR_Osa_right <- PAC3_XSR_Osa_Oki_triple[3] |> get_bps(dir = 'l')
+PAC3_XSR_Oki_left  <- PAC3_XSR_Osa_Oki_triple[1] |> swap() |> get_bps(dir = 'r')
+PAC3_XSR_Oki_right <- PAC3_XSR_Osa_Oki_triple[3] |> swap() |> get_bps(dir = 'l')
+
+PAC3_XSR_Kum_left  <- PAC3_XSR_Osa_Kum_triple[1] |> swap() |> get_bps(dir = 'r')
+PAC3_XSR_Kum_right <- PAC3_XSR_Osa_Kum_triple[3] |> swap() |> get_bps(dir = 'l')
+
+PAC3_XSR_Nor_left  <- PAC3_XSR_Nor_Oki_triple[1] |> get_bps(dir = 'r')
+PAC3_XSR_Nor_right <- PAC3_XSR_Nor_Oki_triple[3] |> get_bps(dir = 'l')
+
+# Remember that Bar-Oki alignment is in the opposite orientation
+PAC3_XSR_Bar_left  <- PAC3_XSR_Bar_Oki_triple[3] |> get_bps(dir = 'l') |> plyranges::mutate(strand = '-')
+PAC3_XSR_Bar_right <- PAC3_XSR_Bar_Oki_triple[1] |> get_bps(dir = 'r') |> plyranges::mutate(strand = '-')
+
+# Remember that Oki-Aom alignment is in the opposite orientation
+PAC3_XSR_Aom_left  <- PAC3_XSR_Aom_Oki_triple[3] |> get_bps(dir = 'l') |> plyranges::mutate(strand = '-')
+PAC3_XSR_Aom_right <- PAC3_XSR_Aom_Oki_triple[1] |> get_bps(dir = 'r') |> plyranges::mutate(strand = '-')
+
+PAC3_XSR_Aom    <- coa$Oki_Aom |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Bar    <- coa$Oki_Bar |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+PAC3_XSR_Nor    <- coa$Oki_Nor |> subsetByOverlaps(PAC3) |> plyranges::slice(2) |> swap()
+```
+
+## Left side
+
+In Okinawa and Kume, the bridge region is ~400 bp-long.  It will not be possible
+to make a combined left-right alignment like on chr1.
+
+```{r XSR_left}
+n <- -40
+PAC3_XSR_Osa.aln.left <- list(
+  Osa_left = PAC3_XSR_Osa_left |> shift(n),
+  Aom_left = PAC3_XSR_Aom_left |> shift(-n),
+  Oki_left = PAC3_XSR_Oki_left |> shift(n),
+  Kum_left = PAC3_XSR_Kum_left |> shift(n),
+  Nor_left = PAC3_XSR_Nor_left |> shift(n),
+  Bar_left = PAC3_XSR_Bar_left |> shift(-n))
+
+PAC3_XSR_Osa.aln.left |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
+```
+
+## Right side
+
+The right-side region is near a bidirectional promoter in both the Oki and Osa
+genomes.
+
+```{r XSR_right}
+PAC3_XSR_Osa.aln.right <- list(
+  Osa_right = PAC3_XSR_Osa_right,
+  Aom_right = PAC3_XSR_Aom_right,
+  Oki_right = PAC3_XSR_Oki_right,
+  Kum_right = PAC3_XSR_Kum_right,
+  Nor_right = PAC3_XSR_Nor_right |> shift(-306),
+  Bar_right = PAC3_XSR_Bar_right |> shift(306))
+
+PAC3_XSR_Osa.aln.right |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
+```
+
+# Session information
+
+```{r session_information}
+sessionInfo()
+```

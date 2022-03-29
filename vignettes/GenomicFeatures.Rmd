@@ -1,5 +1,5 @@
 ---
-title: "Introduction to the OikScrambling package"
+title: "Genomic features of the breakpoints"
 author: 
  - "Charlotte West"
  - "Charles Plessy"
@@ -7,13 +7,13 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{Introduction to the OikScrambling package}
+  %\VignetteIndexEntry{Genomic features of the breakpoints}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
 
-```{r setup}
+```{r setup, cache=FALSE}
 knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
@@ -28,74 +28,29 @@ different objects are prepared.
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
 library('GenomicFeatures') |> suppressPackageStartupMessages()
-(genomes     <- OikScrambling:::loadAllGenomes())
-(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
-(annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings())
-(load("BreakPoints.Rdata"))
-requireNamespace("rGADEM")
-requireNamespace("ggseqlogo")
+library('heatmaps')        |> suppressPackageStartupMessages()
+genomes     <- OikScrambling:::loadAllGenomes(compat = F)
+annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
+reps        <- OikScrambling:::loadAllRepeats(compat = F)
+load("BreakPoints.Rdata")
+requireNamespace("rGADEM")    |> suppressPackageStartupMessages()
+requireNamespace("ggseqlogo") |> suppressPackageStartupMessages()
+ces <- readRDS("CEs.Rds")
+tfbs <- readRDS("pwmMatchesOki_12_95.Rds")
 ```
-
-# Tandem repeats
-
-Repeated regions of genomes are notoriously difficult to assemble and align. Thus, information about an alignment stop's proximity to a tandem repeat is useful information in breakpoint classification. Given a user-defined tolerance, the function `tan_bp` will classify alignment stops as either far from, close to, or within tandem repeats (elements 1,2 and 3 of the produced list, respectively). The function requires the tandem repeat coverage of one of the genomes. By default, the function will expect the target genome tandem coverage. Setting `query_tf = TRUE` will switch the outcome to be query genome oriented.
-
-```{r echo=T, message=F, warning=F}
-# 
-# tan_O <- rtracklayer::import.gff3(system.file("extdata/OSKA2016.tantanf4w100.gff3.gz",  package="GenomicBreaks"))
-# tan_O <- GRanges(tan_O, seqinfo = seqinfo(OSKA2016))
-# tan_gr_O <- tan_bp(gr_ob = gr_O_Oki, tan = tan_O, tol = 50)
-# tan_gr_O
-# 
-# tan_Oki <- rtracklayer::import.gff3(system.file("extdata/I69-5.tantanf4w100.gff3.gz",  package="GenomicBreaks"))
-# tan_Oki <- GRanges(tan_Oki, seqinfo = seqinfo(OKI2018_I69))
-# tan_gr_Oki <- tan_bp(gr_ob = gr_O_Oki, tan = tan_Oki, tol = 50, query_tf = TRUE)
-# tan_gr_Oki
-
-```
-
-We can use another script to plot the density of tandem repeats around alignment stops (and breakpoints). In the following plots, breakpoints are aligned at the centre of the plots. Intuitively, this function can be generalised to see the density of any binary coverage characteristic around breakpoints, given a GRanges object with per-base coverage of a given characteristic. Here we stick with tandem repeat info:
-
-```{r echo=T, message=F, warning=F, cache=FALSE}
-# hm_tan_O <- gr_O_Oki %>%
-#   feature_coverage(tan_O, win = 1000, lab = "Osaka ~ Okinawa", direction = "left") %>%
-#   smoothHeatmap(output.size = c(2000,500), algorithm = "kernel") %T>%
-#   plotHeatmap
-# 
-# hm_red_tan_O <- reduced_gr_O_Oki %>%
-#   feature_coverage(tan_O, win = 1000, lab = "Osaka ~ Okinawa", direction = "left") %>%
-#   smoothHeatmap(output.size = c(2000,500), algorithm = "kernel") %T>%
-#   plotHeatmap
-# 
-# hm_tan_Oki <- gr_Oki_O %>%
-#   feature_coverage(tan_Oki, win = 1000, lab = "Osaka ~ Okinawa", direction = "left") %>%
-#   smoothHeatmap(output.size = c(2000,500), algorithm = "kernel") %T>%
-#   plotHeatmapList
-```
-
-# Coverage
-
-Another characteristic of alignment stops that we can examine is the coverage depth over said alignment stops. By aligning raw reads to assembled genomes, we can obtain per-base coverage depth for target or query genome. Low coverage directly on and surrounding an alignment stop may suggest unreliability in it being a true breakpoint. The function `bp_coverage` returns a GRanges object of the bps, with associated averaged and point converage in the metadatacolumns. 
-
-```{r echo=T, message=F, warning=F}
-
-# cov_gr_O_Oki <- bp_coverage(gr_ob = q_Oki, cov_gr = Oki_cov_pb, win = 50)
-# cov_gr_O_Oki
-
-```
-
-
 
 # Nucleic acid content heatmaps
 
 The `GenomicBreaks::bp_heatmap()` function plots nucleic acid content in windows
-centered on alignment stops.  Lets look at `GC` content before and after
-coalescing: 
+centered on alignment stops.
+
+## GC
+
+Lets look at `GC` content before and after coalescing: 
 
 ```{r echo=T, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
-library(heatmaps)
 #hm_GC1 <- sapply(gbs,  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
-hm_GC2 <- sapply(coa[1:15],  bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
+hm_GC2 <- sapply(coa[1:15],  bp_heatmap, win = 1000, pat = "GC", direction = "left") |> SimpleList()
 #hm_GC3 <- sapply(coa2, bp_heatmap, basep_range = 1000, pat = "GC", direction = "left") |> SimpleList()
 
 maxHeight <- 2000
@@ -116,13 +71,15 @@ The alignment stops are ordered in such a way that start (or left breaks) are
 centred on the top half of the plot, and end alignment stops are centred on the
 bottom. This is why we see different directionality in the plots. At the
 alignment stops, the GC content seems to be lower, but higher once within the
-aligned region. 
+aligned region, except for the Oki – Kum pair.
+
+## TATA
 
 Now looking at TATA content:
 
-```{r TATA, fig.height=6, fig.width=12}
+```{r TATA, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 #hm_GC1_TATA <- sapply(gbs, bp_heatmap, basep_range = 1000, pat = "TATA", direction = "left") |> SimpleList()
-hm_GC2_TATA <- sapply(coa[1:15], bp_heatmap, basep_range = 1000, pat = "TATA", direction = "left") |> SimpleList()
+hm_GC2_TATA <- sapply(coa[1:15], bp_heatmap, window = 1000, pat = "TATA", direction = "left") |> SimpleList()
 
 maxHeight <- 2000
 #sm_GC1_TATA <- sapply(hm_GC1_TATA, smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
@@ -145,9 +102,9 @@ for TATA boxes, so it does not necessarily show that breakpoints are occurring
 directly after promoter regions. 
 
 
-```{r AAGCsGCwwmkCGrCTTyn, fig.height=6, fig.width=12}
+```{r AAGCsGCwwmkCGrCTTyn, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 #hm_GC1_mot <- sapply(gbs, bp_heatmap, basep_range = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
-hm_GC2_mot <- sapply(coa[1:15], bp_heatmap, basep_range = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
+hm_GC2_mot <- sapply(coa[1:15], bp_heatmap, window = 1000, pat = "AGCNGC", direction = "left") |> SimpleList()
 
 maxHeight <- 2000
 #sm_GC1_mot <- sapply(hm_GC1_mot, smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
@@ -231,94 +188,251 @@ plotHeatmapList(sm_GC2_mot[1:5])
 
 ## Evidence for breakpoint hotspots
 
-The function `bp_pair_analysis` takes two pairwise alignments with the same target genome, and plots the alignment stops on to the centred alignment stops of the other. In the plot below, Osaka is there consistent target genome, and as such acts as a coordinate system to relate alignment stops across genomes. Lets produce two of these 3-way analyses; one between Osaka-Okinawa-Norway, and one between Osaka-Okinawa-Aomori
+The function `?GenomicBreaks::bp_pair_analysis` takes two pairwise alignments
+with the same target genome, and plots the alignment stops on to the centred
+alignment stops of the other.
 
-```{r echo=T, message=F, warning=F}
+In the plot below, Osaka is there consistent target genome, and as such acts as
+a coordinate system to relate alignment stops across genomes. Lets produce two
+of these 3-way analyses; one between Osaka-Okinawa-Norway, and one between
+Osaka-Okinawa-Aomori.
 
-# hm1 <- bp_pair_analysis(gr_ref_q1 = gr_O_Oki, gr_ref_q2 = gr_O_N, win = 1000, lab = "Oki~Nor")
-# plotHeatmapMeta(hm1)
-# 
-# hm2 <- bp_pair_analysis(gr_ref_q1 = gr_O_Oki, gr_ref_q2 = gr_O_A, win = 1000, lab = "Oki~Aom")
-# plotHeatmapMeta(hm2)
-
+```{r breakpoint_hotspot_gbs}
+bp_pair_analysis(gbs$Osa_Oki, gbs$Osa_Nor, win = 1000, lab = "Oki~Nor") |> plotHeatmapMeta()
+bp_pair_analysis(gbs$Osa_Oki, gbs$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotHeatmapMeta()
 ```
 
-The accumulation of alignment breaks of one pairwise alignment onto another suggests the existence of breakpoint hotspots; regions where breaks are far more likely to occur. Intuitively, this would lead to the presumption of synteny blocks, also. The pattern is consistent after coalescing, too;
+The accumulation of alignment breaks of one pairwise alignment onto another
+suggests the existence of breakpoint hotspots; regions where breaks are far
+more likely to occur. Intuitively, this would lead to the presumption of synteny
+blocks, also. The pattern is consistent after coalescing, too;
 
-```{r echo=T, message=F, warning=F}
-
-# reduced_gr_O_N <- coalesce_contigs(gr_ob = gr_O_N, tol = 500)
-# 
-# hm3 <- bp_pair_analysis(gr_ref_q1 = reduced_gr_O_Oki, gr_ref_q2 = reduced_gr_O_N, win = 1000, lab = "Oki~Nor")
-# plotHeatmapMeta(hm3)
-
+```{r breakpoint_hotspot_coa}
+bp_pair_analysis(coa$Osa_Oki, coa$Osa_Nor, win = 1000, lab = "Oki~Nor") |> plotHeatmapMeta()
+bp_pair_analysis(coa$Osa_Oki, coa$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotHeatmapMeta()
 ```
 
-## Tandem repeat coverage around alignment stops (breakpoints)
+# Gene feature coverage around aligned and unaligned genomic regions.
 
-The function `GenomicBreaks::feature_coverage()` will plot the coverage of tandem repeats around
-centred alignment stops. 
+## Accessory functions
 
-```{r echo=T, message=F, warning=F, cache=FALSE}
-# 
-# hm_tan1 <- feature_coverage(gr_ob = gr_O_Oki, feat = tan_O, win = 4000, lab = "Osk ~ Oki", direction = "left")
-# plotHeatmapMeta(hm_tan1)
-#  
-# hm_tan2 <- feature_coverage(gr_ob = reduced_gr_O_Oki, feat = tan_O, win = 4000, lab = "OSK~Oki (coalesced)", direction = "left")
-# plotHeatmapMeta(hm_tan2)
-# 
-# # should I also add comparison of proportions of tandem proximities before and after coalescion?
+```{r genomic_features_byType_accessory_Functions}
+prepareFreqPlot <- function(gb, annot, rep, cne = NULL, tfbs = NULL, win = 1000) {
+  l <- list()
+  l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = "left")
+  #l$cds    <- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = "left")
+  l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = "left")
+  l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = "left")
+  l$reps   <- feature_coverage(gb,     rep,                  win = win, lab = "repeats",direction = "left")
+  if (!is.null(cne))
+    l$CNE   <- feature_coverage(gb,    cne,                  win = win, lab = "CNE",    direction = "left")
+  if (!is.null(tfbs))
+    l$tfbs  <- feature_coverage(gb,    tfbs,                 win = win, lab = "TFBS",   direction = "left")
+  #reorder
+  newOrder <- order(rowSums(l$intron@image))
+  l$intron@image <- l$intron@image[newOrder,]
+  l$exon@image   <- l$exon@image[newOrder,]
+  l
+}
+
+prepareGGFreqPlot <- function(x, desc = NULL) {
+  l <- lapply(names(x), \(name){
+    val <- colSums(x[[name]]@image)
+    what <- name
+    tibble::tibble(val, freq = val / nrow(x[[name]]@image), what, pos = 1:length(val) - round(length(val)) / 2, desc)
+  })
+   do.call(rbind, l)
+}
 ```
 
-There appears to be less tandem repeats around alignment stops after coalescion,
-inferring that perhaps that some are artefacts of difficult alignment near to
-tandem repeats. 
+## Centering on left-aligned boundaries.
+
+Breakpoints are between mapped regions.  If the unmapped region is broad we have
+little information where the breakpoint originally was.  We set arbitrarly the
+breakpoints to the left-side (end-side) coordinate of genomic regions.
+
+Mapped regions can consist of multiple colinear aligned regions, or be a single
+uncoalesced aligned region.  We will see that they have different properties.
+
+Our annotations is mostly made of coding exons, so the features _exons_ and
+_cds_ have very similar profiles.  Therefore we keep only _exons_ in the rest of
+the analysis.
+
+Positive coordinates (and zero) start in selected regions and negative
+coordinates start outside these regions.  As we move further from 0, we can not
+guarantee that the statement is still true because some regions have a width
+narrower than the plot window.  This is why the values tend to equilibrate
+away from the boundaries.
+
+Aligned regions are enriched in exons and depleted in introns.
+
+Close to the breakpoint of uncoalesced mapped regions, exon annotations are
+depleted, which makes sense, as exons are usually mapable.  Within the mapped
+regions, frequency of introns and exons are comparable.  In contrary, within
+coalesced mapped regions, the exon annotations are over-represented.
+
+```{r genomic_features_byType}
+computePlotData <- function(target, query, CE=NULL, tfbs=NULL) {
+  pair <- paste(target, query, sep = "_")
+  current_GB_aln_nonCoa     <- gbs[[pair]][   gbs[[pair]]$nonCoa]
+  current_GB_aln_coa        <- gbs[[pair]][ ! gbs[[pair]]$nonCoa]
+  current_GB_syn_block      <- coa[[pair]][ ! coa[[pair]]$nonCoa]
+  # We do not use unal, because it overlaps with unalMap
+  current_GB_unmap          <- unmap[[pair]]
+  current_GB_unalMap        <- unalMap[[pair]]
+  
+  targetGenome <- unique(genome(gbs[[pair]]))
+  
+  hmList <- SimpleList()
+  hmList$aln_nonCoa <- prepareFreqPlot(current_GB_aln_nonCoa, annots[[target]], reps[[targetGenome]], CE, tfbs)
+  hmList$aln_coa    <- prepareFreqPlot(current_GB_aln_coa,    annots[[target]], reps[[targetGenome]], CE, tfbs)
+  hmList$syn_block  <- prepareFreqPlot(current_GB_syn_block,  annots[[target]], reps[[targetGenome]], CE, tfbs)
+  hmList$unmap      <- prepareFreqPlot(current_GB_unmap,      annots[[target]], reps[[targetGenome]], CE, tfbs)
+  hmList$unalMap    <- prepareFreqPlot(current_GB_unalMap,    annots[[target]], reps[[targetGenome]], CE, tfbs)
+  hmList
+}
+
+hmList_to_plot <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa, tfbs)
+
+(p_boundary <- rbind(
+  hmList_to_plot$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
+  hmList_to_plot$unmap       |> prepareGGFreqPlot("02_unal_unmap"),
+  hmList_to_plot$syn_block   |> prepareGGFreqPlot("03_synteny_blk"),
+  hmList_to_plot$unalMap     |> prepareGGFreqPlot("04_unal_syntenic"),
+  hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_aln_syntenic")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1) +
+  ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka"))
+```
 
 
-## Gene feature coverage around alignment stops (breakpoints)
+Most of the narrow-width aligned regions did not coalesce.  We use this
+as a classifier instead of an arbitrary width cutoff.  See
+`vignette("RegionWidths", package = "OikScrambling")` for details.
 
-TODO: analyse separately the breakpoint regions that are in colinear regions?
 
-The function `feature_coverage` will plot the coverage of tandem repeats around
-centred alignment stops. 
+#### Linked regions
 
-```{r genomic_features, cache=FALSE}
-#current_GB <- gr_Oki_O # To ease recomputing with another object
-current_GB <- gbs$Oki_Osa
-#current_GB <- coa$Oki_Osa
+Same approach, but enforcing a succession of just-aligned, unaligned and
+syntenic regions.
+
+```{r genomic_features_byType2}
+flag_aln_unal_syn <- function (x) {
+  p0 <- x$type
+  p1 <- c(tail(p0, -1), factor('aligned'))
+  p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
+  p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
+}
+
+current_GB <- wgo$Oki_Osa
+
+current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
+
+current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
+current_GB_unal    <- current_GB[which(current_GB$flag_a_u_s) + 1]
+current_GB_syn     <- current_GB[which(current_GB$flag_a_u_s) + 2]
+
+current_GB_aln   |> width() |> summary()
+current_GB_unal  |> width() |> summary()
+current_GB_syn   |> width() |> summary()
+
+hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$OKI2018.I69)
+hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$OKI2018.I69)
+hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$OKI2018.I69)
+
+rbind(
+  hmListAln  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnal |> prepareGGFreqPlot("02_unal"),
+  hmListSyn  |> prepareGGFreqPlot("03_syn")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1)
+```
+
+This mildens the differences observed in the earlier section, probably because
+it requires the aligned region to be nearby a syntenic region.
+
+#### Aligning on center instead of border.
+
+As the plots are hardcoded to use the left border, let's artificially make
+regions of 1 bp on centers, rather than changing the accessory function.
+
+```{r genomic_features_byType_center}
+# current_GB <- coa$Oki_Osa
+# 
+# current_GB_wide_c    <- current_GB_wide    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_unal_c    <- current_GB_unal    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_unalMap_c <- current_GB_unalMap |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# 
+# currentCNE <- ces$ce__50__47$Oki_Osa
+# 
+# hmListWide_c    <- prepareFreqPlot(current_GB_wide_c,    annots$Oki, reps$Oki, currentCNE)
+# hmListNarrow_c  <- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki, currentCNE)
+# hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki, currentCNE)
+# hmListUnal_c    <- prepareFreqPlot(current_GB_unal_c,    annots$Oki, reps$Oki, currentCNE)
+# hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki, currentCNE)
+# 
+# p_center <- rbind(
+#   hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
+#   hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
+# #  hmListUnal_c    |> prepareGGFreqPlot("02b_unmap"),
+#   hmListWide_c    |> prepareGGFreqPlot("03_wide"),
+#   hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
+# )|> ggplot() +
+#   aes(pos, freq, col = what) +
+#   geom_line() +
+#   facet_wrap(~desc, nrow = 1) +
+#   ggtitle("Aligned on region midpoints.")
+# 
+# p_center$data$what  <- p_center$data$what |> sub(pat = "CNE", rep = "CE_50_47")
+# p_center
+```
+
+#### Comparison
+
+```{r optional_patchwork}
+# library(patchwork)
+# p_boundary / p_center
+```
+
+### PWM
+
+The PWM motif, which is rare in comparison to the other features, follows
+a profile that bears resemblance to the repeat profile.
+
+```{r genomic_pwm_bpByWidth}
 gadems.invLeftGap <- readRDS("gadems.invLeftGap.Rda")
 pwm <- gadems.invLeftGap$Oki_Osa[[1]]
 pwm@consensus
-pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$Oki)
-
-hmList_OKI <- list()
-
-hmList_OKI$genes      <- feature_coverage(current_GB, genes(annots$Oki),                         win = 2000, lab = "Oki genes", direction = "left")
-hmList_OKI$promoters  <- feature_coverage(current_GB, promoters(annots$Oki),                     win = 2000, lab = "Oki promoters", direction = "left")
-hmList_OKI$exons      <- feature_coverage(current_GB, exonicParts(annots$Oki),                   win = 2000, lab = "Oki exons", direction = "left")
-hmList_OKI$introns    <- feature_coverage(current_GB, intronicParts(annots$Oki),                 win = 2000, lab = "Oki introns", direction = "left")
-hmList_OKI$cds        <- feature_coverage(current_GB, cds(annots$Oki),                           win = 2000, lab = "Oki cds", direction = "left")
-hmList_OKI$utrs5      <- feature_coverage(current_GB, unlist(fiveUTRsByTranscript(annots$Oki)),  win = 2000, lab = "Oki 5′ UTRs", direction = "left")
-hmList_OKI$utrs3      <- feature_coverage(current_GB, unlist(threeUTRsByTranscript(annots$Oki)), win = 2000, lab = "Oki 3′ UTRs", direction = "left")
-hmList_OKI$pwm        <- feature_coverage(current_GB, pwmHits                                  , win = 2000, lab = "PWM", direction = "left")
-
-plotHeatmapMeta(hmList_OKI)
-plotHeatmapMeta(hmList_OKI$genes)
-plotHeatmapMeta(hmList_OKI[c("exons", "cds")])
-plotHeatmapMeta(hmList_OKI[c("exons", "introns", "utrs5", "utrs3", "pwm")])
-plotHeatmapMeta(hmList_OKI[c("introns", "utrs5", "utrs3", "pwm")])
-plotHeatmapMeta(hmList_OKI[c("utrs5", "utrs3", "pwm")])
+# pwmHits <- matchPWM(pwm = sapply(pwm@alignList, \(x) x@seq) |> as("DNAStringSet") |> PWM(), genomes$Oki) # Gives different scores...
+pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$OKI2018.I69) |> suppressWarnings()
+# Suppressing warnings like:
+# Warning messages:
+# 1: In .Call2("XString_match_PWM", pwm, subject, min.score, count.only,  :
+#   'subject' contains letters not in [ACGT] ==> assigned weight 0 to them
+# 
+# plotHeatmapMeta(list(feature_coverage(current_GB_wide,   pwmHits, win = 1e3, lab = "wide",    direction = "left")))
+# plotHeatmapMeta(list(feature_coverage(current_GB_narrow, pwmHits, win = 1e3, lab = "narrow",  direction = "left")))
 ```
 
-Aligned regions are enriched in exons and depleted in introns.  Is it because
-exons are more alignable or is it because it is deleterous to break genes
-in exons ?
+### Question
+
+in `vignette("ColinearityInterruptors", package = "OikScrambling")`, we saw
+that some uncoalesced regions map uniquely and are well conserved across
+genomes.  What are they... enhancers ?
 
 ## Gene feature coverage around PWM hits
 
 Let's look at coverage around PWM hits of the AAGCsGCwwmkCGrCTTyn motif
 
-```{r genomic_features_pwmHits, cache=FALSE}
+```{r genomic_features_pwmHits}
 current_GB <- pwmHits
 
 hmList_PWM_OKI <- list()
@@ -327,18 +441,14 @@ hmList_PWM_OKI$promoters <- feature_coverage(current_GB, promoters(annots$Oki), 
 hmList_PWM_OKI$exons     <- feature_coverage(current_GB, exonicParts(annots$Oki),                   win = 2000, lab = "Oki exons", direction = "left")
 hmList_PWM_OKI$introns   <- feature_coverage(current_GB, intronicParts(annots$Oki),                 win = 2000, lab = "Oki introns", direction = "left")
 hmList_PWM_OKI$cds       <- feature_coverage(current_GB, cds(annots$Oki),                           win = 2000, lab = "Oki cds", direction = "left")
-hmList_PWM_OKI$utrs5     <- feature_coverage(current_GB, unlist(fiveUTRsByTranscript(annots$Oki)),  win = 2000, lab = "Oki 5′ UTRs", direction = "left")
-hmList_PWM_OKI$utrs3     <- feature_coverage(current_GB, unlist(threeUTRsByTranscript(annots$Oki)), win = 2000, lab = "Oki 3′ UTRs", direction = "left")
 
-plotHeatmapMeta(hmList_PWM_OKI)
-plotHeatmapMeta(hmList_PWM_OKI[c("exons", "introns")])
-plotHeatmapMeta(hmList_PWM_OKI[c("exons", "utrs5", "utrs3")])
-plotHeatmapMeta(hmList_PWM_OKI[c("utrs5", "utrs3")])
+plotHeatmapMeta(hmList_PWM_OKI[c("genes", "exons", "cds")]) # Show they look alike.  We keep "exons"
+plotHeatmapMeta(hmList_PWM_OKI[c("promoters", "exons", "introns")])
 ```
 
 They are enriched in introns...
 
-```{r genomic_features3, cache=FALSE}
+```{r genomic_features3}
 # 
 # # Sandbox to make sanity checks.
 # 
@@ -352,6 +462,25 @@ They are enriched in introns...
 # plotHeatmapMeta(list(hm_b))
 ```
 
+## Breakpoint coverage around PWM hits
+
+TODO: triplecheck `feature_coverage`, it is old…
+
+```{r genomic_features_pwmHits2}
+current_GB <- pwmHits
+
+hmList_PWM_OKI$gbOsa     <- feature_coverage(current_GB, gbs$Oki_Osa,  win = 5000, lab = "Oki-Osa", direction = "left")
+hmList_PWM_OKI$gbBar     <- feature_coverage(current_GB, gbs$Oki_Bar,  win = 5000, lab = "Oki-Bar", direction = "left")
+hmList_PWM_OKI$gbKum     <- feature_coverage(current_GB, gbs$Oki_Kum,  win = 5000, lab = "Oki-Kum", direction = "left")
+
+plotHeatmapMeta(hmList_PWM_OKI[c("gbOsa", "gbBar", "gbKum")])
+
+hmList_PWM_OKI$coOsa     <- feature_coverage(current_GB, coa$Oki_Osa,  win = 5000, lab = "Oki-Osa", direction = "left")
+hmList_PWM_OKI$coBar     <- feature_coverage(current_GB, coa$Oki_Bar,  win = 5000, lab = "Oki-Bar", direction = "left")
+hmList_PWM_OKI$coKum     <- feature_coverage(current_GB, coa$Oki_Kum,  win = 5000, lab = "Oki-Kum", direction = "left")
+
+plotHeatmapMeta(hmList_PWM_OKI[c("coOsa", "coBar", "coKum")])
+```
 
 ## Okinawa genome coverage
 
@@ -368,5 +497,19 @@ As previously discussed, low coverage over an alignment stop could lower the lik
 
 We may choose to kick out the one alignment stop for which there is no coverage. However, only 15 out of 34572 alignment stops have a coverage of less than or equal to 50, meaning that it would be hard to exclude more than just a few alignment stops using coverage information for breakpoint analysis. 
 
+# Coverage
 
+_Needs coverage information to be recomputed_
 
+Another characteristic of alignment stops that we can examine is the coverage depth over said alignment stops. By aligning raw reads to assembled genomes, we can obtain per-base coverage depth for target or query genome. Low coverage directly on and surrounding an alignment stop may suggest unreliability in it being a true breakpoint. The function `bp_coverage` returns a GRanges object of the bps, with associated averaged and point converage in the metadatacolumns. 
+
+```{r coverage}
+# cov_gr_O_Oki <- bp_coverage(gr_ob = q_Oki, cov_gr = Oki_cov_pb, win = 50)
+# cov_gr_O_Oki
+```
+
+# Session information
+
+```{r sessioninfo}
+sessionInfo()
+```
