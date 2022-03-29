@@ -174,6 +174,58 @@ segDists$Oki_Bar |> plot_distance_to_next_query_on_coords() + ggtitle("Oki - Bar
 segDists$Osa_Bar |> plot_distance_to_next_query_on_coords() + ggtitle("Osa - Bar")
 ```
 
+Translocation percentages
+=========================
+In this section, we tabulate the amount of translocations based on chromosomal location.
+
+```{r translocation_categories_1}
+countTranslocationTypes <- function(gb, chromosomePairing) {
+  syntenic_pairs <- paste(chromosomePairing[["sp1"]], chromosomePairing[["sp2"]], sep = "_")
+  is_syntenic    <- paste(seqnames(gb),               seqnames(gb$query),         sep = "_") %in% syntenic_pairs
+  region_syntenic <- gb[is_syntenic]
+  region_nonsyntenic <- gb[!is_syntenic]
+  
+  is_arm <- gb$Arm == gb$query$Arm
+  region_arm <- gb[is_arm]
+  region_nonarm <- gb[!is_arm]
+  
+  gb[is_arm & is_syntenic]
+  is_chr_arm <- region_syntenic[region_syntenic$Arm == region_syntenic$query$Arm]
+  is_not_chr_arm <- region_syntenic[region_syntenic$Arm != region_syntenic$query$Arm]
+  
+  count_df <- data.frame('is_syntenic'=length(region_syntenic),
+                  'is_nonsyntenic'=length(region_nonsyntenic),
+                  'same_arm'=length(region_arm),
+                  'diff_arm'=length(region_nonarm),
+                  'is_chr_arm'=length(is_chr_arm),
+                  'is_not_chr_arm'=length(is_not_chr_arm))
+  
+  total_length <- sum(lengths(gb))
+  pct_df <- data.frame('is_syntenic'=sum(lengths(region_syntenic))/total_length*100,
+                  'is_nonsyntenic'=sum(lengths(region_nonsyntenic))/total_length*100,
+                  'same_arm'=sum(lengths(region_arm))/total_length*100,
+                  'diff_arm'=sum(lengths(region_nonarm))/total_length*100,
+                  'is_chr_arm'=sum(lengths(is_chr_arm))/total_length*100,
+                  'is_not_chr_arm'=sum(lengths(is_not_chr_arm))/total_length*100)
+  result <- SimpleList()
+  result$counts <- count_df
+  result$length_pct <- pct_df
+  result
+}
+
+trc <- SimpleList()
+trc$Oki_Osa <- countTranslocationTypes(gbs$Oki_Osa, chromosomePairing = synPairs$chr_Chr)
+trc$Oki_Bar <- countTranslocationTypes(gbs$Oki_Bar, chromosomePairing = synPairs$chr_Chr)
+trc$Osa_Bar <- countTranslocationTypes(gbs$Oki_Bar, chromosomePairing = synPairs$Chr_Chr)
+
+trc$Oki_Osa$counts
+trc$Oki_Osa$length_pct
+trc$Oki_Bar$counts
+trc$Oki_Bar$length_pct
+trc$Osa_Bar$counts
+trc$Osa_Bar$length_pct
+```
+
 # Session information
 
 ```{r session_information}
