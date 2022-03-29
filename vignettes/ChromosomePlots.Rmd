@@ -186,14 +186,20 @@ grWindows <- function(genome=NULL, meta=NULL, windowSize=10000, includeMetaCols=
   mpw
 }
 
-windowSize = 10000
+transcripts$Oki <- flagLongShort(transcripts$Oki, longShort$OKI2018.I69)
+transcripts$Osa <- flagLongShort(transcripts$Osa, longShort$OSKA2016v1.9)
+transcripts$Bar <- flagLongShort(transcripts$Bar, longShort$Bar2.p4)
+
+windowSize = 20000
 chrw <- SimpleList()
 chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize)
-chrw$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
+seqlevels(chrw$Oki) <- sort(seqlevels(chrw$Oki))
+
 chrw$Osa <- grWindows(genome=genomes$Osa, meta=transcripts$Osa, windowSize=windowSize)
-chrw$Osa <- flagLongShort(chrw$Osa, longShort$OSKA2016v1.9)
+seqlevels(chrw$Osa) <- sort(seqlevels(chrw$Osa))
+
 chrw$Bar <- grWindows(genome=genomes$Bar, meta=transcripts$Bar, windowSize=windowSize)
-chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
+seqlevels(chrw$Bar) <- sort(seqlevels(chrw$Bar))
 
 ```
 
