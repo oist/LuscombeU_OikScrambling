@@ -288,9 +288,9 @@ names(O35f.cc) <- paste("O35f", names(O35f.cc), sep = "_")
 
 ```{r}
 OSK421f.c  <- longestMatchesInTarget(OSK421f)
-OSK421f.cc <- queryStrandNames(OSK421f.c)
+OSK421f.cc <- strandNames(OSK421f.c, query = TRUE)
 names(OSK421f.cc) <- paste("OSK421f", names(OSK421f.cc), sep = "_")
-OSK421f.all  <- longestMatchesInTarget(OSK421f, min.width = 0, min.matches = 1) %>% queryStrandNames()
+OSK421f.all  <- longestMatchesInTarget(OSK421f, min.width = 0, min.matches = 1) |> strandNames(q=T)
 ```
 
 ## AOM5
@@ -392,16 +392,24 @@ chromosome.
 Attempts to incorporate smaller OSKA2016 scaffolds only leads to discrepancies
 of support from Flye assembly.
 
-Thus, the XSR superscaffold above appears to be the best we can produce, and is
-properly oriented.
+Thus, the XSR superscaffold above appears to be the best we can produce.
 
 
 ```{r}
 XSR.old
+
+XSR <- c("S10+", "S9+", "S32+", "S84-", "S59+", "S8-", "S1+", "S66-")
 ```
 
-In O9-7f, the XSR contig is `contig_48`.  It is not entirely complete, and it
-continues into S2, maybe because of a misassembly of pericentromeric regions.
+### O9-7f
+
+The O9 individual is form the same laboratory strain as OSKA2016, and its `7f`
+assembly was basecalled with the _high accuracy_ model of Guppy.
+
+In O9-7f, the XSR contig is `contig_44` followed by `contig_48`.
+
+`contig_48` continues into S2, which confirms the connection between the XSR and
+the long arm of the PAR.
 
 ```{r XSR_O97}
 O97f.cc |> flipStrandNames() |> grepByContigName("S9+")
@@ -415,29 +423,51 @@ O97f |> plotApairOfChrs(chrT= "S8", chrQ = "contig_48")
 O97f |> plotApairOfChrs(chrT= "S1", chrQ = "contig_48")
 O97f |> plotApairOfChrs(chrT= "S2", chrQ = "contig_48")
 
+O97f |> plotApairOfChrs(chrT = "S10", chrQ = "contig_44")
+
 O97f |> plyranges::filter(seqnames %in% c("S10", "S9", "S32", "S84", "S59", "S8", "S1", "S2")) |> makeOxfordPlots()
 ```
 
+### O35f
+
+The O3 individual is form the same laboratory strain as OSKA2016, and its `5f`
+assembly was basecalled with the _high accuracy_ model of Guppy.
+
+The XSR is not well assembled in O35f.
 
 ```{r XSR_O35f}
 O35f.cc |> grepByContigName("S9+")
 O35f |> plyranges::filter(seqnames(query) == "contig_45")|> coalesce_contigs(minwidth = 2000) |> swap() |> sort(i=T) |> swap() |> as.data.frame()
-O35f |> plotApairOfChrs(chrQ = "contig_48")
-O35f |> plotApairOfChrs(chrT= "S9", chrQ = "contig_48")
-O35f |> plotApairOfChrs(chrT= "S32", chrQ = "contig_48")
-O35f |> plotApairOfChrs(chrT= "S84", chrQ = "contig_48")
-O35f |> plotApairOfChrs(chrT= "S59", chrQ = "contig_48")
-O35f |> plotApairOfChrs(chrT= "S8", chrQ = "contig_48")
+O35f |> plotApairOfChrs(chrQ = "contig_45")
+O35f |> plotApairOfChrs(chrT= "S9", chrQ = "contig_45")
+O35f |> plotApairOfChrs(chrT= "S32", chrQ = "contig_45")
+O35f |> plotApairOfChrs(chrT= "S84", chrQ = "contig_45")
+O35f |> plotApairOfChrs(chrT= "S59", chrQ = "contig_45")
+
+O35f |> plotApairOfChrs(chrT= "S8", chrQ = "contig_45")
 O35f |> plotApairOfChrs(chrT= "S1", chrQ = "contig_48")
 O35f |> plotApairOfChrs(chrT= "S2", chrQ = "contig_48")
 
 O35f |> plyranges::filter(seqnames %in% c("S10", "S9", "S32", "S84", "S59", "S8", "S1", "S2")) |> makeOxfordPlots()
-
-
-OSK421f.cc %>% flipStrandNames() %>% grepByContigName(name = "S10+")
 ```
 
+### OSK42-1f
 
+The OSK-42 individual was sampled in the same region as the Osaka lab strain.
+As it is a wild animal, its diploid regions are much harder to assemble.
+
+`contig_33` Fully supports the XSR assembly.
+
+A re-assembly using the _superior_ basecall model might increase support for
+the long-arm assembly of the other chromosomes.
+
+```{r OSK_42}
+OSK421f.cc |> grepByContigName(name = "S10+")
+assemble(OSK421f, "XSR", XSR) |> plotApairOfChrs()
+assemble(OSK421f, "XSR", XSR) |> makeOxfordPlots()
+```
+
+### AOM5
 
 ```{r XSR_AOM5}
 AOM5.5f.cc |> grepByContigName(name = "S10+")
@@ -445,7 +475,7 @@ O35f.cc %>% grepByContigName("S9+")
 O35f.cc %>% grepByContigName("S1+")
 
 XSR
-OSK421f.all %>% flipStrandNames() %>% grepByContigName(name = "S10+")
+OSK421f.all %>% flipStrandNames() |> grepByContigName(name = "S10+")
 AOM5.5f.all %>% grepByContigName(name = "S10+")
 O97f.all %>% flipStrandNames %>% grepByContigName("S9+")
 O35f.all %>% grepByContigName("S9+")
@@ -937,3 +967,8 @@ chr2 <- c( # Short arm – good confidence
            # Long arm – high confidence
           "S60-", "S14-", "S90-", "S22-", "S35+", "S118+", "S46+", "S102-", "S72-", "S104+", "S40+", "S27+", "S75-", "S24-", "S19+", "S101+", "S4-")
 ```
+
+# Roadmap towards OSKA2016v2
+
+ - Orient `XSR` so that the telomere is at the 3' end, or
+ - Merge the `PAR` and the (re-oriented) `XSR` to form `chrX.`
