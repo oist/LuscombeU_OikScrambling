@@ -1,3 +1,11 @@
+# OikScrambling 3.0.0
+
+* Corrected arm names on query genomes.
+* New functions `isSyntenic()`, `isSynbrachial()`,
+  `nameSyntenic()` and `nameSynbrachial()`.
+* Renamed _mapped unaligned_ regions to _bridge_ regions (keeping the old
+  `unalmap` object name).
+
 # OikScrambling 2.2.2
 
 * Parallel plot of chr2
