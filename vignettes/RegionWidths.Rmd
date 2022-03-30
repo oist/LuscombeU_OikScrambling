@@ -71,11 +71,14 @@ makeWidthsDF <- function (objList) {
   }) |> do.call(what=rbind)
 }
 
+isol <- sapply(gbs, \(gb) gb[gb$nonCoa]) |> SimpleList()
+
 widths$gbs     <- makeWidthsDF(gbs)     |> tibble::as_tibble()
+widths$isol    <- makeWidthsDF(isol)    |> tibble::as_tibble()
 widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
 widths$coa     <- makeWidthsDF(coa)     |> tibble::as_tibble()
 widths$unmap   <- makeWidthsDF(unmap)   |> tibble::as_tibble()
-widths$bri <- makeWidthsDF(bri) |> tibble::as_tibble()
+widths$bri     <- makeWidthsDF(bri)     |> tibble::as_tibble()
 widths$tra     <- makeWidthsDF(tra)     |> tibble::as_tibble()
 widths$tra2    <- makeWidthsDF(tra2)    |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
@@ -105,19 +108,21 @@ gg_freq_poly <- function(tibble) {
 }
 
 w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
-                   widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
-                   widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
-                   widths$bri |> as.data.frame()|> dplyr::mutate(what = "bridge"),
-                   widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
-                   widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
+              widths$isol    |> as.data.frame()|> dplyr::mutate(what = "isolated"),
+              widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
+              widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
+              widths$bri     |> as.data.frame()|> dplyr::mutate(what = "bridge"),
+              widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
+              widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
 
 
-widths_all_tibble <- rbind(widths$gbs |> dplyr::mutate(what = "aligned"),
-                       widths$unal    |> dplyr::mutate(what = "unaligned"),
-                       widths$coa     |> dplyr::mutate(what = "mapped"),
-                       widths$bri |> dplyr::mutate(what = "bridge"),
-                       widths$unmap   |> dplyr::mutate(what = "unmaped"),
-                       widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
+widths_all_tibble <- rbind(widths$gbs     |> dplyr::mutate(what = "aligned"),
+                           widths$isol    |> dplyr::mutate(what = "isolated"),
+                           widths$unal    |> dplyr::mutate(what = "unaligned"),
+                           widths$coa     |> dplyr::mutate(what = "mapped"),
+                           widths$bri     |> dplyr::mutate(what = "bridge"),
+                           widths$unmap   |> dplyr::mutate(what = "unmaped"),
+                           widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
 
 p <-gg_freq_poly(widths_all_tibble) +
   aes(col = what) +

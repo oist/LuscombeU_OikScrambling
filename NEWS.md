@@ -5,6 +5,7 @@
   `nameSyntenic()` and `nameSynbrachial()`.
 * Renamed _mapped unaligned_ regions to _bridge_ regions and renamed `unalMap`
   object to `bri`.
+* Added an 'isolated' category in the `RegionWidths` vignette.
 
 # OikScrambling 2.2.2
 
