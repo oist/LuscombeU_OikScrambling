@@ -159,21 +159,25 @@ Below, I take the `widths_all_tibble` and perform some statistical operations on
 ```{r saving_width_statistics_for_later, dependson="width_after_processing_steps"}
 library(dplyr) |> suppressPackageStartupMessages()
 
-norm_CI <- function(vector, conf.level){
+t_CI <- function(vector, conf.level){
   conf_test <- t.test(vector, conf.level = conf.level)
   conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
   conf_str
 }
 
+# Note that because the Wilcox test involves ranking (and therefore sorting),
+# this test is computationally demanding for large data frames.
+# I have opted to leave it out, but it works just the same as the function
+# above - just much slower.
 wilcox_CI <- function(vector, conf.level){
-  conf_test <- wilcox.test(vector, conf.level = conf.level)
+  conf_test <- wilcox.test(vector, conf.level = conf.level, conf.int = TRUE)
   conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
   conf_str
 }
 
 stats_to_compute <- list(n         = ~n(),
-                         norm_CI   = ~norm_CI(., conf.level=0.95),
-                         wilcox_CI = ~norm_CI(., conf.level=0.95),
+                         t_CI      = ~t_CI(., conf.level=0.95),
+                         #wilcox_CI = ~wilcox_CI(., conf.level=0.95),
                          min       = min,
                          q25       = ~quantile(., 0.25),
                          median    = median,
