@@ -107,7 +107,7 @@ gg_freq_poly <- function(tibble) {
 w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
                    widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
                    widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
-                   widths$unalMap |> as.data.frame()|> dplyr::mutate(what = "mapped unaligned"),
+                   widths$unalMap |> as.data.frame()|> dplyr::mutate(what = "bridge"),
                    widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
                    widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
 
@@ -115,7 +115,7 @@ w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"
 widths_all_tibble <- rbind(widths$gbs |> dplyr::mutate(what = "aligned"),
                        widths$unal    |> dplyr::mutate(what = "unaligned"),
                        widths$coa     |> dplyr::mutate(what = "mapped"),
-                       widths$unalMap |> dplyr::mutate(what = "mapped unaligned"),
+                       widths$unalMap |> dplyr::mutate(what = "bridge"),
                        widths$unmap   |> dplyr::mutate(what = "unmaped"),
                        widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
 
@@ -495,7 +495,7 @@ gg_freq_poly(widths$unmap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
-## Mapped unaligned regions
+## Bridge regions
 
 Note the short peak when comparing pairs within the same population.
 
@@ -503,17 +503,17 @@ Note the short peak when comparing pairs within the same population.
 gg_freq_poly(widths$unalMap) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of widths of mapped unaligned regions, split by arm.")
+  ggtitle("Distribution of widths of bridge regions, split by arm.")
 
 gg_freq_poly(widths$unalMap) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of widths of mapped unaligned regions, split by genome pair")
+  ggtitle("Distribution of widths of bridge regions, split by genome pair")
 
 gg_freq_poly(widths$unalMap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", nrow=1) +
-  ggtitle("Distribution of widths of mapped unaligned regions, split by distance group") +
+  ggtitle("Distribution of widths of bridge regions, split by distance group") +
   geom_vline(xintercept = 300) +
   scale_x_log10("Width (vertical bar at 300 bp)")
 ```
@@ -675,7 +675,7 @@ ggPlotW2W(gbs.w2w |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
   ggtitle("Width of the target and query aligned regions")
 
 ggPlotW2W(unalMap.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
-  ggtitle("Width of the target and query mapped unaligned regions")
+  ggtitle("Width of the target and query bridge regions")
 
 ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
   ggtitle("Width of the target and query aligned regions")
@@ -684,7 +684,7 @@ ggPlotW2W(gbs.w2w) + facet_wrap(~dist) +
   ggtitle("Width of the target and query aligned regions")
 
 ggPlotW2W(unalMap.w2s) + facet_wrap(~pair) +
-  ggtitle("Width of the target and query mapped unaligned regions")
+  ggtitle("Width of the target and query bridge regions")
 
 ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
   ggtitle("Width of the target and query translocated regions")
@@ -704,7 +704,7 @@ ggPlotW2W(gbs.w2w) +
 
 ggPlotW2W(unalMap.w2s) +
   facet_wrap(~query.rep + target.rep) +
-  ggtitle("Width of the target and query mapped unaligned regions, matching or not matching repeats")
+  ggtitle("Width of the target and query bridge regions, matching or not matching repeats")
 
 ggPlotW2W(tra.w2s) +
   facet_wrap(~dist + query.rep + target.rep, nrow = 3) +
