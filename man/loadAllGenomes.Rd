@@ -4,12 +4,16 @@
 \alias{loadAllGenomes}
 \title{Load all genomes}
 \usage{
-loadAllGenomes()
+loadAllGenomes(compat = TRUE)
+}
+\arguments{
+\item{compat}{Set to TRUE to keep the old names.  This option will be removed
+when the migration will be complete.}
 }
 \value{
 Returns a \code{\link{SimpleList}} of all loaded genomes.
 }
 \description{
 Utility function to load all BSgenome packages in the active session and
-reduce boilerplate in the vignetters.
+reduce boilerplate in the vignettes.
 }

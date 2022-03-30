@@ -4,7 +4,11 @@
 \alias{loadAllTranscriptsGR}
 \title{Load all transcript information as GRanges}
 \usage{
-loadAllTranscriptsGR()
+loadAllTranscriptsGR(compat = TRUE)
+}
+\arguments{
+\item{compat}{Set to TRUE to keep the old names.  This option will be removed
+when the migration will be complete.}
 }
 \value{
 Returns a \code{\link{SimpleList}} of \code{GRanges} objects representing the
