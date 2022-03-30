@@ -583,13 +583,13 @@ g1211.t1    g92.t1    g654.t1
 ```
 
 ```{r}
-### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (unalMap)
+### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (bri)
 
 unal$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2)) # between g1207.t1 and g1208.t1 on Oki
 unal$Osa_Oki |> subsetByOverlaps(GRanges("Chr1", ( 409953 + 410741 )/2)) # between g95.t1 and g94.t1 on Osa
 # Or just:
 
-(BP1_Oki_Osa <- unalMap$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))) # between g1207.t1 and g1208.t1 on Oki
+(BP1_Oki_Osa <- bri$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))) # between g1207.t1 and g1208.t1 on Oki
 
 
 # Now on Bar:

@@ -3,8 +3,8 @@
 * Corrected arm names on query genomes.
 * New functions `isSyntenic()`, `isSynbrachial()`,
   `nameSyntenic()` and `nameSynbrachial()`.
-* Renamed _mapped unaligned_ regions to _bridge_ regions (keeping the old
-  `unalmap` object name).
+* Renamed _mapped unaligned_ regions to _bridge_ regions and renamed `unalMap`
+  object to `bri`.
 
 # OikScrambling 2.2.2
 

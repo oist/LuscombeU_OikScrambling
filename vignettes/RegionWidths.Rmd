@@ -75,7 +75,7 @@ widths$gbs     <- makeWidthsDF(gbs)     |> tibble::as_tibble()
 widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
 widths$coa     <- makeWidthsDF(coa)     |> tibble::as_tibble()
 widths$unmap   <- makeWidthsDF(unmap)   |> tibble::as_tibble()
-widths$unalMap <- makeWidthsDF(unalMap) |> tibble::as_tibble()
+widths$bri <- makeWidthsDF(bri) |> tibble::as_tibble()
 widths$tra     <- makeWidthsDF(tra)     |> tibble::as_tibble()
 widths$tra2    <- makeWidthsDF(tra2)    |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
@@ -107,7 +107,7 @@ gg_freq_poly <- function(tibble) {
 w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
                    widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
                    widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
-                   widths$unalMap |> as.data.frame()|> dplyr::mutate(what = "bridge"),
+                   widths$bri |> as.data.frame()|> dplyr::mutate(what = "bridge"),
                    widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
                    widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
 
@@ -115,7 +115,7 @@ w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"
 widths_all_tibble <- rbind(widths$gbs |> dplyr::mutate(what = "aligned"),
                        widths$unal    |> dplyr::mutate(what = "unaligned"),
                        widths$coa     |> dplyr::mutate(what = "mapped"),
-                       widths$unalMap |> dplyr::mutate(what = "bridge"),
+                       widths$bri |> dplyr::mutate(what = "bridge"),
                        widths$unmap   |> dplyr::mutate(what = "unmaped"),
                        widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
 
@@ -463,7 +463,7 @@ p_map2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", !non
   scale_x_log10(limits = c(1,5e5)) +
   ggtitle("Synteny alignment")
 
-p_unalmap2 <- gg_freq_poly(widths$unalMap |> dplyr::filter(dist == "Oki – North")) +
+p_unalmap2 <- gg_freq_poly(widths$bri |> dplyr::filter(dist == "Oki – North")) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
   ggtitle("Unaligned but syntenic")
@@ -500,17 +500,17 @@ gg_freq_poly(widths$unmap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 Note the short peak when comparing pairs within the same population.
 
 ```{r width_of_unAlmapped_regions, dependson="pre_compute_widths_object"}
-gg_freq_poly(widths$unalMap) +
+gg_freq_poly(widths$bri) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
   ggtitle("Distribution of widths of bridge regions, split by arm.")
 
-gg_freq_poly(widths$unalMap) +
+gg_freq_poly(widths$bri) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
   ggtitle("Distribution of widths of bridge regions, split by genome pair")
 
-gg_freq_poly(widths$unalMap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+gg_freq_poly(widths$bri |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", nrow=1) +
   ggtitle("Distribution of widths of bridge regions, split by distance group") +
@@ -652,13 +652,13 @@ GBreaks2widthTibble <- function(gb, pair = NULL) {
 }
 
 gbs.w2w     <- do.call(rbind, lapply(names(gbs),      \(name) GBreaks2widthTibble(gbs[[name]],      pair = name)))
-unalMap.w2s <- do.call(rbind, lapply(names(unalMap),  \(name) GBreaks2widthTibble(unalMap[[name]],  pair = name)))
+bri.w2s <- do.call(rbind, lapply(names(bri),  \(name) GBreaks2widthTibble(bri[[name]],  pair = name)))
 tra.w2s     <- do.call(rbind, lapply(names(tra),      \(name) GBreaks2widthTibble(tra[[name]],      pair = name)))
 tra2.w2s    <- do.call(rbind, lapply(names(tra2),     \(name) GBreaks2widthTibble(tra2[[name]],     pair = name)))
 
 rbind (
   aligned = table(paste(    gbs.w2w$target.rep,     gbs.w2w$query.rep)),
-  unalMap = table(paste(unalMap.w2s$target.rep, unalMap.w2s$query.rep)),
+  bri = table(paste(bri.w2s$target.rep, bri.w2s$query.rep)),
   transpo = table(paste(    tra.w2s$target.rep,     tra.w2s$query.rep))
 )
 
@@ -674,7 +674,7 @@ ggPlotW2W <- function(tibble) {
 ggPlotW2W(gbs.w2w |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
   ggtitle("Width of the target and query aligned regions")
 
-ggPlotW2W(unalMap.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
+ggPlotW2W(bri.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
   ggtitle("Width of the target and query bridge regions")
 
 ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
@@ -683,7 +683,7 @@ ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
 ggPlotW2W(gbs.w2w) + facet_wrap(~dist) +
   ggtitle("Width of the target and query aligned regions")
 
-ggPlotW2W(unalMap.w2s) + facet_wrap(~pair) +
+ggPlotW2W(bri.w2s) + facet_wrap(~pair) +
   ggtitle("Width of the target and query bridge regions")
 
 ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
@@ -702,7 +702,7 @@ ggPlotW2W(gbs.w2w) +
   facet_wrap(~query.rep + target.rep) +
   ggtitle("Width of the target and query aligned regions, matching or not matching repeats")
 
-ggPlotW2W(unalMap.w2s) +
+ggPlotW2W(bri.w2s) +
   facet_wrap(~query.rep + target.rep) +
   ggtitle("Width of the target and query bridge regions, matching or not matching repeats")
 
@@ -710,7 +710,7 @@ ggPlotW2W(tra.w2s) +
   facet_wrap(~dist + query.rep + target.rep, nrow = 3) +
   ggtitle("Width of the target and query translocated regions, matching or not matching repeats")
 
-ggplot(unalMap.w2s) +
+ggplot(bri.w2s) +
   aes(target / query, col = paste(target.rep, query.rep) ) +
   scale_x_log10() +
   geom_freqpoly() +

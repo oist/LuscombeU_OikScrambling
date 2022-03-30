@@ -206,7 +206,7 @@ sapply(genomes, vmatchPattern, pat = "AAGATACG") |> sapply(length)
  
 ## How often do we see tandem site duplication in similar indel configurations ?
 
-The `unalMap` objects contain unaligned regions flanked by colinear regions.
+The `bri` objects contain unaligned regions flanked by colinear regions.
 Let's search for other situations where one of the regions has a width of zero.
 
 Note: _in order to represent zero-width intervals in this object, which would
@@ -218,8 +218,8 @@ and common in within-population alignments (14–28 percents).
 
 ```{r search_for_indels_with_TSDs}
 isIndel <- \(gb) width(gb) <= 2 | width(gb$query) <= 2
-unalMap |> sapply(\(gb) length(gb[isIndel(gb)]))
-round(unalMap |> sapply(\(gb) length(gb[isIndel(gb)])) / sapply(unalMap, length) * 100 )
+bri |> sapply(\(gb) length(gb[isIndel(gb)]))
+round(bri |> sapply(\(gb) length(gb[isIndel(gb)])) / sapply(bri, length) * 100 )
 ```
 
 Let's inspect within-population alignments first, considering only cases where
@@ -227,7 +227,7 @@ the indel region is on the _query_ genome.  Here is an example with a `CATCTTTG`
 TSD.
 
 ```{r search_for_indels_with_TSDs2}
-gb <- unalMap$Oki_Kum |> plyranges::filter(width == 2)
+gb <- bri$Oki_Kum |> plyranges::filter(width == 2)
 gb$query |> width() |> summary()
 
 alignBreakPoints(gb$query[4])
@@ -287,11 +287,11 @@ gb$query[20] |> alignToSelf()
 gb$query[20] |> searchForTSDs(20)
 
 # TSDs with short TIR on Oki_Osa
-unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][30]$query |> searchForTSDs(20)
-unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][30]$query |> alignToSelf()
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][30]$query |> searchForTSDs(20)
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][30]$query |> alignToSelf()
 
-unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][3]$query |> searchForTSDs(20)
-unalMap$Oki_Osa[isIndel(unalMap$Oki_Osa)][3]$query |> alignToSelf()
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][3]$query |> searchForTSDs(20)
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][3]$query |> alignToSelf()
 ```
 
 ```{r compute_and_plot_score_stats}

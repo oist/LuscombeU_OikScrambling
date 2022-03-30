@@ -277,9 +277,9 @@ computePlotData <- function(target, query, CE=NULL, tfbs=NULL) {
   current_GB_aln_nonCoa     <- gbs[[pair]][   gbs[[pair]]$nonCoa]
   current_GB_aln_coa        <- gbs[[pair]][ ! gbs[[pair]]$nonCoa]
   current_GB_syn_block      <- coa[[pair]][ ! coa[[pair]]$nonCoa]
-  # We do not use unal, because it overlaps with unalMap
+  # We do not use unal, because it overlaps with bri
   current_GB_unmap          <- unmap[[pair]]
-  current_GB_unalMap        <- unalMap[[pair]]
+  current_GB_bri        <- bri[[pair]]
   
   targetGenome <- unique(genome(gbs[[pair]]))
   
@@ -288,7 +288,7 @@ computePlotData <- function(target, query, CE=NULL, tfbs=NULL) {
   hmList$aln_coa    <- prepareFreqPlot(current_GB_aln_coa,    annots[[target]], reps[[targetGenome]], CE, tfbs)
   hmList$syn_block  <- prepareFreqPlot(current_GB_syn_block,  annots[[target]], reps[[targetGenome]], CE, tfbs)
   hmList$unmap      <- prepareFreqPlot(current_GB_unmap,      annots[[target]], reps[[targetGenome]], CE, tfbs)
-  hmList$unalMap    <- prepareFreqPlot(current_GB_unalMap,    annots[[target]], reps[[targetGenome]], CE, tfbs)
+  hmList$bri    <- prepareFreqPlot(current_GB_bri,    annots[[target]], reps[[targetGenome]], CE, tfbs)
   hmList
 }
 
@@ -298,7 +298,7 @@ hmList_to_plot <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa, tfbs)
   hmList_to_plot$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
   hmList_to_plot$unmap       |> prepareGGFreqPlot("02_unal_unmap"),
   hmList_to_plot$syn_block   |> prepareGGFreqPlot("03_synteny_blk"),
-  hmList_to_plot$unalMap     |> prepareGGFreqPlot("04_unal_syntenic"),
+  hmList_to_plot$bri     |> prepareGGFreqPlot("04_unal_syntenic"),
   hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_aln_syntenic")
 
 )|> ggplot() +
@@ -369,7 +369,7 @@ regions of 1 bp on centers, rather than changing the accessory function.
 # current_GB_narrow_c  <- current_GB_narrow  |> plyranges::anchor_center() |> plyranges::mutate(width=1)
 # current_GB_unmap_c   <- current_GB_unmap   |> plyranges::anchor_center() |> plyranges::mutate(width=1)
 # current_GB_unal_c    <- current_GB_unal    |> plyranges::anchor_center() |> plyranges::mutate(width=1)
-# current_GB_unalMap_c <- current_GB_unalMap |> plyranges::anchor_center() |> plyranges::mutate(width=1)
+# current_GB_bri_c <- current_GB_bri |> plyranges::anchor_center() |> plyranges::mutate(width=1)
 # 
 # currentCNE <- ces$ce__50__47$Oki_Osa
 # 
@@ -377,14 +377,14 @@ regions of 1 bp on centers, rather than changing the accessory function.
 # hmListNarrow_c  <- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki, currentCNE)
 # hmListUnmap_c   <- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki, currentCNE)
 # hmListUnal_c    <- prepareFreqPlot(current_GB_unal_c,    annots$Oki, reps$Oki, currentCNE)
-# hmListUnalMap_c <- prepareFreqPlot(current_GB_unalMap_c, annots$Oki, reps$Oki, currentCNE)
+# hmListUnalMap_c <- prepareFreqPlot(current_GB_bri_c, annots$Oki, reps$Oki, currentCNE)
 # 
 # p_center <- rbind(
 #   hmListNarrow_c  |> prepareGGFreqPlot("01_narrow"),
 #   hmListUnmap_c   |> prepareGGFreqPlot("02_unmap"),
 # #  hmListUnal_c    |> prepareGGFreqPlot("02b_unmap"),
 #   hmListWide_c    |> prepareGGFreqPlot("03_wide"),
-#   hmListUnalMap_c |> prepareGGFreqPlot("04_unalMap")
+#   hmListUnalMap_c |> prepareGGFreqPlot("04_bri")
 # )|> ggplot() +
 #   aes(pos, freq, col = what) +
 #   geom_line() +
