@@ -158,14 +158,29 @@ Below, I take the `widths_all_tibble` and perform some statistical operations on
 <summary> Click here to view the full table with many summary statistics for width distributions.</summary>
 ```{r saving_width_statistics_for_later, dependson="width_after_processing_steps"}
 library(dplyr) |> suppressPackageStartupMessages()
-stats_to_compute <- list(n      = ~n(),
-                         min    = min,
-                         q25    = ~quantile(., 0.25),
-                         median = median,
-                         q75    = ~quantile(., 0.75),
-                         max    = max,
-                         mean   = mean,
-                         sd     = sd)
+
+norm_CI <- function(vector, conf.level){
+  conf_test <- t.test(vector, conf.level = conf.level)
+  conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
+  conf_str
+}
+
+wilcox_CI <- function(vector, conf.level){
+  conf_test <- wilcox.test(vector, conf.level = conf.level)
+  conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
+  conf_str
+}
+
+stats_to_compute <- list(n         = ~n(),
+                         norm_CI   = ~norm_CI(., conf.level=0.95),
+                         wilcox_CI = ~norm_CI(., conf.level=0.95),
+                         min       = min,
+                         q25       = ~quantile(., 0.25),
+                         median    = median,
+                         q75       = ~quantile(., 0.75),
+                         max       = max,
+                         mean      = mean,
+                         sd        = sd)
 
 old.o <- options(max.print = 2000)
 
