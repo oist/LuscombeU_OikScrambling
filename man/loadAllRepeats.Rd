@@ -4,7 +4,11 @@
 \alias{loadAllRepeats}
 \title{Load all repeat annotations}
 \usage{
-loadAllRepeats()
+loadAllRepeats(compat = TRUE)
+}
+\arguments{
+\item{compat}{Set to TRUE to keep the old names.  This option will be removed
+when the migration will be complete.}
 }
 \value{
 Returns a \code{SimpleList} of all loaded repeat annotations.
