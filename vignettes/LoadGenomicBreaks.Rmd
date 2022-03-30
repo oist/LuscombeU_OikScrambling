@@ -56,9 +56,22 @@ loadLongShort <- function(file, genome) {
   GRanges(gr, seqinfo = seqinfo(getBSgenome(genome)), strand = "*")
 }
 
-flagLongShort_ <- function(gr, annot) {
-  genome <- gr |> genome() |> unique()
-  flagLongShort(gr, annot[[genome]])
+flagLongShort_ <- function(gr, longShort) {
+  genomeT <- gr |> genome() |> unique()
+  if(genomeT %in% names(longShort))
+    gr <- flagLongShort(gr, longShort[[genomeT]])
+  if("GBreaks" %in% class(gr)) {
+      genomeQ <- gr$query |> genome() |> unique()
+      if(genomeQ %in% names(longShort)) {
+        # sort, flag, unsort, extract flag
+        grq <- gr$query
+        grq$idx <- seq_along(grq)
+        grq <- sort(grq, ignore.strand = TRUE)
+        grq <- flagLongShort(grq, longShort[[genomeQ]])
+        gr$query$Arm <- grq$Arm[order(grq$idx)]
+      }
+  }
+  gr
 }
 
 longShort <- SimpleList()
@@ -161,13 +174,7 @@ Let's load data from genome alignments, using the copy distributed in the
 load_genomic_breaks_ <- function(file, genomeT, genomeQ, longShort=NULL) {
   file <- system.file(paste0("extdata/Oidioi_pairwise_v3/", file), package = "BreakpointsData")
   gb <- load_genomic_breaks(file, getBSgenome(genomeT),  getBSgenome(genomeQ))
-  if (! is.null(longShort)) {
-    gb <-  flagLongShort(gb, longShort[[genomeT]])
-    if (genomeQ %in% names(longShort)) {
-      gb$query <- flagLongShort(gb$query, longShort[[genomeQ]])
-    }
-  }
-  gb
+  flagLongShort_(gb, longShort)
 }
 
 gbs <- SimpleList()
