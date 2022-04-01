@@ -214,6 +214,21 @@ bp_pair_analysis(coa$Osa_Oki, coa$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotH
 
 # Gene feature coverage around aligned and unaligned genomic regions.
 
+## Model operon areas
+
+```{r}
+op <- sort(genes(annots$Oki), ignore.strand=T)
+op <- trim(op + 200) |> suppressWarnings()
+# https://stackoverflow.com/questions/21421047
+# op$idx <- data.table::rleid(as.character(strand(op)))
+op$idx <- Rle(rep(seq_along(runValue(strand(op))), runLength(strand(op))))
+opL <- split(op, op$idx)
+operons <- unlist(endoapply(opL, reduce))
+op <- op - 200
+operons <- operons - 200
+operons <- operons[!operons %in% op]
+```
+
 ## Accessory functions
 
 ```{r genomic_features_byType_accessory_Functions}
