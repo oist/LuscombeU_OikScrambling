@@ -296,10 +296,10 @@ hmList_to_plot <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa, tfbs)
 
 (p_boundary <- rbind(
   hmList_to_plot$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
-  hmList_to_plot$unmap       |> prepareGGFreqPlot("02_unal_unmap"),
-  hmList_to_plot$syn_block   |> prepareGGFreqPlot("03_synteny_blk"),
-  hmList_to_plot$bri     |> prepareGGFreqPlot("04_unal_syntenic"),
-  hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_aln_syntenic")
+  hmList_to_plot$unmap       |> prepareGGFreqPlot("02_unmapped"),
+  hmList_to_plot$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
+  hmList_to_plot$bri         |> prepareGGFreqPlot("04_bridge"),
+  hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
 
 )|> ggplot() +
   aes(pos, freq, col = what) +
