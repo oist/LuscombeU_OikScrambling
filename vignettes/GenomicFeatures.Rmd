@@ -241,7 +241,7 @@ calcOperons <- function(genes, window = 200) {
   operons - window
 }
 
-operons <- lapply(annots, \(a) {a |> genes() |> calcOperons() }) |> SimpleList()
+operons <- lapply(annots, \(a) {a |> genes() |> calcOperons() }) |> SimpleList() |> suppressWarnings()
 sapply(operons, length)
 sapply(operons, \(o) {table(o$n)})
 ```
@@ -305,7 +305,7 @@ depleted, which makes sense, as exons are usually mapable.  Within the mapped
 regions, frequency of introns and exons are comparable.  In contrary, within
 coalesced mapped regions, the exon annotations are over-represented.
 
-```{r genomic_features_byType, fig.width=15, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+```{r genomic_features_byType, fig.width=15, fig.height=5, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 computePlotData <- function(target, query, CE=NULL, tfbs=NULL, operons = NULL) {
   pair <- paste(target, query, sep = "_")
   current_GB_aln_nonCoa     <- gbs[[pair]][   gbs[[pair]]$nonCoa]
