@@ -1,3 +1,7 @@
+# OikScrambling 3.0.1
+
+* Plot operons density near alignment boundaries.
+
 # OikScrambling 3.0.0
 
 * Corrected arm names on query genomes.
