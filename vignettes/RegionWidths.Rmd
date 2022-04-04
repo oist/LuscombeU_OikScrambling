@@ -160,18 +160,25 @@ Below, I take the `widths_all_tibble` and perform some statistical operations on
 library(dplyr) |> suppressPackageStartupMessages()
 
 t_CI <- function(vector, conf.level){
-  conf_test <- t.test(vector, conf.level = conf.level)
-  conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
+  if(length(vector) >= 3){
+    conf_test <- t.test(vector, conf.level = conf.level)
+    conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
+  } else {
+    conf_str <- paste(NA_character_, ',', NA_character_, sep='')
+  }
   conf_str
 }
 
 # Note that because the Wilcox test involves ranking (and therefore sorting),
 # this test is computationally demanding for large data frames.
-# I have opted to leave it out, but it works just the same as the function
-# above - just much slower.
+# It works the same as the function above - just slower.
 wilcox_CI <- function(vector, conf.level){
-  conf_test <- wilcox.test(vector, conf.level = conf.level, conf.int = TRUE)
-  conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
+  if(length(vector) >= 3) {
+    conf_test <- wilcox.test(vector, conf.level = conf.level, conf.int = TRUE)
+    conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
+  } else {
+    conf_str <- paste(NA_character_, ',', NA_character_, sep='')
+  }
   conf_str
 }
 
