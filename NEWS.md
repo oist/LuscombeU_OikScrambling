@@ -1,6 +1,7 @@
 # OikScrambling 3.0.1
 
 * Plot operons density near alignment boundaries.
+* Compute confidence intervals on width distributions.
 
 # OikScrambling 3.0.0
 
