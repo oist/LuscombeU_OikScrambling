@@ -49,40 +49,31 @@ Below, I create some of the functions needed to produce these plots.
 ```{r chromosome_plot_helper_fxns, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Find midpoints of a GRanges object
 grMidpoint <- function(gr) {
-  starts <- as.data.frame(ranges(gr))$start
-  ends <- as.data.frame(ranges(gr))$end
-  mids <- (starts+ends)/2
-  mids
+  (start(gr) + end(gr)) / 2
 }
 
 # Make a BSgenome into a GRanges object, one range per chromosome
 BSgenomeToGR <- function(genome) {
-  df <- data.frame(seqnames=seqnames(genome), start=1, end=lengths(genome), strand="*")
-  gr <- makeGRangesFromDataFrame(df)
-  gr
+  as(seqinfo(genome), "GRanges")
 }
 tmp <- genomes$Oki |> BSgenomeToGR()
 (tmp)
 
 # Make a genome into a bunch of windows of length N
 genomeGRToWindows <- function(gr, windowSize=10000) {
-  df <- as.data.frame(gr)
-  chr <- split(df, df$seqnames)
-  chr <- lapply(chr, function(l) {
-    start_positions <- seq(from=1, to=l$end, by=windowSize)
-    end_positions = start_positions + windowSize
-    end_positions[length(end_positions)] <- l$end
-    df <- data.frame(seqnames=l$seqnames, start=start_positions, end=end_positions)
-    df
+  chr <- split(gr, seqnames(gr))
+  chr <- endoapply(chr, function(l) {
+    start_positions <- seq(from=1, to=end(l), by=windowSize)
+    end_positions   <- start_positions + windowSize
+    end_positions[length(end_positions)] <- end(l)
+    GRanges(seqlevelsInUse(l), IRanges(start_positions, end=end_positions), seqinfo = seqinfo(gr))
   })
-  chr <- do.call(rbind, chr)
-  rownames(chr) <- NULL
-  gr <- makeGRangesFromDataFrame(chr)
-  gr
+  unlist(chr)
 }
 #tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
 #(tmp)
 (genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows())
+# See also (genomes$Oki |> BSgenomeToGR() |> tile(w=10000)) |> unlist() |> unname()
 
 # Generate counts and stats for a column within mcol(GRanges)
 mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
@@ -104,9 +95,9 @@ mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
   df
 }
 # Picked a random line with a dN/dS value (65) 
-#tmp2 <- mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65,])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner')
+#tmp2 <- mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner')
 #(tmp2)
-(mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65,])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner'))
+(mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner'))
 
 # Wrapper to calculate stats (i.e., mcolStats) on every column in a metadata GRanges
 mcolStatsArray <- function(meta, windowSize=10000, includeMetaCols=NULL) {
@@ -152,7 +143,7 @@ mcolBlankArray <- function(meta, includeMetaCols=NULL){
   mcolSA
 }
 tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
-(mcolBlankArray(subsetByOverlaps(transcripts$Oki, tmp[30:32,])))
+(mcolBlankArray(subsetByOverlaps(transcripts$Oki, tmp[30:32])))
 
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
