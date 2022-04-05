@@ -612,7 +612,7 @@ gg_freq_poly(widths$coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 # Compound pictures
 
-Let's put into parallel "aligned", "unaligned" and "mapped"
+## "aligned", "unaligned" and "mapped"
 
 ```{r compound1}
 p_ali <- gg_freq_poly(widths$gbs |> dplyr::filter(! is.na(genus))) +
@@ -634,34 +634,36 @@ p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
 (p_ali | p_una | p_map) + plot_layout(ncol = 3, guides = 'collect') + theme_bw()
 ```
 
-```{r compound2}
+## "isolated", "unmapped", "colinear regions", "bridge" and "colinear alingments"
+
+```{r compound2, fig.width=15, fig.height=5, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 p_ali2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", nonCoa)) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
   ggtitle("Isolated alignments")
 
-p_una2 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "Oki – North")) +
+p_unmap2 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "Oki – North")) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Not aligned, not mapped")
+  ggtitle("Unmapped")
 
 p_syn2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Synteny block")
+  ggtitle("Colinear region")
 
 p_map2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Synteny alignment")
+  ggtitle("Colinear alignment")
 
-p_unalmap2 <- gg_freq_poly(widths$bri |> dplyr::filter(dist == "Oki – North")) +
+p_bridge <- gg_freq_poly(widths$bri |> dplyr::filter(dist == "Oki – North")) +
   aes(width, after_stat(density), col=name) + theme_bw() +
   scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Unaligned but syntenic")
+  ggtitle("Bridge")
 
 # Patchwork
-(p_ali2 | p_una2 | p_syn2 | p_map2 | p_unalmap2) + plot_layout(ncol = 5, guides = 'collect') + theme_bw()
+(p_ali2 | p_unmap2 | p_syn2 | p_bridge | p_map2 ) + plot_layout(ncol = 5, guides = 'collect') + theme_bw()
 ```
 
 
