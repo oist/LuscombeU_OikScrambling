@@ -64,7 +64,7 @@ genomeGRToWindows <- function(gr, windowSize=10000) {
   chr <- split(gr, seqnames(gr))
   chr <- endoapply(chr, function(l) {
     start_positions <- seq(from=1, to=end(l), by=windowSize)
-    end_positions   <- start_positions + windowSize
+    end_positions   <- start_positions + windowSize -1
     end_positions[length(end_positions)] <- end(l)
     GRanges(seqlevelsInUse(l), IRanges(start_positions, end=end_positions), seqinfo = seqinfo(gr))
   })
