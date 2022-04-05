@@ -2,6 +2,7 @@
 
 * Plot operons density near alignment boundaries.
 * Compute confidence intervals on width distributions.
+* Plot width distributions in PDF format.
 
 # OikScrambling 3.0.0
 
