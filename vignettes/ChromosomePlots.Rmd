@@ -159,6 +159,13 @@ chrw$Bar <- flagLongShort(chrw$Bar, longShort$OKI2018.I69)
 
 ```{r chromosome_plots_1, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
+
+ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
+
+bins_Oki_20000 <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(20000)
+chrw$Oki$Oki_Osa.score.mean <- binApply(mean, na.rm = T, bins_Oki_20000, score(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki_20000))
+
+ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=Oki_Osa.score.mean) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + scale_y_log10()
 ```
 
 # Session information
