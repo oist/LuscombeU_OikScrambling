@@ -29,11 +29,7 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 # Load R packages and data
 
 ```{r load_packages_and_data}
-library('GenomicBreaks') |> suppressPackageStartupMessages()
 library('OikScrambling') |> suppressPackageStartupMessages()
-library('dplyr')
-library('ggplot2')
-library('purrr')
 library('viridis') |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR()
@@ -47,50 +43,17 @@ In this vignette, we create the plumbing needed to generate summary plots that s
 Below, I create some of the functions needed to produce these plots.
 
 ```{r chromosome_plot_helper_fxns, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-# Find midpoints of a GRanges object
-grMidpoint <- function(gr) {
-  (start(gr) + end(gr)) / 2
-}
-
 # Make a BSgenome into a GRanges object, one range per chromosome
 BSgenomeToGR <- function(genome) {
   as(seqinfo(genome), "GRanges")
 }
-tmp <- genomes$Oki |> BSgenomeToGR()
-(tmp)
+(tmp <- genomes$Oki |> BSgenomeToGR())
 
 # Make a genome into a bunch of windows of length N
 genomeGRToWindows <- function(gr, windowSize=10000) {
   tile(gr, w=windowSize) |> unlist() |> unname()
 }
 (tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows())
-
-# Generate counts and stats for a column within mcol(GRanges)
-mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
-  count <- length(na.omit(mcol))
-  count_norm <- count/windowSize
-  
-  # Create a new DF and overwrite NA's as needed
-  df <- data.frame('count'=count, 'count_norm'=count_norm, 'mean'=NA, 'median'=NA, 'sd'=NA)
-  if(is.numeric(mcol)){
-    df$mean <- mean(mcol, na.rm=T)
-    df$median <- median(mcol, na.rm=T)
-    df$sd <- sd(mcol, na.rm=T)
-  }
-  
-  # Add column name prefix to facilitate cbind later
-  if(!is.null(mcolName)){
-    colnames(df) <- sapply(colnames(df), function(s) paste(mcolName, '.', s, sep='') )
-  }
-  df
-}
-# Picked a random line with a dN/dS value (65) 
-#tmp2 <- mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner')
-#(tmp2)
-(mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner'))
-
-tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
-(mcolBlankArray(subsetByOverlaps(transcripts$Oki, tmp[30:32])))
 
 # Match ranges to a single bin by reducing each range to its center.
 # Returns the index of the matched bins
@@ -100,7 +63,7 @@ matchToOneBin <- function(ranges, bins) {
   o <- findOverlaps(safeRanges, bins, type = 'within')
   subjectHits(o)
 }
-(matchToOneBin(transcripts$Oki, tmp))
+(matchToOneBin(transcripts$Oki, tmp)) |> head()
 
 # Apply one function to data grouped by bins, and array it according to the
 # original bins (that is, insert NAs for bins that contained no data).
@@ -111,7 +74,7 @@ binApply <- function(f, bins, data, index, ...) {
   res[as.numeric(names(vals))] <- unname(vals)
   res
 }
-(binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE))
+(binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE)) |> head(100)
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
 metaPerWindow <- function(genomeWindows, meta, includeMetaCols=NULL) {
