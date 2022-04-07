@@ -14,8 +14,7 @@ editor_options:
 ---
 
 ```{r setup}
-knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
-knitr::opts_knit$set(verbose = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
 ```
 
 # Introduction
@@ -43,7 +42,7 @@ In this vignette, we create the plumbing needed to generate summary plots that s
 #### Summarizing genomic windows of annotated `GRanges` objects
 Below, I create some of the functions needed to produce these plots.
 
-```{r chromosome_plot_helper_fxns, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r chromosome_plot_helper_fxns}
 # Make a BSgenome into a GRanges object, one range per chromosome
 BSgenomeToGR <- function(genome) {
   as(seqinfo(genome), "GRanges")
@@ -111,7 +110,7 @@ chrw$Bar <- grWindows(genome=genomes$Bar, meta=transcripts$Bar, windowSize=windo
 chrw$Bar <- flagLongShort(chrw$Bar, longShort$OKI2018.I69)
 ```
 
-```{r chromosome_plots_1, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r chromosome_plots_1, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
 
 ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
