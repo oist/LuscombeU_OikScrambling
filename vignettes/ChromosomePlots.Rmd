@@ -100,25 +100,42 @@ grWindows <- function(genome, meta, windowSize=10000){
   mpw
 }
 
-windowSize = 20000
+windowSize <- 20000
+bins_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
 chrw <- SimpleList()
 chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize)
 chrw$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
 chrw$Osa <- grWindows(genome=genomes$Osa, meta=transcripts$Osa, windowSize=windowSize)
-chrw$Osa <- flagLongShort(chrw$Osa, longShort$OKI2018.I69)
+chrw$Osa <- flagLongShort(chrw$Osa, longShort$OSKA2016v1.9)
 chrw$Bar <- grWindows(genome=genomes$Bar, meta=transcripts$Bar, windowSize=windowSize)
-chrw$Bar <- flagLongShort(chrw$Bar, longShort$OKI2018.I69)
+chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
 ```
 
 ```{r chromosome_plots_1, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
 
 ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
+```
 
-bins_Oki_20000 <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(20000)
-chrw$Oki$Oki_Osa.score.mean <- binApply(mean, na.rm = T, bins_Oki_20000, score(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki_20000))
+```{r chromosome_plots_scores, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+chrw$Oki$Oki_Osa.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki))
+chrw$Oki$Oki_Aom.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Aom), matchToOneBin(gbs$Oki_Aom, bins_Oki))
+chrw$Oki$Oki_Bar.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Bar), matchToOneBin(gbs$Oki_Bar, bins_Oki))
+chrw$Oki$Oki_Nor.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Nor), matchToOneBin(gbs$Oki_Nor, bins_Oki))
 
-ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=Oki_Osa.score.mean) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + scale_y_log10()
+ggplot(as.data.frame(chrw$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=Oki_Osa.score.mean) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + scale_y_log10()
+
+ggplot(as.data.frame(chrw$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=Oki_Bar.score.mean) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + scale_y_log10()
+
+chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Oki_Osa.score.mean", "Oki_Aom.score.mean", "Oki_Bar.score.mean", "Oki_Nor.score.mean" )) |>
+  filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Oki_Osa.score.mean", "Oki_Aom.score.mean", "Oki_Bar.score.mean", "Oki_Nor.score.mean")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE)
 ```
 
 # Session information
