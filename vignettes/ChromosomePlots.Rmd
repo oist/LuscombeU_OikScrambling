@@ -61,19 +61,9 @@ tmp <- genomes$Oki |> BSgenomeToGR()
 
 # Make a genome into a bunch of windows of length N
 genomeGRToWindows <- function(gr, windowSize=10000) {
-  chr <- split(gr, seqnames(gr))
-  chr <- endoapply(chr, function(l) {
-    start_positions <- seq(from=1, to=end(l), by=windowSize)
-    end_positions   <- start_positions + windowSize -1
-    end_positions[length(end_positions)] <- end(l)
-    GRanges(seqlevelsInUse(l), IRanges(start_positions, end=end_positions), seqinfo = seqinfo(gr))
-  })
-  unlist(chr)
+  tile(gr, w=windowSize) |> unlist() |> unname()
 }
-#tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
-#(tmp)
-(genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows())
-# See also genomes$Oki |> BSgenomeToGR() |> tile(w=10000) |> unlist() |> unname()
+(tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows())
 
 # Generate counts and stats for a column within mcol(GRanges)
 mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
