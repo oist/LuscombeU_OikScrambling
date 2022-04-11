@@ -2,6 +2,7 @@
 title: "Chromosome-scale feature density plots"
 author: 
  - "Michael Mansfield"
+ - "Charles Plessy"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -13,8 +14,7 @@ editor_options:
 ---
 
 ```{r setup}
-knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
-knitr::opts_knit$set(verbose = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
 ```
 
 # Introduction
@@ -29,15 +29,11 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 # Load R packages and data
 
 ```{r load_packages_and_data}
-library('GenomicBreaks') |> suppressPackageStartupMessages()
 library('OikScrambling') |> suppressPackageStartupMessages()
-library('dplyr')
-library('ggplot2')
-library('purrr')
 library('viridis') |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(transcripts <- OikScrambling:::loadAllTranscriptsGR())
-(load("BreakPoints.Rdata"))
+genomes <- OikScrambling:::loadAllGenomes()
+transcripts <- OikScrambling:::loadAllTranscriptsGR()
+load("BreakPoints.Rdata")
 ```
 
 ### Creating chromosome-scale plots
@@ -46,61 +42,18 @@ In this vignette, we create the plumbing needed to generate summary plots that s
 #### Summarizing genomic windows of annotated `GRanges` objects
 Below, I create some of the functions needed to produce these plots.
 
-```{r chromosome_plot_helper_fxns, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-# Find midpoints of a GRanges object
-grMidpoint <- function(gr) {
-  (start(gr) + end(gr)) / 2
-}
-
+```{r chromosome_plot_helper_fxns}
 # Make a BSgenome into a GRanges object, one range per chromosome
 BSgenomeToGR <- function(genome) {
   as(seqinfo(genome), "GRanges")
 }
-tmp <- genomes$Oki |> BSgenomeToGR()
-(tmp)
+(tmp <- genomes$Oki |> BSgenomeToGR())
 
 # Make a genome into a bunch of windows of length N
 genomeGRToWindows <- function(gr, windowSize=10000) {
-  chr <- split(gr, seqnames(gr))
-  chr <- endoapply(chr, function(l) {
-    start_positions <- seq(from=1, to=end(l), by=windowSize)
-    end_positions   <- start_positions + windowSize -1
-    end_positions[length(end_positions)] <- end(l)
-    GRanges(seqlevelsInUse(l), IRanges(start_positions, end=end_positions), seqinfo = seqinfo(gr))
-  })
-  unlist(chr)
+  tile(gr, w=windowSize) |> unlist() |> unname()
 }
-#tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
-#(tmp)
-(genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows())
-# See also genomes$Oki |> BSgenomeToGR() |> tile(w=10000) |> unlist() |> unname()
-
-# Generate counts and stats for a column within mcol(GRanges)
-mcolStats <- function(mcol, mcolName=NULL, windowSize=10000) {
-  count <- length(na.omit(mcol))
-  count_norm <- count/windowSize
-  
-  # Create a new DF and overwrite NA's as needed
-  df <- data.frame('count'=count, 'count_norm'=count_norm, 'mean'=NA, 'median'=NA, 'sd'=NA)
-  if(is.numeric(mcol)){
-    df$mean <- mean(mcol, na.rm=T)
-    df$median <- median(mcol, na.rm=T)
-    df$sd <- sd(mcol, na.rm=T)
-  }
-  
-  # Add column name prefix to facilitate cbind later
-  if(!is.null(mcolName)){
-    colnames(df) <- sapply(colnames(df), function(s) paste(mcolName, '.', s, sep='') )
-  }
-  df
-}
-# Picked a random line with a dN/dS value (65) 
-#tmp2 <- mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner')
-#(tmp2)
-(mcolStats(subsetByOverlaps(transcripts$Oki, tmp[65])$dNdS_HmmCleaner, mcolName = 'dNdS_HmmCleaner'))
-
-tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows()
-(mcolBlankArray(subsetByOverlaps(transcripts$Oki, tmp[30:32])))
+(tmp <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows())
 
 # Match ranges to a single bin by reducing each range to its center.
 # Returns the index of the matched bins
@@ -110,7 +63,7 @@ matchToOneBin <- function(ranges, bins) {
   o <- findOverlaps(safeRanges, bins, type = 'within')
   subjectHits(o)
 }
-(matchToOneBin(transcripts$Oki, tmp))
+(matchToOneBin(transcripts$Oki, tmp)) |> head()
 
 # Apply one function to data grouped by bins, and array it according to the
 # original bins (that is, insert NAs for bins that contained no data).
@@ -121,7 +74,7 @@ binApply <- function(f, bins, data, index, ...) {
   res[as.numeric(names(vals))] <- unname(vals)
   res
 }
-(binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE))
+(binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE)) |> head(100)
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
 metaPerWindow <- function(genomeWindows, meta, includeMetaCols=NULL) {
@@ -147,25 +100,42 @@ grWindows <- function(genome, meta, windowSize=10000){
   mpw
 }
 
-windowSize = 20000
+windowSize <- 20000
+bins_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
 chrw <- SimpleList()
 chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize)
 chrw$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
 chrw$Osa <- grWindows(genome=genomes$Osa, meta=transcripts$Osa, windowSize=windowSize)
-chrw$Osa <- flagLongShort(chrw$Osa, longShort$OKI2018.I69)
+chrw$Osa <- flagLongShort(chrw$Osa, longShort$OSKA2016v1.9)
 chrw$Bar <- grWindows(genome=genomes$Bar, meta=transcripts$Bar, windowSize=windowSize)
-chrw$Bar <- flagLongShort(chrw$Bar, longShort$OKI2018.I69)
+chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
 ```
 
-```{r chromosome_plots_1, cache=TRUE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
+```{r chromosome_plots_1, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(as.data.frame(chrw$Oki |> unname())  |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
 
-ggplot(as.data.frame(chrw$Oki |> unname())  %>% filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
+ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
+```
 
-bins_Oki_20000 <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(20000)
-chrw$Oki$Oki_Osa.score.mean <- binApply(mean, na.rm = T, bins_Oki_20000, score(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki_20000))
+```{r chromosome_plots_scores, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+chrw$Oki$Oki_Osa.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki))
+chrw$Oki$Oki_Aom.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Aom), matchToOneBin(gbs$Oki_Aom, bins_Oki))
+chrw$Oki$Oki_Bar.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Bar), matchToOneBin(gbs$Oki_Bar, bins_Oki))
+chrw$Oki$Oki_Nor.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Nor), matchToOneBin(gbs$Oki_Nor, bins_Oki))
 
-ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=Oki_Osa.score.mean) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + scale_y_log10()
+ggplot(as.data.frame(chrw$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=Oki_Osa.score.mean) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + scale_y_log10()
+
+ggplot(as.data.frame(chrw$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=Oki_Bar.score.mean) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + scale_y_log10()
+
+chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Oki_Osa.score.mean", "Oki_Aom.score.mean", "Oki_Bar.score.mean", "Oki_Nor.score.mean" )) |>
+  filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Oki_Osa.score.mean", "Oki_Aom.score.mean", "Oki_Bar.score.mean", "Oki_Nor.score.mean")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE)
 ```
 
 # Session information
