@@ -332,13 +332,14 @@ hmList_to_plot <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa, tfbs, op
   hmList_to_plot$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
   hmList_to_plot$unmap       |> prepareGGFreqPlot("02_unmapped"),
   hmList_to_plot$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
-  hmList_to_plot$bri         |> prepareGGFreqPlot("04_bridge"),
-  hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
+  hmList_to_plot$bri         |> prepareGGFreqPlot("04_bridge")#,
+#  hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
 
 )|> ggplot() +
   aes(pos, freq, col = what) +
   geom_line() +
   facet_wrap(~desc, nrow = 1) +
+  theme_bw() +
   ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka"))
 ```
 
@@ -385,6 +386,7 @@ rbind(
 )|> ggplot() +
   aes(pos, freq, col = what) +
   geom_line() +
+  theme_bw() +
   facet_wrap(~desc, nrow = 1)
 ```
 
