@@ -9,47 +9,65 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r setup}
+knitr::opts_knit$set(cache = TRUE)
+```
+
 Load packages and data
 ======================
 
-See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllTranscriptsGR`,
+See `?OikScrambling:::loadAllGenomes()`, `?OikScrambling:::loadAllTranscriptsGR()`,
 and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different objects are prepared.
 
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
-(load("BreakPoints.Rdata"))
-```
-
-Orthogroups
------------
-
-Load Orthogroups for _Oikopleura_ from the `BreakpointsData` package with the
-`OikScrambling::load_one_to_ones()` function.  Original file is in
-`/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`.
-See `news(package = "BreakpointsData")` for inspecting changes in more details.
-
-```{r load_orthogroups}
-# Example for loading all orthogroups:
-OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
-
-# Example for loading a pair
-OikScrambling:::load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
-                , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
+transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings()
+load("BreakPoints.Rdata")
 ```
 
 
-Prepare GBreak objects
-======================
+Prepare GBreaks objects
+=======================
 
-```{r orthoPairs_object}
-orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOGs=NULL) {
+Orthogroups for _Oikopleura_ are loaded from the `BreakpointsData` package with
+the `OikScrambling::load_one_to_ones()` function.  Original file is in
+`/bucket/LuscombeU/common/Breakpoints/Orthologues/selTun+Apps+Amph+Vert_lp_100clstr_blast/OrthoFinder/Results_Oct07/Phylogenetic_Hierarchical_Orthogroups/N19.tsv`. See `news(package = "BreakpointsData")`
+for inspecting changes in more details.
+
+Load Orthogroup data
+--------------------
+
+This produces `GBreaks` objects that map orthologs from between two genomes.
+In these objects, the _target_ and _query_ roles are equivalent.  The genomic
+coordinates are taken from the annotation files (see
+`?OikScrambling:::loadAllTranscriptsGR`.
+
+### Orthogroup pairs
+
+To maximise number of entries, we load data from the larvacean and the ascidian
+subtrees respectively.  This produces the `orthoPairs` collection of objects.
+
+```{r orthoPairs_object, dependson="load_packages_and_data"}
+orthoGroupFileNames <- SimpleList(
+  AOM.5.5f      = "AOM-5-5f.prot.longest.fa_1", 
+  Bar2.p4       = "Bar2_p4.Flye.prot.longest.fa_1", 
+  Ply           = "C_int_P.prot.longest.fa_1",
+  Ros           = "C_int_R.prot.longest.fa_1",
+  Int           = "Ciona_intestinalis.Uniprot.rn.fa_1",
+  Sav           = "Ciona_savignyi.Uniprot.rn.fa_1",
+  KUM.M3.7f     = "KUM-M3-7f.prot.longest.fa_1",
+  OKI2018.I69   = "OKI2018_I69.v2.prot.longest.fa_1",
+  OSKA2016v1.9  = "OSKA2016v1.9.prot.longest.fa_1",
+  OdB3          = "OdB3.v1.0.prot.fa_1.nohaplo"
+)
+
+orthoPairToGBreaks <- function(genome1, genome2, transcripts, treeName="N19", HOGs=NULL) {
   if(is.null(HOGs))
     HOGs <- OikScrambling:::load_one_to_ones(
       system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
-      c(name1, name2))
+      c(orthoGroupFileNames[[genome1]], orthoGroupFileNames[[genome2]]))
 
   IDs2GRanges <- function (IDs, annot) {
     prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
@@ -63,67 +81,96 @@ orthoPairToGBreaks <- function(name1, name2, annot1, annot2, treeName="N19", HOG
     gr                                                # Return the object
   }
   
-  gb       <- IDs2GRanges(HOGs[,name1], annot1)
-  gb$query <- IDs2GRanges(HOGs[,name2], annot2)
+  gb       <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome1]]], transcripts[[genome1]])
+  if (!is.null(genomes[[genome1]]))
+    seqinfo(gb) <- seqinfo(genomes[[genome1]])
+  gb$query <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome2]]], transcripts[[genome2]])
+  if (!is.null(genomes[[genome2]]))
+   seqinfo(gb$query) <- seqinfo(genomes[[genome2]])
   gb <- GenomicBreaks:::GBreaks(gb)
   gb$HOG <- HOGs$HOG
   gb$OG  <- HOGs$OG
   sort(gb)
 }
 
+flagLongShort_ <- function(gr, transcripts) {
+  genome <- unique(genome(gr))
+  flagLongShort(gr, transcripts[[genome]])
+}
+
 orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
   orthoPairs <- SimpleList()
-  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Oki, transcripts$Osa, treeName, HOGs)
-  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Oki, transcripts$Bar, treeName, HOGs)
-  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "KUM-M3-7f.prot.longest.fa_1",      transcripts$Oki, transcripts$Kum, treeName, HOGs)
-  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "AOM-5-5f.prot.longest.fa_1",       transcripts$Oki, transcripts$Aom, treeName, HOGs)
-  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018_I69.v2.prot.longest.fa_1", "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Oki, transcripts$Nor, treeName, HOGs)
+  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018.I69", "OSKA2016v1.9",   transcripts, treeName, HOGs)
+  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018.I69", "Bar2.p4",        transcripts, treeName, HOGs)
+  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018.I69", "KUM.M3.7f",      transcripts, treeName, HOGs)
+  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018.I69", "AOM.5.5f",       transcripts, treeName, HOGs)
+  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018.I69", "OdB3",           transcripts, treeName, HOGs)
   
-  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "Bar2_p4.Flye.prot.longest.fa_1",   transcripts$Osa, transcripts$Bar, treeName, HOGs)
-  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Osa, transcripts$Oki, treeName, HOGs)
-  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Osa, transcripts$Kum, treeName, HOGs)
-  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Osa, transcripts$Aom, treeName, HOGs)
-  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Osa, transcripts$Nor, treeName, HOGs)
+  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9",   "Bar2.p4",     transcripts, treeName, HOGs)
+  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9",   "OKI2018.I69", transcripts, treeName, HOGs)
+  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9",   "KUM.M3.7f",   transcripts, treeName, HOGs)
+  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9",   "AOM.5.5f",    transcripts, treeName, HOGs)
+  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9",   "OdB3",        transcripts, treeName, HOGs)
   
-  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OSKA2016v1.9.prot.longest.fa_1",   transcripts$Bar, transcripts$Osa, treeName, HOGs)
-  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OKI2018_I69.v2.prot.longest.fa_1", transcripts$Bar, transcripts$Oki, treeName, HOGs)
-  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "KUM-M3-7f.prot.longest.fa_1",      transcripts$Bar, transcripts$Kum, treeName, HOGs)
-  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "AOM-5-5f.prot.longest.fa_1",       transcripts$Bar, transcripts$Aom, treeName, HOGs)
-  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2_p4.Flye.prot.longest.fa_1",   "OdB3.v1.0.prot.fa_1.nohaplo",      transcripts$Bar, transcripts$Nor, treeName, HOGs)
+  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2.p4",   "OSKA2016v1.9",     transcripts, treeName, HOGs)
+  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2.p4",   "OKI2018.I69",      transcripts, treeName, HOGs)
+  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2.p4",   "KUM.M3.7f",        transcripts, treeName, HOGs)
+  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2.p4",   "AOM.5.5f",         transcripts, treeName, HOGs)
+  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2.p4",   "OdB3",             transcripts, treeName, HOGs)
   
-  orthoPairs[ 1:5 ] <- sapply(orthoPairs[ 1:5 ],  flagLongShort, longShort$Oki)
-  orthoPairs[ 6:10] <- sapply(orthoPairs[ 6:10],  flagLongShort, longShort$Osa)
-  orthoPairs[11:15] <- sapply(orthoPairs[11:15],  flagLongShort, longShort$Bar)
+  orthoPairs <- sapply(orthoPairs,  flagLongShort_, longShort)
   
-  orthoPairs
+  SimpleList(orthoPairs)
 }
 
 orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
-orthoPairs$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
-                                        , transcripts$Ply, transcripts$Ros, treeName="N20")
+orthoPairs$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N20")
+```
 
-# Same as above but using the same core orthogroups for all species.
+### Orthogroup core pairs
+
+The `orthoPairs_core` collection is built similarly, but from "core"
+orthogroups, that have a member in each species of the tunicate clade.
+
+```{r orthoPairs_core, dependson="orthoPairs_object"}
 orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
-orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("C_int_P.prot.longest.fa_1", "C_int_R.prot.longest.fa_1"
-                                             , transcripts$Ply, transcripts$Ros, treeName="N3")
+orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N3")
+```
 
+### Orthogroups one-to-one in oiks.
+
+Lastly we build an object for Oiks only where we require every orthologue to be
+present as a single copy in every genome.  This is the `orthoPairs_one2oneInOiks`
+collection.
+
+```{r orthoPairs_one2oneInOiks, dependson="orthoPairs_object"}
 orthoPairs_one2oneInOiks <-
   orthoPairToGBreaks_all_Oiks(treeName = NULL,
                               HOGs = OikScrambling:::load_one_to_ones(
                                        system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")))
+```
 
+### Summary
 
+Here is the number of entries in each object.
+
+```{r summary_orthoPairs, dependson=c("orthoPairs_object", "orthoPairs_core", "orthoPairs_one2oneInOiks")}
 sapply(orthoPairs, length)
 sapply(orthoPairs_core, length)
 sapply(orthoPairs_one2oneInOiks, length)
 ```
 
-Problem: some annotations overlap
----------------------------------
 
-```{r fix_Bar_Osk}
-transcripts$Bar |> length()
-transcripts$Bar |> reduce(min = 0) |> length()
+Remove overlapping annotations
+------------------------------
+
+Some transcript annotations overlap and this breaks the coalescing algorithm.
+
+Here we produce non-overlapping versions of the objects.
+
+```{r filtered_objects, dependson="summary_orthoPairs"}
+transcripts$Bar2.p4 |> length()
+transcripts$Bar2.p4 |> reduce(min = 0) |> length()
 
 flagOverlaps <- function(gr) {
   # Find overlaps
@@ -134,7 +181,7 @@ flagOverlaps <- function(gr) {
   seq_along(gr) %in% idx
 }
 
-transcripts$Bar[flagOverlaps(transcripts$Bar)]
+transcripts$Bar2.p4[flagOverlaps(transcripts$Bar2.p4)]
 
 # Show examples
 orthoPairs$Oki_Osa[flagOverlaps(orthoPairs$Oki_Osa)]
@@ -154,15 +201,22 @@ orthoPairsFiltered_core <- sapply(orthoPairs_core, function(gb) {
   gb
 }) |> SimpleList()
 
-sapply(orthoPairs, length) - sapply(orthoPairsFiltered, length)
-sapply(orthoPairs_core, length) - sapply(orthoPairsFiltered_core, length)
+orthoPairs_one2oneInOiks_Filtered <- sapply(orthoPairs_one2oneInOiks, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+
+sapply(orthoPairs, length)               - sapply(orthoPairsFiltered, length)
+sapply(orthoPairs_core, length)          - sapply(orthoPairsFiltered_core, length)
+sapply(orthoPairs_one2oneInOiks, length) - sapply(orthoPairs_one2oneInOiks_Filtered, length)
 ```
 
 
 Coalesce syntenic blocks and annotate them
 ------------------------------------------
 
-```{r coalesce}
+```{r coalesce, dependson="filtered_objects"}
 coalOrtho <- function(gb) {
   # Coalesce
   coal <- coalesce_contigs(gb)
@@ -192,40 +246,51 @@ coalOrtho <- function(gb) {
 
 orthoBlocks <- sapply(orthoPairsFiltered[1:15], coalOrtho) |> SimpleList()
 orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
-orthoBlocks[ 1:5 ] <- sapply(orthoBlocks[ 1:5 ],  flagLongShort, longShort$Oki)
-orthoBlocks[ 6:10] <- sapply(orthoBlocks[ 6:10],  flagLongShort, longShort$Osa)
-orthoBlocks[11:15] <- sapply(orthoBlocks[11:15],  flagLongShort, longShort$Bar)
+orthoBlocks[ 1:15 ] <- sapply(orthoBlocks[ 1:15 ],  flagLongShort_, longShort)
 
 orthoBlocks_core <- sapply(orthoPairsFiltered_core[1:15], coalOrtho) |> SimpleList()
 orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
-orthoBlocks_core[ 1:5 ] <- sapply(orthoBlocks_core[ 1:5 ],  flagLongShort, longShort$Oki)
-orthoBlocks_core[ 6:10] <- sapply(orthoBlocks_core[ 6:10],  flagLongShort, longShort$Osa)
-orthoBlocks_core[11:15] <- sapply(orthoBlocks_core[11:15],  flagLongShort, longShort$Bar)
+orthoBlocks_core[ 1:15 ] <- sapply(orthoBlocks_core[ 1:15 ],  flagLongShort_, longShort)
 
+orthoBlocks_one2oneInOiks <- sapply(orthoPairs_one2oneInOiks_Filtered, coalOrtho) |> SimpleList()
+orthoBlocks_one2oneInOiks <- sapply(orthoBlocks_one2oneInOiks,  flagLongShort_, longShort) |> SimpleList()
+
+sapply(orthoPairsFiltered, length)
 sapply(orthoBlocks, length)
+sapply(orthoPairsFiltered_core, length)
 sapply(orthoBlocks_core, length)
-
+sapply(orthoPairs_one2oneInOiks_Filtered, length)
+sapply(orthoBlocks_one2oneInOiks, length)
 ```
 
 
-Quick overview of the results
-=============================
+Compute bridge regions
+----------------------
+
+Let's pre-compute bridge regions with the `GenomicBreaks::bridgeRegions()`
+function.
+
+```{r bridge_regions, dependson="filtered_objects"}
+# oP_bridges               <- sapply(orthoPairsFiltered,                bridgeRegions) |> SimpleList()
+# oP_core_bridges          <- sapply(orthoPairsFiltered_core,           bridgeRegions) |> SimpleList()
+oP_one2oneInOiks_bridges <- sapply(orthoPairs_one2oneInOiks_Filtered, bridgeRegions) |> SimpleList()
+```
 
 Size distribution of the blocks
--------------------------------
+===============================
 
 ```{r quick_overview}
-stem(orthoBlocks$Oki_Osa$geneNumber)
+hist(orthoBlocks$Oki_Osa$geneNumber)
 table(orthoBlocks$Oki_Osa$geneNumber)
 orthoBlocks$Oki_Osa[order(orthoBlocks$Oki_Osa$geneNumber)] |> tail(11)
 
-stem(orthoBlocks$Oki_Kum$geneNumber)
+hist(orthoBlocks$Oki_Kum$geneNumber)
 table(orthoBlocks$Oki_Kum$geneNumber)
 orthoBlocks$Oki_Kum[order(orthoBlocks$Oki_Kum$geneNumber)] |> tail(11)
 ```
 
 Gene Order Conservation is smaller in short arms
-------------------------------------------------
+================================================
 
 ```{r GOC}
 orthoBlocks_LSnoNA <- sapply(orthoBlocks[1:15], function(gb) gb[!is.na(gb$Arm)]) |> SimpleList()
@@ -240,8 +305,24 @@ apply(df, 2, \(x) {
 }) 
 ```
 
+<details>
+<summary>Click to expand results on a microbenchmark comparing `sapply(split)`
+and `tapply`</summary>
+```
+> microbenchmark::microbenchmark(
+  times = 10,
+  sapply = sapply(split(x, paste(seqnames(x), x$Arm)), GOC),
+  tapply = tapply(x, paste(seqnames(x), x$Arm), GOC)
+)
+Unit: seconds
+   expr      min       lq     mean   median       uq      max neval
+ sapply 6.853530 6.921293 7.050267 6.949315 7.270793 7.477390    10
+ tapply 6.921118 6.923827 7.028373 6.939487 6.968288 7.431115    10
+ ```
+</details>
+
 Fraction of the genome covered or syntenic
-------------------------------------------
+==========================================
 
 ```{r fraction_aligned}
 uncov  <- BiocParallel::bplapply(orthoPairsFiltered, cleanGaps) |> SimpleList()
@@ -290,7 +371,7 @@ sapply(syn_summary_core, \(x) tapply(x, row.names(syn_summary_core) |> OikScramb
 ```
 
 Agreement with nucleotide alignments
-------------------------------------
+====================================
 
 ```{r DNA_prot_comparison}
 (gb_P <- orthoBlocks$Bar_Osa)
@@ -312,7 +393,7 @@ Question: what does interrupt the colinearity of nucleotide regions in gene-cent
 colinear regions ?
 
 XSR plot
---------
+========
 
 Ugly...
 
@@ -378,7 +459,7 @@ makeOxfordPlots(unlist(XSR_toPlot))
 Appears to be duplicated in Bar so missing from HOG `N19.HOG0000192` in that
 genome.
 
-```{r Hox4}
+```{r Hox4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 sapply(orthoPairs[1:15], \(gb) {
   x <- gb |> plyranges::filter(HOG == "N19.HOG0000192")
   if (length(x) == 0) return(NULL)
@@ -394,18 +475,26 @@ subsetByOverlaps(coa$Oki_Osa, Hox4_4e4) |> plotApairOfChrs("chr2", xlim = gb2xli
 subsetByOverlaps(coa$Oki_Osa, Hox4_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_1e5))
 
 ## Genes
-Hox4_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox4_4e4 |> range())
+Hox4_4e4.genes <- transcripts$OKI2018.I69 |> subsetByOverlaps(Hox4_4e4 |> range())
 mids <- Hox4_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
 text <- Hox4_4e4.genes$tx_name |> as.character()
 annot <- genoPlotR::annotation(x1=start(Hox4_4e4.genes), x2=end(Hox4_4e4.genes), text=text, rot=30)
 gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_4e4), annotations = annot)
 ```
 
+<details>
+<summary>Click to see details on where the non-plotted alignments go.</summary>
+```{r}
+subsetByOverlaps(gbs$Oki_Osa, granges(Hox4_4e4)) |> sort(i=T)  |> data.frame()
+subsetByOverlaps(swap(gbs$Oki_Osa), granges(swap(Hox4_4e4))) |> sort(i=T)  |> data.frame()
+```
+<br/>
+
 ## Hox 1
 
 HOG `N19.HOG0000193`.
 
-```{r Hox1}
+```{r Hox1, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 sapply(orthoPairs[1:15], \(gb) {
   x <- gb |> plyranges::filter(HOG == "N19.HOG0000193")
   if (length(x) == 0) return(NULL)
@@ -421,12 +510,121 @@ subsetByOverlaps(coa$Oki_Osa, Hox1_4e4) |> plotApairOfChrs("chr2", xlim = gb2xli
 subsetByOverlaps(coa$Oki_Osa, Hox1_1e5) |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_1e5))
 
 ## Genes
-Hox1_4e4.genes <- transcripts$Oki |> subsetByOverlaps(Hox1_4e4 |> range())
+Hox1_4e4.genes <- transcripts$OKI2018.I69 |> subsetByOverlaps(Hox1_4e4 |> range())
 mids <- Hox1_4e4.genes |> gr2dna_seg() |> dplyr::mutate(mid = (start + end) / 2) |> dplyr::pull(mid)
 text <- Hox1_4e4.genes$tx_name |> as.character()
 annot <- genoPlotR::annotation(x1=start(Hox1_4e4.genes), x2=end(Hox1_4e4.genes), text=text, rot=30)
 gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4), annotations = annot)
 ```
+
+<details>
+<summary>Click to see details on where the non-plotted alignments go.</summary>
+```{r}
+subsetByOverlaps(gbs$Oki_Osa, granges(Hox1_4e4)) |> sort(i=T)  |> data.frame()
+subsetByOverlaps(swap(gbs$Oki_Osa), granges(swap(Hox1_4e4))) |> sort(i=T)  |> data.frame()
+```
+<br/>
+
+# Ancestral states
+
+Prototype 1
+
+In the concept case below, B has moved in the North Atlantic clade.
+
+ - Oki: A-B-C
+ - Osa: A-B-C
+ - Bar:  A-C, and B can be found somewhere else
+ 
+As we work on alignment pairs, this translates to:
+
+ - Oki_Osa: A-B-C
+ - Oki_Bar: A, B, C
+ 
+To find such cases I search for Oki-Bar orthoblock breakpoints that fall within
+an Oki-Osa orthoblock.
+
+```{r}
+reIndex <- \(gb) {names(gb) <- seq_along(gb) ; gb}
+barBreaks <- sapply(orthoBlocks_one2oneInOiks, get_bps, direction = "mid") |> SimpleList()
+
+
+ROIs <- SimpleList()
+findROIs <- function(g1, g2, g3) {
+  pair1_2 <- paste(g1, sep = '_', g2)
+  pair1_3 <- paste(g1, sep = '_', g3)
+  gb <- orthoBlocks_one2oneInOiks[[pair1_2]] |>
+    reIndex() |>
+    subsetByOverlaps(barBreaks[[pair1_3]]) |>
+    subset(geneNumber > 2)
+  # Drop columns to ease browsing on single lines.
+  NULL -> gb$dNdS_GUIDANCE2 -> gb$dNdS_HmmCleaner -> gb$dNdS_PRANK
+  gb
+}
+ROIs$Oki_Osa_Bar <- findROIs("Oki", "Osa", "Bar")
+ROIs$Oki_Bar_Osa <- findROIs("Oki", "Bar", "Osa")
+ROIs$Oki_Aom_Nor <- findROIs("Oki", "Aom", "Nor")
+
+findGene <- function(gb, gene) {
+  if(is.null(gb$geneNames)) {
+    ids <- gb$tx_name
+    index <- gb$tx_name %in% gene
+  } else {
+    ids <- gb$geneNames
+    index <- any(ids %in% gene)
+  }
+  gb[index]
+}
+
+# Genes of Interest
+
+(GoI1 <- head(ROIs$Oki_Osa_Bar$geneNames, 1) |> unlist())
+GoI2 <- c("g1205.t1", "g1208.t1", "g1209.t1", "g1210.t1") # To provide context
+
+# Exploring the region
+
+orthoBlocks$Oki_Osa |> findGene(c(GoI1, GoI2)) # g1206.t1 g1207.t1 g1208.t1 g1211.t1 are in chr1:4573346-4588029 | Chr1:402525-416983  
+orthoPairs $Oki_Osa |> findGene(c(GoI1, GoI2)) |> as.data.frame() # Individual coordinates of the genes
+orthoBlocks$Oki_Bar |> findGene(c(GoI1, GoI2)) # g1205.t1 g1206.t1 g1207.t1 g1208.t1 g1211.t1 are in chr1 4571907-4588029 | Chr1:582810-2680665
+orthoPairs $Oki_Bar |> findGene(c(GoI1, GoI2)) |> as.data.frame() # Individual coordinates of the genes
+orthoBlocks$Bar_Oki |> subsetByOverlaps(GRanges("Chr1:2669327-2680665")) |> swap()  # Let's forget about g1205.t1
+orthoBlocks$Bar_Oki |> subsetByOverlaps(GRanges("Chr1:2669327-2680665")) |> swap() |> cleanGaps() |> width()
+```
+
+```
+Oki         Osa       Bar  
+g1206.t1    g96.t1    g651.t1
+g1207.t1    g95.t1    g650.t1
+g1208.t1    g94.t1    g652.t1
+g1211.t1    g92.t1    g654.t1 
+```
+
+```{r}
+### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (bri)
+
+unal$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2)) # between g1207.t1 and g1208.t1 on Oki
+unal$Osa_Oki |> subsetByOverlaps(GRanges("Chr1", ( 409953 + 410741 )/2)) # between g95.t1 and g94.t1 on Osa
+# Or just:
+
+(BP1_Oki_Osa <- bri$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))) # between g1207.t1 and g1208.t1 on Oki
+
+
+# Now on Bar:
+gbs$Bar_Oki |> reIndex()|> subsetByOverlaps(GRanges("Chr1", (2674502 + 2675030)/2)) # between g651.t1 and  g652.t1 on Bar
+coa$Bar_Oki |> reIndex()|> subsetByOverlaps(GRanges("Chr1", (2674502 + 2675030)/2)) # between g651.t1 and  g652.t1 on Bar
+
+(BP1_Bar <- unal$Bar_Oki |> subsetByOverlaps(GRanges("Chr1", (2674538 + 2674688)/2))) # between g651.t1 and  g652.t1 on Bar according to gbs or coa
+
+# Nothing noticeable on either strand
+pairwiseAlignment(type ="local", BP1_Oki_Osa |> plyranges::mutate(strand = '-'))
+pairwiseAlignment(type ="local", BP1_Oki_Osa |> plyranges::mutate(strand = '+'))
+pairwiseAlignment(type ="local", BP1_Oki_Osa $query, BP1_Bar)
+pairwiseAlignment(type ="global", BP1_Oki_Osa $query, BP1_Bar  |> plyranges::mutate(strand = '-'))
+ 
+oP_one2oneInOiks_bridges$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))
+```
+
+I can also search for orthologs that are marked "Col" in Oki_Osa and "Tra"
+in Osa_Bar.
 
 # Session information
 

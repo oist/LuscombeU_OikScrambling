@@ -1,0 +1,331 @@
+---
+title: "Tandem site duplications"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Tandem site duplications}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+# Load pacakges and data
+
+See the `vignette("OikScrambling", package = "OikScrambling")` for general
+details on package and data load.
+
+See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different `GBreaks` objects are prepared.
+
+```{r load_pacakges_and_data}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  library('ggplot2')
+  library("BreakpointsData")
+  library("Biostrings")
+})
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
+load("BreakPoints.Rdata")
+reps <- OikScrambling:::loadAllRepeats(compat = F)
+transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F)
+```
+
+# Purpose
+
+Here we explore regions of interest that feature an insertion-deletion site
+flanked by a _tandem site duplication_.
+
+In our _genomic breaks_ objects, representing _one-to-one_ alignments, one copy
+of the tandem-duplicated site is part of the alignment, and the other is not.
+
+```
+                   TSD
+query       …──────────━━━━━─────────━━━━━─────────────…
+alignment    ...............              .............
+target      …──────────━━━━━              ─────────────…
+
+```
+
+# Service functions
+
+## Align breakpoints
+
+```
+pat          ++++
+range  --------==========----------
+sub                    ++++             (or ---- if rev = F)
+
+```
+
+```{r service_function_alignBreakpoints}
+alignBreakPoints <- function(gr, n = 20, reverseComplement = FALSE) {
+  if (isFALSE(reverseComplement)) reverseComplement <- identity
+  pairwiseAlignment(getSeq(gr |> flank(n, both = T, start = T)),
+                    getSeq(gr |> flank(n, both = T, start = F)) |> reverseComplement(),
+                    type="global")
+}
+```
+
+## Align ends
+
+```
+pat            ++++
+range  --------==========----------
+sub                  ++++             (or ---- if rev = F)
+
+```
+
+```{r service_function_alignEnds}
+alignEnds <- function(gr, n = 20, reverseComplement = FALSE) {
+  resize_ <- function(...) resize(...) |> trim() |> suppressWarnings()
+  if (isFALSE(reverseComplement)) reverseComplement <- identity
+  pairwiseAlignment(getSeq(gr |> resize_(n, fix = "start")),
+                    getSeq(gr |> resize_(n, fix = "end")) |> reverseComplement(),
+                    type="global")
+}
+```
+
+## Search for TSDs
+
+```
+pat            +
+range  --------==========----------
+sub                      +         
+```
+
+```{r service_function_searchTSDs}
+searchForTSDs <- function(gr, n = 8) {
+  pairwiseAlignment(getSeq(gr |> resize(n, fix = "start")),
+                    getSeq(gr |>  flank(n, start = F)),
+                    type="global")
+}
+```
+
+## Align indels
+
+```
+                          ++++          ++++
+query       …──────────────────────────────────────────…
+target      …───────────────              ─────────────…
+                          ++..............++
+```
+
+```{r service_function_alignInDel}
+alignInDel <- function(gb) {
+  list(
+    q_l = getSeq(gb$query[1] |> flank(20, both = T, start = T))[[1]],
+    trg = getSeq(gb[1]       |> flank(20, both = T, start = F))[[1]],
+    q_r = getSeq(gb$query[2] |> flank(20, both = T, start = F))[[1]]
+  ) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
+}
+```
+
+## Align to self
+
+```{r service_function_alignToSelf}
+alignToSelf <- function(gr) {
+  pairwiseAlignment(getSeq(gr),
+                    getSeq(gr) |> reverseComplement(),
+                    type="global")
+}
+```
+
+# ROI1: composite transposon and tandem site duplication.
+
+## Details on the region
+
+_ROI1_ identified and analysed by Martin Frith.  Here I am just transposing the
+finding in Bioconductor's context.
+
+In `contig_27_1` (which is most of Kume genome's chr1's short arm), there is an
+indel region where the aligned regions in the Okinawa genome are directly in
+contact, but on the Kume genome the aligned regions are separated by a 5146-bp
+gap.
+
+(The regions align on opposite strands, so the plot looks strange if you are
+not familiar with it.)
+
+ROI1 is represented by a `GBreaks` object of lenght 2.  The Kume-specific
+sequence can be obtained with the `cleanGaps` function.
+
+```{r ROI1}
+(ROI1 <- gbs$Oki_Kum |> subsetByOverlaps(GRanges("chr1:3720291-3734643")))
+plotApairOfChrs(ROI1)
+cleanGaps(ROI1$query) |> as.data.frame()
+```
+
+Interestingly, the unaligned region in Kume contains two repeat elements in
+inverted tandem.  You can see them in the alignment below, of the left-side
+boundary of the unaligned region to the reverse-complement of its right side.
+
+```{r ROI_breaks_pair_align}
+ROI1$query |> cleanGaps() |> alignBreakPoints(30, rev=TRUE)
+```
+
+<details>
+<summary>Click here to see the full pairwise alignment between the Kume insert
+and its own reverse-complement.</summary>
+```{r ROI_pair_align}
+ROI1$query |> cleanGaps() |> alignToSelf() |> writePairwiseAlignments()
+```
+</details>
+
+Immediately upstream these repeats, there a tandem octamer `AAGATACG`.  In
+the Okinawan genome, it is present as a single copy.  You can see it in the
+alignment below, where the right-side boundary was not reverse-complemented.
+
+```{r ROI_breaks_pair_align2}
+ROI1$query |> cleanGaps() |> alignBreakPoints(30, rev=FALSE)
+```
+
+The same can be seen in the multiple alignment below comparising the left and
+right arms of the Kume alignments and their match to the Okinawa genome.
+
+```{r ROI_breaks_pair_align3}
+# Note that genome alignment is +/- therefore the order below is counter-intuitive.
+list(
+  kum_right = getSeq(ROI1$query[1] |> flank(20, both = T, start = T))[[1]],
+  kum_left  = getSeq(ROI1$query[2] |> flank(20, both = T, start = F))[[1]],
+  oki       = getSeq(ROI1[2]       |> flank(20, both = T, start = F))[[1]]
+) |> as("DNAStringSet") |> msa::msaClustalW()
+```
+
+The microhomology does not appear to be more frequent in the Okinawan genome
+compared to the others.
+
+```{r search_for_AAGATACG}
+sapply(genomes, vmatchPattern, pat = "AAGATACG") |> sapply(length)
+```
+ 
+## How often do we see tandem site duplication in similar indel configurations ?
+
+The `bri` objects contain unaligned regions flanked by colinear regions.
+Let's search for other situations where one of the regions has a width of zero.
+
+Note: _in order to represent zero-width intervals in this object, which would
+be impossible with `GRanges` objects, the unaligned regions were arbitrarly
+added one base of each flanking aligned regions_.
+
+These regions are rare in between-species alignments (at most a few percents),
+and common in within-population alignments (14–28 percents).
+
+```{r search_for_indels_with_TSDs}
+isIndel <- \(gb) width(gb) <= 2 | width(gb$query) <= 2
+bri |> sapply(\(gb) length(gb[isIndel(gb)]))
+round(bri |> sapply(\(gb) length(gb[isIndel(gb)])) / sapply(bri, length) * 100 )
+```
+
+Let's inspect within-population alignments first, considering only cases where
+the indel region is on the _query_ genome.  Here is an example with a `CATCTTTG`
+TSD.
+
+```{r search_for_indels_with_TSDs2}
+gb <- bri$Oki_Kum |> plyranges::filter(width == 2)
+gb$query |> width() |> summary()
+
+alignBreakPoints(gb$query[4])
+searchForTSDs(gb$query[4] |> shift(1))
+alignEnds(gb$query[4], 40)
+
+msAlignFlank <- function(gb)
+list(
+  query_left  = getSeq(gb$query |> flank(20, both = T, start = T))[[1]],
+  target      = getSeq(gb       |> flank(20, both = T, start = F))[[1]],
+  query_right = getSeq(gb$query |> flank(20, both = T, start = F))[[1]]
+) |> as("DNAStringSet") |> msa::msaClustalW(order = "input")
+
+msAlignFlank(gb[4])
+```
+
+Let's count the number of perfect 8-nt matches.  See the variety in their
+sequences: none of them is found more than twice!
+
+```{r search_for_indels_with_TSDs3}
+searchForTSDs(gb$query) |> nedit() |> table()
+
+gb$nedit <- searchForTSDs(gb$query) |> nedit() 
+gb$consensus <- searchForTSDs(gb$query) |> compareStrings()
+
+gb[gb$nedit==0]$consensus |> table() |> sort() |> tail()
+gb[gb$nedit==0]$consensus |> table() |> length()
+```
+
+## How frequent is the inverted pair of repeats that we see?
+
+```{r}
+checkTIR <- function(gr, reps) {
+  genome <- unique(genome(gr))
+  r <- subsetByOverlaps(reps[[genome]], gr)
+  if (length(r) < 2) return(Inf)
+  if (identical(strand(head(r,1)), strand(tail(r,1)))) return(Inf)
+  stringDist(c(head(r, 1)$Target, tail(r, 1)$Target)) |> as.numeric()
+}
+
+nameTIR <- function(gr, reps) {
+  genome <- unique(genome(gr))
+  r <- subsetByOverlaps(reps[[genome]], gr)
+  if (length(r) < 2) return(NA)
+  paste(head(r, 1)$Target, tail(r, 1)$Target)
+}
+
+gb$hasTIR <- sapply(seq_along(gb), \(n) checkTIR(gb$query[n], reps))
+#gb$TIRname <- sapply(seq_along(gb), \(n) nameTIR(gb$query[n], reps)) #crashes
+which(gb$hasTIR <= 4)
+
+gb$query[28] |> alignToSelf()
+gb$query[28] |> searchForTSDs(20)
+
+# But also in regions not flagged with hasTIR:
+gb$query[20] |> alignToSelf()
+gb$query[20] |> searchForTSDs(20)
+
+# TSDs with short TIR on Oki_Osa
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][30]$query |> searchForTSDs(20)
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][30]$query |> alignToSelf()
+
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][3]$query |> searchForTSDs(20)
+bri$Oki_Osa[isIndel(bri$Oki_Osa)][3]$query |> alignToSelf()
+```
+
+```{r compute_and_plot_score_stats}
+kindOfLogScale <- 2^(0:100 / 8) |> round() |> unique()
+m <- sapply(kindOfLogScale, \(n) gb$query |> alignEnds(n, r=T) |> score())
+plot( apply(m,1, \(v) kindOfLogScale[which.max(v)])
+    , apply(m,1, \(v) max(v))
+    , xlab = "At which length did the alignment score peak?"
+    , ylab = "What was the maximum score?")
+
+plot(table( apply(m,1, \(v) kindOfLogScale[which.max(v)])))
+mm <- m[apply(m,1, \(v) max(v)) > 6,]
+plot(table( apply(mm,1, \(v) kindOfLogScale[which.max(v)])))
+
+apply(m,1, \(v) kindOfLogScale[which.max(v)]) |>
+  Filter(f=\(x) x>7) |>
+  table() |> plot(log="x", ylab = "Frequency",
+                  xlab = "Alignment length where score peaks (starting from n=8)",
+                  main = "Aproximate length of TIRs")
+
+gb$hasScorePeak <- apply(m,1, \(v) kindOfLogScale[which.max(v)]) > 8
+```
+
+## Remaining questions
+
+Questions:
+
+ - Is there any hint of functionality for the sequence in the gap?
+ - are the indels fixed in their respective populations?
+ - Am I missing half of the microhomologies because of alignments to negative strands ?
+
+
+# Session information
+  
+```{r sessioninfo}
+sessionInfo()
+```

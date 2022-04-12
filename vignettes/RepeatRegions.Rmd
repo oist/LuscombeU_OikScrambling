@@ -54,7 +54,7 @@ mkRepsIn <- function(pairs, reps) {
   reps_in$gbs     <- sapply(gbs    [pairs], tableIntersectWithReps)
   reps_in$unmap   <- sapply(unmap  [pairs], tableIntersectWithReps)
   reps_in$unmap2  <- sapply(unmap2 [pairs], tableIntersectWithReps)
-  reps_in$unalMap <- sapply(unalMap[pairs], tableIntersectWithReps)
+  reps_in$bri <- sapply(bri[pairs], tableIntersectWithReps)
   reps_in$map     <- sapply(coa    [pairs], tableIntersectWithReps)
   reps_in$map2    <- sapply(coa2   [pairs], tableIntersectWithReps)
   reps_in$tra     <- sapply(tra    [pairs], tableIntersectWithReps)
@@ -81,7 +81,7 @@ reps_in_Bar.norm <- lapply(reps_in_Bar, \(x) x / reps_in_Bar$total)
 toLong.reps <- function(reps_in)
   rbind(
     toLong(reps_in$unmap,   "unMap"),
-    toLong(reps_in$unalMap, "unAlnMap"),
+    toLong(reps_in$bri, "unAlnMap"),
     toLong(reps_in$map,     "Map"),
     toLong(reps_in$gbs,     "Aln"),
     toLong(reps_in$unal,    "unAln"),
@@ -276,33 +276,33 @@ UpSetR::upset(unmappedRepsBar)
 
 ## Unaligned but mapped by flanking colinear blocks
 
-```{r upset_plot_unalMap}
-unalMapRepsOki <- data.frame(
-  unalMap_Osa = isPresent(reps$Oki, unalMap$Oki_Osa),
-  unalMap_Aom = isPresent(reps$Oki, unalMap$Oki_Aom),
-  unalMap_Bar = isPresent(reps$Oki, unalMap$Oki_Bar),
-  unalMap_Nor = isPresent(reps$Oki, unalMap$Oki_Nor),
-  unalMap_Kum = isPresent(reps$Oki, unalMap$Oki_Kum)
+```{r upset_plot_bri}
+briRepsOki <- data.frame(
+  bri_Osa = isPresent(reps$Oki, bri$Oki_Osa),
+  bri_Aom = isPresent(reps$Oki, bri$Oki_Aom),
+  bri_Bar = isPresent(reps$Oki, bri$Oki_Bar),
+  bri_Nor = isPresent(reps$Oki, bri$Oki_Nor),
+  bri_Kum = isPresent(reps$Oki, bri$Oki_Kum)
 )
-UpSetR::upset(unalMapRepsOki)
+UpSetR::upset(briRepsOki)
 
-unalMapRepsOsa <- data.frame(
-  unalMap_Oki = isPresent(reps$Osa, unalMap$Osa_Oki),
-  unalMap_Bar = isPresent(reps$Osa, unalMap$Osa_Bar),
-  unalMap_Nor = isPresent(reps$Osa, unalMap$Osa_Nor),
-  unalMap_Kum = isPresent(reps$Osa, unalMap$Osa_Kum),
-  unalMap_Aom = isPresent(reps$Osa, unalMap$Osa_Aom)
+briRepsOsa <- data.frame(
+  bri_Oki = isPresent(reps$Osa, bri$Osa_Oki),
+  bri_Bar = isPresent(reps$Osa, bri$Osa_Bar),
+  bri_Nor = isPresent(reps$Osa, bri$Osa_Nor),
+  bri_Kum = isPresent(reps$Osa, bri$Osa_Kum),
+  bri_Aom = isPresent(reps$Osa, bri$Osa_Aom)
 )
-UpSetR::upset(unalMapRepsOsa)
+UpSetR::upset(briRepsOsa)
 
-unalMapRepsBar <- data.frame(
-  unalMap_Oki = isPresent(reps$Bar, unalMap$Bar_Oki),
-  unalMap_Osa = isPresent(reps$Bar, unalMap$Bar_Osa),
-  unalMap_Nor = isPresent(reps$Bar, unalMap$Bar_Nor),
-  unalMap_Kum = isPresent(reps$Bar, unalMap$Bar_Kum),
-  unalMap_Aom = isPresent(reps$Bar, unalMap$Bar_Aom)
+briRepsBar <- data.frame(
+  bri_Oki = isPresent(reps$Bar, bri$Bar_Oki),
+  bri_Osa = isPresent(reps$Bar, bri$Bar_Osa),
+  bri_Nor = isPresent(reps$Bar, bri$Bar_Nor),
+  bri_Kum = isPresent(reps$Bar, bri$Bar_Kum),
+  bri_Aom = isPresent(reps$Bar, bri$Bar_Aom)
 )
-UpSetR::upset(unalMapRepsBar)
+UpSetR::upset(briRepsBar)
 ```
 
 ## Transposed
@@ -348,7 +348,7 @@ countGbsMatchingReps <- function(gb)  sum(sapply(gb$rep, \(x) ! any(is.na(x))))
 
 summaryMatchingReps <- (sapply(list(aligned    = gbs[1:15],     unAligned = unal[1:15],
              mapped     = coa[1:15],     unMapped  = unmap[1:15],
-             unAlMapped = unalMap[1:15],
+             unAlMapped = bri[1:15],
              transposed = tra[1:15],     transposed2 = tra2[1:15],
              mapped2    = coa2[1:15],    unMapped2 = unmap2[1:15]),
         fracGbsMatchingReps))

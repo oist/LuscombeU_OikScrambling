@@ -36,7 +36,7 @@ suppressPackageStartupMessages({
   library('ggplot2')
   library("BreakpointsData")
 })
-(genomes <- OikScrambling:::loadAllGenomes())
+genomes <- OikScrambling:::loadAllGenomes(compat = FALSE)
 ```
 
 Genomic breaks
@@ -49,18 +49,35 @@ Short / long arm annotation will be done by the `GenomicBreaks::flagLongShort()`
 function.
 
 ```{r long_and_short_arms}
-
 loadLongShort <- function(file, genome) {
   file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
   gr <- rtracklayer::import.gff3(file)
   gr$source <- gr$type <- gr$score <- gr$phase <- NULL
-  GRanges(gr, seqinfo = seqinfo(genome), strand = "*")
+  GRanges(gr, seqinfo = seqinfo(getBSgenome(genome)), strand = "*")
+}
+
+flagLongShort_ <- function(gr, longShort) {
+  genomeT <- gr |> genome() |> unique()
+  if(genomeT %in% names(longShort))
+    gr <- flagLongShort(gr, longShort[[genomeT]])
+  if("GBreaks" %in% class(gr)) {
+      genomeQ <- gr$query |> genome() |> unique()
+      if(genomeQ %in% names(longShort)) {
+        # sort, flag, unsort, extract flag
+        grq <- gr$query
+        grq$idx <- seq_along(grq)
+        grq <- sort(grq, ignore.strand = TRUE)
+        grq <- flagLongShort(grq, longShort[[genomeQ]])
+        gr$query$Arm <- grq$Arm[order(grq$idx)]
+      }
+  }
+  gr
 }
 
 longShort <- SimpleList()
-longShort$Oki <- loadLongShort("OKI2018_I69.v2/OKI2018_I69.arms.gff3", OKI2018_I69)
-longShort$Osa <- loadLongShort("OSKA2016v1.9/OSKA2016v1.9.arms.gff3", OSKA2016v1.9)
-longShort$Bar <- loadLongShort("Bar2_p4.Flye/Bar2_p4.Flye.arms.gff3", Bar2_p4)
+longShort$OKI2018.I69   <- loadLongShort("OKI2018_I69.v2/OKI2018_I69.arms.gff3", "OKI2018.I69")
+longShort$OSKA2016v1.9  <- loadLongShort("OSKA2016v1.9/OSKA2016v1.9.arms.gff3",  "OSKA2016v1.9")
+longShort$Bar2.p4       <- loadLongShort("Bar2_p4.Flye/Bar2_p4.Flye.arms.gff3",  "Bar2.p4")
 
 longShort
 ```
@@ -71,67 +88,54 @@ Repeat regions
 Load from `BreakpointsData` package via `OikScrambling:::loadAllRepeats()`
 
 ```{r load_repeats}
-(reps <- OikScrambling:::loadAllRepeats())
+(reps <- OikScrambling:::loadAllRepeats(compat = FALSE))
 
-annotateWithReps.GRanges <- function(gr, rep) {
+annotateWithReps <-  function(x, rep) UseMethod("annotateWithReps")
+
+annotateWithReps.GRanges <- function(x, rep) {
+  genome <- x |> genome() |> unique()
   # Inspired from CAGEr:::ranges2names
-  o <- findOverlaps(gr, rep, ignore.strand = TRUE)
+  o <- findOverlaps(x, rep[[genome]], ignore.strand = TRUE)
   o <- as(o, "List")
-  o <- extractList(rep$Class |> as.character(), o)
+  o <- extractList(rep[[genome]]$Class |> as.character(), o)
   o <- endoapply(o, unique)
   o[sapply(o, length) == 0] <- NA
-  gr$rep <- o
-  gr
+  x$rep <- o
+  x
 }
 
-overlapLength.GRanges <- function(gr, rep) {
+overlapLength.GRanges <- function(x, rep) {
+  genome <- x |> genome() |> unique()
   # Inspired from CAGEr:::ranges2names
-  redRep <- reduce(rep)
-  o <- findOverlaps(gr, redRep, ignore.strand = TRUE)
+  redRep <- reduce(rep[[genome]])
+  o <- findOverlaps(x, redRep, ignore.strand = TRUE)
   o <- as(o, "List")
   repGrl <- extractList(redRep, o)
-  gr$repOvlp <- pintersect(gr, repGrl) |> width() |> sum()
-  gr
+  x$repOvlp <- pintersect(x, repGrl) |> width() |> sum()
+  x
 }
 
-annotateWithReps.GBreaks <- function(gb, repT, repQ) {
-  gb$query <- annotateWithReps.GRanges(gb$query, repQ)
-  gb       <- annotateWithReps.GRanges(gb,       repT)
-  gb$query <- overlapLength.GRanges   (gb$query, repQ)
-  gb       <- overlapLength.GRanges   (gb,       repT)
+annotateWithReps.GBreaks <-  function(x,       rep) {
+  x$query <- annotateWithReps.GRanges(x$query, rep)
+  x       <- annotateWithReps.GRanges(x,       rep)
+  x$query <- overlapLength.GRanges   (x$query, rep)
+  x       <- overlapLength.GRanges   (x,       rep)
+  x
 }
 
-annotateWithReps.GBreaksSimpleList <- function(gbl, reps) {
-  gbl$Oki_Osa <- gbl$Oki_Osa |> annotateWithReps.GBreaks(reps$Oki, reps$Osa)
-  gbl$Oki_Bar <- gbl$Oki_Bar |> annotateWithReps.GBreaks(reps$Oki, reps$Bar)
-  gbl$Oki_Kum <- gbl$Oki_Kum |> annotateWithReps.GBreaks(reps$Oki, reps$Kum)
-  gbl$Oki_Aom <- gbl$Oki_Aom |> annotateWithReps.GBreaks(reps$Oki, reps$Aom)
-  gbl$Oki_Nor <- gbl$Oki_Nor |> annotateWithReps.GBreaks(reps$Oki, reps$Nor)
-  
-  gbl$Osa_Oki <- gbl$Osa_Oki |> annotateWithReps.GBreaks(reps$Osa, reps$Oki)
-  gbl$Osa_Bar <- gbl$Osa_Bar |> annotateWithReps.GBreaks(reps$Osa, reps$Bar)
-  gbl$Osa_Kum <- gbl$Osa_Kum |> annotateWithReps.GBreaks(reps$Osa, reps$Kum)
-  gbl$Osa_Aom <- gbl$Osa_Aom |> annotateWithReps.GBreaks(reps$Osa, reps$Aom)
-  gbl$Osa_Nor <- gbl$Osa_Nor |> annotateWithReps.GBreaks(reps$Osa, reps$Nor)
-  
-  gbl$Bar_Oki <- gbl$Bar_Oki |> annotateWithReps.GBreaks(reps$Bar, reps$Oki)
-  gbl$Bar_Osa <- gbl$Bar_Osa |> annotateWithReps.GBreaks(reps$Bar, reps$Osa)
-  gbl$Bar_Kum <- gbl$Bar_Kum |> annotateWithReps.GBreaks(reps$Bar, reps$Kum)
-  gbl$Bar_Aom <- gbl$Bar_Aom |> annotateWithReps.GBreaks(reps$Bar, reps$Aom)
-  gbl$Bar_Nor <- gbl$Bar_Nor |> annotateWithReps.GBreaks(reps$Bar, reps$Nor)
-  gbl
-}
+annotateWithReps.SimpleList <- function(x, rep)
+  sapply(x, annotateWithReps, rep) |> SimpleList()
 ```
 
 Transcript annotations
 ----------------------
 
 ```{r annotate_transcripts}
-(transcripts <- OikScrambling:::loadAllTranscriptsGR())
+(transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = FALSE))
 
-annotateWithTranscripts <-  function(x, annotT, annotQ) UseMethod("annotateWithTranscripts")
+annotateWithTranscripts <-  function(x, transcripts) UseMethod("annotateWithTranscripts")
 
-annotateWithTranscripts.GRanges <- function(x, annotT, annotQ = NULL) {
+annotateWithTranscripts.GRanges <- function(x, transcripts) {
   # Taken from CAGEr (and I am the author)
   ranges2names <- function (rangesA, rangesB) {
     if (is.null(names(rangesB))) 
@@ -143,40 +147,20 @@ annotateWithTranscripts.GRanges <- function(x, annotT, annotQ = NULL) {
     names <- unstrsplit(names, ";")
     Rle(names)
   }
-  x$transcripts <- ranges2names(x, annotT)
+  genomeT <- x |> genome() |> unique()
+  x$transcripts <- ranges2names(x, transcripts[[genomeT]])
   x$transcripts[x$transcripts == ''] <- NA
   x
 }
 
-annotateWithTranscripts.GBreaks <- function(x, annotT, annotQ) {
-  x$query <- annotateWithTranscripts.GRanges(x$query, annotQ)
-  x       <- annotateWithTranscripts.GRanges(x,       annotT)
+annotateWithTranscripts.GBreaks <- function(x, transcripts) {
+  x$query <- annotateWithTranscripts.GRanges(x$query, transcripts)
+  x       <- annotateWithTranscripts.GRanges(x,       transcripts)
   x
 }
 
-annotateWithTranscripts.GRangesList <- function(x, annotT, annotQ = annotT) {
-  x$Oki_Osa <- x$Oki_Osa |> annotateWithTranscripts(annotT$Oki, annotQ$Osa)
-  x$Oki_Bar <- x$Oki_Bar |> annotateWithTranscripts(annotT$Oki, annotQ$Bar)
-  x$Oki_Kum <- x$Oki_Kum |> annotateWithTranscripts(annotT$Oki, annotQ$Kum)
-  x$Oki_Aom <- x$Oki_Aom |> annotateWithTranscripts(annotT$Oki, annotQ$Aom)
-  x$Oki_Nor <- x$Oki_Nor |> annotateWithTranscripts(annotT$Oki, annotQ$Nor)
-  
-  x$Osa_Oki <- x$Osa_Oki |> annotateWithTranscripts(annotT$Osa, annotQ$Oki)
-  x$Osa_Bar <- x$Osa_Bar |> annotateWithTranscripts(annotT$Osa, annotQ$Bar)
-  x$Osa_Kum <- x$Osa_Kum |> annotateWithTranscripts(annotT$Osa, annotQ$Kum)
-  x$Osa_Aom <- x$Osa_Aom |> annotateWithTranscripts(annotT$Osa, annotQ$Aom)
-  x$Osa_Nor <- x$Osa_Nor |> annotateWithTranscripts(annotT$Osa, annotQ$Nor)
-  
-  x$Bar_Oki <- x$Bar_Oki |> annotateWithTranscripts(annotT$Bar, annotQ$Oki)
-  x$Bar_Osa <- x$Bar_Osa |> annotateWithTranscripts(annotT$Bar, annotQ$Osa)
-  x$Bar_Kum <- x$Bar_Kum |> annotateWithTranscripts(annotT$Bar, annotQ$Kum)
-  x$Bar_Aom <- x$Bar_Aom |> annotateWithTranscripts(annotT$Bar, annotQ$Aom)
-  x$Bar_Nor <- x$Bar_Nor |> annotateWithTranscripts(annotT$Bar, annotQ$Nor)
-  x
-}
-
-annotateWithTranscripts.SimpleList <- function(x, annotT, annotQ = annotT)
-  annotateWithTranscripts.GRangesList(x, annotT = annotT, annotQ = annotQ)
+annotateWithTranscripts.SimpleList <- function(x, transcripts)
+  sapply(x, annotateWithTranscripts, transcripts) |> SimpleList()
 ```
 
 Mapped alignments
@@ -189,50 +173,48 @@ Let's load data from genome alignments, using the copy distributed in the
 # Local function to add extra annotation on long/short arms while loading data
 load_genomic_breaks_ <- function(file, genomeT, genomeQ, longShort=NULL) {
   file <- system.file(paste0("extdata/Oidioi_pairwise_v3/", file), package = "BreakpointsData")
-  gb <- load_genomic_breaks(file, genomeT,  genomeQ)
-  if (! is.null(longShort)) {
-    gb <-  flagLongShort(gb, longShort)
-  }
-  gb
+  gb <- load_genomic_breaks(file, getBSgenome(genomeT),  getBSgenome(genomeQ))
+  flagLongShort_(gb, longShort)
 }
 
 gbs <- SimpleList()
 
-gbs$Oki_Osa <- load_genomic_breaks_("OKI2018_I69_1.0__OSKA2016v1.9.gff.gz", OKI2018_I69,  OSKA2016v1.9, longShort$Oki) |> annotateWithReps.GBreaks(reps$Oki, reps$Osa)
-gbs$Oki_Bar <- load_genomic_breaks_("OKI2018_I69_1.0__Bar2_p4.gff.gz",      OKI2018_I69,  Bar2_p4,      longShort$Oki) |> annotateWithReps.GBreaks(reps$Oki, reps$Bar)
-gbs$Oki_Kum <- load_genomic_breaks_("OKI2018_I69_1.0__KUM-M3-7f.gff.gz",    OKI2018_I69,  KUM_M3,       longShort$Oki) |> annotateWithReps.GBreaks(reps$Oki, reps$Kum)
-gbs$Oki_Aom <- load_genomic_breaks_("OKI2018_I69_1.0__AOM-5-5f.gff.gz",     OKI2018_I69,  AOM_5,        longShort$Oki) |> annotateWithReps.GBreaks(reps$Oki, reps$Aom)
-gbs$Oki_Nor <- load_genomic_breaks_("OKI2018_I69_1.0__OdB3.gff.gz",         OKI2018_I69,  OdB3,         longShort$Oki) |> annotateWithReps.GBreaks(reps$Oki, reps$Nor)
+gbs$Oki_Osa <- load_genomic_breaks_("OKI2018_I69_1.0__OSKA2016v1.9.gff.gz", "OKI2018.I69",  "OSKA2016v1.9", longShort)
+gbs$Oki_Bar <- load_genomic_breaks_("OKI2018_I69_1.0__Bar2_p4.gff.gz",      "OKI2018.I69",  "Bar2.p4",      longShort)
+gbs$Oki_Kum <- load_genomic_breaks_("OKI2018_I69_1.0__KUM-M3-7f.gff.gz",    "OKI2018.I69",  "KUM.M3.7f",    longShort)
+gbs$Oki_Aom <- load_genomic_breaks_("OKI2018_I69_1.0__AOM-5-5f.gff.gz",     "OKI2018.I69",  "AOM.5.5f",     longShort)
+gbs$Oki_Nor <- load_genomic_breaks_("OKI2018_I69_1.0__OdB3.gff.gz",         "OKI2018.I69",  "OdB3",         longShort)
 
-gbs$Osa_Oki <- load_genomic_breaks_("OSKA2016v1.9__OKI2018_I69_1.0.gff.gz", OSKA2016v1.9, OKI2018_I69,  longShort$Osa) |> annotateWithReps.GBreaks(reps$Osa, reps$Oki)
-gbs$Osa_Bar <- load_genomic_breaks_("OSKA2016v1.9__Bar2_p4.gff.gz",         OSKA2016v1.9, Bar2_p4,      longShort$Osa) |> annotateWithReps.GBreaks(reps$Osa, reps$Bar)
-gbs$Osa_Kum <- load_genomic_breaks_("OSKA2016v1.9__KUM-M3-7f.gff.gz",       OSKA2016v1.9, KUM_M3,       longShort$Osa) |> annotateWithReps.GBreaks(reps$Osa, reps$Kum)
-gbs$Osa_Aom <- load_genomic_breaks_("OSKA2016v1.9__AOM-5-5f.gff.gz",        OSKA2016v1.9, AOM_5,        longShort$Osa) |> annotateWithReps.GBreaks(reps$Osa, reps$Aom)
-gbs$Osa_Nor <- load_genomic_breaks_("OSKA2016v1.9__OdB3.gff.gz",            OSKA2016v1.9, OdB3,         longShort$Osa) |> annotateWithReps.GBreaks(reps$Osa, reps$Nor)
+gbs$Osa_Oki <- load_genomic_breaks_("OSKA2016v1.9__OKI2018_I69_1.0.gff.gz", "OSKA2016v1.9", "OKI2018.I69",  longShort)
+gbs$Osa_Bar <- load_genomic_breaks_("OSKA2016v1.9__Bar2_p4.gff.gz",         "OSKA2016v1.9", "Bar2.p4",      longShort)
+gbs$Osa_Kum <- load_genomic_breaks_("OSKA2016v1.9__KUM-M3-7f.gff.gz",       "OSKA2016v1.9", "KUM.M3.7f",    longShort)
+gbs$Osa_Aom <- load_genomic_breaks_("OSKA2016v1.9__AOM-5-5f.gff.gz",        "OSKA2016v1.9", "AOM.5.5f",     longShort)
+gbs$Osa_Nor <- load_genomic_breaks_("OSKA2016v1.9__OdB3.gff.gz",            "OSKA2016v1.9", "OdB3",         longShort)
 
-gbs$Bar_Oki <- load_genomic_breaks_("Bar2_p4__OKI2018_I69_1.0.gff.gz",      Bar2_p4,     OKI2018_I69,   longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Oki)
-gbs$Bar_Osa <- load_genomic_breaks_("Bar2_p4__OSKA2016v1.9.gff.gz",         Bar2_p4,     OSKA2016v1.9,  longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Osa)
-gbs$Bar_Kum <- load_genomic_breaks_("Bar2_p4__KUM-M3-7f.gff.gz",            Bar2_p4,     KUM_M3,        longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Kum)
-gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             Bar2_p4,     AOM_5,         longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Aom)
-gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 Bar2_p4,     OdB3,          longShort$Bar) |> annotateWithReps.GBreaks(reps$Bar, reps$Nor)
+gbs$Bar_Oki <- load_genomic_breaks_("Bar2_p4__OKI2018_I69_1.0.gff.gz",      "Bar2.p4",     "OKI2018.I69",   longShort)
+gbs$Bar_Osa <- load_genomic_breaks_("Bar2_p4__OSKA2016v1.9.gff.gz",         "Bar2.p4",     "OSKA2016v1.9",  longShort)
+gbs$Bar_Kum <- load_genomic_breaks_("Bar2_p4__KUM-M3-7f.gff.gz",            "Bar2.p4",     "KUM.M3.7f",     longShort)
+gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             "Bar2.p4",     "AOM.5.5f",      longShort)
+gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 "Bar2.p4",     "OdB3",          longShort)
 
 Oik_Oik <- names(gbs)
 
 gbs$Ply_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_int_R.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
 gbs$Ply_Rob <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_rob_HT.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
 gbs$Ply_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_sav.gff.gz",            package = "BreakpointsData"),    NULL,     NULL)
-gbs$Ply_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__OKI2018_I69_1.0.gff.gz",  package = "BreakpointsData"),    NULL,     OKI2018_I69)
+gbs$Ply_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__OKI2018_I69_1.0.gff.gz",  package = "BreakpointsData"),    NULL, genomes$OKI2018.I69)
 
 gbs$Rob_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_int_R.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
 gbs$Rob_Ply <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_int_P.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
 gbs$Rob_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_sav.gff.gz",           package = "BreakpointsData"),    NULL,     NULL)
-gbs$Rob_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__OKI2018_I69_1.0.gff.gz", package = "BreakpointsData"),    NULL,     OKI2018_I69)
+gbs$Rob_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__OKI2018_I69_1.0.gff.gz", package = "BreakpointsData"),    NULL,  genomes$OKI2018.I69)
 
 gbs$Dme_Dbu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Dbus_ASM1175060v1.gff.gz",     package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dsu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__RU_Dsub_v1.1.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dya <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Prin_Dyak_Tai18E2_2.0.gff.gz", package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dma <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Dmau_ASM438214v1.gff.gz",      package = "BreakpointsData"),    NULL,     NULL)
 
+gbs[Oik_Oik] <-        annotateWithReps(gbs[Oik_Oik], reps)
 gbs[Oik_Oik] <- annotateWithTranscripts(gbs[Oik_Oik], transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
 ```
@@ -244,17 +226,9 @@ Note that the unaligned regions are strandless and unpaired by definition.
 
 ```{r unal}
 unal  <- BiocParallel::bplapply(gbs, cleanGaps) |> SimpleList()
-unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], flagLongShort, longShort$Oki)
-unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], flagLongShort, longShort$Osa)
-unal[11:15] <- BiocParallel::bplapply(unal[11:15], flagLongShort, longShort$Bar)
-
-unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
-unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithReps.GRanges, reps$Osa)
-unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithReps.GRanges, reps$Bar)
-
-unal[ 1:5 ] <- BiocParallel::bplapply(unal[ 1:5 ], annotateWithTranscripts, transcripts$Oki)
-unal[ 6:10] <- BiocParallel::bplapply(unal[ 6:10], annotateWithTranscripts, transcripts$Osa)
-unal[11:15] <- BiocParallel::bplapply(unal[11:15], annotateWithTranscripts, transcripts$Bar)
+unal[Oik_Oik] <- BiocParallel::bplapply(unal[Oik_Oik], flagLongShort_, longShort)
+unal[Oik_Oik] <- BiocParallel::bplapply(unal[Oik_Oik], annotateWithReps, reps)
+unal[Oik_Oik] <- BiocParallel::bplapply(unal[Oik_Oik], annotateWithTranscripts, transcripts)
 ```
 
 Coalescing alignments
@@ -267,13 +241,9 @@ region are aligned and some not (see the “mapped unaligned regions” later).
 
 ```{r coalescing_algorithm, cache=TRUE, dependson="GBreaks_object"}
 coa <- BiocParallel::bplapply(gbs, coalesce_contigs) |> SimpleList()
-coa[ 1:5]  <- BiocParallel::bplapply(coa[ 1:5],  flagLongShort, longShort$Oki)
-coa[ 6:10] <- BiocParallel::bplapply(coa[ 6:10], flagLongShort, longShort$Osa)
-coa[11:15] <- BiocParallel::bplapply(coa[11:15], flagLongShort, longShort$Bar)
-
-coa[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(coa[Oik_Oik], reps)
+coa[Oik_Oik] <- BiocParallel::bplapply(coa[Oik_Oik],  flagLongShort_, longShort)
+coa[Oik_Oik] <- annotateWithReps(coa[Oik_Oik], reps)
 coa[Oik_Oik] <- annotateWithTranscripts(coa[Oik_Oik], transcripts)
-
 coa <- sapply(coa, flagAll) |> SimpleList()
 ```
 
@@ -301,19 +271,10 @@ We can not call them “uncoalesced” because this would also qualify aligned
 regions that were not colinear with any other region.
 
 ```{r unmap}
-unmap <- BiocParallel::bplapply(coa, cleanGaps) |> SimpleList()
-
-unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], flagLongShort, longShort$Oki)
-unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], flagLongShort, longShort$Osa)
-unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], flagLongShort, longShort$Bar)
-
-unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
-unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithReps.GRanges, reps$Osa)
-unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithReps.GRanges, reps$Bar)
-
-unmap[ 1:5 ] <- BiocParallel::bplapply(unmap[ 1:5 ], annotateWithTranscripts, transcripts$Oki)
-unmap[ 6:10] <- BiocParallel::bplapply(unmap[ 6:10], annotateWithTranscripts, transcripts$Osa)
-unmap[11:15] <- BiocParallel::bplapply(unmap[11:15], annotateWithTranscripts, transcripts$Bar)
+unmap  <- BiocParallel::bplapply(coa, cleanGaps) |> SimpleList()
+unmap[Oik_Oik] <- BiocParallel::bplapply(unmap[Oik_Oik], flagLongShort_, longShort)
+unmap[Oik_Oik] <- BiocParallel::bplapply(unmap[Oik_Oik], annotateWithReps, reps)
+unmap[Oik_Oik] <- BiocParallel::bplapply(unmap[Oik_Oik], annotateWithTranscripts, transcripts)
 ```
 
 ### Flag non-coalesced
@@ -364,37 +325,17 @@ makeWholeGenomeObject <- function(aligned, unaligned, coalesced) {
 wgo <- mapply(makeWholeGenomeObject, gbs, unal, coa) |> SimpleList()
 ```
 
-Mapped unaligned regions
-------------------------
+Bridge regions
+--------------
 
 We can pair the unaligned regions that are between two colinearly aligned regions.
 
 ```{r mappedUnaligned, cache = TRUE, dependson="GBreaks_object"}
-filterMappedUnaligned <- function(gb) {
-  colinearRegions <- filterColinearRegions(flagColinearAlignments(gb), rename = FALSE)
-  # Turning the sequence of [(TRUE)n, FALSE]n into indices.
-  idx <- c(0, head(cumsum(!colinearRegions$colinear), -1))
-  gbl <- split(colinearRegions, idx)
-  unalMap <- endoapply(gbl, \(gb) {
-    # Check strand
-    onMinus <- all(strand(gb) == "-")
-    # Need to subtract 1 because some ranges are adjacent (no gap)
-    GBreaks(target = cleanGaps(gb      - 1),
-            query  = cleanGaps(gb$query -1) |> sort(decreasing = onMinus))
-  }) |> unlist()
-  names(unalMap) <- NULL
-  unalMap
-}
+bri <- BiocParallel::bplapply(gbs, bridgeRegions) |> as("SimpleList")
 
-unalMap <- BiocParallel::bplapply(gbs, filterMappedUnaligned) |> as("SimpleList")
-
-unalMap[ 1:5 ] <- BiocParallel::bplapply(unalMap[ 1:5 ], flagLongShort, longShort$Oki)
-unalMap[ 6:10] <- BiocParallel::bplapply(unalMap[ 6:10], flagLongShort, longShort$Osa)
-unalMap[11:15] <- BiocParallel::bplapply(unalMap[11:15], flagLongShort, longShort$Bar)
-
-unalMap[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(unalMap[Oik_Oik], reps)
-unalMap[Oik_Oik] <- annotateWithTranscripts(unalMap[Oik_Oik], transcripts)
-unalMap[Oik_Oik] <- sapply(unalMap[Oik_Oik], flagAll) |> SimpleList()
+bri[Oik_Oik] <- BiocParallel::bplapply(bri[Oik_Oik], flagLongShort_, longShort)
+bri[Oik_Oik] <- annotateWithReps(bri[Oik_Oik], reps)
+bri[Oik_Oik] <- annotateWithTranscripts(bri[Oik_Oik], transcripts)
 ```
 
 Translocated regions
@@ -405,37 +346,23 @@ regions that would be colinear if there would not be a translocation separating
 them.
 
 ```{r translocated_regions, cache=TRUE, dependson="coalescing_algorithm"}
-removeTranslocations <- function(gb) {
-  if(any(gb$tra))
-    gb <- gb[-(which(gb$tra) + 1)]
-  gb
-}
-
 traGaps <- function(coa) {
   # The input MUST already be coalesced.
-  # First, flag translocations on the target genome
-  tra.target <- flagTranslocations(coa)$tra
-  # Second, do it again on the query genome
-  tra <- swap(coa) |> sort(ignore.strand = TRUE) |> flagTranslocations()
-  tra.query <- tra$tra
-  tra <- swap(tra) |> sort(ignore.strand = TRUE)
-  tra$tra <- tra.target | tra.query
+  tra <- flagTranslocations(coa)
+  # Consider both sides
+  tra$tra <- tra$tra | tra$query$tra
   # Then, remove translocated regions
-  tra <- removeTranslocations(tra)
-  # Then extract the newly "unaligned mapped" regions
+  tra <- filterTranslocations(tra, remove = TRUE)
+  # Finally, extract the newly "unaligned mapped" regions.
   # They contain the gaps left by the removal of the translocated regions.
-  filterMappedUnaligned(tra)
+  bridgeRegions(tra)
 }
 
 tra <- BiocParallel::bplapply(coa, traGaps) |> as("SimpleList")
 
-tra[ 1:5 ] <- BiocParallel::bplapply(tra[ 1:5 ], flagLongShort, longShort$Oki)
-tra[ 6:10] <- BiocParallel::bplapply(tra[ 6:10], flagLongShort, longShort$Osa)
-tra[11:15] <- BiocParallel::bplapply(tra[11:15], flagLongShort, longShort$Bar)
-
-tra[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(tra[Oik_Oik], reps)
+tra[Oik_Oik] <- BiocParallel::bplapply(tra[Oik_Oik], flagLongShort_, longShort)
+tra[Oik_Oik] <- annotateWithReps(tra[Oik_Oik], reps)
 tra[Oik_Oik] <- annotateWithTranscripts(tra[Oik_Oik], transcripts)
-tra <- sapply(tra, flagAll) |> SimpleList()
 ```
 
 Coalesce again
@@ -461,11 +388,9 @@ removeTranslocationsOnBothGenomes <- function(gb)
     swap() |> sort(i=T)
 
 coa2 <- BiocParallel::bplapply(coa, removeTranslocationsOnBothGenomes) |> SimpleList()
-coa2[ 1:5]  <- BiocParallel::bplapply(coa2[ 1:5],  flagLongShort, longShort$Oki)
-coa2[ 6:10] <- BiocParallel::bplapply(coa2[ 6:10], flagLongShort, longShort$Osa)
-coa2[11:15] <- BiocParallel::bplapply(coa2[11:15], flagLongShort, longShort$Bar)
 
-coa2[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(coa2[Oik_Oik], reps)
+coa2[Oik_Oik] <- BiocParallel::bplapply(coa2[Oik_Oik], flagLongShort_, longShort)
+coa2[Oik_Oik] <- annotateWithReps(coa2[Oik_Oik], reps)
 coa2[Oik_Oik] <- annotateWithTranscripts(coa2[Oik_Oik], transcripts)
 coa2 <- sapply(coa2, flagAll) |> SimpleList()
 ```
@@ -476,19 +401,10 @@ Unmapped regions 2
 The intervals between double-coalesced regions.
 
 ```{r unmap2}
-unmap2 <- BiocParallel::bplapply(coa2, cleanGaps) |> SimpleList()
-
-unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], flagLongShort, longShort$Oki)
-unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], flagLongShort, longShort$Osa)
-unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], flagLongShort, longShort$Bar)
-
-unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithReps.GRanges, reps$Oki)
-unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithReps.GRanges, reps$Osa)
-unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithReps.GRanges, reps$Bar)
-
-unmap2[ 1:5 ] <- BiocParallel::bplapply(unmap2[ 1:5 ], annotateWithTranscripts, transcripts$Oki)
-unmap2[ 6:10] <- BiocParallel::bplapply(unmap2[ 6:10], annotateWithTranscripts, transcripts$Osa)
-unmap2[11:15] <- BiocParallel::bplapply(unmap2[11:15], annotateWithTranscripts, transcripts$Bar)
+unmap2  <- BiocParallel::bplapply(coa2, cleanGaps) |> SimpleList()
+unmap2[Oik_Oik] <- BiocParallel::bplapply(unmap2[Oik_Oik], flagLongShort_, longShort)
+unmap2[Oik_Oik] <- BiocParallel::bplapply(unmap2[Oik_Oik], annotateWithReps, reps)
+unmap2[Oik_Oik] <- BiocParallel::bplapply(unmap2[Oik_Oik], annotateWithTranscripts, transcripts)
 ```
 
 Translocated regions 2
@@ -499,14 +415,9 @@ To check that we really removed the small ones as intented.
 ```{r translocated_regions2, cache=TRUE, dependson="re_coalesce"}
 tra2 <- BiocParallel::bplapply(coa2, traGaps) |> as("SimpleList")
 
-tra2[ 1:5 ] <- BiocParallel::bplapply(tra2[ 1:5 ], flagLongShort, longShort$Oki)
-tra2[ 6:10] <- BiocParallel::bplapply(tra2[ 6:10], flagLongShort, longShort$Osa)
-tra2[11:15] <- BiocParallel::bplapply(tra2[11:15], flagLongShort, longShort$Bar)
-
-tra2[Oik_Oik] <- annotateWithReps.GBreaksSimpleList(tra2[Oik_Oik], reps)
+tra2[Oik_Oik] <- BiocParallel::bplapply(tra2[Oik_Oik], flagLongShort_, longShort)
+tra2[Oik_Oik] <- annotateWithReps(tra2[Oik_Oik], reps)
 tra2[Oik_Oik] <- annotateWithTranscripts(tra2[Oik_Oik], transcripts)
-
-tra2 <- sapply(tra2, flagAll) |> SimpleList()
 ```
 
 
@@ -521,7 +432,7 @@ bp_summary <-
     coa     = sapply(coa, length),
     unmap   = sapply(unmap, length),
     unmap2  = sapply(unmap2, length),
-    unalMap = sapply(unalMap, length),
+    bri = sapply(bri, length),
     tra     = sapply(tra, length),
     tra2    = sapply(tra2, length),
     coa2    = sapply(coa2, length)
@@ -719,9 +630,9 @@ align_summary |>
 ```
 
 ```{r breakpoints_per_Mb}
-genome_sizes=list(Aom=sum(seqlengths(genomes$Aom)), Bar=sum(seqlengths(genomes$Bar)),
-                  Oki=sum(seqlengths(genomes$Oki)), Osa=sum(seqlengths(genomes$Osa)),
-                  Kum=sum(seqlengths(genomes$Kum)), Nor=sum(seqlengths(genomes$Nor)),
+genome_sizes=list(Aom=sum(seqlengths(genomes$AOM.5.5f)), Bar=sum(seqlengths(genomes$Bar2.p4)),
+                  Oki=sum(seqlengths(genomes$OKI2018.I69)), Osa=sum(seqlengths(genomes$OSKA2016v1.9)),
+                  Kum=sum(seqlengths(genomes$KUM.M3.7f)), Nor=sum(seqlengths(genomes$OdB3)),
                   Ply=128639392, Ros=134327879, Sav=177003750, Rob=117529544,
                   Dme=137547960, Dbu=110837441, Dsu=130045071, Dya=136883712
                   ) |> unlist()
@@ -763,7 +674,7 @@ Save data
 =========
 
 ```{r save_data}
-save(gbs, unal, coa, unmap, unalMap, tra, tra2, coa2, unmap2, wgo, longShort, file = "BreakPoints.Rdata")
+save(gbs, unal, coa, unmap, bri, tra, tra2, coa2, unmap2, wgo, longShort, file = "BreakPoints.Rdata")
 system("echo '9f273f099ecbfa44899b6c343d1382f1  BreakPoints.Rdata' | md5sum -c", intern = TRUE)
 ```
 

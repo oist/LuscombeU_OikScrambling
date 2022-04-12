@@ -19,7 +19,7 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
       </span>
     </div>
 
@@ -37,6 +37,9 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/CNEs.html">Conserved non-coding elements</a>
+    </li>
+    <li>
       <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
     </li>
     <li>
@@ -61,7 +64,10 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
       <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
     </li>
     <li>
-      <a href="../articles/PWM.html">Motif finding and analysis</a>
+      <a href="../articles/PAC3.html">Region of interest: PAC3</a>
+    </li>
+    <li>
+      <a href="../articles/PWM.html">Motif search and analysis</a>
     </li>
     <li>
       <a href="../articles/ParallelPlots.html">Whole-chromosome parallel plots</a>
@@ -70,10 +76,19 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
       <a href="../articles/RegionWidths.html">Width of the aligned and mapped regions.</a>
     </li>
     <li>
+      <a href="../articles/RegionsOfInterest.html">Regions of interest</a>
+    </li>
+    <li>
       <a href="../articles/RepeatRegions.html">Repeat regions</a>
     </li>
     <li>
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
+    </li>
+    <li>
+      <a href="../articles/TFBS.html">Transcription factor binding sites</a>
+    </li>
+    <li>
+      <a href="../articles/TandemSiteDuplications.html">Tandem site duplications</a>
     </li>
     <li>
       <a href="../articles/Translocations.html">Translocations</a>
@@ -133,6 +148,97 @@ with comma characters.  Species that are not part of the clade covered by
 the table have <code>NA</code> in every row.</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Example for loading all orthogroups:</span></span>
+<span class="r-in"><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu">load_one_to_ones</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 5162 rows and 9 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 HOG          OG Gene Tree Parent Clade</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;character&gt; &lt;character&gt;            &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    N19.HOG0000000   OG0000000                    n15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    N19.HOG0000002   OG0000000                    n88</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    N19.HOG0000003   OG0000000                    n96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    N19.HOG0000004   OG0000000                   n103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    N19.HOG0000008   OG0000000                   n156</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...             ...         ...                    ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5158 N19.HOG0014641   OG0014948                     n0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5159 N19.HOG0014642   OG0014949                     n0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5160 N19.HOG0014644   OG0014951                     n0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5161 N19.HOG0014646   OG0014953                     n0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5162 N19.HOG0014647   OG0014954                     n0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      AOM-5-5f.prot.longest.fa_1 Bar2_p4.Flye.prot.longest.fa_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     &lt;character&gt;                    &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1             AOM-5-5f.g9811.t1         Bar2_p4_Flye.g12146.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            AOM-5-5f.g10661.t1         Bar2_p4_Flye.g12951.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3            AOM-5-5f.g10128.t1         Bar2_p4_Flye.g12454.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4             AOM-5-5f.g9214.t1         Bar2_p4_Flye.g11186.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5             AOM-5-5f.g2181.t1          Bar2_p4_Flye.g8280.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...                         ...                            ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5158          AOM-5-5f.g9913.t1         Bar2_p4_Flye.g12245.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5159          AOM-5-5f.g9950.t1         Bar2_p4_Flye.g12277.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5160          AOM-5-5f.g9966.t1         Bar2_p4_Flye.g12292.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5161          AOM-5-5f.g9981.t1         Bar2_p4_Flye.g12306.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5162          AOM-5-5f.g9987.t1         Bar2_p4_Flye.g12313.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      KUM-M3-7f.prot.longest.fa_1 OKI2018_I69.v2.prot.longest.fa_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;character&gt;                      &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            KUM-M3-7f.g12730.t1           OKI2018_I69.v2.g1680..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            KUM-M3-7f.g14801.t1           OKI2018_I69.v2.g7899..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3            KUM-M3-7f.g11014.t1           OKI2018_I69.v2.g1507..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            KUM-M3-7f.g12676.t1           OKI2018_I69.v2.g1675..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5             KUM-M3-7f.g5128.t1           OKI2018_I69.v2.g1156..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...                          ...                              ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5158          KUM-M3-7f.g9515.t1           OKI2018_I69.v2.g1353..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5159         KUM-M3-7f.g12745.t1           OKI2018_I69.v2.g1681..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5160         KUM-M3-7f.g12085.t1           OKI2018_I69.v2.g1614..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5161         KUM-M3-7f.g12067.t1           OKI2018_I69.v2.g1613..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5162         KUM-M3-7f.g12060.t1           OKI2018_I69.v2.g1612..</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      OSKA2016v1.9.prot.longest.fa_1 OdB3.v1.0.prot.fa_1.nohaplo</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         &lt;character&gt;                 &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            OSKA2016v1.9.g12947.t1      OdB3.GSOIDT00001753001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            OSKA2016v1.9.g12103.t1      OdB3.GSOIDT00003131001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3            OSKA2016v1.9.g12629.t1      OdB3.GSOIDT00010574001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            OSKA2016v1.9.g13527.t1      OdB3.GSOIDT00005080001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5             OSKA2016v1.9.g9587.t1      OdB3.GSOIDT00003802001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...                             ...                         ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5158         OSKA2016v1.9.g12845.t1      OdB3.GSOIDT00006454001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5159         OSKA2016v1.9.g12805.t1      OdB3.GSOIDT00006471001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5160         OSKA2016v1.9.g12790.t1      OdB3.GSOIDT00006489001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5161         OSKA2016v1.9.g12773.t1      OdB3.GSOIDT00006508001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5162         OSKA2016v1.9.g12766.t1      OdB3.GSOIDT00006515001</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Example for loading a pair</span></span>
+<span class="r-in"><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu">load_one_to_ones</span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span></span>
+<span class="r-in">                                  , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 9172 rows and 5 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 HOG          OG Gene Tree Parent Clade</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;character&gt; &lt;character&gt;            &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    N19.HOG0000000   OG0000000                    n15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    N19.HOG0000002   OG0000000                    n88</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    N19.HOG0000003   OG0000000                    n96</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    N19.HOG0000004   OG0000000                   n103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    N19.HOG0000005   OG0000000                   n122</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...             ...         ...                    ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9168 N19.HOG0017512   OG0028110                      -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9169 N19.HOG0017517   OG0028116                      -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9170 N19.HOG0017521   OG0028120                      -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9171 N19.HOG0017528   OG0028128                      -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9172 N19.HOG0017530   OG0028130                      -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Bar2_p4.Flye.prot.longest.fa_1 OSKA2016v1.9.prot.longest.fa_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         &lt;character&gt;                    &lt;character&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            Bar2_p4_Flye.g12146.t1         OSKA2016v1.9.g12947.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            Bar2_p4_Flye.g12951.t1         OSKA2016v1.9.g12103.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3            Bar2_p4_Flye.g12454.t1         OSKA2016v1.9.g12629.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            Bar2_p4_Flye.g11186.t1         OSKA2016v1.9.g13527.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5            Bar2_p4_Flye.g11443.t1         OSKA2016v1.9.g14131.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...                             ...                            ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9168          Bar2_p4_Flye.g7540.t1          OSKA2016v1.9.g6477.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9169           Bar2_p4_Flye.g801.t1          OSKA2016v1.9.g1518.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9170          Bar2_p4_Flye.g8448.t1          OSKA2016v1.9.g9813.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9171          Bar2_p4_Flye.g9382.t1         OSKA2016v1.9.g10500.t1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9172          Bar2_p4_Flye.g9616.t1          OSKA2016v1.9.g9098.t1</span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -145,7 +251,7 @@ the table have <code>NA</code> in every row.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

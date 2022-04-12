@@ -12,9 +12,13 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{css, echo=FALSE}
+pre, code {white-space:pre !important; overflow-x:auto}
+```
+
 ```{r setup}
 knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
-knitr::opts_knit$set(verbose = TRUE)
+options(width = 200)
 ```
 
 # Load R pacakges and data
@@ -23,7 +27,7 @@ knitr::opts_knit$set(verbose = TRUE)
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('ggplot2')
 requireNamespace('patchwork') |> suppressPackageStartupMessages()
-genomes <- OikScrambling:::loadAllGenomes()
+genomes <- OikScrambling:::loadAllGenomes(compat = F)
 load("BreakPoints.Rdata")
 ces <- readRDS("CEs.Rds")
 ```
@@ -67,11 +71,14 @@ makeWidthsDF <- function (objList) {
   }) |> do.call(what=rbind)
 }
 
+isol <- sapply(gbs, \(gb) gb[gb$nonCoa]) |> SimpleList()
+
 widths$gbs     <- makeWidthsDF(gbs)     |> tibble::as_tibble()
+widths$isol    <- makeWidthsDF(isol)    |> tibble::as_tibble()
 widths$unal    <- makeWidthsDF(unal)    |> tibble::as_tibble()
 widths$coa     <- makeWidthsDF(coa)     |> tibble::as_tibble()
 widths$unmap   <- makeWidthsDF(unmap)   |> tibble::as_tibble()
-widths$unalMap <- makeWidthsDF(unalMap) |> tibble::as_tibble()
+widths$bri     <- makeWidthsDF(bri)     |> tibble::as_tibble()
 widths$tra     <- makeWidthsDF(tra)     |> tibble::as_tibble()
 widths$tra2    <- makeWidthsDF(tra2)    |> tibble::as_tibble()
 widths$coa2    <- makeWidthsDF(coa2)    |> tibble::as_tibble()
@@ -101,19 +108,21 @@ gg_freq_poly <- function(tibble) {
 }
 
 w_df <- rbind(widths$gbs     |> as.data.frame()|> dplyr::mutate(what = "aligned"),
-                   widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
-                   widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
-                   widths$unalMap |> as.data.frame()|> dplyr::mutate(what = "mapped unaligned"),
-                   widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
-                   widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
+              widths$isol    |> as.data.frame()|> dplyr::mutate(what = "isolated"),
+              widths$unal    |> as.data.frame()|> dplyr::mutate(what = "unaligned"),
+              widths$coa     |> as.data.frame()|> dplyr::mutate(what = "mapped"),
+              widths$bri     |> as.data.frame()|> dplyr::mutate(what = "bridge"),
+              widths$unmap   |> as.data.frame()|> dplyr::mutate(what = "unmaped"),
+              widths$coa2    |> as.data.frame()|> dplyr::mutate(what = "doublecoalesced"))
 
 
-widths_all_tibble <- rbind(widths$gbs |> dplyr::mutate(what = "aligned"),
-                       widths$unal    |> dplyr::mutate(what = "unaligned"),
-                       widths$coa     |> dplyr::mutate(what = "mapped"),
-                       widths$unalMap |> dplyr::mutate(what = "mapped unaligned"),
-                       widths$unmap   |> dplyr::mutate(what = "unmaped"),
-                       widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
+widths_all_tibble <- rbind(widths$gbs     |> dplyr::mutate(what = "aligned"),
+                           widths$isol    |> dplyr::mutate(what = "isolated"),
+                           widths$unal    |> dplyr::mutate(what = "unaligned"),
+                           widths$coa     |> dplyr::mutate(what = "mapped"),
+                           widths$bri     |> dplyr::mutate(what = "bridge"),
+                           widths$unmap   |> dplyr::mutate(what = "unmaped"),
+                           widths$coa2    |> dplyr::mutate(what = "doublecoalesced"))
 
 p <-gg_freq_poly(widths_all_tibble) +
   aes(col = what) +
@@ -139,6 +148,62 @@ CCC#
 library("patchwork")
 (p_droso / p_ciona / p_oikop) +   plot_layout(design = layout, guides = 'collect')
 ```
+
+
+# Saving width distributions and some statistics
+Below, I take the `widths_all_tibble` and perform some statistical operations on it for later. Click below to view.
+
+## Details 
+<details>
+<summary> Click here to view the full table with many summary statistics for width distributions.</summary>
+```{r saving_width_statistics_for_later, dependson="width_after_processing_steps"}
+library(dplyr) |> suppressPackageStartupMessages()
+
+t_CI <- function(vector, conf.level){
+  if(length(vector) < 3)
+    return(NA_character_)
+  conf_test <- t.test(vector, conf.level = conf.level)
+  conf_str <- paste(round(conf_test$conf.int,2), collapse=',')
+  conf_str
+}
+
+# Note that because the Wilcox test involves ranking (and therefore sorting),
+# this test is computationally demanding for large data frames.
+# It works the same as the function above - just slower.
+wilcox_CI <- function(vector, conf.level){
+  if(length(vector) < 3)
+     return(NA_character_)
+  conf_test <- wilcox.test(vector, conf.level = conf.level, conf.int = TRUE)
+  conf_str <- paste(round(conf_test$conf.int, 2), collapse=',')
+  conf_str
+}
+
+stats_to_compute <- list(n         = ~n(),
+                         t_CI      = ~t_CI(., conf.level=0.95),
+                         wilcox_CI = ~wilcox_CI(., conf.level=0.95),
+                         min       = min,
+                         q25       = ~quantile(., 0.25),
+                         median    = median,
+                         q75       = ~quantile(., 0.75),
+                         max       = max,
+                         mean      = mean,
+                         sd        = sd)
+
+old.o <- options(max.print = 2000)
+
+widths_all_tibble |>
+    group_by(name, class, what) |>
+    summarise(across(width, stats_to_compute)) |> as.data.frame()
+
+widths_all_tibble |>
+    group_by(what, class, genus) |>
+    summarise(across(width, stats_to_compute)) |> as.data.frame()
+
+options(old.o)
+detach('package:dplyr')
+```
+</details>
+
 
 # Width distribution of aligned and mapped regions
 
@@ -380,60 +445,6 @@ The short-width mapped peak is made of aligned regions that can not be coalesced
 We know from `vignette("RepeatRegions", package = "OikScrambling")` that these
 short mapped regions are not repeats.
 
-### Compound pictures
-
-Let's put into parallel "aligned", "unaligned" and "mapped"
-
-```{r compound1}
-p_ali <- gg_freq_poly(widths$gbs |> dplyr::filter(! is.na(genus))) +
-  aes(width, after_stat(density), col=class) + theme_bw() +
-  facet_wrap(~genus, scales = "free_y", ncol = 1) +
-  ggtitle("Aligned")
-
-p_una <- gg_freq_poly(widths$unal |> dplyr::filter(! is.na(genus))) +
-  aes(width, after_stat(density), col=class) + theme_bw() +
-  facet_wrap(~genus, scales = "free_y", ncol = 1) +
-  ggtitle("Not aligned")
-
-p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
-  aes(width, after_stat(density), col=class) + theme_bw() +
-  facet_wrap(~genus, scales = "free_y", ncol = 1) +
-  ggtitle("Mapped")
-
-# Patchwork
-(p_ali | p_una | p_map) + plot_layout(ncol = 3, guides = 'collect') + theme_bw()
-```
-
-```{r compound2}
-p_ali2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", nonCoa)) +
-  aes(width, after_stat(density), col=name) + theme_bw() +
-  scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Isolated alignments")
-
-p_una2 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "Oki – North")) +
-  aes(width, after_stat(density), col=name) + theme_bw() +
-  scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Not aligned, not mapped")
-
-p_syn2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
-  aes(width, after_stat(density), col=name) + theme_bw() +
-  scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Synteny block")
-
-p_map2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
-  aes(width, after_stat(density), col=name) + theme_bw() +
-  scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Synteny alignment")
-
-p_unalmap2 <- gg_freq_poly(widths$unalMap |> dplyr::filter(dist == "Oki – North")) +
-  aes(width, after_stat(density), col=name) + theme_bw() +
-  scale_x_log10(limits = c(1,5e5)) +
-  ggtitle("Unaligned but syntenic")
-
-# Patchwork
-(p_ali2 | p_una2 | p_syn2 | p_map2 | p_unalmap2) + plot_layout(ncol = 5, guides = 'collect') + theme_bw()
-```
-
 ## Unmapped regions
 
 Unmapped regions are a bit longer on the short arm in Oki – North comparisons…
@@ -457,25 +468,25 @@ gg_freq_poly(widths$unmap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   scale_x_log10("Width (vertical bar at 300 bp)")
 ```
 
-## Mapped unaligned regions
+## Bridge regions
 
 Note the short peak when comparing pairs within the same population.
 
 ```{r width_of_unAlmapped_regions, dependson="pre_compute_widths_object"}
-gg_freq_poly(widths$unalMap) +
+gg_freq_poly(widths$bri) +
   aes(col=Arm) +
   facet_wrap(~chr, scales = "free_y") +
-  ggtitle("Distribution of widths of mapped unaligned regions, split by arm.")
+  ggtitle("Distribution of widths of bridge regions, split by arm.")
 
-gg_freq_poly(widths$unalMap) +
+gg_freq_poly(widths$bri) +
   aes(col=Arm) +
   facet_wrap(~name, scales = "free_y", ncol=5) +
-  ggtitle("Distribution of widths of mapped unaligned regions, split by genome pair")
+  ggtitle("Distribution of widths of bridge regions, split by genome pair")
 
-gg_freq_poly(widths$unalMap |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
+gg_freq_poly(widths$bri |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   aes(col=Arm) +
   facet_wrap(~dist, scales = "free_y", nrow=1) +
-  ggtitle("Distribution of widths of mapped unaligned regions, split by distance group") +
+  ggtitle("Distribution of widths of bridge regions, split by distance group") +
   geom_vline(xintercept = 300) +
   scale_x_log10("Width (vertical bar at 300 bp)")
 ```
@@ -599,6 +610,63 @@ gg_freq_poly(widths$coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
   scale_x_log10("Width (vertical bar at 500 bp)")
 ```
 
+# Compound pictures
+
+## "aligned", "unaligned" and "mapped"
+
+```{r compound1}
+p_ali <- gg_freq_poly(widths$gbs |> dplyr::filter(! is.na(genus))) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Aligned")
+
+p_una <- gg_freq_poly(widths$unal |> dplyr::filter(! is.na(genus))) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Not aligned")
+
+p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  facet_wrap(~genus, scales = "free_y", ncol = 1) +
+  ggtitle("Mapped")
+
+# Patchwork
+(p_ali | p_una | p_map) + plot_layout(ncol = 3, guides = 'collect') + theme_bw()
+```
+
+## "isolated", "unmapped", "colinear regions", "bridge" and "colinear alingments"
+
+```{r compound2, fig.width=20, fig.height=4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+p_ali2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", nonCoa)) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Isolated alignments")
+
+p_unmap2 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "Oki – North")) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Unmapped")
+
+p_syn2 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Colinear region")
+
+p_map2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", !nonCoa)) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Colinear alignment")
+
+p_bridge <- gg_freq_poly(widths$bri |> dplyr::filter(dist == "Oki – North")) +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_log10(limits = c(1,5e5)) +
+  ggtitle("Bridge")
+
+# Patchwork
+(p_ali2 | p_unmap2 | p_syn2 | p_bridge | p_map2 ) + plot_layout(ncol = 5, guides = 'collect') + theme_bw()
+```
+
+
 # Paired comparison of widths in target and query genomes.
 
 ```{r paired_width_analysis}
@@ -614,13 +682,13 @@ GBreaks2widthTibble <- function(gb, pair = NULL) {
 }
 
 gbs.w2w     <- do.call(rbind, lapply(names(gbs),      \(name) GBreaks2widthTibble(gbs[[name]],      pair = name)))
-unalMap.w2s <- do.call(rbind, lapply(names(unalMap),  \(name) GBreaks2widthTibble(unalMap[[name]],  pair = name)))
+bri.w2s <- do.call(rbind, lapply(names(bri),  \(name) GBreaks2widthTibble(bri[[name]],  pair = name)))
 tra.w2s     <- do.call(rbind, lapply(names(tra),      \(name) GBreaks2widthTibble(tra[[name]],      pair = name)))
 tra2.w2s    <- do.call(rbind, lapply(names(tra2),     \(name) GBreaks2widthTibble(tra2[[name]],     pair = name)))
 
 rbind (
   aligned = table(paste(    gbs.w2w$target.rep,     gbs.w2w$query.rep)),
-  unalMap = table(paste(unalMap.w2s$target.rep, unalMap.w2s$query.rep)),
+  bri = table(paste(bri.w2s$target.rep, bri.w2s$query.rep)),
   transpo = table(paste(    tra.w2s$target.rep,     tra.w2s$query.rep))
 )
 
@@ -636,8 +704,8 @@ ggPlotW2W <- function(tibble) {
 ggPlotW2W(gbs.w2w |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
   ggtitle("Width of the target and query aligned regions")
 
-ggPlotW2W(unalMap.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
-  ggtitle("Width of the target and query mapped unaligned regions")
+ggPlotW2W(bri.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
+  ggtitle("Width of the target and query bridge regions")
 
 ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
   ggtitle("Width of the target and query aligned regions")
@@ -645,8 +713,8 @@ ggPlotW2W(gbs.w2w) + facet_wrap(~pair) +
 ggPlotW2W(gbs.w2w) + facet_wrap(~dist) +
   ggtitle("Width of the target and query aligned regions")
 
-ggPlotW2W(unalMap.w2s) + facet_wrap(~pair) +
-  ggtitle("Width of the target and query mapped unaligned regions")
+ggPlotW2W(bri.w2s) + facet_wrap(~pair) +
+  ggtitle("Width of the target and query bridge regions")
 
 ggPlotW2W(tra.w2s |> dplyr::filter(!is.na(Arm))) + facet_wrap(~pair) +
   ggtitle("Width of the target and query translocated regions")
@@ -664,15 +732,15 @@ ggPlotW2W(gbs.w2w) +
   facet_wrap(~query.rep + target.rep) +
   ggtitle("Width of the target and query aligned regions, matching or not matching repeats")
 
-ggPlotW2W(unalMap.w2s) +
+ggPlotW2W(bri.w2s) +
   facet_wrap(~query.rep + target.rep) +
-  ggtitle("Width of the target and query mapped unaligned regions, matching or not matching repeats")
+  ggtitle("Width of the target and query bridge regions, matching or not matching repeats")
 
 ggPlotW2W(tra.w2s) +
   facet_wrap(~dist + query.rep + target.rep, nrow = 3) +
   ggtitle("Width of the target and query translocated regions, matching or not matching repeats")
 
-ggplot(unalMap.w2s) +
+ggplot(bri.w2s) +
   aes(target / query, col = paste(target.rep, query.rep) ) +
   scale_x_log10() +
   geom_freqpoly() +
@@ -768,9 +836,9 @@ gg_freq_poly(widths$invs.coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ```{r width_of_inversions_gaps}
 inv.lgaps <- sapply(coa, leftInversionGaps) |> SimpleList()
-inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$Oki)
-inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$Osa)
-inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar)
+inv.lgaps[ 1:5]  <- sapply(inv.lgaps[ 1:5],  flagLongShort, longShort$OKI2018.I69)
+inv.lgaps[ 6:10] <- sapply(inv.lgaps[ 6:10], flagLongShort, longShort$OSKA2016v1.9)
+inv.lgaps[11:15] <- sapply(inv.lgaps[11:15], flagLongShort, longShort$Bar2.p4)
 sapply(inv.lgaps, length)
 
 widths$invs.lgaps <- makeWidthsDF(inv.lgaps) |> tibble::as_tibble()

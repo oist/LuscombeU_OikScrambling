@@ -29,23 +29,31 @@ Here we explore the role of translocations in scrambling _Oikopleura_ genomes.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(reps <- OikScrambling:::loadAllRepeats())
-(load("BreakPoints.Rdata"))
+load("BreakPoints.Rdata")
 ```
 
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different GBreaks objects are prepared.
 
-# Translocations
-
-## Documentation
+# Documentation
 
 Details can be found in `vignette("GenomicBreaks", package = "GenomicBreaks")`,
 in `vignette("StructuralVariants", package = "GenomicBreaks")`,
 and `?GenomicBreaks::flagTranslocations`
 
-## Number of translocations
+# A couple of examples
+
+The block in blue sky color map on the same sequence as their neighbors, but
+not colinearly.  The span of unaligned regions between them varies greatly.
+
+```{r show_some_translocations}
+showTranslocations(coa$Oki_Kum |> flagTranslocations()) -> x
+plotApairOfChrs(x[1:3] |> swap() |> sort(i=T))
+plotApairOfChrs(x[4:6])
+plotApairOfChrs(x[7:9])
+```
+
+# Number of translocations
 
 Notes:
 
@@ -56,25 +64,37 @@ Notes:
    genome.
 
 ```{r count_translocations}
-(trans_summary <- data.frame(
+trans_summary <- data.frame(
   align  = sapply(gbs,  function(gb) sum(flagTranslocations(gb)$tra)),
   mapped = sapply(coa,  function(gb) sum(flagTranslocations(gb)$tra)),
-  map2   = sapply(coa2, function(gb) sum(flagTranslocations(gb)$tra))
-))
+  tra_rm = sapply(coa2, function(gb) sum(flagTranslocations(gb)$tra))
+)
 
 trans_summary$pairname  <- OikScrambling:::compDistance(rownames(trans_summary))
+trans_summary$class     <- OikScrambling:::compDistClass(rownames(trans_summary))
+trans_summary$genus     <- OikScrambling:::compGenus(rownames(trans_summary))
 trans_summary$target    <- sub("_.*", "", rownames(trans_summary))
 
-sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, mean))
-sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, median))
-sapply(trans_summary[,c("align", "mapped", "map2")], \(x) tapply(x, trans_summary$pairname, sd))
-
-ggplot(trans_summary |> tidyr::pivot_longer(c("align", "mapped", "map2"))) +
-  aes(value, name) + geom_point(aes(col = pairname, pch = target)) +
-  ggtitle ("Number of translocations found after different post-processings")
+ggplot(trans_summary |> tidyr::pivot_longer(c("align", "mapped", "tra_rm"))) +
+  aes(value, name) + geom_point(aes(col = class, pch = target)) +
+  ggtitle ("Number of translocations found after different post-processings",
+           subtitle = "align: raw, mapped: collapsed, tra_rm: translocated repeats removed.") +
+  facet_wrap(~genus)
 ```
 
-## Small translocations
+<details>
+<summary>Click here to see the raw data</summary>
+```{r show_count_translocations}
+trans_summary
+```
+</details>
+
+The number of detected translocations increase after coalescing, because the
+translocated region itself may have a double gap interrupting the alignment.
+Then, it logically decreases when the repeat-associated translocations are
+removed.
+
+# Small translocations
 
 Translocations are "small" when the flanking colinear regions are longer.
 
@@ -92,25 +112,11 @@ flagSmallTranslocations <- function (a) {
 }
 
 smallTransObjs <- SimpleList(
-  align = sapply(gbs, flagSmallTranslocations),
-  mapped = sapply(coa, flagSmallTranslocations),
-  map2 = sapply(coa2, flagSmallTranslocations)
+  align_s  = sapply(gbs, flagSmallTranslocations),
+  mapped_s = sapply(coa, flagSmallTranslocations),
+  tra_rm_s = sapply(coa2, flagSmallTranslocations)
 )
 
-countGbsMatchingRepsInStrans <- function(gb) {
-  if (is.null(gb$rep)) gb$rep <- NA
-  sum(sapply(gb[gb$midSmaller]$rep, \(x) ! any(is.na(x))))
-}
-
-(rbind(
-  aln = sapply(gbs, length),
-  alnStrans = sapply(smallTransObjs$align, \(gb) sum(gb$midSmaller)),
-  mapTot = sapply(coa, length),
-  alltrans = sapply(tra, length),
-  mapStrans = sapply(smallTransObjs$mapped, \(gb) sum(gb$midSmaller)),
-  map2Tot = sapply(coa2, length),
-  map2allTrans = sapply(tra2,length),
-  map2Strans = sapply(smallTransObjs$map2, \(gb) sum(gb$midSmaller)),
-  map2StransRep = sapply(smallTransObjs$map2, countGbsMatchingRepsInStrans)
-))
+cbind( trans_summary
+     , smallTransObjs |> sapply(sapply, \(gb) sum(gb$midSmaller)))
 ```

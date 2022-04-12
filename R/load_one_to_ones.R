@@ -17,6 +17,14 @@
 #' @returns Returns a [`DataFrame`] with one column per species, containing
 #' protein identifiers, and the columns `HOG`, `OG` and `Gene.Tree.Parent.Clade`.
 #'
+#' @examples
+#' # Example for loading all orthogroups:
+#' OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
+#'
+#' # Example for loading a pair
+#' OikScrambling:::load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
+#'                                   , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
+#'
 #' @importFrom utils read.delim
 #'
 #' @export
