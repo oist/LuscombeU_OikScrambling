@@ -482,6 +482,14 @@ annot <- genoPlotR::annotation(x1=start(Hox4_4e4.genes), x2=end(Hox4_4e4.genes),
 gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_4e4), annotations = annot)
 ```
 
+<details>
+<summary>Click to see details on where the non-plotted alignments go.</summary>
+```{r}
+subsetByOverlaps(gbs$Oki_Osa, granges(Hox4_4e4)) |> sort(i=T)  |> data.frame()
+subsetByOverlaps(swap(gbs$Oki_Osa), granges(swap(Hox4_4e4))) |> sort(i=T)  |> data.frame()
+```
+<br/>
+
 ## Hox 1
 
 HOG `N19.HOG0000193`.
@@ -508,6 +516,14 @@ text <- Hox1_4e4.genes$tx_name |> as.character()
 annot <- genoPlotR::annotation(x1=start(Hox1_4e4.genes), x2=end(Hox1_4e4.genes), text=text, rot=30)
 gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4), annotations = annot)
 ```
+
+<details>
+<summary>Click to see details on where the non-plotted alignments go.</summary>
+```{r}
+subsetByOverlaps(gbs$Oki_Osa, granges(Hox1_4e4)) |> sort(i=T)  |> data.frame()
+subsetByOverlaps(swap(gbs$Oki_Osa), granges(swap(Hox1_4e4))) |> sort(i=T)  |> data.frame()
+```
+<br/>
 
 # Ancestral states
 
