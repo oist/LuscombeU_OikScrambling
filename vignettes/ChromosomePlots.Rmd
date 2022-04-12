@@ -31,6 +31,7 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('viridis') |> suppressPackageStartupMessages()
+library('dplyr') |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR()
 reps <- OikScrambling:::loadAllRepeats()
@@ -108,7 +109,9 @@ grWindows <- function(genome, meta, windowSize=10000, meta_prefix=NULL){
 ```
 
 ### Chromosome plots: Transcripts
+In the following section we initialize the `chrw` object, which is a `SimpleList()` containing windowed chromosome objects. 
 
+We use these windows to evaluate the distribution of various features across the chromosomes.
 
 ```{r chromosome_plots_transcripts}
 windowSize <- 20000
@@ -127,7 +130,12 @@ chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
 ggplot(as.data.frame(chrw$Oki |> unname())  |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
 
 ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
+
+# Density of transcript names (i.e., gene counts).
+ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
 ```
+
+
 
 ```{r chromosome_plots_scores, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 chrw$Oki$Oki_Osa.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki))
@@ -151,7 +159,10 @@ chrw$Oki |>
 ```
 
 
-```{r chromosome_plots_2, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+### Chromosome plots: Repeats
+In this section we add repeat data to the `chrw` object. Since the windows are the same for every genome, this is simple accomplished with a `cbind` operation to the windowed object's `mcols`.
+
+```{r chromosome_plots_repeats, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Since the coordinates of the windows are the same, you can simply cbind more metadata columns to the data frame.
 mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=reps$Oki, windowSize=windowSize, meta_prefix = 'repeats.')))
 
@@ -161,7 +172,7 @@ mcols(chrw$Bar) <- cbind(mcols(chrw$Bar), mcols(grWindows(genome=genomes$Bar, me
 
 ```
 
-```{r chromosome_plots_repeats, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r chromosome_plots_2, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ggplot(as.data.frame(chrw$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(seqnames~Arm) + geom_smooth() + scale_y_log10()
 
 ggplot(as.data.frame(chrw$Osa) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(seqnames~Arm) + geom_smooth() + scale_y_log10()
@@ -169,6 +180,15 @@ ggplot(as.data.frame(chrw$Osa) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 
 ggplot(as.data.frame(chrw$Bar) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(seqnames~Arm) + geom_smooth() + scale_y_log10()
 ```
 
+We can use the `[mcol].counts.tables` metadata columns to calculate statistics between different genomic regions.
+
+```{r chromosome_plots_2, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+repeat_dist <- SimpleList()
+repeat_dist$Oki <- as.data.frame(chrw$Oki) |> as_tibble() |> group_by(seqnames, Arm) |> summarize(repeats.Class.count.total)
+
+# Now, do something...
+
+```
 # Session information
 
 ```{r sessionInfo}
