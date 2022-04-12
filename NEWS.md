@@ -3,6 +3,7 @@
 * Plot genomic features on white background for Figure 2.
 * Compute strand randomisation indexes.
 * Provide alignment information for manual brush-up of Hox panels in Figure 1.
+* Add Osaka–Aomori Oxford plots.
 
 # OikScrambling 3.0.1
 
