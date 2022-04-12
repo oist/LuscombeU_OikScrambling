@@ -21,31 +21,31 @@ pairwise genome alignments between _Oikopleura_ genomes.
 The core functions used here are maintained in our _GenomicBreaks_ R package,
 which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 
-## How to build this site
+# How to build this site
 
 As some of the computations take time, we build the vignettes on OIST's HPC
 cluster _Deigo_ using the `?pkgdown::build_site` function, in a Git clone in a
-subdirectory of the `/flash` filesytem.
+subdirectory of the `/flash` filesystem.
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"
 ```
 
-## How to install or update the necessary packages
+# How to install or update the necessary packages
 
-### OikScrambling and GenomicBreaks
+## OikScrambling and GenomicBreaks
 
-Sometimes it is necessary to upgrade the OikScrambling package; this is done with:
+Sometimes it is necessary to upgrade the _OikScrambling_ package; this is done with:
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif R CMD INSTALL .
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif R CMD INSTALL .
 ```
 
 And before, it may be needed to update `GenomicBreaks` or `BreakpointsData`:
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
 ```
 
 The trick is that the `GenomicBreaks` singularity images are hardcoded to
@@ -55,12 +55,12 @@ the problem that the images are read-only.
 Command to recompute the `BreakPoints.Rdata` file
 
 ```
-srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "pkgdown::build_article('LoadGenomicBreaks')"
+srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_article('LoadGenomicBreaks')"
 ```
 
-### Data packages
+## Data packages
 
-#### BSgenome packages
+### BSgenome packages
 
 We need the sequences of the studied genomes.  They are provided in a _drat_
 repository: <https://oist.github.io/plessy_oikgenomes_drat/>.
@@ -69,10 +69,10 @@ Example command to install one _Oikopleura_ BSgenome package if you do not yet
 have it:
 
 ```
-/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.10.0.sif Rscript -e "install.packages('BSgenome.Odioica.local.OKI2018.I69', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
+/bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "install.packages('BSgenome.Oidioi.OIST.OKI2018.I69', repos='https://oist.github.io/plessy_oikgenomes_drat/')"
 ```
 
-#### Genome annotations
+### Genome annotations
 
 The annotations from `/bucket/LuscombeU/common/Breakpoints/Annotations` are
 distributed in the same drat repository as the alignment data.
@@ -80,266 +80,3 @@ distributed in the same drat repository as the alignment data.
 ```
 install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')
 ```
-
-## Load pacakges
-
-### Core packages that provide functions we use a lot.
-
-```{r loadlib, echo=T, results='hide'}
-suppressPackageStartupMessages({
-  library('GenomicBreaks')
-  library('BSgenome')
-  library('GenomicFeatures')
-  library('ggplot2')
-  library("BiocParallel")
-})
-requireNamespace("rGADEM")
-requireNamespace("ggseqlogo")
-```
-
-The accessory function `OikScrambling:::loadAllGenomes()` attaches `BSgenome`
-packages in the session and outputs a `SimpleList` containing references to
-the `BSgenome` objects for convenience, such as easy looping, and tab-completion
-to show the available objects.
-
-```{r load_genomes}
-OikScrambling:::loadAllGenomes
-
-(genomes <- OikScrambling:::loadAllGenomes())
-
-## Genome lengths
-(genome.lengths <- sapply(genomes, \(g) sum(seqlengths(seqinfo(g)))))
-
-## Genome average AT content (multicore computation)
-(genomes.AT <- BiocParallel::bplapply(genomes, \(g)
-  weighted.mean(letterFrequency(getSeq(g), "AT", as.prob = TRUE), seqlengths(g))) |> unlist())
-```
-
-## Load data
-
-The `OikScrambling:::loadAllAnnotations()` function returns `TxDB` objects.
-Be careful that they are broken each time the R session restarts, because they
-rely on local file storage.
-
-```{r load_TxDb, warning=FALSE}
-(annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings())
-```
-
-For vignettes that do not use information on the intron/exon structure of
-genes, the `OikScrambling:::loadAllTranscriptsGR()` returns a `SimpleList`
-of `GRanges`, which is more convenient.  Bonus point: the dNdS value for
-conserved genes is included.
-
-```{r load_transcripts, warning=FALSE}
-(transcripts <- OikScrambling:::loadAllTranscriptsGR() |> suppressWarnings())
-```
-
-### GenomicBreaks object
-
-The core data is a list of `GenomicBreaks::GBreaks()` objects that is built
-by a separate vignette (`vignette("Load genomic break data"), package="OikScrambling"`).
-
-The _query_ genome is the one that was provided as a FASTA file and aligned to
-the _target_ genome (the one that was indexed by the aligner).  The _target_
-genome is the main part of the object, and the _query_ genome information is
-contained in the metadata columns (`mcols`) of the structure.
-
-```{r GBreaks_object}
-load("BreakPoints.Rdata")
-gbs$Oki_Osa
-gbs$Oki_Osa$query
-```
-
-In the example displayed above, the object contains the pairwise alignment
-between genomes of two dioceous _Oikopleura_ individuals; one from the Osaka
-assembly `OSKA2016` (_target_) and one from the Okinawa assembly `OKI2018_I69`
-(_query_).
-
-### Long and short arms
-
-The long and short arms are annotated in the `GBreak` objects that are built
-by the vignette (`vignette("Load genomic break data")`), using the function
-`GenomicBreaks::flagLongShort()`.  A copy of the arms annotations is provided
-in the `longShort` list.
-
-```{r long_and_short_arms}
-longShort
-longShort$Oki
-```
-
-### Repeats
-
-```{r loadAllRepeats}
-(reps <- OikScrambling:::loadAllRepeats())
-```
-
-## Breakpoints and alignment stops
-
-We define an **alignment stop** to be a position defined in either the
-_target_ or _query_ genome, where an alignment begins or ends, and a
-**genomic breakpoint** (or simply breakpoint) to be a genomic structural
-mutation, arising from breakage and repair of the chromosome.  Such structural
-events include insertion, deletion, inversion and translocation, and often arise
-during recombination. 
-
-# Measures of distance
-
-See `vignette("DistanceMeasures", package="OikScrambling")`.
-
-# Phylogenetic cladogram
-
-We assume that the _North Pacific_ and the _Atlantic_ species are more related
-to each other than to the _Okinawan_ species.
-
-```{r phylogenetic_tree, fig.height=4, fig.width=6, dev="svg"}
-requireNamespace("ade4")
-treeLeaf <- function(name, length=NULL) {
-  if(!is.null(length)) length <- paste0(':', length)
-  paste0(name, length)
-}
-
-treeNode <- function(branch1, branch2, length = NULL) {
-  if(!is.null(length)) length <- paste0(':', length)
-  paste0('(', branch1, ',', branch2, ')', length)
-}
-
-addRoot <- function(branch)  paste0(branch, ";")
-
-tree <-
-  addRoot(
-    treeNode(
-      treeNode( length = 2,
-        treeLeaf("Okinawa", 1),
-        treeLeaf("Kume", 1)
-      ),
-      treeNode( length = 1,
-        treeNode( length = 1,
-          treeLeaf("Osaka", 1),
-          treeLeaf("Aomori", 1)
-        ),
-        treeNode( length =1,
-          treeLeaf("Norway", 1),
-          treeLeaf("Barcelona", 1)
-        )
-      )
-    )
-  )
-
-plot(ade4::newick2phylog(tree))
-```
-
-# Coalescing alignments
-
-Large syntenic regions can often appear cluttered with alignment breaks.  They
-are either an artefact (for instance in case of incomplete purge of haplotypes)
-or true breakpoint.  Even in that case, it may be needed to coalese them in
-order to facilitate other computations such as the detection of inversions.
-
-The algorithm in  `GenomicBreaks::coalesce_contigs()` is used to produce a new
-`GBreaks` object with fewer alignment breaks by coalescing alignments separated
-by short (user specified) distances.
-
-The computation is done in `vignette("Load genomic break data")`
-
-The resulting GRanges object has far fewer alignments and therefore far fewer
-alignment stops. The algorithm is an initial step in alignment stop filtering,
-with the goal of a reduced number of alignment stops that have a high
-probability of being breakpoints.
-
-```{r coalescing algorithm}
-sapply(gbs, length)
-sapply(coa, length)
-```
-
-# Width summary plots
-
-See `vignette("RegionWidths"), package="OikScrambling"`.
-
-# Repeats
-
-See `vignette("RepeatRegions"), package="OikScrambling"`.
-
-
-
-# Pairwise chromosome plots
-
-## Oki – Bar
-
-```{r parallel_chr_plots_Oki_Bar}
-plotApairOfChrs(coa$Oki_Bar, "chr1", main = "Oki – Bar")
-```
-
-## Osa – Bar
-
-```{r parallel_chr_plots_Osa_Bar}
-plotApairOfChrs(coa$Osa_Bar, "Chr1", main = "Osa – Bar")
-```
-
-## Oki – Kum
-
-The plot is not complete because the Kume assembly is not chromosome-scale.
-
-```{r parallel_chr_plots_Oki_Kum}
-plotApairOfChrs(coa$Oki_Kum, "chr1", main = "Oki – Kum")
-```
-
-Same after double-coalescing.
-
-```{r parallel_chr_plots_Oki_Kum_coa2}
-plotApairOfChrs(coa2$Oki_Kum, "chr1", main = "Oki – Kum")
-```
-
-## More in the _parallel plots_ vignette!
-
-In the _parallel plots_ vignette
-(`vignette("ParallelPlots", package = "OikScrambling")`), we build a more
-more comprehensive collection of plots and explore arrangements for a figure
-panel in paper.
-
-# Structural variants
-
-## Trivial inversions
-
-### Documentation
-
-Details can be found in `vignette("Inversions", package = "OikScrambling")`.
-
-## Trivial translocations
-
-### Representation
-
-The translocation below:
-
-```
-┌──────────────┬──────────────┬──────────────┐
-│ chrA:101-200 │ chrA:201-300 │ chrA:301-400 │ (Target genome)
-└──────────────┴──────────────┴──────────────┘
-      +               +             +         (Alignment direction)
-┌──────────────┬──────────────┬──────────────┐
-│ chrB:101-200 │ chrC:201-300 │ chrB:301-400 │ (Query genome)
-└──────────────┴──────────────┴──────────────┘
-```
-
-Is represented as:
-
-```{r ideal_translocations}
-exampleTranslocation
-```
-
-See in in `vignette("LoadGenomicBreaks", package = "OikScrambling")` how
-trivial translocations are removed, and in `vignette("RepeatRegions",
-package = "OikScrambling")` why they are removed.
-
-# Genomic Features
-
-Moved to `vignette("GenomicFeatuers", package = "OikScrambling")`:
-
- - Tandem repeats
- - Coverage
- - Nucleic acid content heatmaps
- - Cluster analysis
- - Evidence for breakpoint hotspots
- - Tandem repeat coverage around alignment stops (breakpoints)
- - Gene feature coverage around alignment stops (breakpoints)
- - Gene feature coverage around PWM hits
- - Okinawa genome coverage
