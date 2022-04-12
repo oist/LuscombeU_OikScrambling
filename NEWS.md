@@ -1,3 +1,9 @@
+# OikScrambling 3.0.2
+
+* Plot genomic features on white background for Figure 2.
+* Compute strand randomisation indexes.
+* Provide alignment information for manual brush-up of Hox panels in Figure 1.
+
 # OikScrambling 3.0.1
 
 * Plot operons density near alignment boundaries.
