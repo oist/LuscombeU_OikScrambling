@@ -78,20 +78,20 @@ binApply <- function(f, bins, data, index, ...) {
 (binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE)) |> head(100)
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
-metaPerWindow <- function(genomeWindows, meta, includeMetaCols=NULL, meta_prefix=NULL) {
+metaPerWindow <- function(genomeWindows, meta, meta_prefix=NULL) {
   idx <- matchToOneBin(meta, genomeWindows)
   for (name in colnames(mcols(meta))) {
     data <- mcols(meta)[[name]]
     if(is.numeric(data)) {
-      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]  <- binApply(length, genomeWindows, data, idx)
-      mcols(genomeWindows)[[paste0(meta_prefix, name, ".median")]] <- binApply(median, genomeWindows, data, idx, na.rm = TRUE)
-      mcols(genomeWindows)[[paste0(meta_prefix, name, ".mean")]]   <- binApply(mean,   genomeWindows, data, idx, na.rm = TRUE)
-      mcols(genomeWindows)[[paste0(meta_prefix, name, ".sd")]]     <- binApply(sd,     genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]       <- binApply(length, genomeWindows, data, idx)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".median")]]      <- binApply(median, genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".mean")]]        <- binApply(mean,   genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".sd")]]          <- binApply(sd,     genomeWindows, data, idx, na.rm = TRUE)
     } else if(is.character(data) ) {
-      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]  <- binApply(length, genomeWindows, data, idx)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]       <- binApply(length, genomeWindows, data, idx)
     } else if(is.factor(data)) {
       mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.total")]] <- binApply(length, genomeWindows, data, idx)
-      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.table")]] <- binApply(table, genomeWindows, data, idx)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.table")]] <- binApply(table,  genomeWindows, data, idx)
     }
   }
   genomeWindows
@@ -100,14 +100,20 @@ metaPerWindow <- function(genomeWindows, meta, includeMetaCols=NULL, meta_prefix
 
 # Function to do everything
 grWindows <- function(genome, meta, windowSize=10000, meta_prefix=NULL){
-  genome <- BSgenomeToGR(genome)                             # Make GRanges from genome
-  genome <- genomeGRToWindows(genome, windowSize=windowSize) # Make a windowed GRange from chromosome GRanges
-  mpw <- metaPerWindow(genome, meta, meta_prefix=meta_prefix)
+  genome <- BSgenomeToGR(genome)                                 # Make GRanges from genome
+  genome <- genomeGRToWindows(genome, windowSize=windowSize)     # Make a windowed GRange from chromosome GRanges
+  mpw <-    metaPerWindow(genome, meta, meta_prefix=meta_prefix) # Make metadata column windows and intersect
   mpw
 }
+```
 
+### Chromosome plots: Transcripts
+
+
+```{r chromosome_plots_transcripts}
 windowSize <- 20000
 bins_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
+
 chrw <- SimpleList()
 chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize, meta_prefix = 'transcripts.')
 chrw$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
@@ -118,9 +124,9 @@ chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
 ```
 
 ```{r chromosome_plots_1, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-ggplot(as.data.frame(chrw$Oki |> unname())  |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
+ggplot(as.data.frame(chrw$Oki |> unname())  |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm)
 
-ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
+ggplot(as.data.frame(chrw$Oki |> unname()) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth()
 ```
 
 ```{r chromosome_plots_scores, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
@@ -146,24 +152,21 @@ chrw$Oki |>
 
 
 ```{r chromosome_plots_2, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-chrw_rep <- SimpleList()
-chrw_rep$Oki <- grWindows(genome=genomes$Oki, meta=reps$Oki, windowSize=windowSize, meta_prefix = 'repeats.')
-chrw_rep$Oki <- flagLongShort(chrw_rep$Oki, longShort$OKI2018.I69)
+# Since the coordinates of the windows are the same, you can simply cbind more metadata columns to the data frame.
+mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=reps$Oki, windowSize=windowSize, meta_prefix = 'repeats.')))
 
-chrw_rep$Osa <- grWindows(genome=genomes$Osa, meta=reps$Osa, windowSize=windowSize, meta_prefix = 'repeats.')
-chrw_rep$Osa <- flagLongShort(chrw_rep$Osa, longShort$OSKA2016v1.9)
+mcols(chrw$Osa) <- cbind(mcols(chrw$Osa), mcols(grWindows(genome=genomes$Osa, meta=reps$Osa, windowSize=windowSize, meta_prefix = 'repeats.')))
 
-chrw_rep$Bar <- grWindows(genome=genomes$Bar, meta=reps$Bar, windowSize=windowSize, meta_prefix = 'repeats.')
-chrw_rep$Bar <- flagLongShort(chrw_rep$Bar, longShort$Bar2.p4)
+mcols(chrw$Bar) <- cbind(mcols(chrw$Bar), mcols(grWindows(genome=genomes$Bar, meta=reps$Bar, windowSize=windowSize, meta_prefix = 'repeats.')))
 
 ```
 
 ```{r chromosome_plots_repeats, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-ggplot(as.data.frame(chrw_rep$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(Arm~seqnames) + geom_smooth() + scale_y_log10()
+ggplot(as.data.frame(chrw$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(seqnames~Arm) + geom_smooth() + scale_y_log10()
 
-ggplot(as.data.frame(chrw_rep$Osa) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(Arm~seqnames) + geom_smooth() + scale_y_log10()
+ggplot(as.data.frame(chrw$Osa) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(seqnames~Arm) + geom_smooth() + scale_y_log10()
 
-ggplot(as.data.frame(chrw_rep$Bar) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(Arm~seqnames) + geom_smooth() + scale_y_log10()
+ggplot(as.data.frame(chrw$Bar) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(seqnames~Arm) + geom_smooth() + scale_y_log10()
 ```
 
 # Session information
