@@ -33,6 +33,7 @@ library('OikScrambling') |> suppressPackageStartupMessages()
 library('viridis') |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR()
+reps <- OikScrambling:::loadAllRepeats()
 load("BreakPoints.Rdata")
 ```
 
@@ -77,37 +78,42 @@ binApply <- function(f, bins, data, index, ...) {
 (binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE)) |> head(100)
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
-metaPerWindow <- function(genomeWindows, meta, includeMetaCols=NULL) {
+metaPerWindow <- function(genomeWindows, meta, includeMetaCols=NULL, meta_prefix=NULL) {
   idx <- matchToOneBin(meta, genomeWindows)
   for (name in colnames(mcols(meta))) {
     data <- mcols(meta)[[name]]
     if(is.numeric(data)) {
-      mcols(genomeWindows)[[paste0(name, ".count")]]  <- binApply(length, genomeWindows, data, idx)
-      mcols(genomeWindows)[[paste0(name, ".median")]] <- binApply(median, genomeWindows, data, idx, na.rm = TRUE)
-      mcols(genomeWindows)[[paste0(name, ".mean")]]   <- binApply(mean,   genomeWindows, data, idx, na.rm = TRUE)
-      mcols(genomeWindows)[[paste0(name, ".sd")]]     <- binApply(sd,     genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]  <- binApply(length, genomeWindows, data, idx)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".median")]] <- binApply(median, genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".mean")]]   <- binApply(mean,   genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".sd")]]     <- binApply(sd,     genomeWindows, data, idx, na.rm = TRUE)
+    } else if(is.character(data) ) {
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]  <- binApply(length, genomeWindows, data, idx)
+    } else if(is.factor(data)) {
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.total")]] <- binApply(length, genomeWindows, data, idx)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.table")]] <- binApply(table, genomeWindows, data, idx)
     }
   }
   genomeWindows
 }
-(metaPerWindow(genomeWindows=tmp, transcripts$Oki))
+(metaPerWindow(genomeWindows=tmp, transcripts$Oki, meta_prefix = 'transcripts.'))
 
 # Function to do everything
-grWindows <- function(genome, meta, windowSize=10000){
+grWindows <- function(genome, meta, windowSize=10000, meta_prefix=NULL){
   genome <- BSgenomeToGR(genome)                             # Make GRanges from genome
   genome <- genomeGRToWindows(genome, windowSize=windowSize) # Make a windowed GRange from chromosome GRanges
-  mpw <- metaPerWindow(genome, meta)
+  mpw <- metaPerWindow(genome, meta, meta_prefix=meta_prefix)
   mpw
 }
 
 windowSize <- 20000
 bins_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
 chrw <- SimpleList()
-chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize)
+chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize, meta_prefix = 'transcripts.')
 chrw$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
-chrw$Osa <- grWindows(genome=genomes$Osa, meta=transcripts$Osa, windowSize=windowSize)
+chrw$Osa <- grWindows(genome=genomes$Osa, meta=transcripts$Osa, windowSize=windowSize, meta_prefix = 'transcripts.')
 chrw$Osa <- flagLongShort(chrw$Osa, longShort$OSKA2016v1.9)
-chrw$Bar <- grWindows(genome=genomes$Bar, meta=transcripts$Bar, windowSize=windowSize)
+chrw$Bar <- grWindows(genome=genomes$Bar, meta=transcripts$Bar, windowSize=windowSize, meta_prefix = 'transcripts.')
 chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
 ```
 
@@ -136,6 +142,28 @@ chrw$Oki |>
     aes(start, value, col = name) +
     facet_wrap(~seqnames, nrow = 1) +
     geom_smooth(span = 0.25, se = FALSE)
+```
+
+
+```{r chromosome_plots_2, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+chrw_rep <- SimpleList()
+chrw_rep$Oki <- grWindows(genome=genomes$Oki, meta=reps$Oki, windowSize=windowSize, meta_prefix = 'repeats.')
+chrw_rep$Oki <- flagLongShort(chrw_rep$Oki, longShort$OKI2018.I69)
+
+chrw_rep$Osa <- grWindows(genome=genomes$Osa, meta=reps$Osa, windowSize=windowSize, meta_prefix = 'repeats.')
+chrw_rep$Osa <- flagLongShort(chrw_rep$Osa, longShort$OSKA2016v1.9)
+
+chrw_rep$Bar <- grWindows(genome=genomes$Bar, meta=reps$Bar, windowSize=windowSize, meta_prefix = 'repeats.')
+chrw_rep$Bar <- flagLongShort(chrw_rep$Bar, longShort$Bar2.p4)
+
+```
+
+```{r chromosome_plots_repeats, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(as.data.frame(chrw_rep$Oki) |> filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(Arm~seqnames) + geom_smooth() + scale_y_log10()
+
+ggplot(as.data.frame(chrw_rep$Osa) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(Arm~seqnames) + geom_smooth() + scale_y_log10()
+
+ggplot(as.data.frame(chrw_rep$Bar) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=repeats.Class.count.total) + geom_point() + facet_wrap(Arm~seqnames) + geom_smooth() + scale_y_log10()
 ```
 
 # Session information
