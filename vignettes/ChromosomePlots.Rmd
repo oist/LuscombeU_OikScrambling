@@ -92,7 +92,12 @@ metaPerWindow <- function(genomeWindows, meta, meta_prefix=NULL) {
       mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]       <- binApply(length, genomeWindows, data, idx)
     } else if(is.factor(data)) {
       mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.total")]] <- binApply(length, genomeWindows, data, idx)
-      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.table")]] <- binApply(table,  genomeWindows, data, idx)
+      if(length(levels(data)) > 1) {
+        binned_list_of_tables <- binApply(table,  genomeWindows, data, idx)
+        binned_DataFrame <- do.call(rbind, binned_list_of_tables) |> DataFrame()
+        colnames(binned_DataFrame) <- paste0(meta_prefix, colnames(binned_DataFrame), ".count.total")
+        mcols(genomeWindows) <- cbind(mcols(genomeWindows), binned_DataFrame)
+      }
     }
   }
   genomeWindows
@@ -184,7 +189,7 @@ We can use the `[mcol].counts.tables` metadata columns to calculate statistics b
 
 ```{r chromosome_plots_2, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 repeat_dist <- SimpleList()
-repeat_dist$Oki <- as.data.frame(chrw$Oki) |> as_tibble() |> group_by(seqnames, Arm) |> summarize(repeats.Class.count.total)
+repeat_dist$Oki <- as.data.frame(chrw$Oki) |> as_tibble() |> group_by(seqnames, Arm) |> summarize(repeats.Class.count.table)
 
 # Now, do something...
 
