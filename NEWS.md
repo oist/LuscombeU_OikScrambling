@@ -1,3 +1,8 @@
+# OikScrambling 3.0.3
+
+* Mid-centered feature plots for Figure 2.
+
+
 # OikScrambling 3.0.2
 
 * Plot genomic features on white background for Figure 2.
