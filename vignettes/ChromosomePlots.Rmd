@@ -187,11 +187,51 @@ ggplot(as.data.frame(chrw$Bar) |> filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 
 
 We can use the `[mcol].counts.tables` metadata columns to calculate statistics between different genomic regions.
 
-```{r chromosome_plots_2, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-repeat_dist <- SimpleList()
-
+```{r chromosome_plots_2_Oki, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "repeats.Class.count.total", "repeats.Class.LowComplexity.count.total", "repeats.Class.ltr.1.count.total", "repeats.Class.rnd.count.total", "repeats.Class.SINE.count.total", "repeats.Class.tandem.count.total", "repeats.Class.unknown.count.total" )) |>
+  filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("repeats.Class.count.total", "repeats.Class.LowComplexity.count.total", "repeats.Class.ltr.1.count.total", "repeats.Class.rnd.count.total", "repeats.Class.SINE.count.total", "repeats.Class.tandem.count.total", "repeats.Class.unknown.count.total")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Oki: distribution of repeat classes across genome")
 
 ```
+
+
+```{r chromosome_plots_2_Osa, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+chrw$Osa |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "repeats.Class.count.total", "repeats.Class.LowComplexity.count.total", "repeats.Class.rnd.count.total", "repeats.Class.tandem.count.total", "repeats.Class.unknown.count.total" )) |>
+  filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("repeats.Class.count.total", "repeats.Class.LowComplexity.count.total", "repeats.Class.rnd.count.total", "repeats.Class.tandem.count.total", "repeats.Class.unknown.count.total" )) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Osa: distribution of repeat classes across genome")
+
+```
+
+
+
+```{r chromosome_plots_2_Bar, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+chrw$Bar |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "repeats.Class.count.total", "repeats.Class.LowComplexity.count.total", "repeats.Class.rnd.count.total", "repeats.Class.tandem.count.total", "repeats.Class.unknown.count.total" )) |>
+  filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("repeats.Class.count.total", "repeats.Class.LowComplexity.count.total", "repeats.Class.rnd.count.total", "repeats.Class.tandem.count.total", "repeats.Class.unknown.count.total" )) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Bar: distribution of repeat classes across genome")
+
+```
+
 # Session information
 
 ```{r sessionInfo}
