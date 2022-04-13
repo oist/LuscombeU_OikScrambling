@@ -113,7 +113,7 @@ makeOxfordPlots(coa$Oki_Osa, diag = FALSE, col = "strand") + theme_bw() + theme(
 
 10-Mb square window plot.
 
-```{r Oki_Osa_win, dev='svg', fig.ext='svg'}
+```{r Oki_Osa_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
 mkOxPlotWindow(gbs$Oki_Osa)
 ```
 
@@ -125,6 +125,63 @@ makeOxfordPlots(coa$Osa_Bar, diag = FALSE)
 
 ```{r Osa_Bar_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(gbs$Osa_Bar)
+```
+
+## Osa vs Oki
+
+```{r Osa_Oki}
+makeOxfordPlots(coa$Osa_Oki, diag = FALSE)
+```
+
+```{r Osa_Oki_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+mkOxPlotWindow(gbs$Osa_Oki)
+```
+
+## Osa vs Aom
+
+```{r Osa_Aom}
+makeOxfordPlots(coa$Osa_Aom, diag = FALSE)
+```
+
+
+```{r Osa_Aom_win_prepare}
+Osa_Aom_PAR <- gbs$Osa_Aom |> plyranges::filter(seqnames == "PAR")
+seqlevels(Osa_Aom_PAR)       <- seqlevelsInUse(Osa_Aom_PAR)
+seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
+
+makeOxfordPlots(Osa_Aom_PAR)
+
+# Let's remove the contigs that have their main match elsewhere.
+QTcoverage <- function(gb) {
+  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
+  stopifnot (!any(is.na(seqlengths(gb$query))))
+  grl <- split(gb, seqnames(gb$query))
+  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
+}
+Osa_Aom_PAR[seqnames(Osa_Aom_PAR$query) %in% seqlevels(Osa_Aom_PAR$query)[QTcoverage(Osa_Aom_PAR) < 0.5]] <- NULL
+seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
+makeOxfordPlots(Osa_Aom_PAR)
+
+# Let's remove the smallest ones that barely display on one pixel
+seqlengths(Osa_Aom_PAR$query)
+Osa_Aom_PAR[seqnames(Osa_Aom_PAR$query) %in% seqlevels(Osa_Aom_PAR$query)[seqlengths(Osa_Aom_PAR$query) < 2e4]] <- NULL
+seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
+makeOxfordPlots(Osa_Aom_PAR, col = "strand")
+
+# And now let's flip by hand the ones that need
+grl <- split(Osa_Aom_PAR, seqnames(Osa_Aom_PAR$query))
+grl[["contig_38_1"]] <- reverse(grl[["contig_38_1"]], query = TRUE)
+grl[["contig_49_1"]] <- reverse(grl[["contig_49_1"]], query = TRUE)
+Osa_Aom_PAR <- unlist(grl)
+makeOxfordPlots(Osa_Aom_PAR, col = "strand")
+
+# Finally, let's reorder and merge remaining seqlevels
+seqlevels(Osa_Aom_PAR$query) <- seqlevels(Osa_Aom_PAR$query)[orderQuerySeqLevels(Osa_Aom_PAR)]
+Osa_Aom_PAR$query <- mergeSeqLevels(Osa_Aom_PAR$query, seqlevels(Osa_Aom_PAR$query), "PAR")
+```
+
+```{r Osa_Aom_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+mkOxPlotWindow(Osa_Aom_PAR)
 ```
 
 ## Oki vs Kum

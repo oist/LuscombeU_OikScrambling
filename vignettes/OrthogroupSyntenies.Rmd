@@ -459,7 +459,7 @@ makeOxfordPlots(unlist(XSR_toPlot))
 Appears to be duplicated in Bar so missing from HOG `N19.HOG0000192` in that
 genome.
 
-```{r Hox4}
+```{r Hox4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 sapply(orthoPairs[1:15], \(gb) {
   x <- gb |> plyranges::filter(HOG == "N19.HOG0000192")
   if (length(x) == 0) return(NULL)
@@ -482,11 +482,19 @@ annot <- genoPlotR::annotation(x1=start(Hox4_4e4.genes), x2=end(Hox4_4e4.genes),
 gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox4_4e4), annotations = annot)
 ```
 
+<details>
+<summary>Click to see details on where the non-plotted alignments go.</summary>
+```{r}
+subsetByOverlaps(gbs$Oki_Osa, granges(Hox4_4e4)) |> sort(i=T)  |> data.frame()
+subsetByOverlaps(swap(gbs$Oki_Osa), granges(swap(Hox4_4e4))) |> sort(i=T)  |> data.frame()
+```
+<br/>
+
 ## Hox 1
 
 HOG `N19.HOG0000193`.
 
-```{r Hox1}
+```{r Hox1, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 sapply(orthoPairs[1:15], \(gb) {
   x <- gb |> plyranges::filter(HOG == "N19.HOG0000193")
   if (length(x) == 0) return(NULL)
@@ -508,6 +516,14 @@ text <- Hox1_4e4.genes$tx_name |> as.character()
 annot <- genoPlotR::annotation(x1=start(Hox1_4e4.genes), x2=end(Hox1_4e4.genes), text=text, rot=30)
 gbs$Oki_Osa |> plotApairOfChrs("chr2", xlim = gb2xlim(Hox1_4e4), annotations = annot)
 ```
+
+<details>
+<summary>Click to see details on where the non-plotted alignments go.</summary>
+```{r}
+subsetByOverlaps(gbs$Oki_Osa, granges(Hox1_4e4)) |> sort(i=T)  |> data.frame()
+subsetByOverlaps(swap(gbs$Oki_Osa), granges(swap(Hox1_4e4))) |> sort(i=T)  |> data.frame()
+```
+<br/>
 
 # Ancestral states
 
@@ -583,13 +599,13 @@ g1211.t1    g92.t1    g654.t1
 ```
 
 ```{r}
-### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (unalMap)
+### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (bri)
 
 unal$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2)) # between g1207.t1 and g1208.t1 on Oki
 unal$Osa_Oki |> subsetByOverlaps(GRanges("Chr1", ( 409953 + 410741 )/2)) # between g95.t1 and g94.t1 on Osa
 # Or just:
 
-(BP1_Oki_Osa <- unalMap$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))) # between g1207.t1 and g1208.t1 on Oki
+(BP1_Oki_Osa <- bri$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))) # between g1207.t1 and g1208.t1 on Oki
 
 
 # Now on Bar:

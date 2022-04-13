@@ -25,8 +25,7 @@ We want to put numbers on visual impressions such as:
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-(genomes <- OikScrambling:::loadAllGenomes())
-(load("BreakPoints.Rdata"))
+load("BreakPoints.Rdata")
 ```
 
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
@@ -79,4 +78,13 @@ See `?GenomicBreaks::GOC` for details.
 ```{r goc_index}
 BiocParallel::bplapply(gbs,                 GOC  ) |> pairs2Kable6x3()
 BiocParallel::bplapply(gbs, \(g) swap(g) |> GOC()) |> pairs2Kable6x3()
+```
+
+# Strand randomisation index
+
+See `?GenomicBreaks::strand_randomisation_index()` for details.
+
+```{r strand_randomisation_index}
+BiocParallel::bplapply(gbs,                 strand_randomisation_index  ) |> pairs2Kable6x3()
+BiocParallel::bplapply(gbs, \(g) swap(g) |> strand_randomisation_index()) |> pairs2Kable6x3()
 ```

@@ -1,3 +1,30 @@
+# OikScrambling 3.0.2
+
+* Plot genomic features on white background for Figure 2.
+* Compute strand randomisation indexes.
+* Provide alignment information for manual brush-up of Hox panels in Figure 1.
+* Add Osaka–Aomori Oxford plots.
+
+# OikScrambling 3.0.1
+
+* Plot operons density near alignment boundaries.
+* Compute confidence intervals on width distributions.
+* Plot width distributions in PDF format.
+
+# OikScrambling 3.0.0
+
+* Corrected arm names on query genomes.
+* New functions `isSyntenic()`, `isSynbrachial()`,
+  `nameSyntenic()` and `nameSynbrachial()`.
+* Renamed _mapped unaligned_ regions to _bridge_ regions and renamed `unalMap`
+  object to `bri`.
+* Added an 'isolated' category in the `RegionWidths` vignette.
+
+# OikScrambling 2.2.2
+
+* Parallel plot of chr2
+* Export aggregated numbers about segment widths.
+
 # OikScrambling 2.2.1
 
 * New Oki-Osa Oxford plots for Figure 1.

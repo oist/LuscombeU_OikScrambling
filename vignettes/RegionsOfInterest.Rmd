@@ -134,13 +134,13 @@ Let's check examples of unaligned mapped regions in function of presence of repe
 ## FALSE/TRUE
 
 ```{r ROI4_1}
-unalMap$Oki_Osa -> x
+bri$Oki_Osa -> x
 x$Class <- paste(!sapply(x$rep, anyNA), !sapply(x$query$rep, anyNA))
 x |> head() |> as.data.frame()
 ROI4_1 <- x[1]
 
 # Let's recover the flanking regions
-# We expand the unalMap regions of 1 base on each side to promote overlaps with gbs regions)
+# We expand the bri regions of 1 base on each side to promote overlaps with gbs regions)
 gbs$Oki_Osa |> subsetByOverlaps(ROI4_1 + 1) |> as.data.frame()
 gbs$Oki_Osa |> subsetByOverlaps(ROI4_1 + 1) |> range()
 # We confirm that unalmap regions can not be mapped
@@ -410,7 +410,7 @@ ROI10_inv |> plotApairOfChrs(main = "A short unaligned region that is actually a
 ROI10_inv       |> cleanGaps() |> as.character()
 ROI10_inv$query |> cleanGaps() |> as.character()
 
-ROI10_unal <- subsetByOverlaps(unalMap$Oki_Kum, ROI10 + 1e2)
+ROI10_unal <- subsetByOverlaps(bri$Oki_Kum, ROI10 + 1e2)
 ```
 
 Interestingly, this small inversion is flanked by an inverted repeat.
@@ -456,7 +456,7 @@ ROI10_ins$query |> cleanGaps() |> as.data.frame()
 tail(ROI10_ins, 2) |> plotApairOfChrs(main = "An insertion in the Kume genome")
 tail(ROI10_ins, 2) |> swap() |> cleanGaps()
 
-(ROI10_ins_unalMap <- subsetByOverlaps(unalMap$Oki_Kum + 1, tail(ROI10_ins, 2) )[2])
+(ROI10_ins_bri <- subsetByOverlaps(bri$Oki_Kum + 1, tail(ROI10_ins, 2) )[2])
 
 # Left side
 pairwiseAlignment(getSeq(genomes$OKI2018.I69, GRanges("PAR:83350-83550")),
@@ -469,11 +469,11 @@ pairwiseAlignment(getSeq(genomes$OKI2018.I69, GRanges("PAR:83351-83551")),
                   type = "global") |> writePairwiseAlignments()
 
 # Both sides
-pairwiseAlignment(getSeq(ROI10_ins_unalMap + 100),
-                  getSeq(ROI10_ins_unalMap$query + 100) |> reverseComplement(),
+pairwiseAlignment(getSeq(ROI10_ins_bri + 100),
+                  getSeq(ROI10_ins_bri$query + 100) |> reverseComplement(),
                   type = "global") 
 
-getSeq(ROI10_ins_unalMap$query) |> as.character()
+getSeq(ROI10_ins_bri$query) |> as.character()
 ```
 
 Exemplar from the Okinawa genome (found by BLASTing the sequence output by
@@ -651,9 +651,9 @@ Regions of interest were cherry picked for being syntenic, but scrambled regions
 also exist.
 
 ```{r unalmap_plots}
-unalMap$Oki_Kum[20:30]   |> plotApairOfChrs(main = "Oki–Kum")
-unalMap$Oki_Osa[405:413] |> plotApairOfChrs(main = "Oki–Osa")
-unalMap$Osa_Aom[40:50]   |> plotApairOfChrs(main = "Osa–Aom")
+bri$Oki_Kum[20:30]   |> plotApairOfChrs(main = "Oki–Kum")
+bri$Oki_Osa[405:413] |> plotApairOfChrs(main = "Oki–Osa")
+bri$Osa_Aom[40:50]   |> plotApairOfChrs(main = "Osa–Aom")
 ```
 
 # Kume's contig_11_1

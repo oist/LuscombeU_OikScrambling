@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.2</span>
       </span>
     </div>
 
@@ -138,7 +138,7 @@
       <h1 data-toc-skip>Distance Measures</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">08 March, 2022</h4>
+            <h4 data-toc-skip class="date">12 April, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/DistanceMeasures.Rmd" class="external-link"><code>vignettes/DistanceMeasures.Rmd</code></a></small>
       <div class="hidden name"><code>DistanceMeasures.Rmd</code></div>
@@ -163,29 +163,23 @@
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">(</span><span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## List of length 6</span>
-<span class="co">## names(6): Oki Osa Bar Kum Aom Nor</span></code></pre>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##  [1] "gbs"       "unal"      "coa"       "unmap"     "unalMap"   "tra"      </span>
-<span class="co">##  [7] "tra2"      "coa2"      "unmap2"    "wgo"       "longShort"</span></code></pre>
+<span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span></code></pre></div>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are prepared.</p>
 </div>
 <div class="section level2">
 <h2 id="synteny-index">Synteny index<a class="anchor" aria-label="anchor" href="#synteny-index"></a>
 </h2>
 <p>Ad-hoc index measuring to what extent a scaffold of the <em>target</em> genome is mostly aligned to a single scaffold in the <em>query</em> genome. See <code><a href="https://oist.github.io/GenomicBreaks/reference/synteny_index.html" class="external-link">?GenomicBreaks::synteny_index</a></code> for details. One limitation to the use of this index is that it requires that at least the <em>query</em> genome is a complete chromosome assembly.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pairs2table6x3</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>
-    Oki <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="cn">NA</span>,        Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Oki</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
-    Kum <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Kum</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Kum</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Kum</span><span class="op">)</span>,
-    Osa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Osa</span>, Osa <span class="op">=</span> <span class="cn">NA</span>,        Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
-    Aom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Aom</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Aom</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Aom</span><span class="op">)</span>,
-    Bar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Bar</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Bar</span>, Bar <span class="op">=</span> <span class="cn">NA</span>       <span class="op">)</span>,
-    Nor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Nor</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Nor</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Nor</span><span class="op">)</span>
+  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>
+    Oki <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="cn">NA</span>,        Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Oki</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Oki</span><span class="op">)</span>,
+    Kum <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Kum</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Kum</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Kum</span><span class="op">)</span>,
+    Osa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Osa</span>, Osa <span class="op">=</span> <span class="cn">NA</span>,        Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Osa</span><span class="op">)</span>,
+    Aom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Aom</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Aom</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Aom</span><span class="op">)</span>,
+    Bar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Bar</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Bar</span>, Bar <span class="op">=</span> <span class="cn">NA</span>       <span class="op">)</span>,
+    Nor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Oki <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Oki_Nor</span>, Osa <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Osa_Nor</span>, Bar <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">Bar_Nor</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">}</span>
 
@@ -232,8 +226,8 @@
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/synteny_index.html" class="external-link">synteny_index</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu">swap</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu">synteny_index</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left"></th>
@@ -279,7 +273,7 @@
 <h2 id="correlation">Correlation<a class="anchor" aria-label="anchor" href="#correlation"></a>
 </h2>
 <p>Ad-hoc index measuring the correlation of the coordinates of the syntenic alignments in scaffolds of a <em>target</em> genome and their best match in the <em>query</em> genome. See <code><a href="https://oist.github.io/GenomicBreaks/reference/correlation_index.html" class="external-link">?GenomicBreaks::correlation_index</a></code> for details. It is intended to be more robust to the presence of uncollapsed haplotypes in the <em>query</em> genome but probably needs further testing.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>,                 <span class="va">correlation_index</span>  <span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -321,8 +315,8 @@
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/correlation_index.html" class="external-link">correlation_index</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu">swap</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu">correlation_index</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left"></th>
@@ -368,7 +362,7 @@
 <h2 id="gene-order-conservation">Gene Order Conservation<a class="anchor" aria-label="anchor" href="#gene-order-conservation"></a>
 </h2>
 <p>See <code><a href="https://oist.github.io/GenomicBreaks/reference/GOC.html" class="external-link">?GenomicBreaks::GOC</a></code> for details.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>,                 <span class="va">GOC</span>  <span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -410,8 +404,8 @@
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GOC.html" class="external-link">GOC</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu">swap</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu">GOC</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left"></th>
@@ -449,6 +443,95 @@
 <td align="right">0.89</td>
 <td align="right">NA</td>
 <td align="right">0.73</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="strand-randomisation-index">Strand randomisation index<a class="anchor" aria-label="anchor" href="#strand-randomisation-index"></a>
+</h2>
+<p>See <code>?GenomicBreaks::strand_randomisation_index()</code> for details.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>,                 <span class="va">strand_randomisation_index</span>  <span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">Oki</th>
+<th align="right">Kum</th>
+<th align="right">Osa</th>
+<th align="right">Aom</th>
+<th align="right">Bar</th>
+<th align="right">Nor</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Oki</td>
+<td align="right">NA</td>
+<td align="right">0.52</td>
+<td align="right">0.04</td>
+<td align="right">0.06</td>
+<td align="right">0.10</td>
+<td align="right">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">Osa</td>
+<td align="right">0.05</td>
+<td align="right">0.06</td>
+<td align="right">NA</td>
+<td align="right">0.43</td>
+<td align="right">0.23</td>
+<td align="right">0.10</td>
+</tr>
+<tr class="odd">
+<td align="left">Bar</td>
+<td align="right">0.10</td>
+<td align="right">0.09</td>
+<td align="right">0.23</td>
+<td align="right">0.19</td>
+<td align="right">NA</td>
+<td align="right">0.18</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, \<span class="op">(</span><span class="va">g</span><span class="op">)</span> <span class="fu">swap</span><span class="op">(</span><span class="va">g</span><span class="op">)</span> |&gt; <span class="fu">strand_randomisation_index</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">pairs2Kable6x3</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">Oki</th>
+<th align="right">Kum</th>
+<th align="right">Osa</th>
+<th align="right">Aom</th>
+<th align="right">Bar</th>
+<th align="right">Nor</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Oki</td>
+<td align="right">NA</td>
+<td align="right">0.83</td>
+<td align="right">0.05</td>
+<td align="right">0.10</td>
+<td align="right">0.10</td>
+<td align="right">0.31</td>
+</tr>
+<tr class="even">
+<td align="left">Osa</td>
+<td align="right">0.04</td>
+<td align="right">0.06</td>
+<td align="right">NA</td>
+<td align="right">0.66</td>
+<td align="right">0.23</td>
+<td align="right">0.47</td>
+</tr>
+<tr class="odd">
+<td align="left">Bar</td>
+<td align="right">0.10</td>
+<td align="right">0.14</td>
+<td align="right">0.23</td>
+<td align="right">0.25</td>
+<td align="right">NA</td>
+<td align="right">0.82</td>
 </tr>
 </tbody>
 </table>

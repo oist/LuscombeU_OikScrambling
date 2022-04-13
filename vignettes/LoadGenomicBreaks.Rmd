@@ -56,9 +56,22 @@ loadLongShort <- function(file, genome) {
   GRanges(gr, seqinfo = seqinfo(getBSgenome(genome)), strand = "*")
 }
 
-flagLongShort_ <- function(gr, annot) {
-  genome <- gr |> genome() |> unique()
-  flagLongShort(gr, annot[[genome]])
+flagLongShort_ <- function(gr, longShort) {
+  genomeT <- gr |> genome() |> unique()
+  if(genomeT %in% names(longShort))
+    gr <- flagLongShort(gr, longShort[[genomeT]])
+  if("GBreaks" %in% class(gr)) {
+      genomeQ <- gr$query |> genome() |> unique()
+      if(genomeQ %in% names(longShort)) {
+        # sort, flag, unsort, extract flag
+        grq <- gr$query
+        grq$idx <- seq_along(grq)
+        grq <- sort(grq, ignore.strand = TRUE)
+        grq <- flagLongShort(grq, longShort[[genomeQ]])
+        gr$query$Arm <- grq$Arm[order(grq$idx)]
+      }
+  }
+  gr
 }
 
 longShort <- SimpleList()
@@ -161,13 +174,7 @@ Let's load data from genome alignments, using the copy distributed in the
 load_genomic_breaks_ <- function(file, genomeT, genomeQ, longShort=NULL) {
   file <- system.file(paste0("extdata/Oidioi_pairwise_v3/", file), package = "BreakpointsData")
   gb <- load_genomic_breaks(file, getBSgenome(genomeT),  getBSgenome(genomeQ))
-  if (! is.null(longShort)) {
-    gb <-  flagLongShort(gb, longShort[[genomeT]])
-    if (genomeQ %in% names(longShort)) {
-      gb$query <- flagLongShort(gb$query, longShort[[genomeQ]])
-    }
-  }
-  gb
+  flagLongShort_(gb, longShort)
 }
 
 gbs <- SimpleList()
@@ -318,17 +325,17 @@ makeWholeGenomeObject <- function(aligned, unaligned, coalesced) {
 wgo <- mapply(makeWholeGenomeObject, gbs, unal, coa) |> SimpleList()
 ```
 
-Mapped unaligned regions
-------------------------
+Bridge regions
+--------------
 
 We can pair the unaligned regions that are between two colinearly aligned regions.
 
 ```{r mappedUnaligned, cache = TRUE, dependson="GBreaks_object"}
-unalMap <- BiocParallel::bplapply(gbs, bridgeRegions) |> as("SimpleList")
+bri <- BiocParallel::bplapply(gbs, bridgeRegions) |> as("SimpleList")
 
-unalMap[Oik_Oik] <- BiocParallel::bplapply(unalMap[Oik_Oik], flagLongShort_, longShort)
-unalMap[Oik_Oik] <- annotateWithReps(unalMap[Oik_Oik], reps)
-unalMap[Oik_Oik] <- annotateWithTranscripts(unalMap[Oik_Oik], transcripts)
+bri[Oik_Oik] <- BiocParallel::bplapply(bri[Oik_Oik], flagLongShort_, longShort)
+bri[Oik_Oik] <- annotateWithReps(bri[Oik_Oik], reps)
+bri[Oik_Oik] <- annotateWithTranscripts(bri[Oik_Oik], transcripts)
 ```
 
 Translocated regions
@@ -425,7 +432,7 @@ bp_summary <-
     coa     = sapply(coa, length),
     unmap   = sapply(unmap, length),
     unmap2  = sapply(unmap2, length),
-    unalMap = sapply(unalMap, length),
+    bri = sapply(bri, length),
     tra     = sapply(tra, length),
     tra2    = sapply(tra2, length),
     coa2    = sapply(coa2, length)
@@ -667,7 +674,7 @@ Save data
 =========
 
 ```{r save_data}
-save(gbs, unal, coa, unmap, unalMap, tra, tra2, coa2, unmap2, wgo, longShort, file = "BreakPoints.Rdata")
+save(gbs, unal, coa, unmap, bri, tra, tra2, coa2, unmap2, wgo, longShort, file = "BreakPoints.Rdata")
 system("echo '9f273f099ecbfa44899b6c343d1382f1  BreakPoints.Rdata' | md5sum -c", intern = TRUE)
 ```
 

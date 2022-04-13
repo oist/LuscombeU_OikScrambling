@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.1</span>
       </span>
     </div>
 
@@ -215,7 +215,7 @@
 
 <span class="va">flagLongShort_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">transcripts</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">genome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">genome</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span>
-  <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagLongShort.html" class="external-link">flagLongShort</a></span><span class="op">(</span><span class="va">gr</span>, <span class="va">transcripts</span><span class="op">[[</span><span class="va">genome</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
+  <span class="fu">flagLongShort</span><span class="op">(</span><span class="va">gr</span>, <span class="va">transcripts</span><span class="op">[[</span><span class="va">genome</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
 <span class="op">}</span>
 
 <span class="va">orthoPairToGBreaks_all_Oiks</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">treeName</span><span class="op">=</span><span class="cn">NULL</span>, <span class="va">HOGs</span><span class="op">=</span><span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
@@ -297,12 +297,12 @@
 <code class="sourceCode R"><span class="va">transcripts</span><span class="op">$</span><span class="va">Bar2.p4</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] 15741</span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">transcripts</span><span class="op">$</span><span class="va">Bar2.p4</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span>min <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">transcripts</span><span class="op">$</span><span class="va">Bar2.p4</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span>min <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] 14262</span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">flagOverlaps</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Find overlaps</span>
-  <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span>
+  <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span>
   <span class="co"># Index of self hits in the gr object</span>
   <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Hits-class.html" class="external-link">queryHits</a></span><span class="op">(</span><span class="va">ov</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Hits-class.html" class="external-link">isSelfHit</a></span><span class="op">(</span><span class="va">ov</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
   <span class="co"># Convert to Boolean indexing the gr object</span>
@@ -460,10 +460,10 @@
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">coalOrtho</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># Coalesce</span>
-  <span class="va">coal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html" class="external-link">coalesce_contigs</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
+  <span class="va">coal</span> <span class="op">&lt;-</span> <span class="fu">coalesce_contigs</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   
   <span class="co"># Map annotations to the coalesced blocks</span>
-  <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">coal</span>, <span class="va">gb</span><span class="op">)</span>
+  <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">findOverlaps</a></span><span class="op">(</span><span class="va">coal</span>, <span class="va">gb</span><span class="op">)</span>
   
   <span class="co"># Extract gene names mapped to each blocks</span>
   <span class="va">coal</span><span class="op">$</span><span class="va">geneNames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/AtomicList-class.html" class="external-link">CharacterList</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Hits-class.html" class="external-link">subjectHits</a></span><span class="op">(</span><span class="va">ov</span><span class="op">)</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Hits-class.html" class="external-link">queryHits</a></span><span class="op">(</span><span class="va">ov</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span>
@@ -486,11 +486,11 @@
 <span class="op">}</span>
 
 <span class="va">orthoBlocks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">coalOrtho</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html" class="external-link">coalesce_contigs</a></span><span class="op">(</span><span class="va">orthoPairsFiltered</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span>
+<span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu">coalesce_contigs</span><span class="op">(</span><span class="va">orthoPairsFiltered</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span>
 <span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span> <span class="op">]</span>,  <span class="va">flagLongShort_</span>, <span class="va">longShort</span><span class="op">)</span>
 
 <span class="va">orthoBlocks_core</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">coalOrtho</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">orthoBlocks_core</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/coalesce_contigs.html" class="external-link">coalesce_contigs</a></span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span>
+<span class="va">orthoBlocks_core</span><span class="op">$</span><span class="va">Ply_Ros</span> <span class="op">&lt;-</span> <span class="fu">coalesce_contigs</span><span class="op">(</span><span class="va">orthoPairsFiltered_core</span><span class="op">$</span><span class="va">Ply_Ros</span><span class="op">)</span>
 <span class="va">orthoBlocks_core</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_core</span><span class="op">[</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span> <span class="op">]</span>,  <span class="va">flagLongShort_</span>, <span class="va">longShort</span><span class="op">)</span>
 
 <span class="va">orthoBlocks_one2oneInOiks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">orthoPairs_one2oneInOiks_Filtered</span>, <span class="va">coalOrtho</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
@@ -952,7 +952,7 @@ Unit: seconds
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gb_N</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] 45289525</span></code></pre>
 <div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="op">(</span><span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 918 ranges and 8 metadata columns:</span>
 <span class="co">##         seqnames          ranges strand |                query     score</span>
 <span class="co">##            &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;integer&gt;</span>
@@ -1009,7 +1009,7 @@ Unit: seconds
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 68 sequences from Bar2.p4 genome</span></code></pre>
 <div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="va">jaccard</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">ov</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="op">(</span><span class="va">jaccard</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">ov</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html" class="external-link">reduce</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] 0.1434809</span></code></pre>
 <div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gb_P</span> <span class="op">&lt;-</span> <span class="va">gb_P</span><span class="op">[</span><span class="va">gb_P</span><span class="op">$</span><span class="va">geneNumber</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">]</span>
@@ -1073,7 +1073,7 @@ Unit: seconds
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gb_P</span><span class="op">$</span><span class="va">geneNumber</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] 8498</span></code></pre>
 <div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="va">valid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="op">(</span><span class="va">valid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gb_P</span>, <span class="va">gb_N</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 462 ranges and 8 metadata columns:</span>
 <span class="co">##         seqnames            ranges strand |                query     score</span>
 <span class="co">##            &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;integer&gt;</span>
@@ -1156,10 +1156,10 @@ Unit: seconds
   <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span>seqnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqnames</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span>, ranges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/range-squeezers.html" class="external-link">ranges</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span>, strand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/strand.html" class="external-link">strand</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">removeSeqInfoGB</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
-  <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html" class="external-link">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu">removeSeqInfoGR</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>, query <span class="op">=</span> <span class="fu">removeSeqInfoGR</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu">GBreaks</span><span class="op">(</span>target <span class="op">=</span> <span class="fu">removeSeqInfoGR</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>, query <span class="op">=</span> <span class="fu">removeSeqInfoGR</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">XSR_toPlot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">XSR_HOGs</span>, <span class="va">removeSeqInfoGB</span><span class="op">)</span>
-<span class="va">XSR_toPlot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">XSR_toPlot</span>, <span class="st">"GRangesList"</span><span class="op">)</span>
+<span class="va">XSR_toPlot</span> <span class="op">&lt;-</span> <span class="fu">as</span><span class="op">(</span><span class="va">XSR_toPlot</span>, <span class="st">"GRangesList"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlevels</a></span><span class="op">(</span><span class="va">XSR_toPlot</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>       <span class="op">&lt;-</span> <span class="st">"XSR_01_Oki"</span>
 <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlevels</a></span><span class="op">(</span><span class="va">XSR_toPlot</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"XSR_03_Osa"</span>
 <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlevels</a></span><span class="op">(</span><span class="va">XSR_toPlot</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span>       <span class="op">&lt;-</span> <span class="st">"XSR_01_Oki"</span>
@@ -1193,7 +1193,7 @@ Unit: seconds
 <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlevels</a></span><span class="op">(</span><span class="va">XSR_toPlot</span><span class="op">$</span><span class="va">Bar_Nor</span><span class="op">)</span>       <span class="op">&lt;-</span> <span class="st">"XSR_06_Bar"</span>
 <span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlevels</a></span><span class="op">(</span><span class="va">XSR_toPlot</span><span class="op">$</span><span class="va">Bar_Nor</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"XSR_06_Nor"</span>
 
-<span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/makeOxfordPlots.html" class="external-link">makeOxfordPlots</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">XSR_toPlot</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">makeOxfordPlots</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">XSR_toPlot</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning in .Seqinfo.mergexy(x, y): The 2 combined objects have no sequence levels in common. (Use</span>
 <span class="co">##   suppressWarnings() to suppress this warning.)</span>
 
@@ -1340,32 +1340,237 @@ Unit: seconds
 <span class="co">## NULL</span></code></pre>
 <div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">Hox4</span> <span class="op">&lt;-</span> <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">HOG</span> <span class="op">==</span> <span class="st">"N19.HOG0000192"</span><span class="op">)</span>
-<span class="va">Hox4_1e4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html" class="external-link">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e4</span>, query <span class="op">=</span> <span class="va">Hox4</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e4</span><span class="op">)</span>
-<span class="va">Hox4_4e4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html" class="external-link">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">4e4</span>, query <span class="op">=</span> <span class="va">Hox4</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">4e4</span><span class="op">)</span>
-<span class="va">Hox4_1e5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html" class="external-link">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e5</span>, query <span class="op">=</span> <span class="va">Hox4</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e5</span><span class="op">)</span>
+<span class="va">Hox4_1e4</span> <span class="op">&lt;-</span> <span class="fu">GBreaks</span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e4</span>, query <span class="op">=</span> <span class="va">Hox4</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e4</span><span class="op">)</span>
+<span class="va">Hox4_4e4</span> <span class="op">&lt;-</span> <span class="fu">GBreaks</span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">4e4</span>, query <span class="op">=</span> <span class="va">Hox4</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">4e4</span><span class="op">)</span>
+<span class="va">Hox4_1e5</span> <span class="op">&lt;-</span> <span class="fu">GBreaks</span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e5</span>, query <span class="op">=</span> <span class="va">Hox4</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e5</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox4_1e4</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox4_1e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-1.png" width="700"></p>
+<span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox4_1e4</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox4_1e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-1.svg" width="700"></p>
 <div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox4_4e4</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox4_4e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-2.png" width="700"></p>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox4_4e4</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox4_4e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-2.svg" width="700"></p>
 <div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox4_1e5</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox4_1e5</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-3.png" width="700"></p>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox4_1e5</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox4_1e5</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-3.svg" width="700"></p>
 <div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Genes</span>
-<span class="va">Hox4_4e4.genes</span> <span class="op">&lt;-</span> <span class="va">transcripts</span><span class="op">$</span><span class="va">OKI2018.I69</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">Hox4_4e4</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">range</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-<span class="va">mids</span> <span class="op">&lt;-</span> <span class="va">Hox4_4e4.genes</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>mid <span class="op">=</span> <span class="op">(</span><span class="va">start</span> <span class="op">+</span> <span class="va">end</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">mid</span><span class="op">)</span>
+<span class="va">Hox4_4e4.genes</span> <span class="op">&lt;-</span> <span class="va">transcripts</span><span class="op">$</span><span class="va">OKI2018.I69</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">Hox4_4e4</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html" class="external-link">range</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="va">mids</span> <span class="op">&lt;-</span> <span class="va">Hox4_4e4.genes</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>mid <span class="op">=</span> <span class="op">(</span><span class="va">start</span> <span class="op">+</span> <span class="va">end</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">mid</span><span class="op">)</span>
 <span class="va">text</span> <span class="op">&lt;-</span> <span class="va">Hox4_4e4.genes</span><span class="op">$</span><span class="va">tx_name</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">annot</span> <span class="op">&lt;-</span> <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/annotation.html" class="external-link">annotation</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">Hox4_4e4.genes</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">Hox4_4e4.genes</span><span class="op">)</span>, text<span class="op">=</span><span class="va">text</span>, rot<span class="op">=</span><span class="fl">30</span><span class="op">)</span>
-<span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox4_4e4</span><span class="op">)</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-4.png" width="700"></p>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox4_4e4</span><span class="op">)</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox4-4.svg" width="700"></p>
+<details><p><summary>Click to see details on where the non-plotted alignments go.</summary></p>
+<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox4_4e4</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##    seqnames   start     end width strand score query.seqnames query.start</span>
+<span class="co">## 1      chr2 4680017 4680185   169      -   450           Chr2     1130131</span>
+<span class="co">## 2      chr2 4680306 4680615   310      -   751           Chr2     1129482</span>
+<span class="co">## 3      chr2 4680646 4680944   299      -   821           Chr2     1128741</span>
+<span class="co">## 4      chr2 4681217 4681508   292      -   717           Chr2     1128441</span>
+<span class="co">## 5      chr2 4682067 4682396   330      -   482           Chr2     1127536</span>
+<span class="co">## 6      chr2 4682468 4683740  1273      -  1764           Chr2     1126128</span>
+<span class="co">## 7      chr2 4684457 4684873   417      -   442           Chr2     1125551</span>
+<span class="co">## 8      chr2 4685956 4686922   967      +  1473           Chr2     1156232</span>
+<span class="co">## 9      chr2 4687083 4688536  1454      +  1728           Chr2     1157327</span>
+<span class="co">## 10     chr2 4692590 4693427   838      -  1128           Chr2     3612906</span>
+<span class="co">## 11     chr2 4695931 4696033   103      +   355           Chr2     3611932</span>
+<span class="co">## 12     chr2 4696242 4696708   467      -   982           Chr2     2917549</span>
+<span class="co">## 13     chr2 4707204 4708706  1503      -  2221           Chr2     2916035</span>
+<span class="co">## 14     chr2 4714542 4717249  2708      +  4868           Chr2     2842120</span>
+<span class="co">## 15     chr2 4717795 4717995   201      +   258           Chr2     2844493</span>
+<span class="co">## 16     chr2 4718344 4718458   115      +   315           Chr2     2844977</span>
+<span class="co">##    query.end query.width query.strand query.Arm query.rep query.repOvlp</span>
+<span class="co">## 1    1130308         178            *     short        NA             0</span>
+<span class="co">## 2    1129785         304            *     short       rnd             6</span>
+<span class="co">## 3    1129039         299            *     short        NA             0</span>
+<span class="co">## 4    1128739         299            *     short        NA             0</span>
+<span class="co">## 5    1127867         332            *     short        NA             0</span>
+<span class="co">## 6    1127291        1164            *     short       rnd            18</span>
+<span class="co">## 7    1125975         425            *     short        NA             0</span>
+<span class="co">## 8    1157087         856            *     short        NA             0</span>
+<span class="co">## 9    1158757        1431            *     short    tandem            58</span>
+<span class="co">## 10   3613565         660            *     short        NA             0</span>
+<span class="co">## 11   3612034         103            *     short        NA             0</span>
+<span class="co">## 12   2917998         450            *     short        NA             0</span>
+<span class="co">## 13   2917544        1510            *     short        NA             0</span>
+<span class="co">## 14   2844401        2282            *     short       rnd            51</span>
+<span class="co">## 15   2844717         225            *     short        NA             0</span>
+<span class="co">## 16   2845091         115            *     short        NA             0</span>
+<span class="co">##    query.transcripts   Arm         rep repOvlp transcripts flag nonCoa</span>
+<span class="co">## 1  g3343.t1;g3343.t2 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 2  g3343.t1;g3343.t2 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 3  g3343.t1;g3343.t2 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 4  g3343.t1;g3343.t2 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 5  g3343.t1;g3343.t2 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 6  g3343.t1;g3343.t2 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 7  g3343.t1;g3343.t2 short          NA       0        &lt;NA&gt; &lt;NA&gt;  FALSE</span>
+<span class="co">## 8           g3346.t1 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 9           g3346.t1 short          NA       0        &lt;NA&gt; &lt;NA&gt;  FALSE</span>
+<span class="co">## 10          g4058.t1 short   rnd, SINE      89    g5195.t1 &lt;NA&gt;   TRUE</span>
+<span class="co">## 11              &lt;NA&gt; short          NA       0        &lt;NA&gt; &lt;NA&gt;   TRUE</span>
+<span class="co">## 12          g3845.t1 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 13          g3845.t1 short          NA       0        &lt;NA&gt; &lt;NA&gt;  FALSE</span>
+<span class="co">## 14 g3815.t1;g3816.t1 short rnd, tandem      25    g5200.t1  Col  FALSE</span>
+<span class="co">## 15          g3816.t1 short          NA       0        &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 16          g3816.t1 short          NA       0        &lt;NA&gt; &lt;NA&gt;  FALSE</span></code></pre>
+<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu">swap</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="fu">swap</span><span class="op">(</span><span class="va">Hox4_4e4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##    seqnames   start     end width strand   Arm          rep repOvlp</span>
+<span class="co">## 1      Chr2 1116356 1116510   155      + short           NA       0</span>
+<span class="co">## 2      Chr2 1117617 1117737   121      + short           NA       0</span>
+<span class="co">## 3      Chr2 1117896 1118034   139      - short           NA       0</span>
+<span class="co">## 4      Chr2 1119050 1119261   212      - short           NA       0</span>
+<span class="co">## 5      Chr2 1122014 1122116   103      + short           NA       0</span>
+<span class="co">## 6      Chr2 1122663 1122777   115      - short           NA       0</span>
+<span class="co">## 7      Chr2 1125551 1125975   425      - short           NA       0</span>
+<span class="co">## 8      Chr2 1126128 1127291  1164      - short          rnd      18</span>
+<span class="co">## 9      Chr2 1127536 1127867   332      - short           NA       0</span>
+<span class="co">## 10     Chr2 1128441 1128739   299      - short           NA       0</span>
+<span class="co">## 11     Chr2 1128741 1129039   299      - short           NA       0</span>
+<span class="co">## 12     Chr2 1129482 1129785   304      - short          rnd       6</span>
+<span class="co">## 13     Chr2 1130131 1130308   178      - short           NA       0</span>
+<span class="co">## 14     Chr2 1143345 1146561  3217      - short           NA       0</span>
+<span class="co">## 15     Chr2 1146661 1146869   209      - short           NA       0</span>
+<span class="co">## 16     Chr2 1147032 1147428   397      + short           NA       0</span>
+<span class="co">## 17     Chr2 1147686 1148058   373      + short LowCompl....      37</span>
+<span class="co">## 18     Chr2 1148434 1148642   209      - short           NA       0</span>
+<span class="co">## 19     Chr2 1154904 1155305   402      - short           NA       0</span>
+<span class="co">## 20     Chr2 1156232 1157087   856      + short           NA       0</span>
+<span class="co">## 21     Chr2 1157327 1158757  1431      + short       tandem      58</span>
+<span class="co">## 22     Chr2 1162301 1162866   566      - short           NA       0</span>
+<span class="co">## 23     Chr2 1165237 1166110   874      + short       tandem      62</span>
+<span class="co">## 24     Chr2 1167024 1168181  1158      + short           NA       0</span>
+<span class="co">## 25     Chr2 1170520 1170816   297      - short          rnd      82</span>
+<span class="co">## 26     Chr2 1172127 1172242   116      + short           NA       0</span>
+<span class="co">## 27     Chr2 1172509 1172726   218      + short           NA       0</span>
+<span class="co">## 28     Chr2 1175781 1175935   155      - short           NA       0</span>
+<span class="co">## 29     Chr2 1175980 1176136   157      - short           NA       0</span>
+<span class="co">## 30     Chr2 1176714 1176965   252      - short           NA       0</span>
+<span class="co">## 31     Chr2 1177240 1177619   380      + short           NA       0</span>
+<span class="co">## 32     Chr2 1179193 1179404   212      - short           NA       0</span>
+<span class="co">## 33     Chr2 1179725 1179917   193      + short           NA       0</span>
+<span class="co">## 34     Chr2 1180191 1180422   232      + short           NA       0</span>
+<span class="co">## 35     Chr2 1180978 1181238   261      - short LowCompl....      52</span>
+<span class="co">## 36     Chr2 1181615 1181861   247      - short           NA       0</span>
+<span class="co">## 37     Chr2 1183092 1183265   174      - short           NA       0</span>
+<span class="co">## 38     Chr2 1183512 1183682   171      + short           NA       0</span>
+<span class="co">## 39     Chr2 1185336 1185510   175      - short           NA       0</span>
+<span class="co">## 40     Chr2 1186670 1186786   117      - short           NA       0</span>
+<span class="co">## 41     Chr2 1187265 1188647  1383      - short           NA       0</span>
+<span class="co">## 42     Chr2 1189530 1189790   261      + short           NA       0</span>
+<span class="co">## 43     Chr2 1190125 1190380   256      - short           NA       0</span>
+<span class="co">## 44     Chr2 1192014 1192315   302      - short           NA       0</span>
+<span class="co">## 45     Chr2 1192688 1193211   524      + short           NA       0</span>
+<span class="co">## 46     Chr2 1194037 1194926   890      - short           NA       0</span>
+<span class="co">## 47     Chr2 1195129 1195830   702      - short           NA       0</span>
+<span class="co">## 48     Chr2 1195952 1196071   120      - short           NA       0</span>
+<span class="co">##          transcripts query.seqnames query.start query.end query.width</span>
+<span class="co">## 1               &lt;NA&gt;           chr2     1023370   1023532         163</span>
+<span class="co">## 2               &lt;NA&gt;           chr2     1019589   1019734         146</span>
+<span class="co">## 3               &lt;NA&gt;           chr2     1019029   1019173         145</span>
+<span class="co">## 4               &lt;NA&gt;           chr2     1017389   1017657         269</span>
+<span class="co">## 5               &lt;NA&gt;           chr2     1010105   1010207         103</span>
+<span class="co">## 6               &lt;NA&gt;           chr2     1007291   1007406         116</span>
+<span class="co">## 7  g3343.t1;g3343.t2           chr2     4684457   4684873         417</span>
+<span class="co">## 8  g3343.t1;g3343.t2           chr2     4682468   4683740        1273</span>
+<span class="co">## 9  g3343.t1;g3343.t2           chr2     4682067   4682396         330</span>
+<span class="co">## 10 g3343.t1;g3343.t2           chr2     4681217   4681508         292</span>
+<span class="co">## 11 g3343.t1;g3343.t2           chr2     4680646   4680944         299</span>
+<span class="co">## 12 g3343.t1;g3343.t2           chr2     4680306   4680615         310</span>
+<span class="co">## 13 g3343.t1;g3343.t2           chr2     4680017   4680185         169</span>
+<span class="co">## 14 g3344.t1;g3344.t2           chr2     2332229   2335564        3336</span>
+<span class="co">## 15              &lt;NA&gt;           chr2     2331312   2331545         234</span>
+<span class="co">## 16              &lt;NA&gt;           chr2     2331643   2332043         401</span>
+<span class="co">## 17              &lt;NA&gt;           chr2     2330703   2331067         365</span>
+<span class="co">## 18              &lt;NA&gt;           chr2     2330196   2330404         209</span>
+<span class="co">## 19          g3345.t1           chr1     5048358   5048789         432</span>
+<span class="co">## 20          g3346.t1           chr2     4685956   4686922         967</span>
+<span class="co">## 21          g3346.t1           chr2     4687083   4688536        1454</span>
+<span class="co">## 22          g3348.t1           chr1     1196277   1196833         557</span>
+<span class="co">## 23          g3350.t1           chr2     2375085   2375971         887</span>
+<span class="co">## 24          g3351.t1           chr2     2376702   2377879        1178</span>
+<span class="co">## 25              &lt;NA&gt;           chr2     2303024   2303357         334</span>
+<span class="co">## 26              &lt;NA&gt;           chr2     2301006   2301121         116</span>
+<span class="co">## 27              &lt;NA&gt;           chr2     2297961   2298224         264</span>
+<span class="co">## 28          g3353.t1           chr2     2297391   2297553         163</span>
+<span class="co">## 29          g3353.t1           chr2     2296032   2296209         178</span>
+<span class="co">## 30          g3353.t1           chr2     2296898   2297147         250</span>
+<span class="co">## 31          g3353.t1           chr2     2294607   2295014         408</span>
+<span class="co">## 32          g3353.t1           chr2     2293313   2293516         204</span>
+<span class="co">## 33          g3353.t1           chr2     2292910   2293103         194</span>
+<span class="co">## 34          g3353.t1           chr2     2291596   2291823         228</span>
+<span class="co">## 35          g3353.t1           chr2     2290662   2290931         270</span>
+<span class="co">## 36          g3353.t1           chr2     2289870   2290126         257</span>
+<span class="co">## 37          g3353.t1           chr2     2287920   2288086         167</span>
+<span class="co">## 38          g3353.t1           chr2     2288998   2289174         177</span>
+<span class="co">## 39          g3353.t1           chr2     2285456   2285627         172</span>
+<span class="co">## 40          g3353.t1           chr2     2285188   2285303         116</span>
+<span class="co">## 41          g3353.t1           chr2     2282961   2284548        1588</span>
+<span class="co">## 42              &lt;NA&gt;           chr2     2281760   2282066         307</span>
+<span class="co">## 43          g3354.t1           chr2     2279412   2279670         259</span>
+<span class="co">## 44          g3354.t1           chr2     2280385   2280692         308</span>
+<span class="co">## 45          g3354.t1           chr1    13642675  13643204         530</span>
+<span class="co">## 46          g3355.t1           chr2     2275739   2276911        1173</span>
+<span class="co">## 47          g3355.t1           chr2     2274650   2275361         712</span>
+<span class="co">## 48              &lt;NA&gt;           chr2     2272732   2272851         120</span>
+<span class="co">##    query.strand</span>
+<span class="co">## 1             *</span>
+<span class="co">## 2             *</span>
+<span class="co">## 3             *</span>
+<span class="co">## 4             *</span>
+<span class="co">## 5             *</span>
+<span class="co">## 6             *</span>
+<span class="co">## 7             *</span>
+<span class="co">## 8             *</span>
+<span class="co">## 9             *</span>
+<span class="co">## 10            *</span>
+<span class="co">## 11            *</span>
+<span class="co">## 12            *</span>
+<span class="co">## 13            *</span>
+<span class="co">## 14            *</span>
+<span class="co">## 15            *</span>
+<span class="co">## 16            *</span>
+<span class="co">## 17            *</span>
+<span class="co">## 18            *</span>
+<span class="co">## 19            *</span>
+<span class="co">## 20            *</span>
+<span class="co">## 21            *</span>
+<span class="co">## 22            *</span>
+<span class="co">## 23            *</span>
+<span class="co">## 24            *</span>
+<span class="co">## 25            *</span>
+<span class="co">## 26            *</span>
+<span class="co">## 27            *</span>
+<span class="co">## 28            *</span>
+<span class="co">## 29            *</span>
+<span class="co">## 30            *</span>
+<span class="co">## 31            *</span>
+<span class="co">## 32            *</span>
+<span class="co">## 33            *</span>
+<span class="co">## 34            *</span>
+<span class="co">## 35            *</span>
+<span class="co">## 36            *</span>
+<span class="co">## 37            *</span>
+<span class="co">## 38            *</span>
+<span class="co">## 39            *</span>
+<span class="co">## 40            *</span>
+<span class="co">## 41            *</span>
+<span class="co">## 42            *</span>
+<span class="co">## 43            *</span>
+<span class="co">## 44            *</span>
+<span class="co">## 45            *</span>
+<span class="co">## 46            *</span>
+<span class="co">## 47            *</span>
+<span class="co">## 48            *</span></code></pre>
+<p><br></p>
+</details>
 </div>
 <div class="section level3">
 <h3 id="hox-1">Hox 1<a class="anchor" aria-label="anchor" href="#hox-1"></a>
 </h3>
 <p>HOG <code>N19.HOG0000193</code>.</p>
-<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">orthoPairs</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">gb</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">HOG</span> <span class="op">==</span> <span class="st">"N19.HOG0000193"</span><span class="op">)</span>
   <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span>
@@ -1579,28 +1784,282 @@ Unit: seconds
 <span class="co">##   g4409.t1 N19.HOG0000193   OG0000004     long</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 68 sequences from Bar2.p4 genome</span></code></pre>
-<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">Hox1</span> <span class="op">&lt;-</span> <span class="va">orthoPairs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">HOG</span> <span class="op">==</span> <span class="st">"N19.HOG0000193"</span><span class="op">)</span>
-<span class="va">Hox1_1e4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html" class="external-link">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e4</span>, query <span class="op">=</span> <span class="va">Hox1</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e4</span><span class="op">)</span>
-<span class="va">Hox1_4e4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html" class="external-link">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">4e4</span>, query <span class="op">=</span> <span class="va">Hox1</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">4e4</span><span class="op">)</span>
-<span class="va">Hox1_1e5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/GBreaks-class.html" class="external-link">GBreaks</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e5</span>, query <span class="op">=</span> <span class="va">Hox1</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e5</span><span class="op">)</span>
+<span class="va">Hox1_1e4</span> <span class="op">&lt;-</span> <span class="fu">GBreaks</span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e4</span>, query <span class="op">=</span> <span class="va">Hox1</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e4</span><span class="op">)</span>
+<span class="va">Hox1_4e4</span> <span class="op">&lt;-</span> <span class="fu">GBreaks</span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">4e4</span>, query <span class="op">=</span> <span class="va">Hox1</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">4e4</span><span class="op">)</span>
+<span class="va">Hox1_1e5</span> <span class="op">&lt;-</span> <span class="fu">GBreaks</span><span class="op">(</span>target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox1</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e5</span>, query <span class="op">=</span> <span class="va">Hox1</span><span class="op">$</span><span class="va">query</span> <span class="op">+</span> <span class="fl">1e5</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox1_1e4</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox1_1e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-1.png" width="700"></p>
-<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox1_4e4</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox1_4e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-2.png" width="700"></p>
-<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox1_1e5</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox1_1e5</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-3.png" width="700"></p>
-<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
+<span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox1_1e4</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox1_1e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-1.svg" width="700"></p>
+<div class="sourceCode" id="cb109"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox1_4e4</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox1_4e4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-2.svg" width="700"></p>
+<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">Hox1_1e5</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox1_1e5</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-3.svg" width="700"></p>
+<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Genes</span>
-<span class="va">Hox1_4e4.genes</span> <span class="op">&lt;-</span> <span class="va">transcripts</span><span class="op">$</span><span class="va">OKI2018.I69</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">Hox1_4e4</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/inter-range-methods.html" class="external-link">range</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-<span class="va">mids</span> <span class="op">&lt;-</span> <span class="va">Hox1_4e4.genes</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gr2dna_seg.html" class="external-link">gr2dna_seg</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>mid <span class="op">=</span> <span class="op">(</span><span class="va">start</span> <span class="op">+</span> <span class="va">end</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">mid</span><span class="op">)</span>
+<span class="va">Hox1_4e4.genes</span> <span class="op">&lt;-</span> <span class="va">transcripts</span><span class="op">$</span><span class="va">OKI2018.I69</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">Hox1_4e4</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/inter-range-methods.html" class="external-link">range</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="va">mids</span> <span class="op">&lt;-</span> <span class="va">Hox1_4e4.genes</span> |&gt; <span class="fu">gr2dna_seg</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>mid <span class="op">=</span> <span class="op">(</span><span class="va">start</span> <span class="op">+</span> <span class="va">end</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">mid</span><span class="op">)</span>
 <span class="va">text</span> <span class="op">&lt;-</span> <span class="va">Hox1_4e4.genes</span><span class="op">$</span><span class="va">tx_name</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">annot</span> <span class="op">&lt;-</span> <span class="fu">genoPlotR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/genoPlotR/man/annotation.html" class="external-link">annotation</a></span><span class="op">(</span>x1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">Hox1_4e4.genes</span><span class="op">)</span>, x2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">Hox1_4e4.genes</span><span class="op">)</span>, text<span class="op">=</span><span class="va">text</span>, rot<span class="op">=</span><span class="fl">30</span><span class="op">)</span>
-<span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/gb2xlim.html" class="external-link">gb2xlim</a></span><span class="op">(</span><span class="va">Hox1_4e4</span><span class="op">)</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
-<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-4.png" width="700"></p>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="st">"chr2"</span>, xlim <span class="op">=</span> <span class="fu">gb2xlim</span><span class="op">(</span><span class="va">Hox1_4e4</span><span class="op">)</span>, annotations <span class="op">=</span> <span class="va">annot</span><span class="op">)</span></code></pre></div>
+<p><img src="OrthogroupSyntenies_files/figure-html/Hox1-4.svg" width="700"></p>
+<details><p><summary>Click to see details on where the non-plotted alignments go.</summary></p>
+<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">Hox1_4e4</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##    seqnames    start      end width strand score query.seqnames query.start</span>
+<span class="co">## 1      chr2 14291485 14301205  9721      + 14583           Chr2    11840898</span>
+<span class="co">## 2      chr2 14301496 14301975   480      +  1238           Chr2    11850325</span>
+<span class="co">## 3      chr2 14302003 14303041  1039      +  1772           Chr2    11851025</span>
+<span class="co">## 4      chr2 14303396 14308700  5305      + 12924           Chr2    11852392</span>
+<span class="co">## 5      chr2 14308706 14309700   995      -  1745            XSR     6558097</span>
+<span class="co">## 6      chr2 14309745 14316019  6275      + 12337           Chr2    11858653</span>
+<span class="co">## 7      chr2 14317283 14318281   999      +  1524           Chr2    11865528</span>
+<span class="co">## 8      chr2 14318553 14318967   415      +   546           Chr2    11866673</span>
+<span class="co">## 9      chr2 14319031 14323935  4905      +  9635           Chr2    11867661</span>
+<span class="co">## 10     chr2 14324459 14325534  1076      +  2647           Chr2    11872354</span>
+<span class="co">## 11     chr2 14326826 14327212   387      +   836           Chr2    11873646</span>
+<span class="co">## 12     chr2 14328382 14329239   858      +  1599           Chr2    11874085</span>
+<span class="co">## 13     chr2 14329493 14329772   280      +   595           Chr2    11875043</span>
+<span class="co">## 14     chr2 14330549 14330942   394      +   944           Chr2    11875452</span>
+<span class="co">## 15     chr2 14331321 14332339  1019      +  2206           Chr2    11876062</span>
+<span class="co">## 16     chr2 14332623 14333178   556      +  1436           Chr2    11877195</span>
+<span class="co">## 17     chr2 14333407 14335057  1651      +  3720           Chr2    11877808</span>
+<span class="co">## 18     chr2 14335316 14335647   332      +   960           Chr2    11879702</span>
+<span class="co">## 19     chr2 14337548 14340877  3330      +  4593           Chr2    11880320</span>
+<span class="co">## 20     chr2 14342948 14343636   689      +  2119           Chr2    11883383</span>
+<span class="co">## 21     chr2 14343877 14344887  1011      +  1286           Chr2    11884223</span>
+<span class="co">## 22     chr2 14345125 14346591  1467      +  2249           Chr2    11885434</span>
+<span class="co">## 23     chr2 14347027 14350252  3226      +  5426           Chr2    11887227</span>
+<span class="co">## 24     chr2 14350415 14351050   636      +   569           Chr2    11891522</span>
+<span class="co">## 25     chr2 14358965 14360158  1194      +  2046           Chr2    10290400</span>
+<span class="co">## 26     chr2 14366037 14367427  1391      +  2092           Chr2    10291647</span>
+<span class="co">## 27     chr2 14367524 14367889   366      -   637           Chr2    10446531</span>
+<span class="co">## 28     chr2 14367996 14369921  1926      -  3010           Chr2    10443655</span>
+<span class="co">## 29     chr2 14370767 14371196   430      -   615           Chr2    10442957</span>
+<span class="co">## 30     chr2 14371255 14371688   434      -   669           Chr2    10441657</span>
+<span class="co">##    query.end query.width query.strand query.Arm query.rep query.repOvlp</span>
+<span class="co">## 1   11850128        9231            *      long    tandem            26</span>
+<span class="co">## 2   11850830         506            *      long        NA             0</span>
+<span class="co">## 3   11852070        1046            *      long       rnd             6</span>
+<span class="co">## 4   11857551        5160            *      long        NA             0</span>
+<span class="co">## 5    6559035         939            *       XSR        NA             0</span>
+<span class="co">## 6   11864754        6102            *      long        NA             0</span>
+<span class="co">## 7   11866483         956            *      long        NA             0</span>
+<span class="co">## 8   11867070         398            *      long        NA             0</span>
+<span class="co">## 9   11872352        4692            *      long        NA             0</span>
+<span class="co">## 10  11873433        1080            *      long        NA             0</span>
+<span class="co">## 11  11874035         390            *      long        NA             0</span>
+<span class="co">## 12  11875033         949            *      long        NA             0</span>
+<span class="co">## 13  11875304         262            *      long        NA             0</span>
+<span class="co">## 14  11875839         388            *      long        NA             0</span>
+<span class="co">## 15  11876969         908            *      long        NA             0</span>
+<span class="co">## 16  11877761         567            *      long        NA             0</span>
+<span class="co">## 17  11879404        1597            *      long        NA             0</span>
+<span class="co">## 18  11880036         335            *      long        NA             0</span>
+<span class="co">## 19  11883221        2902            *      long        NA             0</span>
+<span class="co">## 20  11884079         697            *      long        NA             0</span>
+<span class="co">## 21  11885210         988            *      long        NA             0</span>
+<span class="co">## 22  11886873        1440            *      long        NA             0</span>
+<span class="co">## 23  11890368        3142            *      long    tandem            34</span>
+<span class="co">## 24  11892136         615            *      long        NA             0</span>
+<span class="co">## 25  10291593        1194            *      long        NA             0</span>
+<span class="co">## 26  10293038        1392            *      long    tandem            23</span>
+<span class="co">## 27  10446893         363            *      long        NA             0</span>
+<span class="co">## 28  10445529        1875            *      long        NA             0</span>
+<span class="co">## 29  10443440         484            *      long        NA             0</span>
+<span class="co">## 30  10442052         396            *      long        NA             0</span>
+<span class="co">##             query.transcripts  Arm          rep repOvlp</span>
+<span class="co">## 1  g6508.t1;g6509.t1;g6510.t1 long       tandem      42</span>
+<span class="co">## 2                    g6511.t1 long           NA       0</span>
+<span class="co">## 3                    g6511.t1 long           NA       0</span>
+<span class="co">## 4  g6512.t1;g6513.t1;g6514.t1 long LowCompl....      48</span>
+<span class="co">## 5                   g13445.t1 long           NA       0</span>
+<span class="co">## 6           g6516.t1;g6516.t2 long           NA       0</span>
+<span class="co">## 7                    g6517.t1 long           NA       0</span>
+<span class="co">## 8                    g6517.t1 long           NA       0</span>
+<span class="co">## 9  g6517.t1;g6518.t1;g6519.t1 long           NA       0</span>
+<span class="co">## 10                   g6519.t1 long           NA       0</span>
+<span class="co">## 11                       &lt;NA&gt; long           NA       0</span>
+<span class="co">## 12                       &lt;NA&gt; long          rnd       0</span>
+<span class="co">## 13                       &lt;NA&gt; long       tandem      25</span>
+<span class="co">## 14                       &lt;NA&gt; long           NA       0</span>
+<span class="co">## 15                   g6520.t1 long           NA       0</span>
+<span class="co">## 16                   g6520.t1 long           NA       0</span>
+<span class="co">## 17                   g6520.t1 long           NA       0</span>
+<span class="co">## 18                   g6520.t1 long           NA       0</span>
+<span class="co">## 19                   g6520.t1 long      unknown     101</span>
+<span class="co">## 20                   g6521.t2 long           NA       0</span>
+<span class="co">## 21 g6521.t2;g6521.t1;g6522.t1 long           NA       0</span>
+<span class="co">## 22                   g6522.t1 long           NA       0</span>
+<span class="co">## 23          g6523.t1;g6523.t2 long           NA       0</span>
+<span class="co">## 24                       &lt;NA&gt; long           NA       0</span>
+<span class="co">## 25                       &lt;NA&gt; long           NA       0</span>
+<span class="co">## 26                       &lt;NA&gt; long           NA       0</span>
+<span class="co">## 27          g6048.t1;g6048.t2 long           NA       0</span>
+<span class="co">## 28 g6047.t1;g6048.t1;g6048.t2 long       tandem       0</span>
+<span class="co">## 29                   g6046.t1 long           NA       0</span>
+<span class="co">## 30                       &lt;NA&gt; long           NA       0</span>
+<span class="co">##                                     transcripts flag nonCoa</span>
+<span class="co">## 1  g8029.t1;g8030.t1;g8031.t1;g8032.t1;g8033.t1  Col  FALSE</span>
+<span class="co">## 2                                      g8034.t1  Col  FALSE</span>
+<span class="co">## 3                                      g8034.t1  Col  FALSE</span>
+<span class="co">## 4                             g8034.t1;g8035.t1  Tra  FALSE</span>
+<span class="co">## 5                                          &lt;NA&gt; &lt;NA&gt;   TRUE</span>
+<span class="co">## 6                                      g8037.t1  Col  FALSE</span>
+<span class="co">## 7                                          &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 8                                          &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 9                             g8039.t1;g8040.t1  Col  FALSE</span>
+<span class="co">## 10                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 11                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 12                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 13                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 14                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 15                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 16                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 17                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 18                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 19                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 20                                     g8044.t1  Col  FALSE</span>
+<span class="co">## 21                                     g8045.t1  Col  FALSE</span>
+<span class="co">## 22                                     g8045.t1  Col  FALSE</span>
+<span class="co">## 23                            g8046.t1;g8046.t2  Col  FALSE</span>
+<span class="co">## 24                                         &lt;NA&gt; &lt;NA&gt;  FALSE</span>
+<span class="co">## 25                                     g8048.t1  Col  FALSE</span>
+<span class="co">## 26                                     g8051.t1 &lt;NA&gt;  FALSE</span>
+<span class="co">## 27                                     g8052.t1  Col  FALSE</span>
+<span class="co">## 28                                     g8052.t1  Col  FALSE</span>
+<span class="co">## 29                                         &lt;NA&gt;  Col  FALSE</span>
+<span class="co">## 30                                         &lt;NA&gt; &lt;NA&gt;  FALSE</span></code></pre>
+<div class="sourceCode" id="cb114"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu">swap</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="fu">swap</span><span class="op">(</span><span class="va">Hox1_4e4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span>  |&gt; <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##    seqnames    start      end width strand  Arm    rep repOvlp</span>
+<span class="co">## 1      Chr2 11836695 11836910   216      + long     NA       0</span>
+<span class="co">## 2      Chr2 11837950 11838286   337      + long     NA       0</span>
+<span class="co">## 3      Chr2 11838557 11839782  1226      + long     NA       0</span>
+<span class="co">## 4      Chr2 11839855 11840506   652      + long     NA       0</span>
+<span class="co">## 5      Chr2 11840898 11850128  9231      + long tandem      26</span>
+<span class="co">## 6      Chr2 11850325 11850830   506      + long     NA       0</span>
+<span class="co">## 7      Chr2 11851025 11852070  1046      + long    rnd       6</span>
+<span class="co">## 8      Chr2 11852392 11857551  5160      + long     NA       0</span>
+<span class="co">## 9      Chr2 11858653 11864754  6102      + long     NA       0</span>
+<span class="co">## 10     Chr2 11865528 11866483   956      + long     NA       0</span>
+<span class="co">## 11     Chr2 11866673 11867070   398      + long     NA       0</span>
+<span class="co">## 12     Chr2 11867661 11872352  4692      + long     NA       0</span>
+<span class="co">## 13     Chr2 11872354 11873433  1080      + long     NA       0</span>
+<span class="co">## 14     Chr2 11873646 11874035   390      + long     NA       0</span>
+<span class="co">## 15     Chr2 11874085 11875033   949      + long     NA       0</span>
+<span class="co">## 16     Chr2 11875043 11875304   262      + long     NA       0</span>
+<span class="co">## 17     Chr2 11875452 11875839   388      + long     NA       0</span>
+<span class="co">## 18     Chr2 11876062 11876969   908      + long     NA       0</span>
+<span class="co">## 19     Chr2 11877195 11877761   567      + long     NA       0</span>
+<span class="co">## 20     Chr2 11877808 11879404  1597      + long     NA       0</span>
+<span class="co">## 21     Chr2 11879702 11880036   335      + long     NA       0</span>
+<span class="co">## 22     Chr2 11880320 11883221  2902      + long     NA       0</span>
+<span class="co">## 23     Chr2 11883383 11884079   697      + long     NA       0</span>
+<span class="co">## 24     Chr2 11884223 11885210   988      + long     NA       0</span>
+<span class="co">## 25     Chr2 11885434 11886873  1440      + long     NA       0</span>
+<span class="co">## 26     Chr2 11887227 11890368  3142      + long tandem      34</span>
+<span class="co">## 27     Chr2 11891522 11892136   615      + long     NA       0</span>
+<span class="co">## 28     Chr2 11892246 11895803  3558      - long     NA       0</span>
+<span class="co">## 29     Chr2 11898001 11904292  6292      - long tandem      17</span>
+<span class="co">## 30     Chr2 11904831 11905119   289      - long     NA       0</span>
+<span class="co">## 31     Chr2 11905364 11908894  3531      - long tandem      35</span>
+<span class="co">## 32     Chr2 11908930 11909902   973      - long     NA       0</span>
+<span class="co">## 33     Chr2 11910312 11911039   728      - long     NA       0</span>
+<span class="co">## 34     Chr2 11911499 11915152  3654      - long     NA       0</span>
+<span class="co">## 35     Chr2 11915518 11916015   498      - long     NA       0</span>
+<span class="co">## 36     Chr2 11916043 11916133    91      - long     NA       0</span>
+<span class="co">## 37     Chr2 11916531 11916876   346      - long tandem      50</span>
+<span class="co">## 38     Chr2 11917362 11917452    91      - long     NA       0</span>
+<span class="co">## 39     Chr2 11918407 11921078  2672      - long     NA       0</span>
+<span class="co">## 40     Chr2 11921113 11924324  3212      - long     NA       0</span>
+<span class="co">##                                     transcripts query.seqnames query.start</span>
+<span class="co">## 1                                          &lt;NA&gt;           chr2    14285932</span>
+<span class="co">## 2                                          &lt;NA&gt;           chr2    14287358</span>
+<span class="co">## 3                                      g6508.t1           chr2    14288200</span>
+<span class="co">## 4                                      g6508.t1           chr2    14289936</span>
+<span class="co">## 5                    g6508.t1;g6509.t1;g6510.t1           chr2    14291485</span>
+<span class="co">## 6                                      g6511.t1           chr2    14301496</span>
+<span class="co">## 7                                      g6511.t1           chr2    14302003</span>
+<span class="co">## 8                    g6512.t1;g6513.t1;g6514.t1           chr2    14303396</span>
+<span class="co">## 9                             g6516.t1;g6516.t2           chr2    14309745</span>
+<span class="co">## 10                                     g6517.t1           chr2    14317283</span>
+<span class="co">## 11                                     g6517.t1           chr2    14318553</span>
+<span class="co">## 12                   g6517.t1;g6518.t1;g6519.t1           chr2    14319031</span>
+<span class="co">## 13                                     g6519.t1           chr2    14324459</span>
+<span class="co">## 14                                         &lt;NA&gt;           chr2    14326826</span>
+<span class="co">## 15                                         &lt;NA&gt;           chr2    14328382</span>
+<span class="co">## 16                                         &lt;NA&gt;           chr2    14329493</span>
+<span class="co">## 17                                         &lt;NA&gt;           chr2    14330549</span>
+<span class="co">## 18                                     g6520.t1           chr2    14331321</span>
+<span class="co">## 19                                     g6520.t1           chr2    14332623</span>
+<span class="co">## 20                                     g6520.t1           chr2    14333407</span>
+<span class="co">## 21                                     g6520.t1           chr2    14335316</span>
+<span class="co">## 22                                     g6520.t1           chr2    14337548</span>
+<span class="co">## 23                                     g6521.t2           chr2    14342948</span>
+<span class="co">## 24                   g6521.t2;g6521.t1;g6522.t1           chr2    14343877</span>
+<span class="co">## 25                                     g6522.t1           chr2    14345125</span>
+<span class="co">## 26                            g6523.t1;g6523.t2           chr2    14347027</span>
+<span class="co">## 27                                         &lt;NA&gt;           chr2    14350415</span>
+<span class="co">## 28                   g6524.t1;g6524.t2;g6524.t3           chr1     4306180</span>
+<span class="co">## 29                            g6528.t1;g6529.t1           chr2    12400690</span>
+<span class="co">## 30                                         &lt;NA&gt;           chr2    12399778</span>
+<span class="co">## 31 g6531.t1;g6532.t1;g6533.t1;g6534.t1;g6534.t2           chr2    12396262</span>
+<span class="co">## 32                            g6534.t1;g6534.t2           chr2    12395020</span>
+<span class="co">## 33                            g6534.t1;g6534.t2           chr2    12392902</span>
+<span class="co">## 34                   g6534.t1;g6534.t2;g6535.t1           chr2    12388523</span>
+<span class="co">## 35                                         &lt;NA&gt;           chr2    12388067</span>
+<span class="co">## 36                                         &lt;NA&gt;           chr2    12387612</span>
+<span class="co">## 37                                         &lt;NA&gt;           chr2    12386629</span>
+<span class="co">## 38                                         &lt;NA&gt;           chr2    12385932</span>
+<span class="co">## 39                                     g6536.t1           chr2    12382223</span>
+<span class="co">## 40          g6536.t1;g6537.t1;g6537.t2;g6538.t1           chr2    12378062</span>
+<span class="co">##    query.end query.width query.strand</span>
+<span class="co">## 1   14286139         208            *</span>
+<span class="co">## 2   14287714         357            *</span>
+<span class="co">## 3   14289564        1365            *</span>
+<span class="co">## 4   14290622         687            *</span>
+<span class="co">## 5   14301205        9721            *</span>
+<span class="co">## 6   14301975         480            *</span>
+<span class="co">## 7   14303041        1039            *</span>
+<span class="co">## 8   14308700        5305            *</span>
+<span class="co">## 9   14316019        6275            *</span>
+<span class="co">## 10  14318281         999            *</span>
+<span class="co">## 11  14318967         415            *</span>
+<span class="co">## 12  14323935        4905            *</span>
+<span class="co">## 13  14325534        1076            *</span>
+<span class="co">## 14  14327212         387            *</span>
+<span class="co">## 15  14329239         858            *</span>
+<span class="co">## 16  14329772         280            *</span>
+<span class="co">## 17  14330942         394            *</span>
+<span class="co">## 18  14332339        1019            *</span>
+<span class="co">## 19  14333178         556            *</span>
+<span class="co">## 20  14335057        1651            *</span>
+<span class="co">## 21  14335647         332            *</span>
+<span class="co">## 22  14340877        3330            *</span>
+<span class="co">## 23  14343636         689            *</span>
+<span class="co">## 24  14344887        1011            *</span>
+<span class="co">## 25  14346591        1467            *</span>
+<span class="co">## 26  14350252        3226            *</span>
+<span class="co">## 27  14351050         636            *</span>
+<span class="co">## 28   4309907        3728            *</span>
+<span class="co">## 29  12407280        6591            *</span>
+<span class="co">## 30  12400072         295            *</span>
+<span class="co">## 31  12399665        3404            *</span>
+<span class="co">## 32  12396031        1012            *</span>
+<span class="co">## 33  12393798         897            *</span>
+<span class="co">## 34  12392467        3945            *</span>
+<span class="co">## 35  12388501         435            *</span>
+<span class="co">## 36  12387706          95            *</span>
+<span class="co">## 37  12386995         367            *</span>
+<span class="co">## 38  12386031         100            *</span>
+<span class="co">## 39  12384947        2725            *</span>
+<span class="co">## 40  12381443        3382            *</span></code></pre>
+<p><br></p>
+</details>
 </div>
 </div>
 <div class="section level2">
@@ -1619,7 +2078,7 @@ Unit: seconds
 <li>Oki_Bar: A, B, C</li>
 </ul>
 <p>To find such cases I search for Oki-Bar orthoblock breakpoints that fall within an Oki-Osa orthoblock.</p>
-<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reIndex</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> ; <span class="va">gb</span><span class="op">}</span>
 <span class="va">barBreaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">orthoBlocks_one2oneInOiks</span>, <span class="va">get_bps</span>, direction <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 
@@ -1630,7 +2089,7 @@ Unit: seconds
   <span class="va">pair1_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">g1</span>, sep <span class="op">=</span> <span class="st">'_'</span>, <span class="va">g3</span><span class="op">)</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="va">orthoBlocks_one2oneInOiks</span><span class="op">[[</span><span class="va">pair1_2</span><span class="op">]</span><span class="op">]</span> |&gt;
     <span class="fu">reIndex</span><span class="op">(</span><span class="op">)</span> |&gt;
-    <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">barBreaks</span><span class="op">[[</span><span class="va">pair1_3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> |&gt;
+    <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">barBreaks</span><span class="op">[[</span><span class="va">pair1_3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> |&gt;
     <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">geneNumber</span> <span class="op">&gt;</span> <span class="fl">2</span><span class="op">)</span>
   <span class="co"># Drop columns to ease browsing on single lines.</span>
   <span class="cn">NULL</span> <span class="op">-&gt;</span> <span class="va">gb</span><span class="op">$</span><span class="va">dNdS_GUIDANCE2</span> <span class="op">-&gt;</span> <span class="va">gb</span><span class="op">$</span><span class="va">dNdS_HmmCleaner</span> <span class="op">-&gt;</span> <span class="va">gb</span><span class="op">$</span><span class="va">dNdS_PRANK</span>
@@ -1655,7 +2114,7 @@ Unit: seconds
 
 <span class="op">(</span><span class="va">GoI1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ROIs</span><span class="op">$</span><span class="va">Oki_Osa_Bar</span><span class="op">$</span><span class="va">geneNames</span>, <span class="fl">1</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] "g1206.t1" "g1207.t1" "g1211.t1"</span></code></pre>
-<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">GoI2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"g1205.t1"</span>, <span class="st">"g1208.t1"</span>, <span class="st">"g1209.t1"</span>, <span class="st">"g1210.t1"</span><span class="op">)</span> <span class="co"># To provide context</span>
 
 <span class="co"># Exploring the region</span>
@@ -1676,7 +2135,7 @@ Unit: seconds
 <span class="co">##   [1]    short</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></code></pre>
-<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">orthoPairs</span> <span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu">findGene</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">GoI1</span>, <span class="va">GoI2</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># Individual coordinates of the genes</span></code></pre></div>
 <pre><code><span class="co">##          seqnames   start     end width strand tx_id  tx_name dNdS_GUIDANCE2</span>
 <span class="co">## g1206.t1     chr1 4573346 4575265  1920      *   631 g1206.t1        0.04258</span>
@@ -1703,7 +2162,7 @@ Unit: seconds
 <span class="co">## g1207.t1 N19.HOG0010718 OG0006871 short</span>
 <span class="co">## g1208.t1 N19.HOG0015251 OG0016820 short</span>
 <span class="co">## g1211.t1 N19.HOG0008357 OG0003884 short</span></code></pre>
-<div class="sourceCode" id="cb114"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Oki_Bar</span> |&gt; <span class="fu">findGene</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">GoI1</span>, <span class="va">GoI2</span><span class="op">)</span><span class="op">)</span> <span class="co"># g1205.t1 g1206.t1 g1207.t1 g1208.t1 g1211.t1 are in chr1 4571907-4588029 | Chr1:582810-2680665</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 3 ranges and 8 metadata columns:</span>
 <span class="co">##       seqnames          ranges strand |                query     score</span>
@@ -1723,7 +2182,7 @@ Unit: seconds
 <span class="co">##   [3]          2    short</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></code></pre>
-<div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">orthoPairs</span> <span class="op">$</span><span class="va">Oki_Bar</span> |&gt; <span class="fu">findGene</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">GoI1</span>, <span class="va">GoI2</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># Individual coordinates of the genes</span></code></pre></div>
 <pre><code><span class="co">##          seqnames   start     end width strand tx_id  tx_name dNdS_GUIDANCE2</span>
 <span class="co">## g1205.t1     chr1 4571907 4573262  1356      *   630 g1205.t1             NA</span>
@@ -1755,8 +2214,8 @@ Unit: seconds
 <span class="co">## g1207.t1 N19.HOG0010718 OG0006871 short</span>
 <span class="co">## g1208.t1 N19.HOG0015251 OG0016820 short</span>
 <span class="co">## g1211.t1 N19.HOG0008357 OG0003884 short</span></code></pre>
-<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1:2669327-2680665"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Let's forget about g1205.t1</span></code></pre></div>
+<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1:2669327-2680665"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span>  <span class="co"># Let's forget about g1205.t1</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 2 ranges and 5 metadata columns:</span>
 <span class="co">##       seqnames          ranges strand |         geneNames  dNdS_GUIDANCE2</span>
 <span class="co">##          &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |   &lt;CharacterList&gt;   &lt;NumericList&gt;</span>
@@ -1768,18 +2227,18 @@ Unit: seconds
 <span class="co">##   [2]       NA,0.0242      NA,0.02526 Chr1:2675030-2680665</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></code></pre>
-<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1:2669327-2680665"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/cleanGaps.html" class="external-link">cleanGaps</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">orthoBlocks</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1:2669327-2680665"</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu">swap</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">cleanGaps</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] 657</span></code></pre>
 <pre><code>Oki         Osa       Bar  
 g1206.t1    g96.t1    g651.t1
 g1207.t1    g95.t1    g650.t1
 g1208.t1    g94.t1    g652.t1
 g1211.t1    g92.t1    g654.t1 </code></pre>
-<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (unalMap)</span>
+<div class="sourceCode" id="cb131"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">### Between "g1207.t1" and "g1208.t1", there is a repeat region, where the Bar genome broke, but that is still in the Osa genome (bri)</span>
 
-<span class="va">unal</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="op">(</span><span class="fl">4577337</span> <span class="op">+</span> <span class="fl">4577995</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g1207.t1 and g1208.t1 on Oki</span></code></pre></div>
+<span class="va">unal</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="op">(</span><span class="fl">4577337</span> <span class="op">+</span> <span class="fl">4577995</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g1207.t1 and g1208.t1 on Oki</span></code></pre></div>
 <pre><code><span class="co">## GRanges object with 1 range and 4 metadata columns:</span>
 <span class="co">##       seqnames          ranges strand |      Arm             rep transcripts</span>
 <span class="co">##          &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; | &lt;factor&gt; &lt;CharacterList&gt;       &lt;Rle&gt;</span>
@@ -1789,8 +2248,8 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##   [1]     FALSE</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></code></pre>
-<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">unal</span><span class="op">$</span><span class="va">Osa_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span> <span class="fl">409953</span> <span class="op">+</span> <span class="fl">410741</span> <span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g95.t1 and g94.t1 on Osa</span></code></pre></div>
+<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">unal</span><span class="op">$</span><span class="va">Osa_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span> <span class="fl">409953</span> <span class="op">+</span> <span class="fl">410741</span> <span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g95.t1 and g94.t1 on Osa</span></code></pre></div>
 <pre><code><span class="co">## GRanges object with 1 range and 4 metadata columns:</span>
 <span class="co">##       seqnames        ranges strand |      Arm             rep transcripts</span>
 <span class="co">##          &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt; | &lt;factor&gt; &lt;CharacterList&gt;       &lt;Rle&gt;</span>
@@ -1800,10 +2259,10 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##   [1]     FALSE</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></code></pre>
-<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Or just:</span>
 
-<span class="op">(</span><span class="va">BP1_Oki_Osa</span> <span class="op">&lt;-</span> <span class="va">unalMap</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="op">(</span><span class="fl">4577337</span> <span class="op">+</span> <span class="fl">4577995</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g1207.t1 and g1208.t1 on Oki</span></code></pre></div>
+<span class="op">(</span><span class="va">BP1_Oki_Osa</span> <span class="op">&lt;-</span> <span class="va">bri</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="op">(</span><span class="fl">4577337</span> <span class="op">+</span> <span class="fl">4577995</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g1207.t1 and g1208.t1 on Oki</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 1 range and 5 metadata columns:</span>
 <span class="co">##       seqnames          ranges strand |              query      Arm</span>
 <span class="co">##          &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |          &lt;GRanges&gt; &lt;factor&gt;</span>
@@ -1813,9 +2272,9 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##   [1]         unknown       110        &lt;NA&gt;</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></code></pre>
-<div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Now on Bar:</span>
-<span class="va">gbs</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu">reIndex</span><span class="op">(</span><span class="op">)</span>|&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span><span class="fl">2674502</span> <span class="op">+</span> <span class="fl">2675030</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g651.t1 and  g652.t1 on Bar</span></code></pre></div>
+<span class="va">gbs</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu">reIndex</span><span class="op">(</span><span class="op">)</span>|&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span><span class="fl">2674502</span> <span class="op">+</span> <span class="fl">2675030</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g651.t1 and  g652.t1 on Bar</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 1 range and 8 metadata columns:</span>
 <span class="co">##        seqnames          ranges strand |     score                query</span>
 <span class="co">##           &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;            &lt;GRanges&gt;</span>
@@ -1825,8 +2284,8 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##   2026    short            &lt;NA&gt;         0     g652.t1         Col     FALSE</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 68 sequences from Bar2.p4 genome</span></code></pre>
-<div class="sourceCode" id="cb131"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu">reIndex</span><span class="op">(</span><span class="op">)</span>|&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span><span class="fl">2674502</span> <span class="op">+</span> <span class="fl">2675030</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g651.t1 and  g652.t1 on Bar</span></code></pre></div>
+<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">coa</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu">reIndex</span><span class="op">(</span><span class="op">)</span>|&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span><span class="fl">2674502</span> <span class="op">+</span> <span class="fl">2675030</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g651.t1 and  g652.t1 on Bar</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 1 range and 8 metadata columns:</span>
 <span class="co">##       seqnames          ranges strand |                query     score      Arm</span>
 <span class="co">##          &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;integer&gt; &lt;factor&gt;</span>
@@ -1836,8 +2295,8 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##   893     unknown,rnd      1060     g652.t1        &lt;NA&gt;     FALSE</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 68 sequences from Bar2.p4 genome</span></code></pre>
-<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="op">(</span><span class="va">BP1_Bar</span> <span class="op">&lt;-</span> <span class="va">unal</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span><span class="fl">2674538</span> <span class="op">+</span> <span class="fl">2674688</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g651.t1 and  g652.t1 on Bar according to gbs or coa</span></code></pre></div>
+<div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="op">(</span><span class="va">BP1_Bar</span> <span class="op">&lt;-</span> <span class="va">unal</span><span class="op">$</span><span class="va">Bar_Oki</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"Chr1"</span>, <span class="op">(</span><span class="fl">2674538</span> <span class="op">+</span> <span class="fl">2674688</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># between g651.t1 and  g652.t1 on Bar according to gbs or coa</span></code></pre></div>
 <pre><code><span class="co">## GRanges object with 1 range and 4 metadata columns:</span>
 <span class="co">##       seqnames          ranges strand |      Arm             rep transcripts</span>
 <span class="co">##          &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; | &lt;factor&gt; &lt;CharacterList&gt;       &lt;Rle&gt;</span>
@@ -1847,33 +2306,33 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##   [1]      TRUE</span>
 <span class="co">##   -------</span>
 <span class="co">##   seqinfo: 68 sequences from Bar2.p4 genome</span></code></pre>
-<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Nothing noticeable on either strand</span>
-<span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/pairwiseAlignment.html" class="external-link">pairwiseAlignment</a></span><span class="op">(</span>type <span class="op">=</span><span class="st">"local"</span>, <span class="va">BP1_Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>strand <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">pairwiseAlignment</span><span class="op">(</span>type <span class="op">=</span><span class="st">"local"</span>, <span class="va">BP1_Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>strand <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Local PairwiseAlignmentsSingleSubject (1 of 1)</span>
 <span class="co">## pattern: [164] <span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TTTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span></span>
 <span class="co">## subject: [182] <span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TTTT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span></span>
 <span class="co">## score: 17.8358</span></code></pre>
-<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/pairwiseAlignment.html" class="external-link">pairwiseAlignment</a></span><span class="op">(</span>type <span class="op">=</span><span class="st">"local"</span>, <span class="va">BP1_Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>strand <span class="op">=</span> <span class="st">'+'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span>type <span class="op">=</span><span class="st">"local"</span>, <span class="va">BP1_Oki_Osa</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>strand <span class="op">=</span> <span class="st">'+'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Local PairwiseAlignmentsSingleSubject (1 of 1)</span>
 <span class="co">## pattern: [37] <span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">GG</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span></span>
 <span class="co">## subject: [23] <span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span></span>
 <span class="co">## score: 15.90003</span></code></pre>
-<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/pairwiseAlignment.html" class="external-link">pairwiseAlignment</a></span><span class="op">(</span>type <span class="op">=</span><span class="st">"local"</span>, <span class="va">BP1_Oki_Osa</span> <span class="op">$</span><span class="va">query</span>, <span class="va">BP1_Bar</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb147"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span>type <span class="op">=</span><span class="st">"local"</span>, <span class="va">BP1_Oki_Osa</span> <span class="op">$</span><span class="va">query</span>, <span class="va">BP1_Bar</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Local PairwiseAlignmentsSingleSubject (1 of 1)</span>
 <span class="co">## pattern: [188] <span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TTTTTT</span><span style="color: #000000; background-color: #AFFFAF;">C</span></span>
 <span class="co">## subject:  [31] <span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TTTTTT</span><span style="color: #000000; background-color: #AFFFAF;">C</span></span>
 <span class="co">## score: 15.85405</span></code></pre>
-<div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/pairwiseAlignment.html" class="external-link">pairwiseAlignment</a></span><span class="op">(</span>type <span class="op">=</span><span class="st">"global"</span>, <span class="va">BP1_Oki_Osa</span> <span class="op">$</span><span class="va">query</span>, <span class="va">BP1_Bar</span>  |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>strand <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb149"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">pairwiseAlignment</span><span class="op">(</span>type <span class="op">=</span><span class="st">"global"</span>, <span class="va">BP1_Oki_Osa</span> <span class="op">$</span><span class="va">query</span>, <span class="va">BP1_Bar</span>  |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>strand <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Global PairwiseAlignmentsSingleSubject (1 of 1)</span>
 <span class="co">## pattern: <span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TTT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #AFFFFF;">GGG</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AAA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">AAAA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">T</span>...<span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AAA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TTTT</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span></span>
 <span class="co">## subject: <span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">TT</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span>----<span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AAA</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #FFAFAF;">AA</span>-<span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">C</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFD7AF;">T</span><span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">AA</span><span style="color: #000000; background-color: #FFD7AF;">T</span>...<span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #AFFFAF;">CC</span><span style="color: #000000; background-color: #AFFFFF;">G</span>-----------------<span style="color: #000000; background-color: #AFFFFF;">G</span><span style="color: #000000; background-color: #FFAFAF;">A</span><span style="color: #000000; background-color: #FFD7AF;">TTTT</span><span style="color: #000000; background-color: #AFFFFF;">G</span>------</span>
 <span class="co">## score: -867.5856</span></code></pre>
-<div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">oP_one2oneInOiks_bridges</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="op">(</span><span class="fl">4577337</span> <span class="op">+</span> <span class="fl">4577995</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb151"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">oP_one2oneInOiks_bridges</span><span class="op">$</span><span class="va">Oki_Osa</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html" class="external-link">GRanges</a></span><span class="op">(</span><span class="st">"chr1"</span>, <span class="op">(</span><span class="fl">4577337</span> <span class="op">+</span> <span class="fl">4577995</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 1 range and 1 metadata column:</span>
 <span class="co">##       seqnames          ranges strand |              query</span>
 <span class="co">##          &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |          &lt;GRanges&gt;</span>
@@ -1885,7 +2344,7 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb153"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
 <span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span>
@@ -1914,7 +2373,7 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##  [4] BSgenome.Oidioi.OIST.Bar2.p4_1.0.1     </span>
 <span class="co">##  [5] BSgenome.Oidioi.OIST.OSKA2016v1.9_1.0.0</span>
 <span class="co">##  [6] BSgenome.Oidioi.OIST.OKI2018.I69_1.0.1 </span>
-<span class="co">##  [7] OikScrambling_2.1.0                    </span>
+<span class="co">##  [7] OikScrambling_3.0.0                    </span>
 <span class="co">##  [8] ggplot2_3.3.5                          </span>
 <span class="co">##  [9] GenomicBreaks_0.13.1                   </span>
 <span class="co">## [10] BSgenome_1.62.0                        </span>
@@ -1950,7 +2409,7 @@ g1211.t1    g92.t1    g654.t1 </code></pre>
 <span class="co">##  [39] zlibbioc_1.40.0             DelayedArray_0.20.0        </span>
 <span class="co">##  [41] plyranges_1.14.0            weights_1.0.4              </span>
 <span class="co">##  [43] abind_1.4-5                 scales_1.1.1               </span>
-<span class="co">##  [45] DBI_1.1.2                   Rcpp_1.0.8                 </span>
+<span class="co">##  [45] DBI_1.1.2                   Rcpp_1.0.8.3               </span>
 <span class="co">##  [47] plotrix_3.8-2               progress_1.2.2             </span>
 <span class="co">##  [49] genoPlotR_0.8.11            xtable_1.8-4               </span>
 <span class="co">##  [51] htmlTable_2.4.0             foreign_0.8-81             </span>

@@ -27,3 +27,12 @@ species, represented as an empty string, or multiple entries, separated
 with comma characters.  Species that are not part of the clade covered by
 the table have \code{NA} in every row.
 }
+\examples{
+# Example for loading all orthogroups:
+OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
+
+# Example for loading a pair
+OikScrambling:::load_one_to_ones( system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")
+                                  , c("Bar2_p4.Flye.prot.longest.fa_1", "OSKA2016v1.9.prot.longest.fa_1"))
+
+}
