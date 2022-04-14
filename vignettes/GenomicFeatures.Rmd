@@ -417,6 +417,20 @@ hmList_to_plot.centered <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa,
   facet_wrap(~desc, nrow = 1) +
   theme_bw() +
   ggtitle("Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"))
+
+(p_boundary <- rbind(
+  hmList_to_plot.centered$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
+  hmList_to_plot.centered$unmap       |> prepareGGFreqPlot("02_unmapped"),
+  #hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
+  hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge"),
+  hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("03_colinear_alns")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc, nrow = 1) +
+  theme_bw() +
+  ggtitle("Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"))
 ```
 
 #### Comparison
