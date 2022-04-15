@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.3</span>
       </span>
     </div>
 
@@ -139,7 +139,7 @@
                         <h4 data-toc-skip class="author">Charlotte West</h4>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">12 April, 2022</h4>
+            <h4 data-toc-skip class="date">14 April, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/GenomicFeatures.Rmd" class="external-link"><code>vignettes/GenomicFeatures.Rmd</code></a></small>
       <div class="hidden name"><code>GenomicFeatures.Rmd</code></div>
@@ -398,19 +398,24 @@
 <h3 id="accessory-functions">Accessory functions<a class="anchor" aria-label="anchor" href="#accessory-functions"></a>
 </h3>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">prepareFreqPlot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span>, <span class="va">annot</span>, <span class="va">rep</span>, <span class="va">cne</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">tfbs</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">operons</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">win</span> <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">{</span>
+<code class="sourceCode R"><span class="va">prepareFreqPlot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span>, <span class="va">annot</span>, <span class="va">rep</span>, <span class="va">cne</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">tfbs</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">operons</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">win</span> <span class="op">=</span> <span class="fl">1000</span>, <span class="va">direction</span> <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
-  <span class="va">l</span><span class="op">$</span><span class="va">genes</span>  <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html" class="external-link">genes</a></span><span class="op">(</span><span class="va">annot</span><span class="op">)</span>,         win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"genes"</span>,  direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
-  <span class="co">#l$cds    &lt;- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = "left")</span>
-  <span class="va">l</span><span class="op">$</span><span class="va">intron</span> <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/exonicParts.html" class="external-link">intronicParts</a></span><span class="op">(</span><span class="va">annot</span><span class="op">)</span>, win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"intron"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
-  <span class="va">l</span><span class="op">$</span><span class="va">exon</span>   <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/exonicParts.html" class="external-link">exonicParts</a></span><span class="op">(</span><span class="va">annot</span><span class="op">)</span>,   win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"exon"</span>,   direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
-  <span class="va">l</span><span class="op">$</span><span class="va">reps</span>   <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="va">rep</span>,                  win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"repeats"</span>,direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
+  <span class="co"># Note that get_bps(direction="mid") is probably not what you think.</span>
+  <span class="kw">if</span><span class="op">(</span><span class="va">direction</span> <span class="op">==</span> <span class="st">"mid"</span><span class="op">)</span> <span class="op">{</span>
+    <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/intra-range-methods.html" class="external-link">resize</a></span><span class="op">(</span><span class="va">gb</span>, <span class="fl">1</span>, <span class="st">"center"</span><span class="op">)</span>
+    <span class="va">direction</span> <span class="op">&lt;-</span> <span class="st">"left"</span>
+  <span class="op">}</span>
+  <span class="va">l</span><span class="op">$</span><span class="va">genes</span>  <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html" class="external-link">genes</a></span><span class="op">(</span><span class="va">annot</span><span class="op">)</span>,         win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"genes"</span>,  direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
+  <span class="co">#l$cds    &lt;- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = direction)</span>
+  <span class="va">l</span><span class="op">$</span><span class="va">intron</span> <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/exonicParts.html" class="external-link">intronicParts</a></span><span class="op">(</span><span class="va">annot</span><span class="op">)</span>, win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"intron"</span>, direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
+  <span class="va">l</span><span class="op">$</span><span class="va">exon</span>   <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/exonicParts.html" class="external-link">exonicParts</a></span><span class="op">(</span><span class="va">annot</span><span class="op">)</span>,   win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"exon"</span>,   direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
+  <span class="va">l</span><span class="op">$</span><span class="va">reps</span>   <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,     <span class="va">rep</span>,                  win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"repeats"</span>,direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
   <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">cne</span><span class="op">)</span><span class="op">)</span>
-    <span class="va">l</span><span class="op">$</span><span class="va">CNE</span>   <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,    <span class="va">cne</span>,                  win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"CNE"</span>,    direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
+    <span class="va">l</span><span class="op">$</span><span class="va">CNE</span>   <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,    <span class="va">cne</span>,                  win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"CNE"</span>,    direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
   <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">tfbs</span><span class="op">)</span><span class="op">)</span>
-    <span class="va">l</span><span class="op">$</span><span class="va">tfbs</span>  <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,    <span class="va">tfbs</span>,                 win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"TFBS"</span>,   direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
+    <span class="va">l</span><span class="op">$</span><span class="va">tfbs</span>  <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,    <span class="va">tfbs</span>,                 win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"TFBS"</span>,   direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
   <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">operons</span><span class="op">)</span><span class="op">)</span>
-    <span class="va">l</span><span class="op">$</span><span class="va">operons</span><span class="op">&lt;-</span><span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,    <span class="va">operons</span>,              win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"operons"</span>,direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
+    <span class="va">l</span><span class="op">$</span><span class="va">operons</span><span class="op">&lt;-</span><span class="fu">feature_coverage</span><span class="op">(</span><span class="va">gb</span>,    <span class="va">operons</span>,              win <span class="op">=</span> <span class="va">win</span>, lab <span class="op">=</span> <span class="st">"operons"</span>,direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
   <span class="co">#reorder</span>
   <span class="va">newOrder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">l</span><span class="op">$</span><span class="va">intron</span><span class="op">@</span><span class="va">image</span><span class="op">)</span><span class="op">)</span>
   <span class="va">l</span><span class="op">$</span><span class="va">intron</span><span class="op">@</span><span class="va">image</span> <span class="op">&lt;-</span> <span class="va">l</span><span class="op">$</span><span class="va">intron</span><span class="op">@</span><span class="va">image</span><span class="op">[</span><span class="va">newOrder</span>,<span class="op">]</span>
@@ -437,7 +442,7 @@
 <p>Aligned regions are enriched in exons and depleted in introns.</p>
 <p>Close to the breakpoint of uncoalesced mapped regions, exon annotations are depleted, which makes sense, as exons are usually mapable. Within the mapped regions, frequency of introns and exons are comparable. In contrary, within coalesced mapped regions, the exon annotations are over-represented.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">computePlotData</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">target</span>, <span class="va">query</span>, <span class="va">CE</span><span class="op">=</span><span class="cn">NULL</span>, <span class="va">tfbs</span><span class="op">=</span><span class="cn">NULL</span>, <span class="va">operons</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span>
+<code class="sourceCode R"><span class="va">computePlotData</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">target</span>, <span class="va">query</span>, <span class="va">CE</span><span class="op">=</span><span class="cn">NULL</span>, <span class="va">tfbs</span><span class="op">=</span><span class="cn">NULL</span>, <span class="va">operons</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">direction</span> <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">pair</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">target</span>, <span class="va">query</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span>
   <span class="va">current_GB_aln_nonCoa</span>     <span class="op">&lt;-</span> <span class="va">gbs</span><span class="op">[[</span><span class="va">pair</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>   <span class="va">gbs</span><span class="op">[[</span><span class="va">pair</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
   <span class="va">current_GB_aln_coa</span>        <span class="op">&lt;-</span> <span class="va">gbs</span><span class="op">[[</span><span class="va">pair</span><span class="op">]</span><span class="op">]</span><span class="op">[</span> <span class="op">!</span> <span class="va">gbs</span><span class="op">[[</span><span class="va">pair</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
@@ -448,12 +453,14 @@
   
   <span class="va">targetGenome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">genome</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">[[</span><span class="va">pair</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
   
+  <span class="va">prepareFreqPlot_default</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">prepareFreqPlot</span><span class="op">(</span><span class="va">x</span>, <span class="va">annots</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span>, <span class="va">reps</span><span class="op">[[</span><span class="va">targetGenome</span><span class="op">]</span><span class="op">]</span>, <span class="va">CE</span>, <span class="va">tfbs</span>, <span class="va">operons</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span>, direction <span class="op">=</span> <span class="va">direction</span><span class="op">)</span>
+  
   <span class="va">hmList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
-  <span class="va">hmList</span><span class="op">$</span><span class="va">aln_nonCoa</span> <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot</span><span class="op">(</span><span class="va">current_GB_aln_nonCoa</span>, <span class="va">annots</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span>, <span class="va">reps</span><span class="op">[[</span><span class="va">targetGenome</span><span class="op">]</span><span class="op">]</span>, <span class="va">CE</span>, <span class="va">tfbs</span>, <span class="va">operons</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
-  <span class="va">hmList</span><span class="op">$</span><span class="va">aln_coa</span>    <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot</span><span class="op">(</span><span class="va">current_GB_aln_coa</span>,    <span class="va">annots</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span>, <span class="va">reps</span><span class="op">[[</span><span class="va">targetGenome</span><span class="op">]</span><span class="op">]</span>, <span class="va">CE</span>, <span class="va">tfbs</span>, <span class="va">operons</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
-  <span class="va">hmList</span><span class="op">$</span><span class="va">syn_block</span>  <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot</span><span class="op">(</span><span class="va">current_GB_syn_block</span>,  <span class="va">annots</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span>, <span class="va">reps</span><span class="op">[[</span><span class="va">targetGenome</span><span class="op">]</span><span class="op">]</span>, <span class="va">CE</span>, <span class="va">tfbs</span>, <span class="va">operons</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
-  <span class="va">hmList</span><span class="op">$</span><span class="va">unmap</span>      <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot</span><span class="op">(</span><span class="va">current_GB_unmap</span>,      <span class="va">annots</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span>, <span class="va">reps</span><span class="op">[[</span><span class="va">targetGenome</span><span class="op">]</span><span class="op">]</span>, <span class="va">CE</span>, <span class="va">tfbs</span>, <span class="va">operons</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
-  <span class="va">hmList</span><span class="op">$</span><span class="va">bri</span>        <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot</span><span class="op">(</span><span class="va">current_GB_bri</span>,        <span class="va">annots</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span>, <span class="va">reps</span><span class="op">[[</span><span class="va">targetGenome</span><span class="op">]</span><span class="op">]</span>, <span class="va">CE</span>, <span class="va">tfbs</span>, <span class="va">operons</span><span class="op">[[</span><span class="va">target</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
+  <span class="va">hmList</span><span class="op">$</span><span class="va">aln_nonCoa</span> <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot_default</span><span class="op">(</span><span class="va">current_GB_aln_nonCoa</span><span class="op">)</span>
+  <span class="va">hmList</span><span class="op">$</span><span class="va">aln_coa</span>    <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot_default</span><span class="op">(</span><span class="va">current_GB_aln_coa</span><span class="op">)</span>
+  <span class="va">hmList</span><span class="op">$</span><span class="va">syn_block</span>  <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot_default</span><span class="op">(</span><span class="va">current_GB_syn_block</span><span class="op">)</span>
+  <span class="va">hmList</span><span class="op">$</span><span class="va">unmap</span>      <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot_default</span><span class="op">(</span><span class="va">current_GB_unmap</span><span class="op">)</span>
+  <span class="va">hmList</span><span class="op">$</span><span class="va">bri</span>        <span class="op">&lt;-</span> <span class="fu">prepareFreqPlot_default</span><span class="op">(</span><span class="va">current_GB_bri</span><span class="op">)</span>
   <span class="va">hmList</span>
 <span class="op">}</span>
 
@@ -526,43 +533,43 @@
 <div class="section level5">
 <h5 id="aligning-on-center-instead-of-border-">Aligning on center instead of border.<a class="anchor" aria-label="anchor" href="#aligning-on-center-instead-of-border-"></a>
 </h5>
-<p>As the plots are hardcoded to use the left border, let’s artificially make regions of 1 bp on centers, rather than changing the accessory function.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># current_GB &lt;- coa$Oki_Osa</span>
-<span class="co"># </span>
-<span class="co"># current_GB_wide_c    &lt;- current_GB_wide    |&gt; plyranges::anchor_center() |&gt; plyranges::mutate(width=1)</span>
-<span class="co"># current_GB_narrow_c  &lt;- current_GB_narrow  |&gt; plyranges::anchor_center() |&gt; plyranges::mutate(width=1)</span>
-<span class="co"># current_GB_unmap_c   &lt;- current_GB_unmap   |&gt; plyranges::anchor_center() |&gt; plyranges::mutate(width=1)</span>
-<span class="co"># current_GB_unal_c    &lt;- current_GB_unal    |&gt; plyranges::anchor_center() |&gt; plyranges::mutate(width=1)</span>
-<span class="co"># current_GB_bri_c &lt;- current_GB_bri |&gt; plyranges::anchor_center() |&gt; plyranges::mutate(width=1)</span>
-<span class="co"># </span>
-<span class="co"># currentCNE &lt;- ces$ce__50__47$Oki_Osa</span>
-<span class="co"># </span>
-<span class="co"># hmListWide_c    &lt;- prepareFreqPlot(current_GB_wide_c,    annots$Oki, reps$Oki, currentCNE)</span>
-<span class="co"># hmListNarrow_c  &lt;- prepareFreqPlot(current_GB_narrow_c,  annots$Oki, reps$Oki, currentCNE)</span>
-<span class="co"># hmListUnmap_c   &lt;- prepareFreqPlot(current_GB_unmap_c,   annots$Oki, reps$Oki, currentCNE)</span>
-<span class="co"># hmListUnal_c    &lt;- prepareFreqPlot(current_GB_unal_c,    annots$Oki, reps$Oki, currentCNE)</span>
-<span class="co"># hmListUnalMap_c &lt;- prepareFreqPlot(current_GB_bri_c, annots$Oki, reps$Oki, currentCNE)</span>
-<span class="co"># </span>
-<span class="co"># p_center &lt;- rbind(</span>
-<span class="co">#   hmListNarrow_c  |&gt; prepareGGFreqPlot("01_narrow"),</span>
-<span class="co">#   hmListUnmap_c   |&gt; prepareGGFreqPlot("02_unmap"),</span>
-<span class="co"># #  hmListUnal_c    |&gt; prepareGGFreqPlot("02b_unmap"),</span>
-<span class="co">#   hmListWide_c    |&gt; prepareGGFreqPlot("03_wide"),</span>
-<span class="co">#   hmListUnalMap_c |&gt; prepareGGFreqPlot("04_bri")</span>
-<span class="co"># )|&gt; ggplot() +</span>
-<span class="co">#   aes(pos, freq, col = what) +</span>
-<span class="co">#   geom_line() +</span>
-<span class="co">#   facet_wrap(~desc, nrow = 1) +</span>
-<span class="co">#   ggtitle("Aligned on region midpoints.")</span>
-<span class="co"># </span>
-<span class="co"># p_center$data$what  &lt;- p_center$data$what |&gt; sub(pat = "CNE", rep = "CE_50_47")</span>
-<span class="co"># p_center</span></code></pre></div>
+<code class="sourceCode R"><span class="va">hmList_to_plot.centered</span> <span class="op">&lt;-</span> <span class="fu">computePlotData</span><span class="op">(</span><span class="st">"Oki"</span>, <span class="st">"Osa"</span>, <span class="va">ces</span><span class="op">$</span><span class="va">ce__50__48</span><span class="op">$</span><span class="va">Oki_Osa</span>, <span class="va">tfbs</span>, <span class="va">operons</span>, direction <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span>
+
+<span class="op">(</span><span class="va">p_boundary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">aln_nonCoa</span>  |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"01_isolated_alns"</span><span class="op">)</span>,
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">unmap</span>       |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"02_unmapped"</span><span class="op">)</span>,
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">syn_block</span>   |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"03_colinear_reg"</span><span class="op">)</span>,
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">bri</span>         |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"04_bridge"</span><span class="op">)</span><span class="co">#,</span>
+ <span class="co">#hmList_to_plot.centered$aln_coa     |&gt; prepareGGFreqPlot("05_colinear_alns")</span>
+
+<span class="op">)</span>|&gt; <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">aes</span><span class="op">(</span><span class="va">pos</span>, <span class="va">freq</span>, col <span class="op">=</span> <span class="va">what</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">desc</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="GenomicFeatures_files/figure-html/genomic_features_byType.centered-1.svg" width="1440"></p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="op">(</span><span class="va">p_boundary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">aln_nonCoa</span>  |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"01_isolated_alns"</span><span class="op">)</span>,
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">unmap</span>       |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"02_unmapped"</span><span class="op">)</span>,
+  <span class="co">#hmList_to_plot.centered$syn_block   |&gt; prepareGGFreqPlot("03_colinear_reg"),</span>
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">bri</span>         |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"04_bridge"</span><span class="op">)</span>,
+  <span class="va">hmList_to_plot.centered</span><span class="op">$</span><span class="va">aln_coa</span>     |&gt; <span class="fu">prepareGGFreqPlot</span><span class="op">(</span><span class="st">"03_colinear_alns"</span><span class="op">)</span>
+
+<span class="op">)</span>|&gt; <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">aes</span><span class="op">(</span><span class="va">pos</span>, <span class="va">freq</span>, col <span class="op">=</span> <span class="va">what</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">desc</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="GenomicFeatures_files/figure-html/genomic_features_byType.centered-2.svg" width="1440"></p>
 </div>
 <div class="section level5">
 <h5 id="comparison">Comparison<a class="anchor" aria-label="anchor" href="#comparison"></a>
 </h5>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># library(patchwork)</span>
 <span class="co"># p_boundary / p_center</span></code></pre></div>
 </div>
@@ -570,12 +577,12 @@
 <h4 id="pwm">PWM<a class="anchor" aria-label="anchor" href="#pwm"></a>
 </h4>
 <p>The PWM motif, which is rare in comparison to the other features, follows a profile that bears resemblance to the repeat profile.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gadems.invLeftGap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"gadems.invLeftGap.Rda"</span><span class="op">)</span>
 <span class="va">pwm</span> <span class="op">&lt;-</span> <span class="va">gadems.invLeftGap</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>
 <span class="va">pwm</span><span class="op">@</span><span class="va">consensus</span></code></pre></div>
 <pre><code><span class="co">## [1] "rArAAGCCGCdwAGCsGCw"</span></code></pre>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># pwmHits &lt;- matchPWM(pwm = sapply(pwm@alignList, \(x) x@seq) |&gt; as("DNAStringSet") |&gt; PWM(), genomes$Oki) # Gives different scores...</span>
 <span class="va">pwmHits</span> <span class="op">&lt;-</span> <span class="fu">matchPWM</span><span class="op">(</span>pwm <span class="op">=</span> <span class="fu">rGADEM</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html" class="external-link">getPWM</a></span><span class="op">(</span><span class="va">pwm</span><span class="op">)</span>, <span class="va">genomes</span><span class="op">$</span><span class="va">OKI2018.I69</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co"># Suppressing warnings like:</span>
@@ -596,7 +603,7 @@
 <h3 id="gene-feature-coverage-around-pwm-hits">Gene feature coverage around PWM hits<a class="anchor" aria-label="anchor" href="#gene-feature-coverage-around-pwm-hits"></a>
 </h3>
 <p>Let’s look at coverage around PWM hits of the AAGCsGCwwmkCGrCTTyn motif</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">current_GB</span> <span class="op">&lt;-</span> <span class="va">pwmHits</span>
 
 <span class="va">hmList_PWM_OKI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
@@ -609,18 +616,18 @@
 <span class="co">##   lengths and circularity flags of the underlying sequences). You can use</span>
 <span class="co">##   trim() to trim these ranges. See ?`trim,GenomicRanges-method` for more</span>
 <span class="co">##   information.</span></code></pre>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">hmList_PWM_OKI</span><span class="op">$</span><span class="va">exons</span>     <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">current_GB</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/exonicParts.html" class="external-link">exonicParts</a></span><span class="op">(</span><span class="va">annots</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>,                   win <span class="op">=</span> <span class="fl">2000</span>, lab <span class="op">=</span> <span class="st">"Oki exons"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
 <span class="va">hmList_PWM_OKI</span><span class="op">$</span><span class="va">introns</span>   <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">current_GB</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/exonicParts.html" class="external-link">intronicParts</a></span><span class="op">(</span><span class="va">annots</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>,                 win <span class="op">=</span> <span class="fl">2000</span>, lab <span class="op">=</span> <span class="st">"Oki introns"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
 <span class="va">hmList_PWM_OKI</span><span class="op">$</span><span class="va">cds</span>       <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">current_GB</span>, <span class="fu"><a href="https://rdrr.io/pkg/GenomicFeatures/man/transcripts.html" class="external-link">cds</a></span><span class="op">(</span><span class="va">annots</span><span class="op">$</span><span class="va">Oki</span><span class="op">)</span>,                           win <span class="op">=</span> <span class="fl">2000</span>, lab <span class="op">=</span> <span class="st">"Oki cds"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/pkg/heatmaps/man/plotHeatmapMeta.html" class="external-link">plotHeatmapMeta</a></span><span class="op">(</span><span class="va">hmList_PWM_OKI</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"genes"</span>, <span class="st">"exons"</span>, <span class="st">"cds"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="co"># Show they look alike.  We keep "exons"</span></code></pre></div>
 <p><img src="GenomicFeatures_files/figure-html/genomic_features_pwmHits-1.png" width="700"></p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/heatmaps/man/plotHeatmapMeta.html" class="external-link">plotHeatmapMeta</a></span><span class="op">(</span><span class="va">hmList_PWM_OKI</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"promoters"</span>, <span class="st">"exons"</span>, <span class="st">"introns"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <p><img src="GenomicFeatures_files/figure-html/genomic_features_pwmHits-2.png" width="700"></p>
 <p>They are enriched in introns…</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># </span>
 <span class="co"># # Sandbox to make sanity checks.</span>
 <span class="co"># </span>
@@ -637,7 +644,7 @@
 <h3 id="breakpoint-coverage-around-pwm-hits">Breakpoint coverage around PWM hits<a class="anchor" aria-label="anchor" href="#breakpoint-coverage-around-pwm-hits"></a>
 </h3>
 <p>TODO: triplecheck <code>feature_coverage</code>, it is old…</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">current_GB</span> <span class="op">&lt;-</span> <span class="va">pwmHits</span>
 
 <span class="va">hmList_PWM_OKI</span><span class="op">$</span><span class="va">gbOsa</span>     <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">current_GB</span>, <span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Osa</span>,  win <span class="op">=</span> <span class="fl">5000</span>, lab <span class="op">=</span> <span class="st">"Oki-Osa"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
@@ -646,7 +653,7 @@
 
 <span class="fu"><a href="https://rdrr.io/pkg/heatmaps/man/plotHeatmapMeta.html" class="external-link">plotHeatmapMeta</a></span><span class="op">(</span><span class="va">hmList_PWM_OKI</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gbOsa"</span>, <span class="st">"gbBar"</span>, <span class="st">"gbKum"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <p><img src="GenomicFeatures_files/figure-html/genomic_features_pwmHits2-1.png" width="700"></p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">hmList_PWM_OKI</span><span class="op">$</span><span class="va">coOsa</span>     <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">current_GB</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>,  win <span class="op">=</span> <span class="fl">5000</span>, lab <span class="op">=</span> <span class="st">"Oki-Osa"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
 <span class="va">hmList_PWM_OKI</span><span class="op">$</span><span class="va">coBar</span>     <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">current_GB</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>,  win <span class="op">=</span> <span class="fl">5000</span>, lab <span class="op">=</span> <span class="st">"Oki-Bar"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
 <span class="va">hmList_PWM_OKI</span><span class="op">$</span><span class="va">coKum</span>     <span class="op">&lt;-</span> <span class="fu">feature_coverage</span><span class="op">(</span><span class="va">current_GB</span>, <span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span>,  win <span class="op">=</span> <span class="fl">5000</span>, lab <span class="op">=</span> <span class="st">"Oki-Kum"</span>, direction <span class="op">=</span> <span class="st">"left"</span><span class="op">)</span>
@@ -658,7 +665,7 @@
 <h3 id="okinawa-genome-coverage">Okinawa genome coverage<a class="anchor" aria-label="anchor" href="#okinawa-genome-coverage"></a>
 </h3>
 <p>As previously discussed, low coverage over an alignment stop could lower the likelihood of it being considered as a breakpoint. We have per-base coverage depth information for the Okinawan genome (<code>Oki_cov_pb</code>). However, the coverage of this particular assembly is quite good. In fact, we can investigate the coverge over alignment stops from the information obtained using <code>master_bp_analysis</code>.</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># fin_Oki &lt;- fin_gr_O_Oki[[2]]</span>
 <span class="co"># min_cov &lt;- min(min(fin_Oki$left_cov_pb), min(fin_Oki$right_cov_pb)) # minimum coverage over an alignment stop</span>
 <span class="co"># min_cov</span>
@@ -672,14 +679,14 @@
 </h2>
 <p><em>Needs coverage information to be recomputed</em></p>
 <p>Another characteristic of alignment stops that we can examine is the coverage depth over said alignment stops. By aligning raw reads to assembled genomes, we can obtain per-base coverage depth for target or query genome. Low coverage directly on and surrounding an alignment stop may suggest unreliability in it being a true breakpoint. The function <code>bp_coverage</code> returns a GRanges object of the bps, with associated averaged and point converage in the metadatacolumns.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># cov_gr_O_Oki &lt;- bp_coverage(gr_ob = q_Oki, cov_gr = Oki_cov_pb, win = 50)</span>
 <span class="co"># cov_gr_O_Oki</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
 <span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span>
