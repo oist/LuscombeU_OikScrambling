@@ -1,6 +1,8 @@
 # OikScrambling 3.0.4
 
 * Draft chromosome plots for Figure 4 (ex-3, ex-2b).
+* Natural scale width plots for Figure 2
+* 5-panel feature plots for Figure 2
 
 # OikScrambling 3.0.3
 
