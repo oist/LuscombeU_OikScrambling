@@ -134,11 +134,13 @@ chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
 
 ```{r chromosome_plots_transcripts_oki, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Density of transcript names (i.e., gene counts).
-ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Okinawa: transcripts per window (size = ", windowSize/1000, " kbp)", sep=""))
+ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Okinawa: transcripts per window (size = ", windowSize/1000, " kbp)", sep="")) +
+  geom_vline( data = (longShort$OKI2018.I69 -1) |> GenomicBreaks::cleanGaps() |> as.data.frame()
+            , aes(xintercept = start), col = "gray")
 
 ggplot(as.data.frame(chrw$Oki)  |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 
-ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
+ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 ```
 
 
