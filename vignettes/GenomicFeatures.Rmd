@@ -407,9 +407,9 @@ hmList_to_plot.centered <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa,
 (p_boundary <- rbind(
   hmList_to_plot.centered$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
   hmList_to_plot.centered$unmap       |> prepareGGFreqPlot("02_unmapped"),
-  hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
-  hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge")#,
- #hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
+  hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("05_colinear_reg"),
+  hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge"),
+  hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("03_colinear_alns")
 
 )|> ggplot() +
   aes(pos, freq, col = what) +
@@ -421,7 +421,7 @@ hmList_to_plot.centered <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa,
 (p_boundary <- rbind(
   hmList_to_plot.centered$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
   hmList_to_plot.centered$unmap       |> prepareGGFreqPlot("02_unmapped"),
-  #hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
+  hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("05_colinear_reg"),
   hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge"),
   hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("03_colinear_alns")
 
