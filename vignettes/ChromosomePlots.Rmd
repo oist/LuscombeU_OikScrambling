@@ -626,6 +626,77 @@ p3_noysr <- chrw$Bar |>
 ggpubr::ggarrange(p1_ysr, p2_ysr, p3_ysr, ncol=1)
 ggpubr::ggarrange(p1_noysr, p2_noysr, p3_noysr, ncol=1)
 ```
+
+#### Plotting everything on one plot
+Note that there are two Y axes for these plots. Repeat and gene density are shown on the same Y axis (left), while dN/dS is shown on the second Y axis (right).
+
+
+```{r chromosome_plots_bp_oki_2, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+tmp <- chrw$Oki |> as.data.frame() |> plyranges::filter(seqnames %in% c("chr1", "chr2", "PAR", "XSR"))
+
+tmp$bp.mean.breaks <- tmp |> select("bp.Oki_Osa.breaks.count", "bp.Oki_Bar.breaks.count", "bp.Oki_Kum.breaks.count", "bp.Oki_Aom.breaks.count",  "bp.Oki_Nor.breaks.count") |> as.data.frame() |> rowMeans()
+
+scaleFactor <- max(tmp$bp.mean.breaks,na.rm=T)/max(tmp$transcripts.dNdS_PRANK.median, na.rm=T)
+p1 <- ggplot(tmp, aes(x=start)) +
+  geom_smooth(aes(y=bp.mean.breaks, color="genes"), method="loess") +
+  geom_smooth(aes(y=transcripts.dNdS_PRANK.median*scaleFactor, color="dN/dS"), method="loess") +
+  geom_smooth(aes(y=repeats.Class.count.total, color="repeats"), method="loess") +
+  scale_y_continuous(name="breakpoints/repeats per window", sec.axis=sec_axis(~./scaleFactor, name="median dN/dS per window")) +
+  ggtitle("Okinawa: Breakpoints, genes, and dN/dS per window") + 
+  facet_wrap(~seqnames, nrow=1)
+
+p1
+
+# And a correlation plot
+ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Okinawa: Breakpoints vs. dN/dS') + ylab('dN/dS')
+```
+
+
+```{r chromosome_plots_bp_osa_2, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+tmp <- chrw$Osa |> as.data.frame() |> plyranges::filter(seqnames %in% c("Chr1", "Chr2", "PAR", "XSR"))
+
+tmp$bp.mean.breaks <- tmp |> select("bp.Osa_Oki.breaks.count", "bp.Osa_Bar.breaks.count", "bp.Osa_Kum.breaks.count", "bp.Osa_Aom.breaks.count",  "bp.Osa_Nor.breaks.count") |> as.data.frame() |> rowMeans()
+
+scaleFactor <- max(tmp$bp.mean.breaks,na.rm=T)/max(tmp$transcripts.dNdS_PRANK.median, na.rm=T)
+
+p2 <- ggplot(tmp, aes(x=start)) +
+  geom_smooth(aes(y=bp.mean.breaks, color="genes"), method="loess") +
+  geom_smooth(aes(y=transcripts.dNdS_PRANK.median*scaleFactor, color="dN/dS"), method="loess") +
+  geom_smooth(aes(y=repeats.Class.count.total, color="repeats"), method="loess") +
+  scale_y_continuous(name="breakpoints/repeats per window", sec.axis=sec_axis(~./scaleFactor, name="median dN/dS per window")) +
+  ggtitle("Osaka: Breakpoints, genes, and dN/dS per window") + 
+  facet_wrap(~seqnames, nrow=1)
+
+p2
+
+ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Osaka: Breakpoints vs. dN/dS') + ylab('dN/dS')
+```
+
+```{r chromosome_plots_bp_bar_2, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+tmp <- chrw$Bar |> as.data.frame() |> plyranges::filter(seqnames %in% c("Chr1", "Chr2", "PAR", "XSR"))
+
+tmp$bp.mean.breaks <- tmp |> select("bp.Bar_Oki.breaks.count", "bp.Bar_Osa.breaks.count", "bp.Bar_Kum.breaks.count", "bp.Bar_Aom.breaks.count",  "bp.Bar_Nor.breaks.count") |> as.data.frame() |> rowMeans()
+
+scaleFactor <- max(tmp$bp.mean.breaks,na.rm=T)/max(tmp$transcripts.dNdS_PRANK.median, na.rm=T)
+
+p3 <- ggplot(tmp, aes(x=start)) +
+  geom_smooth(aes(y=bp.mean.breaks, color="genes"), method="loess") +
+  geom_smooth(aes(y=transcripts.dNdS_PRANK.median*scaleFactor, color="dN/dS"), method="loess") +
+  geom_smooth(aes(y=repeats.Class.count.total, color="repeats"), method="loess") +
+  scale_y_continuous(name="breakpoints/repeats per window", sec.axis=sec_axis(~./scaleFactor, name="median dN/dS per window")) +
+  ggtitle("Barcelona: Breakpoints, genes, and dN/dS per window") + 
+  facet_wrap(~seqnames, nrow=1)
+
+p3
+
+ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Barcelona: Breakpoints vs. dN/dS') + ylab('dN/dS')
+```
+
+```{r chromosome_plots_bp_joined_2, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggpubr::ggarrange(p1, p2, p3, ncol=1)
+```
+
+
 # Session information
 
 ```{r sessionInfo}
