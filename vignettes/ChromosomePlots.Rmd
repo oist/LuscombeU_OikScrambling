@@ -122,6 +122,8 @@ We use these windows to evaluate the distribution of various features across the
 ```{r chromosome_plots_transcripts}
 windowSize <- 2e5
 bins_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
+bins_Osa <- genomes$Osa |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
+bins_Bar <- genomes$Bar |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
 
 chrw <- SimpleList()
 chrw$Oki <- grWindows(genome=genomes$Oki, meta=transcripts$Oki, windowSize=windowSize, meta_prefix = 'transcripts.')
@@ -153,7 +155,6 @@ ggplot(as.data.frame(chrw$Osa)  |> plyranges::filter(seqnames %in% c('Chr1', 'Ch
 ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Osaka: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) 
 ```
 
-
 ```{r chromosome_plots_transcripts_bar, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Density of transcript names (i.e., gene counts).
 ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Barcelona: transcripts per window (size = ", windowSize/1000, " kbp)", sep=""))
@@ -162,6 +163,32 @@ ggplot(as.data.frame(chrw$Bar)  |> plyranges::filter(seqnames %in% c('Chr1', 'Ch
 
 ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Barcelona: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 ```
+
+#### Transcripts: joined gene density plot
+```{r chromosome_plots_transcripts_joined, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Okinawa
+p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
+
+# Osaka
+p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
+
+# Barcelona
+p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
+
+ggpubr::ggarrange(p1, p2, p3, ncol=1)
+```
+
+#### Transcripts: joined dN/dS plot
+```{r chromosome_plots_transcripts_dnds_joined, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
+
+p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
+
+p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
+
+ggpubr::ggarrange(p1, p2, p3, ncol=1)
+```
+
 
 ### Repeats
 In this section we add repeat data to the `chrw` object. Since the windows are the same for every genome, this is simple accomplished with a `cbind` operation to the windowed object's `mcols`.
@@ -231,19 +258,41 @@ chrw$Bar |>
 
 ```
 
+```{r chromosome_plots_repeats_joined, dependson="chromosome_plots_repeats", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=repeats.type.count.total, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: repeats per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('repeats')
 
+p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=repeats.type.count.total, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Osa: repeats per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('repeats')
+
+p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=repeats.type.count.total, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: repeats per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('repeats')
+
+ggpubr::ggarrange(p1, p2, p3, ncol=1)
+```
 
 ## `GenomicBreaks` objects: Scores and widths
 
 In the next sections, we explore the distribution of alignment parameters (scores and widths) for different populations vs. chromosomal position.
 
 ```{r chromosome_plots_scores, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Okinawa
 chrw$Oki$Oki_Osa.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki))
 chrw$Oki$Oki_Aom.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Aom), matchToOneBin(gbs$Oki_Aom, bins_Oki))
 chrw$Oki$Oki_Bar.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Bar), matchToOneBin(gbs$Oki_Bar, bins_Oki))
 chrw$Oki$Oki_Nor.score.mean <- binApply(mean, na.rm = T, bins_Oki, score(gbs$Oki_Nor), matchToOneBin(gbs$Oki_Nor, bins_Oki))
+
+# Osaka
+chrw$Osa$Osa_Oki.score.mean <- binApply(mean, na.rm = T, bins_Osa, score(gbs$Osa_Oki), matchToOneBin(gbs$Osa_Oki, bins_Osa))
+chrw$Osa$Osa_Kum.score.mean <- binApply(mean, na.rm = T, bins_Osa, score(gbs$Osa_Kum), matchToOneBin(gbs$Osa_Kum, bins_Osa))
+chrw$Osa$Osa_Bar.score.mean <- binApply(mean, na.rm = T, bins_Osa, score(gbs$Osa_Bar), matchToOneBin(gbs$Osa_Bar, bins_Osa))
+chrw$Osa$Osa_Nor.score.mean <- binApply(mean, na.rm = T, bins_Osa, score(gbs$Osa_Nor), matchToOneBin(gbs$Osa_Nor, bins_Osa))
+
+# Barcelona
+chrw$Bar$Bar_Osa.score.mean <- binApply(mean, na.rm = T, bins_Bar, score(gbs$Bar_Osa), matchToOneBin(gbs$Bar_Osa, bins_Bar))
+chrw$Bar$Bar_Aom.score.mean <- binApply(mean, na.rm = T, bins_Bar, score(gbs$Bar_Aom), matchToOneBin(gbs$Bar_Aom, bins_Bar))
+chrw$Bar$Bar_Oki.score.mean <- binApply(mean, na.rm = T, bins_Bar, score(gbs$Bar_Oki), matchToOneBin(gbs$Bar_Oki, bins_Bar))
+chrw$Bar$Bar_Kum.score.mean <- binApply(mean, na.rm = T, bins_Bar, score(gbs$Bar_Kum), matchToOneBin(gbs$Bar_Kum, bins_Bar))
 ```
-```{r chromosome_plots_scores_1, dependson="chromosome_plots_scores", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+
+```{r chromosome_plots_scores_oki, dependson="chromosome_plots_scores", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) +
   aes(x=start, y=Oki_Osa.score.mean) +
   geom_point() +
@@ -273,6 +322,45 @@ chrw$Oki |>
     ggtitle("Okinawa: Chromosomal position vs. alignment score")
 
 ```
+
+
+```{r chromosome_plots_scores_joined, dependson="chromosome_plots_scores", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Oki_Osa.score.mean", "Oki_Aom.score.mean", "Oki_Bar.score.mean", "Oki_Nor.score.mean" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Oki_Osa.score.mean", "Oki_Aom.score.mean", "Oki_Bar.score.mean", "Oki_Nor.score.mean")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Okinawa: Chromosomal position vs. alignment score")
+
+p2 <- chrw$Osa |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Osa_Oki.score.mean", "Osa_Kum.score.mean", "Osa_Bar.score.mean", "Osa_Nor.score.mean" )) |>
+  plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Osa_Oki.score.mean", "Osa_Kum.score.mean", "Osa_Bar.score.mean", "Osa_Nor.score.mean")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Osaka: Chromosomal position vs. alignment score")
+
+p3 <- chrw$Bar |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Bar_Oki.score.mean", "Bar_Kum.score.mean", "Bar_Osa.score.mean", "Bar_Aom.score.mean" )) |>
+  plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Bar_Oki.score.mean", "Bar_Kum.score.mean", "Bar_Osa.score.mean", "Bar_Aom.score.mean")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Barcelona: Chromosomal position vs. alignment score")
+
+ggpubr::ggarrange(p1, p2, p3, ncol=1)
+```
+
 
 In the following section I divide the scores by the widths of the alignments, creating a scaled score.
 
@@ -316,10 +404,24 @@ chrw$Oki |>
 ## Alignment widths
 
 ```{r chromosome_plots_widths, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Okinawa
 chrw$Oki$Oki_Osa.width.mean <- binApply(mean, na.rm = T, bins_Oki, width(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, bins_Oki))
 chrw$Oki$Oki_Aom.width.mean <- binApply(mean, na.rm = T, bins_Oki, width(gbs$Oki_Aom), matchToOneBin(gbs$Oki_Aom, bins_Oki))
 chrw$Oki$Oki_Bar.width.mean <- binApply(mean, na.rm = T, bins_Oki, width(gbs$Oki_Bar), matchToOneBin(gbs$Oki_Bar, bins_Oki))
 chrw$Oki$Oki_Nor.width.mean <- binApply(mean, na.rm = T, bins_Oki, width(gbs$Oki_Nor), matchToOneBin(gbs$Oki_Nor, bins_Oki))
+
+
+# Osaka
+chrw$Osa$Osa_Oki.width.mean <- binApply(mean, na.rm = T, bins_Osa, width(gbs$Osa_Oki), matchToOneBin(gbs$Osa_Oki, bins_Osa))
+chrw$Osa$Osa_Kum.width.mean <- binApply(mean, na.rm = T, bins_Osa, width(gbs$Osa_Kum), matchToOneBin(gbs$Osa_Kum, bins_Osa))
+chrw$Osa$Osa_Bar.width.mean <- binApply(mean, na.rm = T, bins_Osa, width(gbs$Osa_Bar), matchToOneBin(gbs$Osa_Bar, bins_Osa))
+chrw$Osa$Osa_Nor.width.mean <- binApply(mean, na.rm = T, bins_Osa, width(gbs$Osa_Nor), matchToOneBin(gbs$Osa_Nor, bins_Osa))
+
+# Barcelona
+chrw$Bar$Bar_Osa.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Osa), matchToOneBin(gbs$Bar_Osa, bins_Bar))
+chrw$Bar$Bar_Aom.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Aom), matchToOneBin(gbs$Bar_Aom, bins_Bar))
+chrw$Bar$Bar_Oki.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Oki), matchToOneBin(gbs$Bar_Oki, bins_Bar))
+chrw$Bar$Bar_Kum.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Kum), matchToOneBin(gbs$Bar_Kum, bins_Bar))
 ```
 
 ```{r chromosome_plots_widths_oki, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
@@ -351,6 +453,43 @@ chrw$Oki |>
     ggtitle("Okinawa: Chromosomal position vs. aligned segment width")
 ```
 
+```{r chromosome_plots_widths_joined, dependson="chromosome_plots_widths", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Oki_Osa.width.mean", "Oki_Aom.width.mean", "Oki_Bar.width.mean", "Oki_Nor.width.mean" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Oki_Osa.width.mean", "Oki_Aom.width.mean", "Oki_Bar.width.mean", "Oki_Nor.width.mean")) |>
+  ggplot() +
+  aes(start, value, col = name) +
+  facet_wrap(~seqnames, nrow = 1) +
+  geom_smooth(span = 0.25, se = FALSE) +
+  ggtitle("Okinawa: Chromosomal position vs. aligned segment width")
+
+p2 <- chrw$Osa |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Osa_Oki.width.mean", "Osa_Kum.width.mean", "Osa_Bar.width.mean", "Osa_Nor.width.mean" )) |>
+  plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Osa_Oki.width.mean", "Osa_Kum.width.mean", "Osa_Bar.width.mean", "Osa_Nor.width.mean")) |>
+  ggplot() +
+  aes(start, value, col = name) +
+  facet_wrap(~seqnames, nrow = 1) +
+  geom_smooth(span = 0.25, se = FALSE) +
+  ggtitle("Osaka: Chromosomal position vs. aligned segment width")
+
+p3 <- chrw$Bar |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Bar_Oki.width.mean", "Bar_Kum.width.mean", "Bar_Osa.width.mean", "Bar_Aom.width.mean" )) |>
+  plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("Bar_Oki.width.mean", "Bar_Kum.width.mean", "Bar_Osa.width.mean", "Bar_Aom.width.mean")) |>
+  ggplot() +
+  aes(start, value, col = name) +
+  facet_wrap(~seqnames, nrow = 1) +
+  geom_smooth(span = 0.25, se = FALSE) +
+  ggtitle("Barcelona: Chromosomal position vs. aligned segment width")
+
+ggpubr::ggarrange(p1, p2, p3, ncol=1)
+```
+
 
 ## Breakpoints
 
@@ -378,10 +517,23 @@ mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, me
 ```
 
 ```{r chromosome_plots_bp_oki_1, dependson="chromosome_plots_bp", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-chrw$Oki |>
+p1_ysr <- chrw$Oki |>
   as.data.frame() |>
   subset(select=c("seqnames", "start", "end", "bp.Oki_Osa.breaks.count", "bp.Oki_Bar.breaks.count", "bp.Oki_Kum.breaks.count", "bp.Oki_Aom.breaks.count",  "bp.Oki_Nor.breaks.count" )) |>
   plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) |>
+  tidyr::pivot_longer(c("bp.Oki_Osa.breaks.count", "bp.Oki_Bar.breaks.count", "bp.Oki_Kum.breaks.count", "bp.Oki_Aom.breaks.count",  "bp.Oki_Nor.breaks.count" )) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Okinawa: Chromosomal position vs. number of breakpoints")
+
+p1_ysr
+
+p1_noysr <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "bp.Oki_Osa.breaks.count", "bp.Oki_Bar.breaks.count", "bp.Oki_Kum.breaks.count", "bp.Oki_Aom.breaks.count",  "bp.Oki_Nor.breaks.count" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
   tidyr::pivot_longer(c("bp.Oki_Osa.breaks.count", "bp.Oki_Bar.breaks.count", "bp.Oki_Kum.breaks.count", "bp.Oki_Aom.breaks.count",  "bp.Oki_Nor.breaks.count" )) |>
   ggplot() +
     aes(start, value, col = name) +
@@ -404,7 +556,7 @@ mcols(chrw$Osa) <- cbind(mcols(chrw$Osa), mcols(grWindows(genome=genomes$Osa, me
 ```
 
 ```{r chromosome_plots_bp_osa_1, dependson="chromosome_plots_bp_osa", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-chrw$Osa |>
+p2_ysr <- chrw$Osa |>
   as.data.frame() |>
   subset(select=c("seqnames", "start", "end", "bp.Osa_Oki.breaks.count", "bp.Osa_Bar.breaks.count", "bp.Osa_Kum.breaks.count", "bp.Osa_Aom.breaks.count",  "bp.Osa_Nor.breaks.count" )) |>
   plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |>
@@ -414,6 +566,20 @@ chrw$Osa |>
     facet_wrap(~seqnames, nrow = 1) +
     geom_smooth(span = 0.25, se = FALSE) +
     ggtitle("Osaka: Chromosomal position vs. number of breakpoints")
+
+p2_ysr
+
+p2_noysr <- chrw$Osa |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "bp.Osa_Oki.breaks.count", "bp.Osa_Bar.breaks.count", "bp.Osa_Kum.breaks.count", "bp.Osa_Aom.breaks.count",  "bp.Osa_Nor.breaks.count" )) |>
+  plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("bp.Osa_Oki.breaks.count", "bp.Osa_Bar.breaks.count", "bp.Osa_Kum.breaks.count", "bp.Osa_Aom.breaks.count",  "bp.Osa_Nor.breaks.count" )) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(span = 0.25, se = FALSE) +
+    ggtitle("Osaka: Chromosomal position vs. number of breakpoints")
+
 ```
 
 
@@ -430,7 +596,7 @@ mcols(chrw$Bar) <- cbind(mcols(chrw$Bar), mcols(grWindows(genome=genomes$Bar, me
 ```
 
 ```{r chromosome_plots_bp_bar_1, dependson="chromosome_plots_bp_bar", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-chrw$Bar |>
+p3_ysr <- chrw$Bar |>
   as.data.frame() |>
   subset(select=c("seqnames", "start", "end", "bp.Bar_Oki.breaks.count", "bp.Bar_Osa.breaks.count", "bp.Bar_Kum.breaks.count", "bp.Bar_Aom.breaks.count",  "bp.Bar_Nor.breaks.count" )) |>
   plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |>
@@ -440,8 +606,26 @@ chrw$Bar |>
   facet_wrap(~seqnames, nrow = 1) +
   geom_smooth(span = 0.25, se = FALSE) +
   ggtitle("Barcelona: Chromosomal position vs. number of breakpoints")
+
+p3_ysr 
+
+p3_noysr <- chrw$Bar |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "bp.Bar_Oki.breaks.count", "bp.Bar_Osa.breaks.count", "bp.Bar_Kum.breaks.count", "bp.Bar_Aom.breaks.count",  "bp.Bar_Nor.breaks.count" )) |>
+  plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("bp.Bar_Oki.breaks.count", "bp.Bar_Osa.breaks.count", "bp.Bar_Kum.breaks.count", "bp.Bar_Aom.breaks.count",  "bp.Bar_Nor.breaks.count" )) |>
+  ggplot() +
+  aes(start, value, col = name) +
+  facet_wrap(~seqnames, nrow = 1) +
+  geom_smooth(span = 0.25, se = FALSE) +
+  ggtitle("Barcelona: Chromosomal position vs. number of breakpoints")
+
 ```
 
+```{r chromosome_plots_bp_joined, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggpubr::ggarrange(p1_ysr, p2_ysr, p3_ysr, ncol=1)
+ggpubr::ggarrange(p1_noysr, p2_noysr, p3_noysr, ncol=1)
+```
 # Session information
 
 ```{r sessionInfo}
