@@ -120,7 +120,7 @@ In the following sections we annotate and initialize the `chrw` object, which is
 We use these windows to evaluate the distribution of various features across the chromosomes. This section concerns one-dimensional features.
 
 ```{r chromosome_plots_transcripts}
-windowSize <- 20000
+windowSize <- 2e5
 bins_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToWindows(windowSize)
 
 chrw <- SimpleList()
@@ -138,7 +138,7 @@ ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr
 
 ggplot(as.data.frame(chrw$Oki)  |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 
-ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
+ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 ```
 
 
