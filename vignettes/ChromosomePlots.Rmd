@@ -32,6 +32,9 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('viridis') |> suppressPackageStartupMessages()
 library('dplyr') |> suppressPackageStartupMessages()
+requireNamespace('patchwork') |> suppressPackageStartupMessages()
+library("patchwork")
+
 genomes <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR()
 reps <- OikScrambling:::loadAllRepeats()
@@ -136,57 +139,71 @@ chrw$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
 
 ```{r chromosome_plots_transcripts_oki, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Density of transcript names (i.e., gene counts).
-ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Okinawa: transcripts per window (size = ", windowSize/1000, " kbp)", sep="")) +
+ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth(method='loess', formula = y ~ x) + ggtitle(paste("Okinawa: transcripts per window (size = ", windowSize/1000, " kbp)", sep="")) +
   geom_vline( data = (longShort$OKI2018.I69 -1) |> GenomicBreaks::cleanGaps() |> as.data.frame()
-            , aes(xintercept = start), col = "gray")
+            , aes(xintercept = start), col = "gray") 
 
 ggplot(as.data.frame(chrw$Oki)  |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 
-ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
+ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 ```
 
 
 ```{r chromosome_plots_transcripts_osa, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Density of transcript names (i.e., gene counts).
-ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Osaka: transcripts per window (size = ", windowSize/1000, " kbp)", sep=""))
+ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth(method='loess', formula = y ~ x) + ggtitle(paste("Osaka: transcripts per window (size = ", windowSize/1000, " kbp)", sep=""))
 
 ggplot(as.data.frame(chrw$Osa)  |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm) + ggtitle(paste("Osaka: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 
-ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Osaka: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) 
+ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth(method='loess', formula = y ~ x) + ggtitle(paste("Osaka: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 ```
 
 ```{r chromosome_plots_transcripts_bar, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Density of transcript names (i.e., gene counts).
-ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Barcelona: transcripts per window (size = ", windowSize/1000, " kbp)", sep=""))
+ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.tx_name.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth(method='loess', formula = y ~ x) + ggtitle(paste("Barcelona: transcripts per window (size = ", windowSize/1000, " kbp)", sep=""))
 
 ggplot(as.data.frame(chrw$Bar)  |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(seqnames ~ Arm) + ggtitle(paste("Barcelona: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 
-ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Barcelona: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
+ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median) + geom_point() + facet_wrap(~seqnames) + geom_smooth(method='loess', formula = y ~ x) + ggtitle(paste("Barcelona: dN/dS per window (size = ", windowSize/1000, " kbp)", sep=""))
 ```
 
 #### Transcripts: joined gene density plot
 ```{r chromosome_plots_transcripts_joined, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Okinawa
-p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
+p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method='loess', formula = y ~ x,  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
 
 # Osaka
-p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
+p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method='loess', formula = y ~ x, method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
 
 # Barcelona
-p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
+p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.tx_id.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method='loess', formula = y ~ x, method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: genes per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('transcripts')
 
-ggpubr::ggarrange(p1, p2, p3, ncol=1)
+layout <- "
+A
+B
+C
+"
+
+(p1 / p2 / p3) +   plot_layout(design = layout, guides = 'collect')
 ```
 
 #### Transcripts: joined dN/dS plot
 ```{r chromosome_plots_transcripts_dnds_joined, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
+p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method='loess', formula = y ~ x, method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
 
-p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
+p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method='loess', formula = y ~ x, method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
 
-p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
+p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=transcripts.dNdS_PRANK.median, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method='loess', formula = y ~ x, method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: dN/dS per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab("dN/dS")
 
-ggpubr::ggarrange(p1, p2, p3, ncol=1)
+
+layout <- "
+A
+B
+C
+"
+
+(p1 / p2 / p3) +   plot_layout(design = layout, guides = 'collect')
+
 ```
 
 
@@ -237,9 +254,14 @@ p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1'
 # Barcelona
 p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=operons.n.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: operons per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('operons')
 
-ggpubr::ggarrange(p1, p2, p3, ncol=1)
-```
+layout <- "
+A
+B
+C
+"
 
+(p1 / p2 / p3) +   plot_layout(design = layout, guides = 'collect')
+```
 
 ### Repeats
 Like operons, it is simple to add repeat density, since the X coordinates (`start` and `end` positions of a `GRanges` are shared).
@@ -315,7 +337,13 @@ p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1'
 
 p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=repeats.type.count.total, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: repeats per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('repeats')
 
-ggpubr::ggarrange(p1, p2, p3, ncol=1)
+layout <- "
+A
+B
+C
+"
+
+(p1 / p2 / p3) +   plot_layout(design = layout, guides = 'collect')
 ```
 
 ## `GenomicBreaks` objects: Scores and widths
@@ -408,7 +436,13 @@ p3 <- chrw$Bar |>
     geom_smooth(span = 0.25, se = FALSE) +
     ggtitle("Barcelona: Chromosomal position vs. alignment score")
 
-ggpubr::ggarrange(p1, p2, p3, ncol=1)
+layout <- "
+A
+B
+C
+"
+
+(p1 / p2 / p3) +   plot_layout(design = layout, guides = 'collect')
 ```
 
 
@@ -537,7 +571,13 @@ p3 <- chrw$Bar |>
   geom_smooth(span = 0.25, se = FALSE) +
   ggtitle("Barcelona: Chromosomal position vs. aligned segment width")
 
-ggpubr::ggarrange(p1, p2, p3, ncol=1)
+layout <- "
+A
+B
+C
+"
+
+(p1 / p2 / p3) +   plot_layout(design = layout, guides = 'collect')
 ```
 
 
@@ -673,8 +713,14 @@ p3_noysr <- chrw$Bar |>
 ```
 
 ```{r chromosome_plots_bp_joined, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-ggpubr::ggarrange(p1_ysr, p2_ysr, p3_ysr, ncol=1)
-ggpubr::ggarrange(p1_noysr, p2_noysr, p3_noysr, ncol=1)
+layout <- "
+A
+B
+C
+"
+
+(p1_ysr / p2_ysr / p3_ysr ) +   plot_layout(design = layout, guides = 'collect')
+(p1_noysr / p2_noysr / p3_noysr ) +   plot_layout(design = layout, guides = 'collect')
 ```
 
 #### Plotting everything on one plot
@@ -743,7 +789,7 @@ ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_
 ```
 
 ```{r chromosome_plots_bp_joined_2, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-ggpubr::ggarrange(p1, p2, p3, ncol=1)
+(p1 / p2 / p3 ) + plot_layout(design = layout, guides = 'collect')
 ```
 
 
