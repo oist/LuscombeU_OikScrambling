@@ -190,11 +190,61 @@ ggpubr::ggarrange(p1, p2, p3, ncol=1)
 ```
 
 
+### Operons
+In this section we add operon data to the `chrw` object. Since the windows are the same for every genome, this is simple accomplished with a `cbind` operation to the windowed object's `mcols`.
+
+
+```{r chromosome_plots_operons, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Since the coordinates of the windows are the same, you can simply cbind more metadata columns to the data frame.
+mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=OikScrambling:::calcOperons(transcripts$Oki), windowSize=windowSize, meta_prefix = 'operons.')))
+
+mcols(chrw$Osa) <- cbind(mcols(chrw$Osa), mcols(grWindows(genome=genomes$Osa, meta=OikScrambling:::calcOperons(transcripts$Osa), windowSize=windowSize, meta_prefix = 'operons.')))
+
+mcols(chrw$Bar) <- cbind(mcols(chrw$Bar), mcols(grWindows(genome=genomes$Bar, meta=OikScrambling:::calcOperons(transcripts$Bar), windowSize=windowSize, meta_prefix = 'operons.')))
+
+```
+
+
+```{r chromosome_plots_operons_oki, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=operons.n.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Okinawa: operons per window (size = ", windowSize/1000, " kbp)", sep="")) +
+  geom_vline( data = (longShort$OKI2018.I69 -1) |> GenomicBreaks::cleanGaps() |> as.data.frame()
+            , aes(xintercept = start), col = "gray")
+
+ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=operons.n.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: operons per window (size = ", windowSize/1000, " kbp)", sep=""))
+```
+
+
+```{r chromosome_plots_operons_osa, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=operons.n.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Osaka: transcripts per window (size = ", windowSize/1000, " kbp)", sep=""))
+
+ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=operons.n.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: operons per window (size = ", windowSize/1000, " kbp)", sep=""))
+```
+
+```{r chromosome_plots_operons_bar, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) ) + aes(x=start, y=operons.n.count) + geom_point() + facet_wrap(~seqnames) + geom_smooth() + ggtitle(paste("Barcelona: operons per window (size = ", windowSize/1000, " kbp)", sep=""))
+
+ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=operons.n.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: operons per window (size = ", windowSize/1000, " kbp)", sep=""))
+```
+
+#### Operons: joined operon density plot
+```{r chromosome_plots_operons_joined, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Okinawa
+p1 <- ggplot(as.data.frame(chrw$Oki) |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) ) + aes(x=start, y=operons.n.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Okinawa: operons per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('operons')
+
+# Osaka
+p2 <- ggplot(as.data.frame(chrw$Osa) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=operons.n.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Osaka: operons per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('operons')
+
+# Barcelona
+p3 <- ggplot(as.data.frame(chrw$Bar) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR')) ) + aes(x=start, y=operons.n.count, col = Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(method = 'loess',  method.args = list(family = "symmetric")) + ggtitle(paste("Barcelona: operons per window (size = ", windowSize/1000, " kbp)", sep="")) + ylab('operons')
+
+ggpubr::ggarrange(p1, p2, p3, ncol=1)
+```
+
+
 ### Repeats
-In this section we add repeat data to the `chrw` object. Since the windows are the same for every genome, this is simple accomplished with a `cbind` operation to the windowed object's `mcols`.
+Like operons, it is simple to add repeat density, since the X coordinates (`start` and `end` positions of a `GRanges` are shared).
 
 ```{r chromosome_plots_repeats, dependson="chromosome_plot_helper_fxns", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-# Since the coordinates of the windows are the same, you can simply cbind more metadata columns to the data frame.
 mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=reps$Oki, windowSize=windowSize, meta_prefix = 'repeats.')))
 
 mcols(chrw$Osa) <- cbind(mcols(chrw$Osa), mcols(grWindows(genome=genomes$Osa, meta=reps$Osa, windowSize=windowSize, meta_prefix = 'repeats.')))
