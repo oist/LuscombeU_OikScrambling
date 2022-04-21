@@ -37,7 +37,7 @@ calcOperons <- function(genes, window = 100) {
   g$namedStrand <- Rle(paste0(seqnames(g), strand(g)))
   g$idx <- Rle(rep(seq_along(runValue(g$namedStrand))), runLength(g$namedStrand))
   # Split the genes by run ID
-  opL <- split(g, g$idx)
+  opL <- GenomicRanges::split(g, g$idx)
   # Remove all runs of length one
   opL <- opL[runLength(strand(g)) > 1]
   # Merge into operons
