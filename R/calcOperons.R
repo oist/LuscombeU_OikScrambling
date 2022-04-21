@@ -31,12 +31,13 @@ calcOperons <- function(genes, window = 100) {
   # We suppress warnings because coordinates at the edges of seqfeatures can
   # become transiently negative.
   g <- (g + halfwin) |> suppressWarnings()
-  # Give a unique ID to all runs of successive genes on the same strand
-  # https://stackoverflow.com/questions/21421047
-  # op$idx <- data.table::rleid(as.character(strand(g)))
-  g$idx <- Rle(rep(seq_along(runValue(strand(g))), runLength(strand(g))))
+  # Give a unique ID to all runs of successive genes on the same strand of the
+  # same seqname, see also https://stackoverflow.com/questions/21421047 and
+  # data.table::rleid
+  g$namedStrand <- Rle(paste0(seqnames(g), strand(g)))
+  g$idx <- Rle(rep(seq_along(runValue(g$namedStrand))), runLength(g$namedStrand))
   # Split the genes by run ID
-  opL <- split(g, g$idx)
+  opL <- GenomicRanges::split(g, g$idx)
   # Remove all runs of length one
   opL <- opL[runLength(strand(g)) > 1]
   # Merge into operons
