@@ -31,15 +31,9 @@ load("BreakPoints.Rdata")
 See `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
 different GBreaks objects are prepared.
 
-# Synteny index
+# Declare service functions
 
-Ad-hoc index measuring to what extent a scaffold of the _target_ genome is
-mostly aligned to a single scaffold in the _query_ genome.   See
-`?GenomicBreaks::synteny_index` for details.  One limitation to the use of this
-index is that it requires that at least the _query_ genome is a complete
-chromosome assembly.
-
-```{r synteny_index}
+```{r pretty_print_functions}
 pairs2table6x3 <- function (x) {
   x <- as.list(x)
   cbind(
@@ -53,7 +47,21 @@ pairs2table6x3 <- function (x) {
 }
 
 pairs2Kable6x3 <- function (df) df |> pairs2table6x3() |> round(2) |> knitr::kable()
+```
 
+# Synteny index
+
+Ad-hoc index measuring to what extent a scaffold of the _target_ genome is
+mostly aligned to a single scaffold in the _query_ genome.   See
+`?GenomicBreaks::synteny_index` for details.  One limitation to the use of this
+index is that it requires that at least the _query_ genome is a complete
+chromosome assembly.
+
+```{r synteny_index_def}
+synteny_index
+```
+
+```{r synteny_index_run}
 BiocParallel::bplapply(gbs,                 synteny_index  ) |> pairs2Kable6x3()
 BiocParallel::bplapply(gbs, \(g) swap(g) |> synteny_index()) |> pairs2Kable6x3()
 ```
@@ -66,7 +74,11 @@ _query_ genome.  See `?GenomicBreaks::correlation_index` for details.  It is
 intended to be more robust to the presence of uncollapsed haplotypes in the
 _query_ genome but probably needs further testing.
 
-```{r correlation_index}
+```{r correlation_index_def}
+correlation_index
+```
+
+```{r correlation_index_run}
 BiocParallel::bplapply(gbs,                 correlation_index  ) |> pairs2Kable6x3()
 BiocParallel::bplapply(gbs, \(g) swap(g) |> correlation_index()) |> pairs2Kable6x3()
 ```
@@ -75,7 +87,11 @@ BiocParallel::bplapply(gbs, \(g) swap(g) |> correlation_index()) |> pairs2Kable6
 
 See `?GenomicBreaks::GOC` for details.
 
-```{r goc_index}
+```{r goc_index_def}
+GOC
+```
+
+```{r goc_index_run}
 BiocParallel::bplapply(gbs,                 GOC  ) |> pairs2Kable6x3()
 BiocParallel::bplapply(gbs, \(g) swap(g) |> GOC()) |> pairs2Kable6x3()
 ```
@@ -84,7 +100,62 @@ BiocParallel::bplapply(gbs, \(g) swap(g) |> GOC()) |> pairs2Kable6x3()
 
 See `?GenomicBreaks::strand_randomisation_index` for details.
 
-```{r strand_randomisation_index}
+```{r strand_randomisation_index_def}
+strand_randomisation_index
+```
+
+```{r strand_randomisation_index_run}
 BiocParallel::bplapply(gbs,                 strand_randomisation_index  ) |> pairs2Kable6x3()
 BiocParallel::bplapply(gbs, \(g) swap(g) |> strand_randomisation_index()) |> pairs2Kable6x3()
+```
+
+# Strand proportion index
+
+Attempts to use pure proportions lead to scores drifting towards 0.5 when
+comparing fragmented assemblies, as the fragments are not oriented.
+
+```{r strand_proportion_index_def}
+strand_proportion_index <- function(gb) {
+  gbl <- split(gb, droplevels(seqnames(gb)))
+  # Calculate an index for each sequence feature
+  idx <- sapply(gbl, \(x) {
+    onPlus  <- sum(width(x[strand(x) == '+']))
+    onMinus <- sum(width(x[strand(x) == '-']))
+    onPlus / (onPlus + onMinus)
+  })
+  # Average by the sum of all widths
+  weighted.mean(idx, sum(width(gbl)))
+}
+```
+
+```{r strand_proportion_index_run}
+BiocParallel::bplapply(gbs,                 strand_proportion_index  ) |> pairs2Kable6x3()
+BiocParallel::bplapply(gbs, \(g) swap(g) |> strand_proportion_index()) |> pairs2Kable6x3()
+```
+
+# Strand proportion majority index
+
+One possible solution to the problem above could be to report the highest
+proportion, so that the value returned is not sensitive to orientation.  But
+it scales the index between 0.5 and 1, which may be counter-intuitive.
+
+```{r strand_proportion_majority_index_def}
+strand_proportion_majority_index <- function(gb) {
+  gbl <- split(gb, droplevels(seqnames(gb)))
+  # Calculate an index for each sequence feature
+  idx <- sapply(gbl, \(x) {
+    onPlus  <- sum(width(x[strand(x) == '+']))
+    onMinus <- sum(width(x[strand(x) == '-']))
+    p <- onPlus / (onPlus + onMinus)
+    if(p < 0.5) p <- 1 - p
+    p
+  })
+  # Average by the sum of all widths
+  weighted.mean(idx, sum(width(gbl)))
+}
+```
+
+```{r strand_proportion_majority_index_run}
+BiocParallel::bplapply(gbs,                 strand_proportion_majority_index  ) |> pairs2Kable6x3()
+BiocParallel::bplapply(gbs, \(g) swap(g) |> strand_proportion_majority_index()) |> pairs2Kable6x3()
 ```

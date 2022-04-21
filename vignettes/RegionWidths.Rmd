@@ -639,6 +639,8 @@ p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
 
 ## "isolated", "unmapped", "colinear regions", "bridge" and "colinear alingments"
 
+### Oki – North
+
 ```{r compound2, fig.width=20, fig.height=4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 p_ali2 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "Oki – North", nonCoa), binwidth = 60, scale = "natural") +
   aes(width, after_stat(density), col=name) + theme_bw() +
@@ -666,9 +668,77 @@ p_bridge <- gg_freq_poly(widths$bri |> dplyr::filter(dist == "Oki – North"), b
   ggtitle("Bridge")
 
 # Patchwork
-(p_ali2 | p_unmap2 | p_syn2 | p_bridge | p_map2 ) + plot_layout(ncol = 5, guides = 'collect') + theme_bw()
+p_oki_north <-(p_ali2 | p_unmap2 | p_syn2 | p_bridge | p_map2 ) + plot_layout(ncol = 5, guides = 'collect') + theme_bw() + plot_annotation(title = "Okinawa vs North")
+p_oki_north
 ```
 
+### North – North
+
+```{r compound3, fig.width=20, fig.height=4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+p_ali3 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "North – North", nonCoa), binwidth = 60, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Isolated alignments")
+
+p_unmap3 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "North – North"), binwidth = 60, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Unmapped")
+
+p_syn3 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "North – North", !nonCoa), binwidth = 600, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e4)) +
+  ggtitle("Colinear region")
+
+p_map3 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "North – North", !nonCoa), binwidth = 60, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Colinear alignment")
+
+p_bridge3 <- gg_freq_poly(widths$bri |> dplyr::filter(dist == "North – North"), binwidth = 20, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Bridge")
+
+# Patchwork
+p_north_north <- (p_ali3 | p_unmap3 | p_syn3 | p_bridge3 | p_map3 ) + plot_layout(ncol = 5, guides = 'collect') + theme_bw() + plot_annotation(title = "North vs North")
+```
+
+```{r compound4, fig.width=20, fig.height=4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+p_ali4 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "In same pop", nonCoa), binwidth = 60, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Isolated alignments")
+
+p_unmap4 <- gg_freq_poly(widths$unmap |> dplyr::filter(dist == "In same pop"), binwidth = 60, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Unmapped")
+
+p_syn4 <- gg_freq_poly(widths$coa |> dplyr::filter(dist == "In same pop", !nonCoa), binwidth = 600, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e4)) +
+  ggtitle("Colinear region")
+
+p_map4 <- gg_freq_poly(widths$gbs |> dplyr::filter(dist == "In same pop", !nonCoa), binwidth = 60, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Colinear alignment")
+
+p_bridge4 <- gg_freq_poly(widths$bri |> dplyr::filter(dist == "In same pop"), binwidth = 20, scale = "natural") +
+  aes(width, after_stat(density), col=name) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3)) +
+  ggtitle("Bridge")
+
+# Patchwork
+p_same_pop <- (p_ali4 | p_unmap4 | p_syn4 | p_bridge4 | p_map4 ) + plot_layout(ncol = 5, guides = 'collect') + theme_bw() + plot_annotation(title = "Same population")
+```
+
+```{r compound_all, fig.width=20, fig.height=4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+p_oki_north    /
+p_north_north  /
+p_same_pop
+```
 
 # Paired comparison of widths in target and query genomes.
 

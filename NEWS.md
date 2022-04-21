@@ -1,3 +1,7 @@
+# OikScrambling 3.0.5
+
+* Explore strand proportion indices
+
 # OikScrambling 3.0.4
 
 * Draft chromosome plots for Figure 4 (ex-3, ex-2b).

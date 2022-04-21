@@ -217,31 +217,7 @@ bp_pair_analysis(coa$Osa_Oki, coa$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotH
 ## Model operon areas
 
 ```{r guess_operons}
-calcOperons <- function(genes, window = 200) {
-  # Sort the genes ignoring strand.
-  g <- sort(genes, ignore.strand=T)
-  # Expand by `window` nucleotides (default 200)
-  # We suppress warnings because coordinates at the edges of seqfeatures can
-  # become transiently negative.
-  g <- (g + window) |> suppressWarnings()
-  # Give a unique ID to all runs of successive genes on the same strand
-  # https://stackoverflow.com/questions/21421047
-  # op$idx <- data.table::rleid(as.character(strand(g)))
-  g$idx <- Rle(rep(seq_along(runValue(strand(g))), runLength(strand(g))))
-  # Split the genes by run ID
-  opL <- split(g, g$idx)
-  # Remove all runs of length one
-  opL <- opL[runLength(strand(g)) > 1]
-  # Merge into operons
-  operons   <- unlist(endoapply(opL, reduce)) |> suppressWarnings()
-  # Removed un-merged genes
-  operons$n <- countOverlaps(operons, genes)
-  operons   <- operons[operons$n > 1]
-  # Remove the flanking sequences
-  operons - window
-}
-
-operons <- lapply(annots, \(a) {a |> genes() |> calcOperons() }) |> SimpleList() |> suppressWarnings()
+operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 400) }) |> SimpleList() |> suppressWarnings()
 sapply(operons, length)
 sapply(operons, \(o) {table(o$n)})
 ```
