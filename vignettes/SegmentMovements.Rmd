@@ -180,11 +180,15 @@ In this section, we tabulate the amount of translocations based on chromosomal l
 
 ```{r translocation_categories_1}
 translocation_percent_table <- function(gb, name){
-  data.frame('name'                       = name,
-             'percent_syntenic'           = length(gb[isSyntenic(gb)]) / length(gb)*100,
-             'percent_syntenic_length'    = sum(lengths(gb[isSyntenic(gb)]))/sum(lengths(gb))*100,
-             'percent_synbrachial'        = length(gb[isSynbrachial(gb)])/length(gb)*100,
-             'percent_synbrachial_length' = sum(lengths(gb[isSynbrachial(gb)]))/sum(lengths(gb))*100)
+  data.frame('name'                          = name,
+             'percent_syntenic'              = length(gb[isSyntenic(gb)]) / length(gb)*100,
+             'percent_syntenic_length'       = sum(lengths(gb[isSyntenic(gb)]))/sum(lengths(gb))*100,
+             'percent_synbrachial'           = length(gb[isSynbrachial(gb)])/length(gb)*100,
+             'percent_synbrachial_length'    = sum(lengths(gb[isSynbrachial(gb)]))/sum(lengths(gb))*100,
+             'percent_nonsyntenic_synbrachial'        = length(gb[isNonsyntenicSynbrachial(gb)])/length(gb)*100,
+             'percent_nonsyntenic_synbrachial_length' = sum(lengths(gb[isNonsyntenicSynbrachial(gb)]))/sum(lengths(gb))*100,
+             'percent_nonsyntenic_nonsynbrachial'        = length(gb[isNonsyntenicNonsynbrachial(gb)])/length(gb)*100,
+             'percent_nonsyntenic_nonsynbrachial_length' = sum(lengths(gb[isNonsyntenicNonsynbrachial(gb)]))/sum(lengths(gb))*100)
 }
 
 tpct <- SimpleList()

@@ -47,3 +47,25 @@ isSynbrachial <- function(gb) {
 nameSynbrachial <- function(gb) {
   ifelse(isSynbrachial(gb),  paste(tolower(as.character(seqnames(gb))), gb$Arm), NA)
 }
+
+#' Flag pairs that are on the same arm of non-homologous chromosomes
+#'
+#' @param gb A [`GenomicBreaks::GBreaks`] object.
+#'
+#' @return A logical vector of same length as the `gb` object
+
+isNonsyntenicSynbrachial <- function(gb) {
+  gb$Arm == gb$query$Arm & tolower(as.character(seqnames(gb))) != tolower(as.character(seqnames(gb$query)))
+}
+
+
+#' Flag pairs that are on different arms of non-homologous chromosomes
+#'
+#' @param gb A [`GenomicBreaks::GBreaks`] object.
+#'
+#' @return A logical vector of same length as the `gb` object
+
+isNonsyntenicNonsynbrachial <- function(gb) {
+  gb$Arm != gb$query$Arm & tolower(as.character(seqnames(gb))) != tolower(as.character(seqnames(gb$query)))
+}
+
