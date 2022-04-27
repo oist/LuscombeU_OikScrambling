@@ -1,6 +1,7 @@
 # OikScrambling 3.0.5
 
-* Explore strand proportion indices
+* Explore strand proportion indices.
+* New region width plots for Figure 2.
 
 # OikScrambling 3.0.4
 
