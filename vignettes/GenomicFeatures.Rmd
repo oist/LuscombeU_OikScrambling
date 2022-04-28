@@ -275,8 +275,7 @@ prepareFreqPlot_noncoding <- function(gb, annot, rep, cne = NULL, tfbs = NULL, o
 #' the `Heatmap_to_freq_tibble` function call.
 prepareGGFreqPlot <- function(x, desc = NULL) {
   l <- lapply(names(x), \(name){
-    tib <- Heatmap_to_freq_tibble(x[[name]])
-    tib$desc <- desc
+    tib <- Heatmap_to_freq_tibble(x[[name]], desc = desc)
     tib$what <- name
     tib
   })
@@ -295,11 +294,12 @@ prepareGGFreqPlot <- function(x, desc = NULL) {
 #' @param h a `Heatmap` object
 #'
 #' @return a `tibble` with `val`, `freq` and `pos` columns
-Heatmap_to_freq_tibble <- function(h) {
+Heatmap_to_freq_tibble <- function(h, desc = NULL) {
   val  <- colSums(h@image)
   tibble::tibble( val  = val
                 , freq = val / nrow(h@image)
-                , pos  = 1:ncol(h@image) - round(ncol(h@image)) / 2)
+                , pos  = 1:ncol(h@image) - round(ncol(h@image)) / 2
+                , desc = desc)
 }
 
 ```
