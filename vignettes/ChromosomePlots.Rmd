@@ -1262,6 +1262,14 @@ ggplot(chrt_unified |> as.data.frame()) +
   ggtitle('Tiles (averages across Oki, Osa, Bar): Properties across genome')
 ```
 
+```{r chromosome_plots_tiles_1_points, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=transcripts.dNdS.mean, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess', method.args = list(family = "symmetric")) + ylab('dN/dS') 
+p1 + ggtitle("Tiles (averages across Oki, Osa, Bar): Properties across genome")
+
+p2 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=breakpoints.count.mean , col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess', method.args = list(family = "symmetric")) + ylab('breakpoints') 
+p2 + ggtitle("Tiles (averages across Oki, Osa, Bar): Properties across genome")
+```
+
 ```{r chromosome_plots_tiles_2, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ggplot(chrt_unified |> as.data.frame()) +
   geom_smooth(aes(x=start, y=categories.isolated.mean,  col='isolated'), se=FALSE) +
@@ -1290,20 +1298,31 @@ library(ggpubr)
 tb <- chrt_unified |> as.data.frame()
 tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Oki.Arm)
 
-ggboxplot(tb, x='seqnames_arm', y='breakpoints.count.mean', color='seqnames', add='jitter') +
+p3 <- ggboxplot(tb, x='seqnames_arm', y='breakpoints.count.mean', color='seqnames', add='jitter') +
   theme(axis.text.x=element_text(angle=90)) +
   ylab('breakpoints per tile') +
-  stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long')), paired = FALSE, na.rm = TRUE, method='t.test')  +
-  ggtitle('Tiles (averages across Oki, Osa, Bar): Breakpoints per chr+arm')
+  stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long')), paired = FALSE, na.rm = TRUE, method='t.test') 
+p3 + ggtitle('Tiles (averages across Oki, Osa, Bar): Breakpoints per chr+arm')
 
-ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS.mean', color='seqnames', add='jitter') +
+p4 <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS.mean', color='seqnames', add='jitter') +
   theme(axis.text.x=element_text(angle=90)) +
   ylab('dN/dS per tile') +
-  stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long')), paired = FALSE, na.rm = TRUE, method='t.test')  + 
-  ggtitle('Tiles (averages across Oki, Osa, Bar): dNdS per chr+arm')
+  stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long')), paired = FALSE, na.rm = TRUE, method='t.test')  
+p4 +  ggtitle('Tiles (averages across Oki, Osa, Bar): dNdS per chr+arm')
 
 # And a correlation plot
-ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ggtitle('Tiles (averages across Oki, Osa, Bar): dNdS per chr+arm') + ylab('dN/dS')
+p5 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('dN/dS')
+p5 + ggtitle('Tiles (averages across Oki, Osa, Bar): dNdS per chr+arm') 
+
+layout <- "
+A
+B
+C
+D
+E
+"
+
+( p1 / p3 / p2 / p4 / p5 ) +   plot_layout(design = layout, guides = 'collect')
 
 detach('package:ggpubr')
 ```
