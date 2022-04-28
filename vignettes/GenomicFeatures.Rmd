@@ -584,19 +584,63 @@ As previously discussed, low coverage over an alignment stop could lower the lik
 
 We may choose to kick out the one alignment stop for which there is no coverage. However, only 15 out of 34572 alignment stops have a coverage of less than or equal to 50, meaning that it would be hard to exclude more than just a few alignment stops using coverage information for breakpoint analysis. 
 
-# Operons
+# Operons and genes
 
-```{r}
-# 5' ends of operons
-current_GB <- operons$Oki |> promoters(0,1)
+Do alignments often cross gene or operon boundaries ?
 
-hmList_op_OKI <- list()
-hmList_op_OKI$gbs <- feature_coverage(current_GB, gbs$Oki_Osa, win = 2000, lab = "Oki_Osa alns", direction = "left")
-hmList_op_OKI$coa <- feature_coverage(current_GB, coa$Oki_Osa, win = 2000, lab = "Oki_Osa col reg", direction = "left")
-hmList_op_OKI$bri <- feature_coverage(current_GB, bri$Oki_Osa, win = 2000, lab = "Oki_Osa bridge reg", direction = "left")
+## Operons
 
-plotHeatmapMeta(hmList_op_OKI[c("gbs", "coa", "bri")])
+```{r operons}
+
+feature_coverage_on_operons <- {
+  # Hide the pre-computed object in the function's environment
+  operon_boundaries <- c(
+    operons$Oki |> resize(1, fix = "start"),
+    operons$Oki |> resize(1, fix = "end")
+  ) |> sort(i = T)
+  function(feat, desc)
+    feature_coverage(gene_boundaries, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+}
+
+rbind(
+  feature_coverage_on_operons(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
+  feature_coverage_on_operons(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unaligned"),
+  feature_coverage_on_operons(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
+  feature_coverage_on_operons(bri$Oki_Osa, "04_bridge"),
+  feature_coverage_on_operons(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("operons")
 ```
+
+## Genes
+
+```{r genes}
+feature_coverage_on_genes <- {
+  # Hide the pre-computed object in the function's environment
+  gene_boundaries <- c(
+    annots$Oki |> genes() |> resize(1, fix = "start"),
+    annots$Oki |> genes() |> resize(1, fix = "end")
+  ) |> sort(i = T)
+  function(feat, desc)
+    feature_coverage(gene_boundaries, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+}
+
+rbind(
+  feature_coverage_on_genes(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
+  feature_coverage_on_genes(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unaligned"),
+  feature_coverage_on_genes(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
+  feature_coverage_on_genes(bri$Oki_Osa, "04_bridge"),
+  feature_coverage_on_genes(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes")
+
+rbind(
+  feature_coverage_on_genes(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa] |> resize(1), "01_isolated"),
+  feature_coverage_on_genes(unal$Oki_Osa[unal$Oki_Osa$nonCoa]|> resize(1), "02_unaligned"),
+  feature_coverage_on_genes(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa]|> resize(1), "03_colinear_aln"),
+  feature_coverage_on_genes(bri$Oki_Osa|> resize(1), "04_bridge"),
+  feature_coverage_on_genes(coa$Oki_Osa[!coa$Oki_Osa$nonCoa]|> resize(1), "05_colinear_reg")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes")
+```
+
 
 # Coverage
 
