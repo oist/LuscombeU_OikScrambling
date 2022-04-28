@@ -818,6 +818,131 @@ ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_
 (p1 / p2 / p3 ) + plot_layout(design = layout, guides = 'collect')
 ```
 
+## Alignment categories
+```{r chromosome_plots_categories_helper_fxns}
+makeWholeGenomeObject <- function(aligned, unaligned) {
+  isolated  <- aligned[aligned$nonCoa]
+  collinear <- aligned[!aligned$nonCoa]
+  unmapped  <- unaligned[unaligned$nonCoa]
+  bridge    <- unaligned[!unaligned$nonCoa]
+
+  # Let's keep only the common metadata
+  mcols(isolated)  <- mcols(isolated)[ ,colnames(mcols(unaligned))]
+  mcols(collinear) <- mcols(collinear)[,colnames(mcols(unaligned))]
+  
+  # Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.
+  isolated$nonCoa <- collinear$nonCoa <- unmapped$nonCoa <- bridge$nonCoa <- NULL
+  isolated$type   <- 'isolated'
+  collinear$type  <- 'collinear'
+  unmapped$type   <- 'unmapped'
+  bridge$type     <- 'bridge'
+
+  wholeGenome <- c(isolated, collinear, unmapped, bridge) |> sort(ignore.strand = TRUE)
+  wholeGenome$type <- factor(wholeGenome$type)
+  wholeGenome
+}
+
+
+wgo2 <- mapply(makeWholeGenomeObject, gbs, unal) |> SimpleList()
+# We really only care about "type" for this analysis, so let's strip out all the other metadata.
+wgo2 <- lapply(wgo2, function(g) { 
+  gr <- g
+  mcols(gr) <- mcols(gr)[["type"]]
+  colnames(mcols(gr)) <- "type"
+  gr
+}) |> SimpleList()
+```
+
+```{r chromosome_plots_categories_oki, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Okinawa
+mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=wgo2$Oki_Osa, windowSize=windowSize, meta_prefix = 'ac.Oki_Osa.')))
+mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=wgo2$Oki_Bar, windowSize=windowSize, meta_prefix = 'ac.Oki_Bar.')))
+mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=wgo2$Oki_Kum, windowSize=windowSize, meta_prefix = 'ac.Oki_Kum.')))
+mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=wgo2$Oki_Aom, windowSize=windowSize, meta_prefix = 'ac.Oki_Aom.')))
+mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, meta=wgo2$Oki_Nor, windowSize=windowSize, meta_prefix = 'ac.Oki_Nor.')))
+
+chrw$Oki$ac.isolated.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Bar.type.isolated.count.total", "ac.Oki_Kum.type.isolated.count.total", "ac.Oki_Aom.type.isolated.count.total", "ac.Oki_Nor.type.isolated.count.total") |> as.data.frame() |> rowMeans()
+chrw$Oki$ac.collinear.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Bar.type.collinear.count.total", "ac.Oki_Kum.type.collinear.count.total", "ac.Oki_Aom.type.collinear.count.total", "ac.Oki_Nor.type.collinear.count.total") |> as.data.frame() |> rowMeans()
+chrw$Oki$ac.unmapped.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Bar.type.unmapped.count.total", "ac.Oki_Kum.type.unmapped.count.total", "ac.Oki_Aom.type.unmapped.count.total", "ac.Oki_Nor.type.unmapped.count.total") |> as.data.frame() |> rowMeans()
+chrw$Oki$ac.bridge.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.bridge.count.total", "ac.Oki_Bar.type.bridge.count.total", "ac.Oki_Kum.type.bridge.count.total", "ac.Oki_Aom.type.bridge.count.total", "ac.Oki_Nor.type.bridge.count.total") |> as.data.frame() |> rowMeans()
+
+plots$Oki$categories <- list()
+
+plots$Oki$categories$oki_osa_classes <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+  tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(method='loess', formula = y ~ x, span = 0.25, se = FALSE) +
+    ggtitle("Okinawa-Osaka: Distribution of alignment categories across genome")
+
+plots$Oki$categories$oki_osa_overall <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+ tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
+  ggplot() +
+    aes(value, paste0(seqnames, "_", Arm),  fill = name) +
+    geom_bar(position='fill', stat='identity') +
+    ylab("chr and arm") +
+    ggtitle("Okinawa-Osaka: Overall proportion of alignment categories across genome")
+
+plots$Oki$categories$oki_osa_by_chr_position <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+ tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
+  ggplot() +
+    aes(as.factor(start), value, fill = name) +
+    facet_wrap(~seqnames, nrow = 1, scales='free') +
+    theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+    geom_bar(position='fill', stat='identity') +
+    xlab("start") +
+    ggtitle("Okinawa-Osaka: Proportion of alignment categories by position")
+
+# Next, plot the means of ALL populations vs. Oki.
+plots$Oki$categories$mean_classes <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+ tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean")) |>
+  ggplot() +
+    aes(start, value, col = name) +
+    facet_wrap(~seqnames, nrow = 1) +
+    geom_smooth(method='loess', formula = y ~ x, span = 0.25, se = FALSE) +
+    ggtitle("Okinawa vs. all: Distribution of alignment categories across genome")
+
+plots$Oki$categories$mean_classes_overall <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+ tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean")) |>
+  ggplot() +
+    aes(value, paste0(seqnames, "_", Arm),  fill = name) +
+    geom_bar(position='fill', stat='identity') +
+    ylab("chr and arm") +
+    ggtitle("Okinawa vs. all: Overall proportion of alignment categories across genome")
+
+plots$Oki$categories$mean_classes_by_chr_position <- chrw$Oki |>
+  as.data.frame() |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean" )) |>
+  plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
+ tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean")) |>
+  ggplot() +
+    aes(as.factor(start), value, fill = name) +
+    facet_wrap(~seqnames, nrow = 1, scales='free') +
+    theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+    geom_bar(position='fill', stat='identity') +
+    xlab("start") +
+    ggtitle("Okinawa vs. all: Proportion of alignment categories by position")
+
+lapply(plots$Oki$categories, \(x) x)
+```
+
+
 ## Statistics
 ```{r chromosome_plots_statistics_1, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 append_width <- function(gr) {
@@ -969,6 +1094,99 @@ plots$Bar$boxplots$dnds <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS_G
 lapply(plots$Bar$boxplots, \(x) x)
 detach('package:ggpubr')
 ```
+
+## Transforming to a single coordinate system
+In this section, I create some utility functions to scale genomic ranges to the same coordinate system, then calculate averages of some statistics over the windows in these regions.
+
+First, create some helper functions for making new metadata types.
+
+```{r something}
+genomeGRToTiles <- function(gr, n=100) {
+  tile(gr, n=n) |> unlist() |> unname()
+}
+
+grTiles <- function(genome, meta, n=100, meta_prefix=NULL){
+  genome <- BSgenomeToGR(genome)                                 # Make GRanges from genome
+  genome <- genomeGRToTiles(genome, n=n)                         # Make a tiled GRange from chromosome GRanges
+  mpw <-    metaPerWindow(genome, meta, meta_prefix=meta_prefix) # Make metadata column windows and intersect
+  mpw
+}
+
+makeWholeGenomeObject <- function(aligned, unaligned) {
+  isolated  <- aligned[aligned$nonCoa]
+  collinear <- aligned[!aligned$nonCoa]
+  unmapped  <- unaligned[unaligned$nonCoa]
+  bridge    <- unaligned[!unaligned$nonCoa]
+
+  # Let's keep only the common metadata
+  mcols(isolated)  <- mcols(isolated)[ ,colnames(mcols(unaligned))]
+  mcols(collinear) <- mcols(collinear)[,colnames(mcols(unaligned))]
+  
+  # Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.
+  isolated$nonCoa <- collinear$nonCoa <- unmapped$nonCoa <- bridge$nonCoa <- NULL
+  isolated$type   <- 'isolated'
+  collinear$type  <- 'collinear'
+  unmapped$type   <- 'unmapped'
+  bridge$type     <- 'bridge'
+
+  wholeGenome <- c(isolated, collinear, unmapped, bridge) |> sort(ignore.strand = TRUE)
+  wholeGenome$type <- factor(wholeGenome$type)
+  wholeGenome
+}
+
+wgo2 <- mapply(makeWholeGenomeObject, gbs, coa) |> SimpleList()
+```
+
+
+```{r somethingelse}
+nTiles <- 100
+tiles_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToTiles(nTiles)
+tiles_Osa <- genomes$Osa |> BSgenomeToGR() |> genomeGRToTiles(nTiles)
+tiles_Bar <- genomes$Bar |> BSgenomeToGR() |> genomeGRToTiles(nTiles)
+
+chrt <- SimpleList()
+chrt$Oki <- grTiles(genome=genomes$Oki, meta=transcripts$Oki, n=nTiles, meta_prefix = 'transcripts.')
+chrt$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
+chrt$Osa <- grTiles(genome=genomes$Osa, meta=transcripts$Osa, n=nTiles, meta_prefix = 'transcripts.')
+chrt$Osa <- flagLongShort(chrw$Osa, longShort$OSKA2016v1.9)
+chrt$Bar <- grTiles(genome=genomes$Bar, meta=transcripts$Bar, n=nTiles, meta_prefix = 'transcripts.')
+chrt$Bar <- flagLongShort(chrw$Bar, longShort$Bar2.p4)
+
+# Operons
+mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta=OikScrambling:::calcOperons(transcripts$Oki), n=nTiles, meta_prefix = 'operons.')))
+mcols(chrt$Osa) <- cbind(mcols(chrt$Osa), mcols(grTiles(genome=genomes$Osa, meta=OikScrambling:::calcOperons(transcripts$Osa), n=nTiles, meta_prefix = 'operons.')))
+mcols(chrt$Bar) <- cbind(mcols(chrt$Bar), mcols(grTiles(genome=genomes$Bar, meta=OikScrambling:::calcOperons(transcripts$Bar), n=nTiles, meta_prefix = 'operons.')))
+
+# Repeats
+mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grWindows(genome=genomes$Oki, meta=reps$Oki, n=nTiles, meta_prefix = 'repeats.')))
+mcols(chrt$Osa) <- cbind(mcols(chrt$Osa), mcols(grWindows(genome=genomes$Osa, meta=reps$Osa, n=nTiles, meta_prefix = 'repeats.')))
+mcols(chrt$Bar) <- cbind(mcols(chrt$Bar), mcols(grWindows(genome=genomes$Bar, meta=reps$Bar, n=nTiles, meta_prefix = 'repeats.')))
+
+# Widths
+chrt$Oki$Oki_Osa.width.mean <- binApply(mean, na.rm = T, tiles_Oki, width(gbs$Oki_Osa), matchToOneBin(gbs$Oki_Osa, tiles_Oki))
+chrt$Oki$Oki_Aom.width.mean <- binApply(mean, na.rm = T, tiles_Oki, width(gbs$Oki_Aom), matchToOneBin(gbs$Oki_Aom, tiles_Oki))
+chrt$Oki$Oki_Bar.width.mean <- binApply(mean, na.rm = T, tiles_Oki, width(gbs$Oki_Bar), matchToOneBin(gbs$Oki_Bar, tiles_Oki))
+chrt$Oki$Oki_Nor.width.mean <- binApply(mean, na.rm = T, tiles_Oki, width(gbs$Oki_Nor), matchToOneBin(gbs$Oki_Nor, tiles_Oki))
+chrt$Osa$Osa_Oki.width.mean <- binApply(mean, na.rm = T, tiles_Osa, width(gbs$Osa_Oki), matchToOneBin(gbs$Osa_Oki, tiles_Osa))
+chrt$Osa$Osa_Kum.width.mean <- binApply(mean, na.rm = T, tiles_Osa, width(gbs$Osa_Kum), matchToOneBin(gbs$Osa_Kum, tiles_Osa))
+chrt$Osa$Osa_Bar.width.mean <- binApply(mean, na.rm = T, tiles_Osa, width(gbs$Osa_Bar), matchToOneBin(gbs$Osa_Bar, tiles_Osa))
+chrt$Osa$Osa_Nor.width.mean <- binApply(mean, na.rm = T, tiles_Osa, width(gbs$Osa_Nor), matchToOneBin(gbs$Osa_Nor, tiles_Osa))
+chrt$Bar$Bar_Osa.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Osa), matchToOneBin(gbs$Bar_Osa, bins_Bar))
+chrt$Bar$Bar_Aom.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Aom), matchToOneBin(gbs$Bar_Aom, bins_Bar))
+chrt$Bar$Bar_Oki.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Oki), matchToOneBin(gbs$Bar_Oki, bins_Bar))
+chrt$Bar$Bar_Kum.width.mean <- binApply(mean, na.rm = T, bins_Bar, width(gbs$Bar_Kum), matchToOneBin(gbs$Bar_Kum, bins_Bar))
+
+# Breakpoints
+mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta=get_bps_mcol(gbs$Oki_Osa), n=nTiles, meta_prefix = 'bp.Oki_Osa.')))
+mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta=get_bps_mcol(gbs$Oki_Bar), n=nTiles, meta_prefix = 'bp.Oki_Bar.')))
+mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta=get_bps_mcol(gbs$Oki_Kum), n=nTiles, meta_prefix = 'bp.Oki_Kum.')))
+mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta=get_bps_mcol(gbs$Oki_Aom), n=nTiles, meta_prefix = 'bp.Oki_Aom.')))
+mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta=get_bps_mcol(gbs$Oki_Nor), n=nTiles, meta_prefix = 'bp.Oki_Nor.')))
+chrt$Oki$bp.mean.breaks <- chrt$Oki |> as.data.frame()|> select("bp.Oki_Osa.breaks.count", "bp.Oki_Bar.breaks.count", "bp.Oki_Kum.breaks.count", "bp.Oki_Aom.breaks.count",  "bp.Oki_Nor.breaks.count") |> as.data.frame() |> rowMeans()
+```
+
+
+
 # Session information
 
 ```{r sessionInfo}
