@@ -474,6 +474,21 @@ hmList_to_plot.centered <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa,
   ggtitle("Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"))
 ```
 
+### Splice junctions
+
+```{r splice_junctions}
+rbind(
+  feature_coverage(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+    Heatmap_to_freq_tibble("01_isolated"),
+  feature_coverage(unal$Oki_Osa[unal$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+    Heatmap_to_freq_tibble("02_unaligned"),
+  feature_coverage(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+    Heatmap_to_freq_tibble("03_colinear_reg"),
+  feature_coverage(bri$Oki_Osa, intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+    Heatmap_to_freq_tibble("04_bridge") 
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line()
+```
+
 ### PWM
 
 The PWM motif, which is rare in comparison to the other features, follows
