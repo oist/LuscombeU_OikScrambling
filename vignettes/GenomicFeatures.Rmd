@@ -584,6 +584,20 @@ As previously discussed, low coverage over an alignment stop could lower the lik
 
 We may choose to kick out the one alignment stop for which there is no coverage. However, only 15 out of 34572 alignment stops have a coverage of less than or equal to 50, meaning that it would be hard to exclude more than just a few alignment stops using coverage information for breakpoint analysis. 
 
+# Operons
+
+```{r}
+# 5' ends of operons
+current_GB <- operons$Oki |> promoters(0,1)
+
+hmList_op_OKI <- list()
+hmList_op_OKI$gbs <- feature_coverage(current_GB, gbs$Oki_Osa, win = 2000, lab = "Oki_Osa alns", direction = "left")
+hmList_op_OKI$coa <- feature_coverage(current_GB, coa$Oki_Osa, win = 2000, lab = "Oki_Osa col reg", direction = "left")
+hmList_op_OKI$bri <- feature_coverage(current_GB, bri$Oki_Osa, win = 2000, lab = "Oki_Osa bridge reg", direction = "left")
+
+plotHeatmapMeta(hmList_op_OKI[c("gbs", "coa", "bri")])
+```
+
 # Coverage
 
 _Needs coverage information to be recomputed_
