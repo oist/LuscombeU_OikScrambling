@@ -588,40 +588,43 @@ We may choose to kick out the one alignment stop for which there is no coverage.
 
 Do alignments often cross gene or operon boundaries ?
 
-## Operons
+## Operons boundaries
+
+Operon boundaries tend to coincide with alignment boundaries and the largest
+shift in frequency is for colinear alignments.  Baseline frequency of colinear
+regions is higher than 0.6 on both side of operon boundaries.
 
 ```{r operons}
-
 feature_coverage_on_operons <- {
-  # Hide the pre-computed object in the function's environment
-  operon_boundaries <- c(
-    operons$Oki |> resize(1, fix = "start"),
-    operons$Oki |> resize(1, fix = "end")
-  ) |> sort(i = T)
   function(feat, desc)
-    feature_coverage(gene_boundaries, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+    feature_coverage(operons$Oki, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
 }
 
+pairname <- "Oki_Bar"
+pairname <- "Oki_Osa"
 rbind(
-  feature_coverage_on_operons(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
-  feature_coverage_on_operons(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unaligned"),
-  feature_coverage_on_operons(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
-  feature_coverage_on_operons(bri$Oki_Osa, "04_bridge"),
-  feature_coverage_on_operons(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
+  feature_coverage_on_operons(gbs[[pairname]][gbs[[pairname]]$nonCoa], "01_isolated"),
+  feature_coverage_on_operons(unal[[pairname]][unal[[pairname]]$nonCoa], "02_unaligned"),
+  feature_coverage_on_operons(gbs[[pairname]][!gbs[[pairname]]$nonCoa], "03_colinear_aln"),
+  #feature_coverage_on_operons(subsetByOverlaps(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], granges(coa$Oki_Osa[!coa$Oki_Osa$nonCoa] - 1),type = "within"), "03b_colinear_aln_intern"),
+  #feature_coverage_on_operons(subsetByOverlaps(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], unal$Oki_Osa[unal$Oki_Osa$nonCoa] + 1), "03c_colinear_aln_extern"),
+
+  feature_coverage_on_operons(bri[[pairname]], "04_bridge"),
+  feature_coverage_on_operons(coa[[pairname]][!coa[[pairname]]$nonCoa], "05_colinear_reg")
 ) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("operons")
 ```
 
-## Genes
+## Gene boundaries inside operons
 
 ```{r genes}
+# Shrinking operons of 1 base and requesting full overlap
+# in order to exclude the genes at the boundaries.
+genes_inside_operons  <- subsetByOverlaps(genes(annots$Oki),           operons$Oki -1, type = "within")
+genes_outside_operons <- subsetByOverlaps(genes(annots$Oki), cleanGaps(operons$Oki),   type = "within")
+
 feature_coverage_on_genes <- {
-  # Hide the pre-computed object in the function's environment
-  gene_boundaries <- c(
-    annots$Oki |> genes() |> resize(1, fix = "start"),
-    annots$Oki |> genes() |> resize(1, fix = "end")
-  ) |> sort(i = T)
   function(feat, desc)
-    feature_coverage(gene_boundaries, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+    feature_coverage(genes_inside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
 }
 
 rbind(
@@ -630,17 +633,28 @@ rbind(
   feature_coverage_on_genes(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
   feature_coverage_on_genes(bri$Oki_Osa, "04_bridge"),
   feature_coverage_on_genes(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
-) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_internal_to_operons")
+
+feature_coverage_on_genes_outside <- {
+  function(feat, desc)
+    feature_coverage(genes_outside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+}
 
 rbind(
-  feature_coverage_on_genes(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa] |> resize(1), "01_isolated"),
-  feature_coverage_on_genes(unal$Oki_Osa[unal$Oki_Osa$nonCoa]|> resize(1), "02_unaligned"),
-  feature_coverage_on_genes(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa]|> resize(1), "03_colinear_aln"),
-  feature_coverage_on_genes(bri$Oki_Osa|> resize(1), "04_bridge"),
-  feature_coverage_on_genes(coa$Oki_Osa[!coa$Oki_Osa$nonCoa]|> resize(1), "05_colinear_reg")
-) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes")
+  feature_coverage_on_genes_outside(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
+  feature_coverage_on_genes_outside(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unaligned"),
+  feature_coverage_on_genes_outside(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
+  feature_coverage_on_genes_outside(bri$Oki_Osa, "04_bridge"),
+  feature_coverage_on_genes_outside(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_outside_operons")
 ```
 
+## Operon conservation
+
+```{r operon_conservation}
+operons$Oki$n |> table()
+subsetByOverlaps(operons$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa])$n |> table()
+```
 
 # Coverage
 
