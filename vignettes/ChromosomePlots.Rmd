@@ -1214,7 +1214,7 @@ chrt$Bar$ac.bridge.mean <- chrt$Bar |> as.data.frame()|> select("ac.Bar_Oki.type
 
 
 # Now, combining it all into a single unified tiled chromosome object.
-chrt_unified <- data.frame(seqnames=c(rep('Chr1', 100), rep('Chr2', 100), rep('PAR', 100), rep('XSR', 100)), start=c(seq(1, 100), seq(1, 100), seq(1, 100), seq(1, 100)), end=c(seq(1, 100)+1, seq(1, 100)+1, seq(1, 100)+1, seq(1, 100)+1) )  |> GRanges()
+chrt_unified <- data.frame(seqnames=c(rep('Chr1', nTiles), rep('Chr2', nTiles), rep('PAR', nTiles), rep('XSR', nTiles)), start=c(seq(1, nTiles), seq(1, nTiles), seq(1, nTiles), seq(1, nTiles)), end=c(seq(1, nTiles)+1, seq(1, nTiles)+1, seq(1, nTiles)+1, seq(1, nTiles)+1) )  |> GRanges()
 seqlevels(chrt_unified) <- c('Chr1', 'Chr2', 'PAR', 'XSR')
 
 # Add a prefix to mcols to prevent collisions between colnames between similar objects.
