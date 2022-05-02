@@ -216,8 +216,39 @@ bp_pair_analysis(coa$Osa_Oki, coa$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotH
 
 ## Model operon areas
 
+### Notes about operons
+
+The operon of [Ganot et al., 2004](https://journals.asm.org/doi/10.1128/MCB.24.17.7795-7805.2004)
+appears to be conserved in OKI and OSA.  In OKI:
+
+ - Centrosomal protein POC5 is in the second half `Oidioi.mRNA.OKI2018_I69.PAR.g12978`,
+   downstream of a CAGE TSS promoter. (Not reported in Ganot et al., 2004)
+ - IQ domain-containing protein K isoform X2 is `Oidioi.mRNA.OKI2018_I69.PAR.g12977`
+   (Not reported in Ganot et al., 2004).
+ - Ran binding protein 16 is `Oidioi.mRNA.OKI2018_I69.PAR.g12976`. (First member
+   of the operon of Ganot et al., 2004).
+ - Dynein light chain is `Oidioi.mRNA.OKI2018_I69.PAR.g12975`.
+ - Delta tubulin is `Oidioi.mRNA.OKI2018_I69.PAR.g12974`.
+ - MBF is `Oidioi.mRNA.OKI2018_I69.PAR.g12973`.
+ - CycD is `Oidioi.mRNA.OKI2018_I69.PAR.g12972`. Polyadenylation signal conserved.
+
+Ganot et al., 2004 reported very small (<30) intercistronic regions and Denoeud
+et al., 2010 stated: “_The operons were predicted as co-oriented genes
+separated by 60 nucleotides at most : 1761 operons containing 4997 genes were
+predicted on the reference assembly_”.  However, in our annotation, we do not
+have the UTRs, but only the distances between translation stops and starts, so
+we need a broader window.  The example below shows that a window of 400 would
+break the Ganot 2004 operon, so let's use 500 instead.
+
+```{r ganot_operon}
+transcripts$Oki |> subsetByOverlaps(GRanges("PAR:15956430-15967745"))
+transcripts$Oki |> subsetByOverlaps(GRanges("PAR:15956430-15967745")) |> cleanGaps() |> width()
+```
+
+### Compute operons
+
 ```{r guess_operons}
-operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 400) }) |> SimpleList() |> suppressWarnings()
+operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
 sapply(operons, length)
 sapply(operons, \(o) {table(o$n)})
 ```
