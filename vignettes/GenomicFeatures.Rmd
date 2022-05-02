@@ -249,9 +249,17 @@ transcripts$Oki |> subsetByOverlaps(GRanges("PAR:15956430-15967745")) |> cleanGa
 
 ```{r guess_operons}
 operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
+operons$Nor <- OikScrambling:::calcOperons(window = 500, transcripts(annots$Nor) |> reduce()) |> suppressWarnings()
 sapply(operons, length)
 sapply(operons, \(o) {table(o$n)})
 ```
+
+With the OdB3 genome, the results are apparently close to those of Denoeud et
+al., 2010 (see above for why the difference).  We have a few more (1844 instead
+of 1761), they contain more genes (5814 instead of 4997), mostly because our
+computation outputs 50 operons longer than 9 genes (617 genes in total).
+Nevertheless, the proportion of operons of length 2, 3 and 4 are visually
+similar in both cases.
 
 ## Accessory functions
 
