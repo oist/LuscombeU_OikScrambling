@@ -1,3 +1,7 @@
+# OikScrambling 3.0.x
+
+* New chromosome plots for Figure 4.
+
 # OikScrambling 3.0.5
 
 * Explore strand proportion indices
