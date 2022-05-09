@@ -240,34 +240,26 @@ similar in both cases.
 ## Accessory functions
 
 ```{r genomic_features_byType_accessory_Functions}
-prepareFreqPlot_coding <- function(gb, annot, rep = NULL, cne = NULL, tfbs = NULL, operons = NULL, win = 1000, direction = "left") {
+prepareFreqPlot <- function(gb, annot = NULL, rep = NULL, cne = NULL, tfbs = NULL, operons = NULL, win = 1000, direction = "left") {
   l <- list()
   # Note that get_bps(direction="mid") is probably not what you think.
   if(direction == "mid") {
     gb <- resize(gb, 1, "center")
     direction <- "left"
   }
-  l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = direction)
-  #l$cds    <- feature_coverage(gb,     cds(annot),           win = win, lab = "CDS",    direction = direction)
-  l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = direction)
-  l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = direction)
+  if (!is.null(annot)) {
+    l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = direction)
+    l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = direction)
+    l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = direction)
+    #reorder
+    newOrder <- order(rowSums(l$intron@image))
+    l$intron@image <- l$intron@image[newOrder,]
+    l$exon@image   <- l$exon@image[newOrder,]
+  }
   if (!is.null(operons))
     l$operons<-feature_coverage(gb,    operons,              win = win, lab = "operons",direction = direction)
-  #reorder
-  newOrder <- order(rowSums(l$intron@image))
-  l$intron@image <- l$intron@image[newOrder,]
-  l$exon@image   <- l$exon@image[newOrder,]
-  l
-}
-
-prepareFreqPlot_noncoding <- function(gb, annot, rep, cne = NULL, tfbs = NULL, operons = NULL, win = 1000, direction = "left") {
-  l <- list()
-  # Note that get_bps(direction="mid") is probably not what you think.
-  if(direction == "mid") {
-    gb <- resize(gb, 1, "center")
-    direction <- "left"
-  }
-  l$reps   <- feature_coverage(gb,     rep,                  win = win, lab = "repeats",direction = direction)
+  if (!is.null(rep))
+    l$reps   <- feature_coverage(gb,   rep,                  win = win, lab = "repeats",direction = direction)
   if (!is.null(cne))
     l$CNE   <- feature_coverage(gb,    cne,                  win = win, lab = "CNE",    direction = direction)
   if (!is.null(tfbs))
@@ -358,7 +350,7 @@ coalesced mapped regions, the exon annotations are over-represented.
 #' @param direction Where to center the windows (`left`, `right` or `mid`)
 #'
 #' @return A `SimpleList` of Heatmap objects
-computePlotData <- function(target, query, perpareFreqPlot, reps = NULL, CE=NULL, tfbs=NULL, operons = NULL, direction = "left") {
+computePlotData <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left") {
   pair <- paste(target, query, sep = "_")
   current_GB_aln_nonCoa     <- gbs[[pair]][   gbs[[pair]]$nonCoa]
   current_GB_aln_coa        <- gbs[[pair]][ ! gbs[[pair]]$nonCoa]
@@ -369,7 +361,7 @@ computePlotData <- function(target, query, perpareFreqPlot, reps = NULL, CE=NULL
   
   targetGenome <- unique(genome(gbs[[pair]]))
   
-  prepareFreqPlot_default <- \(x) perpareFreqPlot(x, annots[[target]], reps[[targetGenome]], CE, tfbs, operons[[target]], direction = direction)
+  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
   
   hmList <- SimpleList()
   hmList$aln_nonCoa <- prepareFreqPlot_default(current_GB_aln_nonCoa)
@@ -380,8 +372,8 @@ computePlotData <- function(target, query, perpareFreqPlot, reps = NULL, CE=NULL
   hmList
 }
 
-hmList_to_plot_noncoding <- computePlotData("Oki", "Osa", prepareFreqPlot_noncoding, reps = reps, CE = ces$ce__50__48$Oki_Osa, tfbs = NULL)
-hmList_to_plot_coding    <- computePlotData("Oki", "Osa", prepareFreqPlot_coding, reps = reps, CE = ces$ce__50__48$Oki_Osa, tfbs = NULL)
+hmList_to_plot_noncoding <- computePlotData("Oki", "Osa", reps = reps, CE = ces$ce__50__48)
+hmList_to_plot_coding    <- computePlotData("Oki", "Osa", annots = annots, operons = operons)
 
 list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
   tib <-rbind(
@@ -417,39 +409,39 @@ Same approach, but enforcing a succession of just-aligned, unaligned and
 syntenic regions.
 
 ```{r genomic_features_byType2}
-# flag_aln_unal_syn <- function (x) {
-#   p0 <- x$type
-#   p1 <- c(tail(p0, -1), factor('aligned'))
-#   p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
-#   p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
-# }
-# 
-# current_GB <- wgo$Oki_Osa
-# 
-# current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
-# 
-# current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
-# current_GB_unal    <- current_GB[which(current_GB$flag_a_u_s) + 1]
-# current_GB_syn     <- current_GB[which(current_GB$flag_a_u_s) + 2]
-# 
-# current_GB_aln   |> width() |> summary()
-# current_GB_unal  |> width() |> summary()
-# current_GB_syn   |> width() |> summary()
-# 
-# hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$OKI2018.I69)
-# hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$OKI2018.I69)
-# hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$OKI2018.I69)
-# 
-# rbind(
-#   hmListAln  |> prepareGGFreqPlot("01_narrow"),
-#   hmListUnal |> prepareGGFreqPlot("02_unal"),
-#   hmListSyn  |> prepareGGFreqPlot("03_syn")
-# 
-# )|> ggplot() +
-#   aes(pos, freq, col = what) +
-#   geom_line() +
-#   theme_bw() +
-#   facet_wrap(~desc, nrow = 1)
+flag_aln_unal_syn <- function (x) {
+  p0 <- x$type
+  p1 <- c(tail(p0, -1), factor('aligned'))
+  p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
+  p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
+}
+
+current_GB <- wgo$Oki_Osa
+
+current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
+
+current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
+current_GB_unal    <- current_GB[which(current_GB$flag_a_u_s) + 1]
+current_GB_syn     <- current_GB[which(current_GB$flag_a_u_s) + 2]
+
+current_GB_aln   |> width() |> summary()
+current_GB_unal  |> width() |> summary()
+current_GB_syn   |> width() |> summary()
+
+hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$OKI2018.I69)
+hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$OKI2018.I69)
+hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$OKI2018.I69)
+
+rbind(
+  hmListAln  |> prepareGGFreqPlot("01_narrow"),
+  hmListUnal |> prepareGGFreqPlot("02_unal"),
+  hmListSyn  |> prepareGGFreqPlot("03_syn")
+
+)|> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  theme_bw() +
+  facet_wrap(~desc, nrow = 1)
 ```
 
 This mildens the differences observed in the earlier section, probably because
@@ -458,7 +450,7 @@ it requires the aligned region to be nearby a syntenic region.
 ### Aligning on center instead of border.
 
 ```{r genomic_features_byType.centered, fig.width=15, fig.height=5, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
-hmList_to_plot.centered <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa, tfbs, operons, direction = "mid")
+hmList_to_plot.centered <- computePlotData("Oki", "Osa", annots = annots, CE = ces$ce__50__48, tfbs =  tfbs, operons = operons, direction = "mid")
 
 (p_boundary <- rbind(
   hmList_to_plot.centered$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
