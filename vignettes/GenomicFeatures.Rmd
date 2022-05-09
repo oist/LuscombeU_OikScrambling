@@ -691,8 +691,19 @@ rbind(
 ## Operon conservation
 
 ```{r operon_conservation}
+# Distribution of operon lengths
 operons$Oki$n |> table()
-subsetByOverlaps(operons$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa])$n |> table()
+
+# An operon is scrambled if it overlaps with an unaligned noncoalesced (= unmapped) region
+scrambled_operons     <- subsetByOverlaps(operons$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa])
+not_scrambled_operons <- operons$Oki[! operons$Oki %in% scrambled_operons ]
+
+# Distribution of operon lengths (scrambled)
+scrambled_operons$n     |> table()
+not_scrambled_operons$n |> table()
+
+# Example of long scrambled operons
+scrambled_operons[scrambled_operons$n > 5]
 ```
 
 # Coverage
