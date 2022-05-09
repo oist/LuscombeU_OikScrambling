@@ -1,6 +1,7 @@
-# OikScrambling 3.0.x
+# OikScrambling 3.0.6
 
 * Alignment features plotted on operon boundaries for Figure 3.
+* New chromosome plots for Figure 4.
 
 # OikScrambling 3.0.5
 
