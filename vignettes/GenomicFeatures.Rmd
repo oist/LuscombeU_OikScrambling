@@ -13,11 +13,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, cache=FALSE}
-knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
-knitr::opts_knit$set(verbose = TRUE)
-```
-
 Load packages and data
 ======================
 
@@ -30,6 +25,7 @@ library('OikScrambling')   |> suppressPackageStartupMessages()
 library('GenomicFeatures') |> suppressPackageStartupMessages()
 library('heatmaps')        |> suppressPackageStartupMessages()
 genomes     <- OikScrambling:::loadAllGenomes(compat = F)
+# Cannot use Knitr cache as long as "annot" objects are used.
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
 reps        <- OikScrambling:::loadAllRepeats(compat = F)
 load("BreakPoints.Rdata")
