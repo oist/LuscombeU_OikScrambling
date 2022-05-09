@@ -411,51 +411,51 @@ as a classifier instead of an arbitrary width cutoff.  See
 `vignette("RegionWidths", package = "OikScrambling")` for details.
 
 
-#### Linked regions
+### Linked regions
 
 Same approach, but enforcing a succession of just-aligned, unaligned and
 syntenic regions.
 
 ```{r genomic_features_byType2}
-flag_aln_unal_syn <- function (x) {
-  p0 <- x$type
-  p1 <- c(tail(p0, -1), factor('aligned'))
-  p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
-  p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
-}
-
-current_GB <- wgo$Oki_Osa
-
-current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
-
-current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
-current_GB_unal    <- current_GB[which(current_GB$flag_a_u_s) + 1]
-current_GB_syn     <- current_GB[which(current_GB$flag_a_u_s) + 2]
-
-current_GB_aln   |> width() |> summary()
-current_GB_unal  |> width() |> summary()
-current_GB_syn   |> width() |> summary()
-
-hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$OKI2018.I69)
-hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$OKI2018.I69)
-hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$OKI2018.I69)
-
-rbind(
-  hmListAln  |> prepareGGFreqPlot("01_narrow"),
-  hmListUnal |> prepareGGFreqPlot("02_unal"),
-  hmListSyn  |> prepareGGFreqPlot("03_syn")
-
-)|> ggplot() +
-  aes(pos, freq, col = what) +
-  geom_line() +
-  theme_bw() +
-  facet_wrap(~desc, nrow = 1)
+# flag_aln_unal_syn <- function (x) {
+#   p0 <- x$type
+#   p1 <- c(tail(p0, -1), factor('aligned'))
+#   p2 <- c(tail(p0, -2), factor('aligned'), factor('aligned'))
+#   p0 == 'aligned' & p1 == 'unaligned' & p2 == 'syntenic'
+# }
+# 
+# current_GB <- wgo$Oki_Osa
+# 
+# current_GB$flag_a_u_s <- flag_aln_unal_syn(current_GB)
+# 
+# current_GB_aln     <- current_GB[which(current_GB$flag_a_u_s) + 0]
+# current_GB_unal    <- current_GB[which(current_GB$flag_a_u_s) + 1]
+# current_GB_syn     <- current_GB[which(current_GB$flag_a_u_s) + 2]
+# 
+# current_GB_aln   |> width() |> summary()
+# current_GB_unal  |> width() |> summary()
+# current_GB_syn   |> width() |> summary()
+# 
+# hmListAln     <- prepareFreqPlot(current_GB_aln,     annots$Oki, reps$OKI2018.I69)
+# hmListUnal    <- prepareFreqPlot(current_GB_unal,    annots$Oki, reps$OKI2018.I69)
+# hmListSyn     <- prepareFreqPlot(current_GB_syn,     annots$Oki, reps$OKI2018.I69)
+# 
+# rbind(
+#   hmListAln  |> prepareGGFreqPlot("01_narrow"),
+#   hmListUnal |> prepareGGFreqPlot("02_unal"),
+#   hmListSyn  |> prepareGGFreqPlot("03_syn")
+# 
+# )|> ggplot() +
+#   aes(pos, freq, col = what) +
+#   geom_line() +
+#   theme_bw() +
+#   facet_wrap(~desc, nrow = 1)
 ```
 
 This mildens the differences observed in the earlier section, probably because
 it requires the aligned region to be nearby a syntenic region.
 
-#### Aligning on center instead of border.
+### Aligning on center instead of border.
 
 ```{r genomic_features_byType.centered, fig.width=15, fig.height=5, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 hmList_to_plot.centered <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa, tfbs, operons, direction = "mid")
@@ -466,20 +466,6 @@ hmList_to_plot.centered <- computePlotData("Oki", "Osa", ces$ce__50__48$Oki_Osa,
   hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
   hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge"),
   hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
-
-)|> ggplot() +
-  aes(pos, freq, col = what) +
-  geom_line() +
-  facet_wrap(~desc, nrow = 1) +
-  theme_bw() +
-  ggtitle("Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"))
-
-(p_boundary <- rbind(
-  hmList_to_plot.centered$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
-  hmList_to_plot.centered$unmap       |> prepareGGFreqPlot("02_unmapped"),
-  hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("05_colinear_reg"),
-  hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge"),
-  hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("03_colinear_alns")
 
 )|> ggplot() +
   aes(pos, freq, col = what) +
