@@ -219,7 +219,8 @@ bp_pair_analysis(coa$Osa_Oki, coa$Osa_Aom, win = 1000, lab = "Oki~Aom") |> plotH
 ### Notes about operons
 
 The operon of [Ganot et al., 2004](https://journals.asm.org/doi/10.1128/MCB.24.17.7795-7805.2004)
-appears to be conserved in OKI and OSA.  In OKI:
+appears to be conserved in OKI and OSA.  In the annotation visible in ZENBU
+and NCBI:
 
  - Centrosomal protein POC5 is in the second half `Oidioi.mRNA.OKI2018_I69.PAR.g12978`,
    downstream of a CAGE TSS promoter. (Not reported in Ganot et al., 2004)
@@ -231,6 +232,8 @@ appears to be conserved in OKI and OSA.  In OKI:
  - Delta tubulin is `Oidioi.mRNA.OKI2018_I69.PAR.g12974`.
  - MBF is `Oidioi.mRNA.OKI2018_I69.PAR.g12973`.
  - CycD is `Oidioi.mRNA.OKI2018_I69.PAR.g12972`. Polyadenylation signal conserved.
+ 
+(Note that the transcripts IDs here differ from the public ones.)
 
 Ganot et al., 2004 reported very small (<30) intercistronic regions and Denoeud
 et al., 2010 stated: “_The operons were predicted as co-oriented genes
@@ -241,8 +244,8 @@ we need a broader window.  The example below shows that a window of 400 would
 break the Ganot 2004 operon, so let's use 500 instead.
 
 ```{r ganot_operon}
-transcripts$Oki |> subsetByOverlaps(GRanges("PAR:15956430-15967745"))
-transcripts$Oki |> subsetByOverlaps(GRanges("PAR:15956430-15967745")) |> cleanGaps() |> width()
+transcripts(annots$Oki) |> subsetByOverlaps(GRanges("PAR:15956430-15967745"))
+transcripts(annots$Oki) |> subsetByOverlaps(GRanges("PAR:15956430-15967745")) |> cleanGaps() |> width()
 ```
 
 ### Compute operons
