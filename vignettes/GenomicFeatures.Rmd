@@ -641,7 +641,8 @@ feature_coverage_on_operons <- {
 
 pairname <- "Oki_Bar"
 pairname <- "Oki_Osa"
-rbind(
+
+p_op_scrambling <- rbind(
   feature_coverage_on_operons(gbs[[pairname]][gbs[[pairname]]$nonCoa], "01_isolated"),
   feature_coverage_on_operons(unal[[pairname]][unal[[pairname]]$nonCoa], "02_unaligned"),
   feature_coverage_on_operons(gbs[[pairname]][!gbs[[pairname]]$nonCoa], "03_colinear_aln"),
@@ -650,7 +651,7 @@ rbind(
 
   feature_coverage_on_operons(bri[[pairname]], "04_bridge"),
   feature_coverage_on_operons(coa[[pairname]][!coa[[pairname]]$nonCoa], "05_colinear_reg")
-) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("operons")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("operons", subtitle = "n = 2017") + theme_bw()
 ```
 
 ## Gene boundaries inside operons
@@ -666,26 +667,32 @@ feature_coverage_on_genes <- {
     feature_coverage(genes_inside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
 }
 
-rbind(
+p_gene_int_scrambling <- rbind(
   feature_coverage_on_genes(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
   feature_coverage_on_genes(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unaligned"),
   feature_coverage_on_genes(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
   feature_coverage_on_genes(bri$Oki_Osa, "04_bridge"),
   feature_coverage_on_genes(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
-) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_internal_to_operons")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_internal_to_operons", subtitle = "n = 1348") + theme_bw()
 
 feature_coverage_on_genes_outside <- {
   function(feat, desc)
     feature_coverage(genes_outside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
 }
 
-rbind(
+p_gene_ext_scrambling <- rbind(
   feature_coverage_on_genes_outside(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
   feature_coverage_on_genes_outside(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unaligned"),
   feature_coverage_on_genes_outside(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
   feature_coverage_on_genes_outside(bri$Oki_Osa, "04_bridge"),
   feature_coverage_on_genes_outside(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
-) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_outside_operons")
+) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_outside_operons", subtitle = "n = 11688") + theme_bw()
+```
+
+## Summary plot
+
+```{r operon_scrambling, fig.width=15, fig.height=4, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+p_gene_ext_scrambling + p_op_scrambling + p_gene_int_scrambling + plot_layout(nrow = 1, guides = 'collect')
 ```
 
 ## Operon conservation

@@ -1,3 +1,7 @@
+# OikScrambling 3.0.x
+
+* Alignment features plotted on operon boundaries for Figure 3.
+
 # OikScrambling 3.0.5
 
 * Explore strand proportion indices.
