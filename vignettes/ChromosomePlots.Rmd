@@ -1262,6 +1262,38 @@ ggplot(chrt_unified |> as.data.frame()) +
   ggtitle('Tiles (averages across Oki, Osa, Bar): Properties across genome')
 ```
 
+
+What features correlate with breakpoints?
+
+```{r chromosome_plots_tiles_2, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Correlation plots, relating number of 
+p1 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('dN/dS')
+
+p2 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.count.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('transcripts')
+
+p3 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=operons.count.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('transcripts')
+
+p4 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=repeats.count.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('repeats')
+
+( p1 / p2 / p3 / p4)
+```
+
+
+What features correlate with breakpoints?
+
+```{r chromosome_plots_tiles_2, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Correlation plots, relating number of 
+p1 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.isolated.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('isolated')
+
+p2 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.collinear.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('collinear')
+
+p3 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.unmapped.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('unmapped')
+
+p4 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.bridge.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('bridge')
+
+( p1 / p2 / p3 / p4)
+```
+
 ```{r chromosome_plots_tiles_1_points, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 p1 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=transcripts.dNdS.mean, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess', method.args = list(family = "symmetric")) + ylab('dN/dS') 
 p1 + ggtitle("Tiles (averages across Oki, Osa, Bar): Properties across genome")
@@ -1280,6 +1312,7 @@ ggplot(chrt_unified |> as.data.frame()) +
   facet_wrap(~seqnames, nrow=1) +
   ggtitle('Tiles (averages across Oki, Osa, Bar): Alignment categories by location')
 ```
+
 
 ```{r chromosome_plots_tiles_3, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 chrt_unified |>
@@ -1314,7 +1347,12 @@ p4 +  ggtitle('Tiles (averages across Oki, Osa, Bar): dNdS per chr+arm')
 
 # And a correlation plot
 p5 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('dN/dS')
+
 p5 + ggtitle('Tiles (averages across Oki, Osa, Bar): dNdS per chr+arm') 
+
+p6 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=repeats.count.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('repeats')
+
+p6 
 
 layout <- "
 A
@@ -1324,7 +1362,7 @@ D
 E
 "
 
-( p1 / p3 / p2 / p4 / p5 ) +   plot_layout(design = layout, guides = 'collect')
+( p1 / p4 / p2 / p3 / p5 ) + plot_layout(design = layout, guides = 'collect')
 
 detach('package:ggpubr')
 ```
@@ -1403,7 +1441,7 @@ D
 E
 "
 
-( p1 / p3 / p2 / p4 / p5 ) + plot_layout(design = layout, guides = 'collect')
+( p1 / p4 / p2 / p3 / p5 ) + plot_layout(design = layout, guides = 'collect')
 
 detach('package:ggpubr')
 ```
@@ -1441,7 +1479,7 @@ D
 E
 "
 
-( p1 / p3 / p2 / p4 / p5 ) + plot_layout(design = layout, guides = 'collect')
+( p1 / p4 / p2 / p3 / p5 ) + plot_layout(design = layout, guides = 'collect')
 
 detach('package:ggpubr')
 ```
@@ -1477,7 +1515,7 @@ D
 E
 "
 
-( p1 / p3 / p2 / p4 / p5 ) + plot_layout(design = layout, guides = 'collect')
+( p1 / p4 / p2 / p3 / p5 ) + plot_layout(design = layout, guides = 'collect')
 
 detach('package:ggpubr')
 ```
@@ -1513,7 +1551,7 @@ D
 E
 "
 
-( p1 / p3 / p2 / p4 / p5 ) + plot_layout(design = layout, guides = 'collect')
+( p1 / p4 / p2 / p3 / p5 ) + plot_layout(design = layout, guides = 'collect')
 
 detach('package:ggpubr')
 ```
@@ -1549,9 +1587,9 @@ D
 E
 "
 
-( p1 / p3 / p2 / p4 / p5 ) + plot_layout(design = layout, guides = 'collect')
+( p1 / p4 / p2 / p3 / p5 ) + plot_layout(design = layout, guides = 'collect')
 
-detach('package:ggpubr')
+#detach('package:ggpubr')
 ```
 
 
