@@ -2,6 +2,7 @@
 
 * Alignment features plotted on operon boundaries for Figure 3.
 * New chromosome plots for Figure 4.
+* New panel showing that short bridge regions are mostly made of short introns.
 
 # OikScrambling 3.0.5
 

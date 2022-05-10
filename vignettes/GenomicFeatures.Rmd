@@ -399,6 +399,53 @@ Most of the narrow-width aligned regions did not coalesce.  We use this
 as a classifier instead of an arbitrary width cutoff.  See
 `vignette("RegionWidths", package = "OikScrambling")` for details.
 
+### Bridge regions classified by width.
+
+Short bridge regions contain small introns.  Long bridge regions contain repeats,
+which may be in introns.
+
+```{r bridge_width_features}
+computePlotData_for_bridge <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left") {
+  pair <- paste(target, query, sep = "_")
+
+  current_GB_bri       <- bri[[pair]]
+  current_GB_bri_small <- current_GB_bri[width(current_GB_bri) <  150]
+  current_GB_bri_long  <- current_GB_bri[width(current_GB_bri) >= 150]
+
+  targetGenome <- unique(genome(gbs[[pair]]))
+  
+  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
+  
+  hmList <- SimpleList()
+  hmList$bri       <- prepareFreqPlot_default(current_GB_bri)
+  hmList$bri_small <- prepareFreqPlot_default(current_GB_bri_small)
+  hmList$bri_long  <- prepareFreqPlot_default(current_GB_bri_long)
+  hmList
+}
+
+hmList_to_plot_noncoding <- computePlotData_for_bridge("Oki", "Osa", reps = reps, CE = ces$ce__50__48)
+hmList_to_plot_coding    <- computePlotData_for_bridge("Oki", "Osa", annots = annots, operons = operons)
+
+list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
+  tib <-rbind(
+    hmList_to_plot$bri         |> prepareGGFreqPlot("01_bridge"),
+    hmList_to_plot$bri_small   |> prepareGGFreqPlot("02_bridge_small"),
+    hmList_to_plot$bri_long    |> prepareGGFreqPlot("02_bridge_long")
+  )
+  tib$desc2 <- desc
+  tib
+}
+
+rbind(
+  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding, "noncoding"),
+  list_of_heatmaps_to_long_tibble(hmList_to_plot_coding, "coding")
+) |> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc2 + desc, nrow = 2) +
+  theme_bw() +
+  ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
+```
 
 ### Linked regions
 
