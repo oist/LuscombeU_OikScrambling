@@ -711,6 +711,101 @@ not_scrambled_operons$n |> table()
 scrambled_operons[scrambled_operons$n > 5]
 ```
 
+In comparison: genes
+
+```{r gene_conservation_Oki_Osa}
+all_genes <- genes(annots$Oki)
+scrambled_genes <- (subsetByOverlaps(all_genes, unal$Oki_Osa[unal$Oki_Osa$nonCoa])) |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+not_scrambled_genes <- all_genes[! all_genes %in% scrambled_genes]                  |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+
+length(scrambled_genes)
+length(all_genes)
+
+scr_g_tbl <- table(paste(seqnames(    scrambled_genes), scrambled_genes$Arm))
+nsc_g_tbl <- table(paste(seqnames(not_scrambled_genes), not_scrambled_genes$Arm))
+
+Oki_Osa_scr_ratio_long_arm <- c(
+  scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
+  scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
+  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+)
+mean(Oki_Osa_scr_ratio_long_arm)
+Oki_Osa_scr_ratio_short_arm <- c(
+  scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
+  scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
+  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+)
+mean(Oki_Osa_scr_ratio_short_arm)
+
+t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
+```
+
+Replicate on an independent pair of genomes.
+
+```{r gene_conservation_Bar_Kum}
+all_genes <- genes(annots$Bar)
+scrambled_genes <- (subsetByOverlaps(all_genes, unal$Bar_Kum[unal$Bar_Kum$nonCoa])) |> sort(i=F) |> flagLongShort(longShort$Bar2.p4)
+not_scrambled_genes <- all_genes[! all_genes %in% scrambled_genes]                  |> sort(i=F) |> flagLongShort(longShort$Bar2.p4)
+
+length(scrambled_genes)
+length(all_genes)
+
+scr_g_tbl <- table(paste(seqnames(    scrambled_genes), scrambled_genes$Arm))
+nsc_g_tbl <- table(paste(seqnames(not_scrambled_genes), not_scrambled_genes$Arm))
+
+Bar_Kum_scr_ratio_long_arm <- c(
+  scr_g_tbl[["Chr1 long"]] / ( scr_g_tbl[["Chr1 long"]] + nsc_g_tbl[["Chr1 long"]]),
+  scr_g_tbl[["Chr2 long"]] / ( scr_g_tbl[["Chr2 long"]] + nsc_g_tbl[["Chr2 long"]]),
+  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+)
+Bar_Kum_scr_ratio_short_arm <- c(
+  scr_g_tbl[["Chr1 short"]] / ( scr_g_tbl[["Chr1 short"]] + nsc_g_tbl[["Chr1 short"]]),
+  scr_g_tbl[["Chr2 short"]] / ( scr_g_tbl[["Chr2 short"]] + nsc_g_tbl[["Chr2 short"]]),
+  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+)
+
+t.test(Bar_Kum_scr_ratio_long_arm, Bar_Kum_scr_ratio_short_arm, paired = TRUE)
+```
+
+```{r gene_conservation_all}
+mean(c(Oki_Osa_scr_ratio_long_arm, Bar_Kum_scr_ratio_long_arm))
+mean(c(Oki_Osa_scr_ratio_short_arm, Bar_Kum_scr_ratio_short_arm))
+t.test(
+  c(Oki_Osa_scr_ratio_long_arm, Bar_Kum_scr_ratio_long_arm),
+  c(Oki_Osa_scr_ratio_short_arm, Bar_Kum_scr_ratio_short_arm),
+  paired = TRUE
+)
+```
+
+How about exons ?
+
+```{r exon_conservation}
+all_exons <- exonicParts(annots$Oki)
+scrambled_exons <- (subsetByOverlaps(all_exons, unal$Oki_Osa[unal$Oki_Osa$nonCoa])) |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+not_scrambled_exons <- all_exons[! all_exons %in% scrambled_exons]                  |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+
+length(scrambled_exons)
+length(all_exons)
+
+scr_g_tbl <- table(paste(seqnames(    scrambled_exons), scrambled_exons$Arm))
+nsc_g_tbl <- table(paste(seqnames(not_scrambled_exons), not_scrambled_exons$Arm))
+
+Oki_Osa_scr_ratio_long_arm <- c(
+  scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
+  scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
+  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+)
+mean(Oki_Osa_scr_ratio_long_arm)
+Oki_Osa_scr_ratio_short_arm <- c(
+  scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
+  scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
+  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+)
+mean(Oki_Osa_scr_ratio_short_arm)
+
+t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
+```
+
 # Coverage
 
 _Needs coverage information to be recomputed_
