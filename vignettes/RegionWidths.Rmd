@@ -622,6 +622,8 @@ gg_freq_poly(widths$coa2 |> subset(chr %in% c("chr1", "chr2", "PAR"))) +
 
 ## "aligned", "unaligned" and "mapped"
 
+### Facet by genus
+
 ```{r compound1}
 p_ali <- gg_freq_poly(widths$gbs |> dplyr::filter(! is.na(genus))) +
   aes(width, after_stat(density), col=class) + theme_bw() +
@@ -641,6 +643,57 @@ p_map <- gg_freq_poly(widths$coa |> dplyr::filter(! is.na(genus))) +
 # Patchwork
 (p_ali | p_una | p_map) + plot_layout(ncol = 3, guides = 'collect') + theme_bw()
 ```
+
+### Oik only, color by distance
+
+```{r compound1_oik}
+p_isol <- gg_freq_poly(widths$isol |> dplyr::filter(genus == "Oikopleura")) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  ggtitle("Isolated alignments")
+
+p_unma <- gg_freq_poly(widths$unmap |> dplyr::filter(genus == "Oikopleura")) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  ggtitle("Unmapped")
+
+p_coar <- gg_freq_poly(widths$coa |> dplyr::filter(genus == "Oikopleura", !nonCoa)) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  ggtitle("Colinear regions")
+
+p_brid <- gg_freq_poly(widths$bri |> dplyr::filter(genus == "Oikopleura")) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  ggtitle("Bridge regions")
+
+p_coal <- gg_freq_poly(widths$gbs |> dplyr::filter(genus == "Oikopleura", !nonCoa)) +
+  aes(width, after_stat(density), col=class) + theme_bw() +
+  ggtitle("Colinear alignments")
+
+# Patchwork
+(p_isol | p_unma | p_coar | p_brid | p_coal) + plot_layout(nrow = 1, guides = 'collect') + theme_bw()
+```
+
+### Oik only, color by alignment class
+
+```{r compound1_alignment_classes}
+w <- rbind(
+  widths$isol  |> dplyr::filter(genus == "Oikopleura")           |> dplyr::mutate(aliclass = "Isol"),
+  widths$unmap |> dplyr::filter(genus == "Oikopleura")           |> dplyr::mutate(aliclass = "Unmap"),
+  widths$coa   |> dplyr::filter(genus == "Oikopleura", !nonCoa)  |> dplyr::mutate(aliclass = "Col reg"),
+  widths$bri   |> dplyr::filter(genus == "Oikopleura")           |> dplyr::mutate(aliclass = "Bridge"),
+  widths$gbs   |> dplyr::filter(genus == "Oikopleura", !nonCoa)  |> dplyr::mutate(aliclass = "Col aln")
+)
+
+gg_freq_poly(w) +
+  aes(width, after_stat(density), col=aliclass) + theme_bw()+
+  facet_wrap(~class, ncol = 1)
+
+gg_freq_poly(w |> dplyr::filter(class == "distant")) +
+  aes(width, after_stat(density), col=aliclass) + theme_bw()
+
+gg_freq_poly(w |> dplyr::filter(class == "distant"), scale = "natural") +
+  aes(width, after_stat(density), col=aliclass) + theme_bw() +
+  scale_x_continuous(limits = c(0, 3e3))
+```
+
 
 ## "isolated", "unmapped", "colinear regions", "bridge" and "colinear alingments"
 
