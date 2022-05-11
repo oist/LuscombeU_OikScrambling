@@ -100,13 +100,18 @@ This is useful to verify by eye that collections of distributions in the same
 distance group resemble each other.
 
 ```{r width_after_processing_steps, dependson="pre_compute_widths_object", fig.width=12, fig.height=8}
-gg_freq_poly <- function(tibble, binwidth = 30, scale = "log") {
+gg_freq_poly <- function(tibble, bins = 30, binwidth = 30, scale = "log") {
   p <-
     ggplot(tibble) +
-    aes(width) +
-    geom_freqpoly(binwidth = binwidth)
-  if(scale == "log")
-    p <- p + scale_x_log10()
+    aes(width)
+  if(scale == "log") {
+    p <- p + 
+      geom_freqpoly(bins = bins) +
+      scale_x_log10()
+  } else {
+    p <- p +
+      geom_freqpoly(binwidth = binwidth)
+  }
   p
 }
 
