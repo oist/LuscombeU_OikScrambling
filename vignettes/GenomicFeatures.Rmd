@@ -413,7 +413,7 @@ almost all the information present in the 5-panel version above.
 computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left", withGenes = c("yes", "no", "only")) {
   withGenes <- match.arg(withGenes)
   pair <- paste(target, query, sep = "_")
-  current_GB_brk <- unmap[[pair]]
+  current_GB_brk <- unmap[[pair]] |> subsetByOverlaps(coa[[pair]][!coa[[pair]]$nonCoa] + 1) # The unmapped region flanking colinear regions
   current_GB_bri <- bri[[pair]]
   
   targetGenome <- unique(genome(gbs[[pair]]))
