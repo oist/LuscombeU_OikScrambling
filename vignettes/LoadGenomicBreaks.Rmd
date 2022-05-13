@@ -297,32 +297,81 @@ Whole-genome objects
 --------------------
 
 Let's have objects that cover the whole genomes (with the possible exception
-of the telomeric regions) and contain non-overlapping aligned, unaligned
-and syntenic regions.  These are `GRanges` objects, not `GBreaks`, since they
-contain unaligned regions.
+of the telomeric regions) and contain _isolated alignments_, _breakpoint regions_,
+_colinear alignments_ and _bridge regions_.  These are `GRanges` objects, not
+`GBreaks`, since they contain unaligned regions.
 
 ```{r}
-makeWholeGenomeObject <- function(aligned, unaligned, coalesced) {
-  aligned_nonCoa   <- aligned[aligned$nonCoa]
-  unaligned_nonCoa <- unaligned[unaligned$nonCoa]
-  syntenic         <- coalesced[ ! coalesced$nonCoa]
+makeWholeGenomeObject <- function(aligned, unaligned) {
+  # Isolated alignments are aligned regions not in collinear regions
+  iso <- granges(aligned[aligned$nonCoa]) |> plyranges::mutate(type = "isolated alignment")
+  # Breakpoint regions are unaligned regions not in collinear regions
+  brk <- granges(unaligned[unaligned$nonCoa])|> plyranges::mutate(type = "breakpoint region")
+  # Collinear alignments are aligned regions in collinear regions
+  col <- granges(aligned[!aligned$nonCoa]) |> plyranges::mutate(type = "collinear alignment")
+  # Bridge regions are unaligned regions in collinear regions
+  bri <- granges(unaligned[!unaligned$nonCoa]) |> plyranges::mutate(type = "bridge region")
   
-  # Let's keep only the common metadata
-  mcols(aligned_nonCoa) <- mcols(aligned_nonCoa)[,colnames(mcols(unaligned))]
-  mcols(syntenic)       <- mcols(syntenic)[      ,colnames(mcols(unaligned))]
-  
-  # Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.
-  aligned_nonCoa$nonCoa <- unaligned_nonCoa$nonCoa <- syntenic$nonCoa <- NULL
-  aligned_nonCoa$type   <- 'aligned'
-  unaligned_nonCoa$type <- 'unaligned'
-  syntenic$type         <- 'syntenic'
-
-  wholeGenome <- c(aligned_nonCoa, unaligned_nonCoa, syntenic) |> sort(ignore.strand = TRUE)
+  wholeGenome <- c(iso, brk, col, bri) |> sort(ignore.strand = TRUE)
   wholeGenome$type <- factor(wholeGenome$type)
   wholeGenome
 }
 
-wgo <- mapply(makeWholeGenomeObject, gbs, unal, coa) |> SimpleList()
+wgo <- mapply(makeWholeGenomeObject, gbs, unal) |> SimpleList()
+```
+
+```{r calc_proportion_of_genome_region_classes}
+for_wgo_barplots <- sapply(wgo, \(gr) tapply(width(gr), gr$type, sum)) |>
+  as.data.frame() |>
+  tibble::as_tibble(rownames = "type") |>
+  tidyr::pivot_longer(!type) |>
+  dplyr::mutate(distClass = OikScrambling:::compDistClass(name)) |>
+  dplyr::mutate(genus = OikScrambling:::compGenus(name))
+
+p1 <- ggplot(for_wgo_barplots |> dplyr::filter(genus == "Oikopleura", distClass == "distant")) +
+  aes(name, value, fill = type) +
+  ggplot2::coord_flip() +
+  geom_bar( stat = "identity") +
+  ggtitle("Oki or Kume vs other populations")
+
+p2 <- ggplot(for_wgo_barplots |> dplyr::filter(genus == "Oikopleura", distClass == "intermediate")) +
+  aes(name, value, fill = type) +
+  ggplot2::coord_flip() +
+  geom_bar( stat = "identity")  +
+  ggtitle("North Atlantic vs North Pacific")
+
+p3 <- ggplot(for_wgo_barplots |> dplyr::filter(genus == "Oikopleura", distClass == "same_or_sister")) +
+  aes(name, value, fill = type) +
+  ggplot2::coord_flip() +
+  geom_bar( stat = "identity") +
+  ggtitle("same population")
+
+p4 <- ggplot(for_wgo_barplots |> dplyr::filter(genus == "Drosophila")) +
+  aes(name, value, fill = type) +
+  ggplot2::coord_flip() +
+  geom_bar( stat = "identity") +
+  ggtitle("Drosophila (various evol. distances)")
+
+p5 <- ggplot(for_wgo_barplots |> dplyr::filter(genus == "Ciona")) +
+  aes(name, value, fill = type) +
+  ggplot2::coord_flip() +
+  geom_bar( stat = "identity") +
+  ggtitle("Ciona (various evol. distances)")
+```
+
+We can see that:
+
+ - The larger size of Okinawa and Kume genomes is explained by sequences that
+   are not aligned.  (Repeats ?)
+ - The fraction of isolated alignments is always small, but it is comparatively
+   larger in Oiks compared to Drosophila and Ciona.
+ - The fraction of bridge regions increases with evolutionary distance, until
+   becoming larger than the fraction of colinear alignments (_D. melanogaster_ /
+   _D. buskii_, _C. savignyi_ / _C intestinalis or robusta_).
+
+```{r proportion_of_genome_region_classes, fig.width=6, fig.height=18, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+library("patchwork")
+p1 / p2 / p3 / p4 / p5
 ```
 
 Bridge regions

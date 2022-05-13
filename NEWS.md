@@ -1,3 +1,8 @@
+# OikScrambling 4.0.0
+
+* Reformed the `wgo` object to match the 4 classes: _isolated alignment_,
+  _breakpoint region_, _collinear alignment_ and _bridge region_.
+
 # OikScrambling 3.0.6
 
 * Alignment features plotted on operon boundaries for Figure 3.
