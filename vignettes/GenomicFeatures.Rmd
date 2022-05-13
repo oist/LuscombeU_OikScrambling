@@ -399,6 +399,50 @@ Most of the narrow-width aligned regions did not coalesce.  We use this
 as a classifier instead of an arbitrary width cutoff.  See
 `vignette("RegionWidths", package = "OikScrambling")` for details.
 
+#### Simplified version
+
+With only 2 panels, for unmapped–aligned and bridge–aligned, we display
+almost all the information present in the 5-panel version above.
+
+```{r genomic_features_byType_2, fig.width=15, fig.height=5, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left") {
+  pair <- paste(target, query, sep = "_")
+  current_GB_brk <- unmap[[pair]]
+  current_GB_bri <- bri[[pair]]
+  
+  targetGenome <- unique(genome(gbs[[pair]]))
+  
+  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
+  
+  hmList <- SimpleList()
+  hmList$brk <- prepareFreqPlot_default(current_GB_brk)
+  hmList$bri <- prepareFreqPlot_default(current_GB_bri)
+  hmList
+}
+
+hmList_to_plot_noncoding <- computePlotData_simplified("Oki", "Osa", reps = reps, CE = ces$ce__50__48, direction = "right")
+hmList_to_plot_coding    <- computePlotData_simplified("Oki", "Osa", annots = annots, operons = operons, direction = "right")
+
+list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
+  tib <-rbind(
+    hmList_to_plot$brk         |> prepareGGFreqPlot("01_break"),
+    hmList_to_plot$bri         |> prepareGGFreqPlot("02_bridge")
+  )
+  tib$desc2 <- desc
+  tib
+}
+
+rbind(
+  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding, "noncoding"),
+  list_of_heatmaps_to_long_tibble(hmList_to_plot_coding, "coding")
+) |> ggplot() +
+  aes(pos, freq, col = what) +
+  geom_line() +
+  facet_wrap(~desc2 + desc, nrow = 2) +
+  theme_bw() +
+  ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
+```
+
 ### Bridge regions classified by width.
 
 Short bridge regions contain small introns.  Long bridge regions contain repeats,
