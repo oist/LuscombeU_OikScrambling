@@ -237,7 +237,8 @@ similar in both cases.
 ## Accessory functions
 
 ```{r genomic_features_byType_accessory_Functions}
-prepareFreqPlot <- function(gb, annot = NULL, rep = NULL, cne = NULL, tfbs = NULL, operons = NULL, win = 1000, direction = "left") {
+prepareFreqPlot <- function(gb, annot = NULL, rep = NULL, cne = NULL, tfbs = NULL, operons = NULL, win = 1000, direction = "left", withGenes=c("yes", "no", "only")) {
+  withGenes <- match.arg(withGenes)
   l <- list()
   # Note that get_bps(direction="mid") is probably not what you think.
   if(direction == "mid") {
@@ -245,13 +246,17 @@ prepareFreqPlot <- function(gb, annot = NULL, rep = NULL, cne = NULL, tfbs = NUL
     direction <- "left"
   }
   if (!is.null(annot)) {
-    l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = direction)
-    l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = direction)
-    l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = direction)
-    #reorder
-    newOrder <- order(rowSums(l$intron@image))
-    l$intron@image <- l$intron@image[newOrder,]
-    l$exon@image   <- l$exon@image[newOrder,]
+    if (withGenes %in% c("yes", "only")) {
+      l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = direction)
+    }
+    if (withGenes %in% c("yes", "no")) {
+      l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = direction)
+      l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = direction)
+      #reorder
+      newOrder <- order(rowSums(l$intron@image))
+      l$intron@image <- l$intron@image[newOrder,]
+      l$exon@image   <- l$exon@image[newOrder,]
+    }
   }
   if (!is.null(operons))
     l$operons<-feature_coverage(gb,    operons,              win = win, lab = "operons",direction = direction)
@@ -405,14 +410,15 @@ With only 2 panels, for unmapped–aligned and bridge–aligned, we display
 almost all the information present in the 5-panel version above.
 
 ```{r genomic_features_byType_2, fig.width=15, fig.height=5, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
-computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left") {
+computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left", withGenes = c("yes", "no", "only")) {
+  withGenes <- match.arg(withGenes)
   pair <- paste(target, query, sep = "_")
   current_GB_brk <- unmap[[pair]]
   current_GB_bri <- bri[[pair]]
   
   targetGenome <- unique(genome(gbs[[pair]]))
   
-  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
+  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction, withGenes = withGenes)
   
   hmList <- SimpleList()
   hmList$brk <- prepareFreqPlot_default(current_GB_brk)
@@ -420,8 +426,9 @@ computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE
   hmList
 }
 
-hmList_to_plot_noncoding <- computePlotData_simplified("Oki", "Osa", reps = reps, CE = ces$ce__50__48, direction = "right")
-hmList_to_plot_coding    <- computePlotData_simplified("Oki", "Osa", annots = annots, operons = operons, direction = "right")
+hmList_to_plot_noncoding    <- computePlotData_simplified("Oki", "Osa", reps = reps, CE = ces$ce__50__48, direction = "right")
+hmList_to_plot_genesoperons <- computePlotData_simplified("Oki", "Osa", annots = annots, operons = operons, direction = "right", withGenes = "only")
+hmList_to_plot_exonintron   <- computePlotData_simplified("Oki", "Osa", annots = annots, direction = "right", withGenes = "no")
 
 list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
   tib <-rbind(
@@ -433,12 +440,13 @@ list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
 }
 
 rbind(
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding, "noncoding"),
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_coding, "coding")
+  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding,    "noncoding"),
+  list_of_heatmaps_to_long_tibble(hmList_to_plot_genesoperons, "genes and operons"),
+  list_of_heatmaps_to_long_tibble(hmList_to_plot_exonintron,   "exons and introns")
 ) |> ggplot() +
   aes(pos, freq, col = what) +
   geom_line() +
-  facet_wrap(~desc2 + desc, nrow = 2) +
+  facet_wrap(~desc2 + desc, nrow = 3) +
   theme_bw() +
   ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
 ```
