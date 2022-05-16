@@ -70,25 +70,24 @@ gadems <- SimpleList()
 ```
 
 
-## Aligned non-coalesced regions
+## Isolated alignments
 
-Aligned regions that do not coalesce into syntenic blocks are relatively
+Aligned regions that do not coalesce into collinear regions are relatively
 depleted in genes, and show no enrichment of exons versus introns.  They are
-also depleted in repeats, and are mildly enriched in CNEs.  Altogether, they
-can not be summarised in one feature.  So let's see if there are motifs enriched
-there.
-
-See `vignette("GenomicFeatuers", package = "OikScrambling")` for details on
-these regions.
+also depleted in repeats, and are mildly enriched in CNEs (see
+`vignette("GenomicFeatures", package = "OikScrambling")` for details).
+Altogether, they can not be summarised in one feature.  So let's see if there
+are motifs enriched there.
 
 ```{r search_in_aln_nonCoa}
-alnNonCoa_seqs <- sapply(gbs[1:15], \(gb) gb[gb$nonCoa] |> getSeq_()) |> SimpleList()
-sapply(alnNonCoa_seqs, length)
+isolAln_seqs <- sapply(gbs[1:15], \(gb) gb[gb$nonCoa] |> getSeq_()) |> SimpleList()
+sapply(isolAln_seqs, length)
 if(!file.exists("gadems.alnNonCoa.Rds")) {
-  gadems$alnNonCoa <- BiocParallel::bplapply(alnNonCoa_seqs, doGadem) |> SimpleList()
-  saveRDS(gadems$alnNonCoa, file = "gadems.alnNonCoa.Rds")
+  gadems$isolAln <- BiocParallel::bplapply(isolAln_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$isolAln, file = "gadems.alnNonCoa.Rds")
 } else {
-  gadems$alnNonCoa <- readRDS("gadems.alnNonCoa.Rds")
+  # File names still follow old nomenclature: isolated ~ aligned non-coalesced
+  gadems$isolAln <- readRDS("gadems.alnNonCoa.Rds")
 }
 ```
 
@@ -222,7 +221,7 @@ plotOneMotif <- function(gadem, pairName = NULL, range = NULL) {
 }
 ```
 
-## Aligned non-coalesced regions
+## Isolated alignments
 
 Many comparison return a motif that looks like `AAAA.....AAAA`, and some also
 return `AAGAA` (or their reverse-complement).
@@ -232,19 +231,19 @@ A-rich reverse-complement).
 
 Sometimes a weaker A-rich / T-rich motif is also found.
 
-```{r show_alnNonCoa_motifs}
-showAllMotifs(gadems$alnNonCoa)
+```{r show_isolAln_motifs}
+showAllMotifs(gadems$isolAln)
 ```
 
 Here are a few graphical examples.
 
-```{r plot_some_alnNonCoa_motifs}
-plotOneMotif(gadems$alnNonCoa$Oki_Osa[[1]], "Okinawa - Osaka")
-plotOneMotif(gadems$alnNonCoa$Oki_Osa[[2]], "Okinawa - Osaka")
-plotOneMotif(gadems$alnNonCoa$Oki_Kum[[1]], "Okinawa - Kume")
-plotOneMotif(gadems$alnNonCoa$Oki_Kum[[2]], "Okinawa - Kume")
-plotOneMotif(gadems$alnNonCoa$Osa_Oki[[2]], "Osaka - Okinawa")
-plotOneMotif(gadems$alnNonCoa$Osa_Bar[[2]], "Osaka - Barcelona")
+```{r plot_some_isolAln_motifs}
+plotOneMotif(gadems$isolAln$Oki_Osa[[1]], "Okinawa - Osaka")
+plotOneMotif(gadems$isolAln$Oki_Osa[[2]], "Okinawa - Osaka")
+plotOneMotif(gadems$isolAln$Oki_Kum[[1]], "Okinawa - Kume")
+plotOneMotif(gadems$isolAln$Oki_Kum[[2]], "Okinawa - Kume")
+plotOneMotif(gadems$isolAln$Osa_Oki[[2]], "Osaka - Okinawa")
+plotOneMotif(gadems$isolAln$Osa_Bar[[2]], "Osaka - Barcelona")
 ```
 
 ## Unaligned non-mapped regions
@@ -338,7 +337,7 @@ Unmapped regions have a much higher AT-richness than aligned ones.
 
 ```{r at_richness2}
 rbind(
-  alnNonCoa = sapply(alnNonCoa_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  isolAln = sapply(isolAln_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   unmap     = sapply(unmap_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   inv.lgaps = sapply(inv.lgaps_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   inv       = sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean())
