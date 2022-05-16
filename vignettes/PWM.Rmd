@@ -53,7 +53,7 @@ documentation states:
 # Pass genome information through metadata
 getSeq_ <- function(x) {
   seqs <- getSeq(x)
-  metadata(seqs)$genome <- unique(genome(x))
+  genome(seqs) <- unique(genome(x))
   seqs
 }
 
@@ -61,7 +61,7 @@ getSeq_ <- function(x) {
 # Slow !
 doGadem <- function(seqs) {
   seqs <- seqs[width(seqs) < 48000]
-  bsgenome_name <- metadata(seqs)$genome
+  bsgenome_name <- genome(seqs@metadata$seqinfo) |> unique()
   bsgenome_obj <- BSgenome::getBSgenome(bsgenome_name)
   GADEM(seqs, verbose=1, genome=bsgenome_obj)
 }
