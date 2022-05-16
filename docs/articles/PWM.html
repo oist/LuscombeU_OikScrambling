@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.0.0</span>
       </span>
     </div>
 
@@ -54,6 +54,9 @@
   <ul class="dropdown-menu" role="menu">
 <li>
       <a href="../articles/CNEs.html">Conserved non-coding elements</a>
+    </li>
+    <li>
+      <a href="../articles/ChromosomePlots.html">Chromosome-scale feature density plots</a>
     </li>
     <li>
       <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
@@ -138,7 +141,7 @@
       <h1 data-toc-skip>Motif search and analysis</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">30 March, 2022</h4>
+            <h4 data-toc-skip class="date">16 May, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/PWM.Rmd" class="external-link"><code>vignettes/PWM.Rmd</code></a></small>
       <div class="hidden name"><code>PWM.Rmd</code></div>
@@ -184,7 +187,7 @@
 <code class="sourceCode R"><span class="co"># Pass genome information through metadata</span>
 <span class="va">getSeq_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">seqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html" class="external-link">getSeq</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span><span class="op">$</span><span class="va">genome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">genome</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/heatmaps/man/metadata.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span><span class="op">$</span><span class="va">genome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">genome</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
   <span class="va">seqs</span>
 <span class="op">}</span>
 
@@ -192,7 +195,7 @@
 <span class="co"># Slow !</span>
 <span class="va">doGadem</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">seqs</span> <span class="op">&lt;-</span> <span class="va">seqs</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IPosRanges-class.html" class="external-link">width</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">48000</span><span class="op">]</span>
-  <span class="va">bsgenome_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span><span class="op">$</span><span class="va">genome</span>
+  <span class="va">bsgenome_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/heatmaps/man/metadata.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">seqs</span><span class="op">)</span><span class="op">$</span><span class="va">genome</span>
   <span class="va">bsgenome_obj</span> <span class="op">&lt;-</span> <span class="fu">BSgenome</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BSgenome/man/available.genomes.html" class="external-link">getBSgenome</a></span><span class="op">(</span><span class="va">bsgenome_name</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/GADEM.html" class="external-link">GADEM</a></span><span class="op">(</span><span class="va">seqs</span>, verbose<span class="op">=</span><span class="fl">1</span>, genome<span class="op">=</span><span class="va">bsgenome_obj</span><span class="op">)</span>
 <span class="op">}</span>
