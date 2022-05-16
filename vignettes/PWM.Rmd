@@ -91,25 +91,26 @@ if(!file.exists("gadems.alnNonCoa.Rds")) {
 }
 ```
 
-## Unmapped
+## Breakpoint regions
 
-There regions are not aligned and not within a synteny block.
+There regions are not aligned and not within a collinear region.
 
-```{r search_in_unmap}
-unmap_seqs <- sapply(unmap[1:15], getSeq_) |> SimpleList()
-sapply(unmap_seqs, length)
+```{r search_in_brkReg}
+brkReg_seqs <- sapply(brkReg[1:15], getSeq_) |> SimpleList()
+sapply(brkReg_seqs, length)
 if(!file.exists("gadems.unmap.Rds")) {
-  gadems$unmap <- BiocParallel::bplapply(unmap_seqs, doGadem) |> SimpleList()
-  saveRDS(gadems$unmap, file = "gadems.unmap.Rds")
+  gadems$brkReg <- BiocParallel::bplapply(brkReg_seqs, doGadem) |> SimpleList()
+  saveRDS(gadems$brkReg, file = "gadems.unmap.Rds")
 } else {
-  gadems$unmap <- readRDS("gadems.unmap.Rds")
+  gadems$brkReg <- readRDS("gadems.unmap.Rds")
 }
 ```
 
 ## Unaligned regions near inversions
 
 I wanted to search search for motifs near inversions to see if they can
-lead to an explanation.
+lead to an explanation.  Here I do not discriminate between breakpoint region or
+bridge region among unaligned regions.  Maybe I should...
 
 See `vignette("Inversions", package = "OikScrambling")` for details on inversion.
 
@@ -246,7 +247,7 @@ plotOneMotif(gadems$isolAln$Osa_Oki[[2]], "Osaka - Okinawa")
 plotOneMotif(gadems$isolAln$Osa_Bar[[2]], "Osaka - Barcelona")
 ```
 
-## Unaligned non-mapped regions
+## Breakpoint regions
 
 We still find `AAAA.....AAAA`,`AAGAA`, `A`-rich (or their reverse-complement),
 but not as systematicaly.
@@ -258,17 +259,17 @@ We start to see species-specific motifs:
     the reverse complements).
 
 
-```{r show_unal_motifs}
-showAllMotifs(gadems$unmap)
+```{r show_brkReg_motifs}
+showAllMotifs(gadems$brkReg)
 ```
 
 Here are a few graphical examples.
 
-```{r plot_some_unal_motifs}
-plotOneMotif(gadems$unmap$Oki_Osa[[2]], "Okinawa - Osaka")
-plotOneMotif(gadems$unmap$Oki_Kum[[1]], "Okinawa - Kume")
-plotOneMotif(gadems$unmap$Osa_Oki[[1]], "Osaka - Okinawa")
-plotOneMotif(gadems$unmap$Bar_Osa[[1]], "Barcelona - Okinawa")
+```{r plot_some_brkReg_motifs}
+plotOneMotif(gadems$brkReg$Oki_Osa[[2]], "Okinawa - Osaka")
+plotOneMotif(gadems$brkReg$Oki_Kum[[1]], "Okinawa - Kume")
+plotOneMotif(gadems$brkReg$Osa_Oki[[1]], "Osaka - Okinawa")
+plotOneMotif(gadems$brkReg$Bar_Osa[[1]], "Barcelona - Okinawa")
 ```
 
 ## Unaligned regions left to inversion
@@ -333,12 +334,12 @@ plotOneMotif(gadems$inv.lgaps$Osa_Nor[[2]], "Osaka - Norway")
 
 # AT richness
 
-Unmapped regions have a much higher AT-richness than aligned ones.
+Breakpoint regions have a much higher AT-richness than aligned ones.
 
 ```{r at_richness2}
 rbind(
   isolAln = sapply(isolAln_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
-  unmap     = sapply(unmap_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
+  brkReg     = sapply(brkReg_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   inv.lgaps = sapply(inv.lgaps_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   inv       = sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean())
 )
