@@ -131,7 +131,9 @@ if(!file.exists("gadems.inv.lgaps.Rds")) {
 ## Inversions
 
 ```{r search_in_inversions}
-# inv_seqs <- sapply(coa[1:15], leftInversionGaps) |> sapply(getSeq_) |> SimpleList()
+invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> SimpleList()
+inv_seqs <-  sapply(invRegions, getSeq) |> SimpleList()
+sapply(inv_seqs, length)
 # sapply(inv_seqs, length)
 # if (!file.exists("gadems.invs.Rds")) {
 #   gadems$invs <- BiocParallel::bplapply(inv_seqs, doGadem) |> SimpleList()
@@ -170,12 +172,6 @@ if(!file.exists("gadems.inv.lgaps.Rds")) {
 ```
 
 ## Summary
-
-```{r at_richness}
-## Inverted regions are AT-rich as usual.
-invRegions <- sapply(coa[1:15], \(gr) filterInversions(flagInversions(gr))) |> SimpleList()
-invSeq <-  sapply(invRegions, getSeq) |> SimpleList()
-```
 
 Number of motifs found
 
@@ -341,17 +337,17 @@ rbind(
   isolAln = sapply(isolAln_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   brkReg     = sapply(brkReg_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
   inv.lgaps = sapply(inv.lgaps_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean()),
-  inv       = sapply(invSeq, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean())
+  inv       = sapply(inv_seqs, \(seq) letterFrequency(seq, "AT", as.prob = TRUE) |> mean())
 )
 
 (genomes.AT <- sapply(genomes, \(g)
   weighted.mean(letterFrequency(getSeq_(g), "AT", as.prob = TRUE), seqlengths(g))))
 
 ## This difference is significant.
-t.test(letterFrequency(invSeq$Oki_Osa, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Osa, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Osa_Oki, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Osa_Oki, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Oki_Bar, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Bar, "AT", as.prob = TRUE))
-t.test(letterFrequency(invSeq$Oki_Kum, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Kum, "AT", as.prob = TRUE))
+t.test(letterFrequency(inv_seqs$Oki_Osa, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Osa, "AT", as.prob = TRUE))
+t.test(letterFrequency(inv_seqs$Osa_Oki, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Osa_Oki, "AT", as.prob = TRUE))
+t.test(letterFrequency(inv_seqs$Oki_Bar, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Bar, "AT", as.prob = TRUE))
+t.test(letterFrequency(inv_seqs$Oki_Kum, "AT", as.prob = TRUE), letterFrequency(inv.lgaps_seqs$Oki_Kum, "AT", as.prob = TRUE))
 ```
 
 
