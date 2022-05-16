@@ -14,7 +14,6 @@ editor_options:
 
 ```{r setup}
 knitr::opts_chunk$set(cache = TRUE)
-knitr::opts_knit$set(verbose = TRUE)
 ```
 
 # Introduction
@@ -33,7 +32,7 @@ genomes <- OikScrambling:::loadAllGenomes(compat = F)
 annots  <- OikScrambling:::loadAllAnnotations() |> suppressWarnings()
 load("BreakPoints.Rdata")
 
-library('ggplot2')
+library('ggplot2') |> suppressPackageStartupMessages()
 
 requireNamespace("ggseqlogo")
 requireNamespace("JASPAR2020") |> suppressPackageStartupMessages()
