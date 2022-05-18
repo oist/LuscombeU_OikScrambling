@@ -22,6 +22,18 @@ Search for motifs in regions near genomic breaks.  By default the computations
 that take time are loaded from R objects.  The source code to generate them
 is only executed when the object files can not be found.
 
+# Short summary
+
+Motifs found in _isolated regions_ are made of one or two stretches of `A`s (or
+`T`s when found in reverse-complement).  Typical example: `nrAAAwnnnnrAAAn`.
+The same motifs are found in _breakpoint regions_, with the addition of
+species-specific motifs such as `GsCsCkwmGsGsC` (Okinawa) or `GCT..GCT` (North).
+In addition to this, other species-specific palindromic motifs are enriched in
+breakpoint regions flanking inversions, such as `CCTGA.TCAGG` in the Okinawan
+genome and `nGAGGCmACGmsCGTTCn` or `nACGCyCryTCATTCTwTy` in Northern genomes.
+
+This search is intuition-driven and not exhaustive.
+
 # Load pacakges
 
 Core packages that provide functions we use a lot.
@@ -96,7 +108,7 @@ if(!file.exists("gadems.alnNonCoa.Rds")) {
 There regions are not aligned and not within a collinear region.
 
 ```{r search_in_brkReg}
-brkReg_seqs <- sapply(brkReg[1:15], getSeq_) |> SimpleList()
+brkReg_seqs <- sapply(unmap[1:15], getSeq_) |> SimpleList()
 sapply(brkReg_seqs, length)
 if(!file.exists("gadems.unmap.Rds")) {
   gadems$brkReg <- BiocParallel::bplapply(brkReg_seqs, doGadem) |> SimpleList()
