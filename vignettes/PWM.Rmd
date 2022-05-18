@@ -506,17 +506,14 @@ rtracklayer::export.bed(toZenbuOki |> sort(i=T), "PWMs_of_interest_Oki.bed")
 ```
 
 ```{r PWM_score_on_chrs, warning=FALSE}
-# No exact match
-#vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)
+# No exact match or can not the pattern acept Ns ?
+#vmatchPattern("nCCTGAsTCAGGkTyTn", BSgenome.Oidioi.OIST.OKI2018.I69)
 
-pwm <- rGADEM::getPWM(gadems$inv.lgaps$Oki_Osa[[1]])
+sapply(gadems_to_export_hits$nCCTGAsTCAGGkTyTn, length)
+hist(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69$score)
+hist(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OSKA2016v1.9$score)
 
-pwmHits <- sapply(genomes, matchPWM, pwm = pwm)
-sapply(pwmHits, length)
-hist(pwmHits$OKI2018.I69$score)
-hist(pwmHits$OSKA2016v1.9$score)
-
-pwmHit <- pwmHits$OKI2018.I69
+pwmHit <- gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69
 
 library("Gviz")
 options(ucscChromosomeNames=FALSE)
@@ -537,19 +534,17 @@ plotTracks(list(gen, a, trk))
 
 ```{r}
 
-length(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa))
-length(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa))
+length(subsetByOverlaps(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69, inv.lgaps$Oki_Osa))
+length(subsetByOverlaps(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69, invRegions$Oki_Osa))
 
-hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
-hist(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)))
+hist(score(subsetByOverlaps(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69, inv.lgaps$Oki_Osa)))
+hist(score(subsetByOverlaps(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69, invRegions$Oki_Osa)))
 
 # Scores in gaps are higher than average.
-t.test(score(pwmHits$OKI2018.I69), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
+t.test(score(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69), score(subsetByOverlaps(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # Scores in gaps and inversions are not different 
-t.test(score(subsetByOverlaps(pwmHits$OKI2018.I69, invRegions$Oki_Osa)), score(subsetByOverlaps(pwmHits$OKI2018.I69, inv.lgaps$Oki_Osa)))
-
-# rtracklayer::export.bed(pwmHits, "AAGCsGCwwmkCGrCTTyn.bed")
+t.test(score(subsetByOverlaps(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69, invRegions$Oki_Osa)), score(subsetByOverlaps(gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69, inv.lgaps$Oki_Osa)))
 
 # PWM hits seem to be more abundant on short arms.
 #OKI_longShort$pwmHitsPerMb <- countOverlaps(OKI_longShort, pwmHits$Oki) / width(OKI_longShort) * 1e6
