@@ -14,7 +14,6 @@ editor_options:
 
 ```{r setup}
 knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
-knitr::opts_knit$set(verbose = TRUE)
 ```
 
 # Introduction
@@ -29,8 +28,6 @@ Here we explore the role of inversions in scrambling _Oikopleura_ genomes.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-genomes <- OikScrambling:::loadAllGenomes()
-reps <- OikScrambling:::loadAllRepeats()
 load("BreakPoints.Rdata")
 ```
 
@@ -88,3 +85,33 @@ ggplot(invs_summary |> tidyr::pivot_longer(c("mapped"))) +
 Enrichment for motifs is being searched in
 `vignette("PWM", package = "OikScrambling")`.
 
+## Breakpoint regions flanking inversions in the same-population alignments.
+
+Check `vignette("ColinearityInterruptors", package = "OikScrambling")`.
+
+## Breakpoint regions flanking large inversions in the North–North alignments.
+
+Let's try to isolate some inversions that are easy to spot on a whole-chromosome
+alignment.
+
+```{r}
+plotApairOfChrs(coa2$Osa_Bar, "PAR")
+(ROI1 <- coa2$Osa_Bar |> plyranges::filter(seqnames == "PAR", start > 9e6, end < 14e6, start(query) > 7e6, end(query) < 12e6))
+plotApairOfChrs(ROI1)
+# The contours of the main 4 blocks can be coalesced by applying a size threshold.
+ROI1 |> coalesce_contigs(min = 1e4)
+# The gaps flanking the first inverted region are quite large!
+(ROI1_gaps <- ROI1 |> coalesce_contigs(min = 1e4) |> cleanGaps() |> plyranges::mutate(w = width))
+# The left-side gap contains no alignment at all even before discarding the short ones.
+subsetByOverlaps(gbs$Osa_Bar, ROI1_gaps)
+# The same region aligns well to Aomori, suggesting that it is not missassembled
+coa2$Osa_Aom |> plyranges::filter(seqnames == "PAR", start > 9e6, end < 14e6) |> plotApairOfChrs()
+# The Osa–Bar unaligned regions appear to align well to Aom, but the first one is split
+# and the second one contains a small inversion. Are there a hotspots ?
+subsetByOverlaps(gbs$Osa_Aom, ROI1_gaps, type = "any") |> plotApairOfChrs()
+subsetByOverlaps(gbs$Osa_Aom, ROI1_gaps[1], type = "within") |> plotApairOfChrs()
+subsetByOverlaps(gbs$Osa_Aom, ROI1_gaps[2], type = "within") |> plotApairOfChrs()
+subsetByOverlaps(gbs$Osa_Aom, ROI1_gaps[3], type = "within") |> plotApairOfChrs()
+# In the alignment to Okinawa, it is scrambled.
+coa2$Osa_Oki |> plyranges::filter(seqnames == "PAR", start > 9e6, end < 14e6) |> plotApairOfChrs()
+```
