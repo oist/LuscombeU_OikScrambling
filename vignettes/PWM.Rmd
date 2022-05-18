@@ -437,6 +437,74 @@ GLAM2 search of the gap sequences did not return a motif similar to "AAGCsGCwwmk
 Disappointingly, the motif is found equally in gaps and inversions when searched
 with its PWM.
 
+```{r PWM_collection_Oki}
+gadems$isolAln |> showAllMotifs()
+
+gadems_to_export <- SimpleList()
+# gadems_to_export$nrAAAwnnnnrAAAn            <- gadems $ isolAln   $ Oki_Osa [1] # Too many hits
+gadems_to_export$GsCsCkwmGsGsCkTyn          <- gadems $ brkReg    $ Oki_Osa [2]
+gadems_to_export$mCGsCCCkwmGGGCCGkCwmrsCCCy <- gadems $ brkReg    $ Oki_Kum [1]
+gadems_to_export$nCCTGAsTCAGGkTyTn          <- gadems $ inv.lgaps $ Oki_Osa [1]
+gadems_to_export$nGCCGCwwmkCGGCTTyTn        <- gadems $ inv.lgaps $ Oki_Osa [3]
+gadems_to_export$mGCTymGCTymGCnmwTTTn       <- gadems $ brkReg    $ Osa_Oki [1]
+gadems_to_export$wGCTTCGCTTCGCk             <- gadems $ brkReg    $ Bar_Osa [1]
+gadems_to_export$mCAAyTwATTGGTCAyTTTn       <- gadems $ inv.lgaps $ Osa_Oki [4]
+
+# Search for all selected motifs in all genomes
+gadems_to_export_pwms <- sapply(gadems_to_export, rGADEM::getPWM) |> SimpleList()
+gadems_to_export_hits <- sapply(gadems_to_export_pwms, \(pwm) {
+  sapply(genomes, matchPWM, pwm = pwm) |> SimpleList()
+}) |> suppressWarnings() |> SimpleList()
+
+# Just fix names
+names(gadems_to_export_hits) <- names(gadems_to_export_pwms) <- names(gadems_to_export)
+
+sapply(gadems_to_export_hits, sapply, length) |> t()
+```
+
+Overlap between detected motifs in Oki
+
+```{r Oki_pwm_found_overlap}
+sapply(names(gadems_to_export_hits), \(motif) {
+  sapply(names(gadems_to_export_hits), \(motif2) {
+    sum(width(intersect(gadems_to_export_hits[[motif]][["OKI2018.I69"]],gadems_to_export_hits[[motif2]][["OKI2018.I69"]])))
+  })
+})
+```
+
+Overlap between detected motifs in Osa
+
+```{r Osa_pwm_found_overlap}
+sapply(names(gadems_to_export_hits), \(motif) {
+  sapply(names(gadems_to_export_hits), \(motif2) {
+    sum(width(intersect(gadems_to_export_hits[[motif]][["OSKA2016v1.9"]],gadems_to_export_hits[[motif2]][["OSKA2016v1.9"]])))
+  })
+})
+```
+
+Export to ZENBU
+
+```{r export_for_ZENBU}
+toZenbuOki <- c(
+  gadems_to_export_hits$GsCsCkwmGsGsCkTyn$OKI2018.I69          |> plyranges::mutate(Name = "GsCsCkwmGsGsCkTyn"),
+  gadems_to_export_hits$mCGsCCCkwmGGGCCGkCwmrsCCCy$OKI2018.I69 |> plyranges::mutate(Name = "mCGsCCCkwmGGGCCGkCwmrsCCCy"),
+  gadems_to_export_hits$nCCTGAsTCAGGkTyTn$OKI2018.I69          |> plyranges::mutate(Name = "nCCTGAsTCAGGkTyTn"),
+  gadems_to_export_hits$nGCCGCwwmkCGGCTTyTn$OKI2018.I69        |> plyranges::mutate(Name = "nGCCGCwwmkCGGCTTyTn"),
+  gadems_to_export_hits$mGCTymGCTymGCnmwTTTn$OKI2018.I69       |> plyranges::mutate(Name = "mGCTymGCTymGCnmwTTTn"),
+  gadems_to_export_hits$wGCTTCGCTTCGCk$OKI2018.I69             |> plyranges::mutate(Name = "wGCTTCGCTTCGCk"),
+  gadems_to_export_hits$mCAAyTwATTGGTCAyTTTn$OKI2018.I69       |> plyranges::mutate(Name = "mCAAyTwATTGGTCAyTTTn")
+)
+toZenbuOki$sequence <- as.character(toZenbuOki$string)
+toZenbuOki$string <- NULL
+
+# Export to GFF3
+rtracklayer::export.gff3(toZenbuOki |> sort(i=T), "PWMs_of_interest_Oki.gff")
+
+# And also to BED for expression tracks
+names(toZenbuOki) <- toZenbuOki$Name
+rtracklayer::export.bed(toZenbuOki |> sort(i=T), "PWMs_of_interest_Oki.bed")
+```
+
 ```{r PWM_score_on_chrs, warning=FALSE}
 # No exact match
 #vmatchPattern("rAAGCsGCwwmkCGrCTTyn", OKI2018_I69)
