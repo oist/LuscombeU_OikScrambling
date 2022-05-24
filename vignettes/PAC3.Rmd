@@ -27,8 +27,12 @@ package = "OikScrambling")` for how the different objects are prepared.
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes(compat = F)
+
+transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings()
+
 load("BreakPoints.Rdata")
 ```
+
 
 # PAC3 moved between chr1 and XSR; its ancestral state is unknown
 
@@ -290,8 +294,336 @@ PAC3_XSR_Osa.aln.right <- list(
 PAC3_XSR_Osa.aln.right |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
 ```
 
+## PAC 3 as arrows
+``` {r}
+
+gr2dna_seg_arr <- function (gr, ...) {
+  # DNA segments need unique names
+  if (length(gr) == 0) return(NULL)
+  if (is.null(names(gr))) names(gr) <- as.character(gr)
+  # Unstranded ranges are not recognised
+  strand(gr[strand(gr) == "*"]) <- "+"
+  df <- data.frame(
+    name   = names(gr),
+    start  = start(gr),
+    end    = end(gr),
+    strand = strand(gr)
+  )
+  genoPlotR::dna_seg(df, gene_type = "arrows", ...)
+
+  
+  }
+
+
+```
+
+
+
 # Session information
 
 ```{r session_information}
 sessionInfo()
+```
+
+```{r header}
+
+
+
+libray("genoPlotR")
+
+#Get the region the operon is in Okinawa
+##    Write a function that extracts a gene and its surrounding region
+## 
+#Get corresponding region in Osaka
+#Plot them in the same plot
+
+
+#Transform GR into dna_segs
+
+gr2dna_seg_arr <- function (gr, ...) {
+   # DNA segments need unique names
+   if (length(gr) == 0) return(NULL)
+   if (is.null(names(gr))) names(gr) <- as.character(gr)
+   # Unstranded ranges are not recognised
+   strand(gr[strand(gr) == "*"]) <- "+"
+   df <- data.frame(
+     name   = names(gr),
+     start  = start(gr),
+     end    = end(gr),
+     strand = strand(gr)
+   )
+   genoPlotR::dna_seg(df, gene_type = "arrows", ...)
+ 
+
+
+comparisons[[1]]$
+
+gr2dna_seg_arr(transcripts$OKI2018.I69[11497331-11498497, 11498259-11511831], ) |> list() |> plot_gene_map(main = "Scrambled", dna_seg_scale = T)
+
+
+
+
+#Oki range 1
+dna_seg1 <- gr2dna_seg_arr(transcripts$OKI2018.I69[11478580-11497681], ) 
+
+#gr1 <- as.data.frame(transcripts$OKI2018.I69)
+df4 <- data.frame(start1=dna_seg1$start,
+ end1=dna_seg1$end,
+ start2=dna_seg1$start,
+ end2=dna_seg1$end)
+
+comp1 <- comparison(df4)
+
+
+#Oki range 2
+dna_seg2 <- gr2dna_seg_arr(transcripts$OKI2018.I69[11498259-11511831], ) 
+df5 <- data.frame(start1=dna_seg2$start,
+ end1=dna_seg2$end,
+ start2=dna_seg2$start,
+ end2=dna_seg2$end)
+
+comp2 <- comparison(df5)
+
+#Range 2 (PAC3)
+dna_seg3 <- gr2dna_seg_arr(transcripts$OKI2018.I69[11497718-11498101], ) 
+
+comparisons <- list(comp1, comp2)
+
+
+dna_segs <- list(dna_seg1, dna_seg2, dna_seg3)
+
+
+plot_gene_map(dna_segs=dna_segs, comparisons=comparisons)
+
+
+
+#OKI_OSA
+daf1 <- data.frame(name=c("g1", "g2", "g3"),
+ start=c(11478580, 11497718, 11498259),
+ end=c(11497681, 11498101, 11511831),
+ strand=c(-1, -1, -1),
+ col=c("blue", "grey", "red"))
+
+dna_seg1a <- dna_seg(daf1)
+
+daf11 <- data.frame(start1=dna_seg1a$start,
+ end1=dna_seg1a$end,
+ start2=dna_seg1a$start,
+ end2=dna_seg1a$end)
+
+
+
+
+#OKI_BAR
+daf2 <- data.frame(name=c("e1", "e2", "e3"),
+ start=c(11478590, 11497717, 11498256),
+ end=c(11497665, 11498108, 11511831),
+ strand=c(+1, +1, +1),
+ col=c("pink", "yellow", "green"))
+
+dna_seg2a <- dna_seg(daf2)
+
+daf22 <- data.frame(start1=dna_seg2a$start,
+ end1=dna_seg2a$end,
+ start2=dna_seg2a$start,
+ end2=dna_seg2a$end)
+
+comp22 <- comparison(daf22)
+
+
+#OKI_NOR
+daf3 <- data.frame(name=c("e1", "e2", "e3"),
+ start=c(11478590, 11497717, 11498256),
+ end=c(11497665, 11498108, 11511831),
+ strand=c(+1, -1, +1),
+ col=c("gray", "blue", "red"))
+
+dna_seg3a <- dna_seg(daf3)
+
+daf33 <- data.frame(start1=dna_seg3a$start,
+ end1=dna_seg3a$end,
+ start2=dna_seg3a$start,
+ end2=dna_seg3a$end)
+
+comp33 <- comparison(daf33)
+
+dna_segs2 <- list(dna_seg1a, dna_seg2a, dna_seg3a)
+
+compari2 <- comparison(comp22, comp33)
+
+
+
+
+
+
+
+
+
+
+
+#Osaka
+dna_seg2 <- gr2dna_seg_arr(transcripts$OSKA2016v1.9[582083:585144], ) |> list() |> plot_gene_map()
+
+
+dna_seg1$col <- c("blue","red", "green", "yellow", "pink")
+gr2dna_seg_arr(dna_seg1) |> list() |> plot_gene_map(main = "Scrambled", dna_seg_scale = T)
+
+
+
+dna_seg12 <- 
+
+
+dna_seg11 <- dna_seg1[,-1]
+rownames(dna_seg11) <- dna_seg1[,1]
+colnames(dna_seg11) <- c("start1", "end1", "start2", "end2")
+
+dna_seg11 |> select(start1, end1, start2, end2)
+
+comparison1 <- comparison(dna_seg11)
+
+
+
+
+
+#################
+################
+PAC3 <- GRanges("chr1:11497331-11498497")
+
+coa$Oki_Osa |> subsetByOverlaps(PAC3)
+coa$Oki_Bar |> subsetByOverlaps(PAC3)
+
+extract_transcript_coords <- function(gr, gene_name, upstream=0, downstream=0) {
+  matching_gene_index <- which(mcols(gr)$tx_name == gene_name)
+  sgr <- gr[(matching_gene_index-upstream):(matching_gene_index+downstream),]
+
+  sgr
+}
+
+pac3_operon_oki <- extract_transcript_coords(transcripts$OKI2018.I69, 'g3146.t1', upstream=9, downstream=9)
+pac3_operon_osa <- extract_transcript_coords(transcripts$OSKA2016v1.9, 'g12442.t1', upstream=9, downstream=9)
+
+
+
+
+calkOperons <- function(genes, window = 100) {
+  # Divide the window by two because we will expand both sides of the range.
+  halfwin <- round(window / 2)
+  # Sort the genes ignoring strand.
+  g <- sort(genes, ignore.strand = TRUE)
+  # Expand by `halfwin` nucleotides
+  # We suppress warnings because coordinates at the edges of seqfeatures can
+  # become transiently negative.
+  g <- (g + halfwin) |> suppressWarnings()
+  # Give a unique ID to all runs of successive genes on the same strand of the
+  # same seqname, see also https://stackoverflow.com/questions/21421047 and
+  # data.table::rleid
+  g$namedStrand <- Rle(paste0(seqnames(g), strand(g)))
+  g$idx <- Rle(rep(seq_along(runValue(g$namedStrand))), runLength(g$namedStrand))
+  # Split the genes by run ID
+  opL <- GenomicRanges::split(g, g$idx)
+  # Remove all runs of length one
+  opL <- opL[runLength(strand(g)) > 1]
+  # Merge into operons
+  operons   <- unlist(endoapply(opL, reduce, min.gapwidth = 0L)) |> suppressWarnings()
+  # Removed un-merged genes
+  operons$n <- countOverlaps(operons, genes)
+  ov <- findOverlaps(operons, genes)
+  operons$tx_names <- CharacterList(split(genes$tx_name[subjectHits(ov)], queryHits(ov))) |> unname()
+  operons <- operons[operons$n > 1]
+  # Remove the flanking sequences
+  operons - halfwin
+}
+
+
+
+
+operons <- SimpleList()
+operons$Oki <- calkOperons(transcripts$OKI2018.I69, window = 500)
+operons$Osa <- calkOperons(transcripts$OSKA2016v1.9, window=500)
+operons$Bar <- calkOperons(transcripts$Bar2.p4, window=500)
+
+
+gr2dna_seg <- function (gr, gene_of_interest=NULL, ...) {
+  # DNA segments need unique names
+  if (length(gr) == 0) return(NULL)
+  if (is.null(names(gr))) names(gr) <- as.character(gr)
+  # Unstranded ranges are not recognised
+  strand(gr[strand(gr) == "*"]) <- "+"
+  df <- data.frame(
+    name   = names(gr),
+    start  = start(gr),
+    end    = end(gr),
+    strand = strand(gr)
+  )
+  dna_seg <- genoPlotR::dna_seg(df, ...)
+  dna_seg$col <- 'black'
+  dna_seg$fill <- '#595959'
+  if(!is.null(gene_of_interest)){
+    dna_seg$fill[which(dna_seg$name==gene_of_interest)] <- 'red'
+  }
+  dna_seg
+}
+
+gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1') -> tmp_dnaseg
+
+dnaseg_to_annot <- function(ds, ...) {
+  annot <- annotation(x1=middle(ds), text=ds$name, ...)
+  annot
+}
+dnaseg_to_annot(tmp_dnaseg)
+
+
+
+
+addMargins <- function(regs, inner.margin, outer.margin){
+  regs <- extendRegions(regs, inner.margin, inner.margin)
+  regs[1] <- extendRegions(regs[1], extend.start = outer.margin -inner.margin)
+  regs[length(regs)] <- 
+    extendRegions(regs[length(regs)], extend.end = 
+                    outer.margin - inner.margin)
+  return(regs)
+}
+
+
+
+
+
+
+plot_gene_map(
+  dna_segs = list(
+    Okinawa=gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'),
+    Osaka=gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1')
+  ),
+  addMargins(
+  annotations = list(
+    dnaseg_to_annot(gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'), rot=10, col=rainbow(19)),
+    dnaseg_to_annot(gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1'), rot=10, col=rainbow(19))
+  ),
+  comparisons = list(gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3))),
+  main = "PAC3 moved between chr1 and XSR")
+ # par(mar=c(8,8,8,8))
+)
+
+
+
+
+'''
+
+GenesOfInterest <- 
+
+
+
+gene_of_interest_in_x_species <- function(species_names, gene_list){
+  names_with_coords <- sapply(species_names, function(s) paste0(species_names, min(s$start), '-',   max(s$end))
+  dna_segs = list(
+    Okinawa=gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'),
+    Osaka=gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1')
+  )
+}
+
+
+
+
+
+
 ```
