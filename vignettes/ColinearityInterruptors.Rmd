@@ -62,9 +62,10 @@ bestMatch <- function(gb)
 coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
 ```
 
-`contig_27_1` is most of chr1's short arm.
+The next best match, `contig_27_1` is most of chr1's short arm.
 
 ```{r Kum_chr1_assembly_2}
+coa$Oki_Kum |> plyranges::filter(seqnames == "chr1", seqnames(query)!="contig_3_1") |> bestMatch()
 coa$Oki_Kum |> plotApairOfChrs(chrQ = "contig_27_1")
 ```
 
