@@ -194,9 +194,10 @@ Inversions …
 # We start with a broader random region
 (ROI6 <- coa2$Oki_Kum |> flagAll() |> dplyr::slice(160:200))
 ROI6 |> plotApairOfChrs()
-coa2$Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Double-collapsed")
-coa $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Collapsed")
-gbs $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Mapped")
+ROI6_range <- ROI6 |> plyranges::filter(seqnames(query) == "contig_27_1") |> range()
+coa2$Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Double-collapsed collinear regions")
+coa $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Collinear regions")
+gbs $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Alignments")
 
 # Sometimes, everything that remains is inversions
 ROI6[1:6] |> plotApairOfChrs()
