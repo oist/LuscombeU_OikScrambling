@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.0.0</span>
       </span>
     </div>
 
@@ -54,6 +54,9 @@
   <ul class="dropdown-menu" role="menu">
 <li>
       <a href="../articles/CNEs.html">Conserved non-coding elements</a>
+    </li>
+    <li>
+      <a href="../articles/ChromosomePlots.html">Chromosome-scale feature density plots</a>
     </li>
     <li>
       <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
@@ -138,7 +141,7 @@
       <h1 data-toc-skip>Inversions</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">30 March, 2022</h4>
+            <h4 data-toc-skip class="date">18 May, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/Inversions.Rmd" class="external-link"><code>vignettes/Inversions.Rmd</code></a></small>
       <div class="hidden name"><code>Inversions.Rmd</code></div>
@@ -148,8 +151,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_knit.html" class="external-link">opts_knit</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>cache <span class="op">=</span> <span class="cn">TRUE</span>, cache.lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -161,8 +163,6 @@
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/oist/LuscombeU_OikScrambling" class="external-link">'OikScrambling'</a></span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">genomes</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllGenomes.html">loadAllGenomes</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/loadAllRepeats.html">loadAllRepeats</a></span><span class="op">(</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"BreakPoints.Rdata"</span><span class="op">)</span></code></pre></div>
 <p>See <code><a href="../articles/LoadGenomicBreaks.html">vignette("LoadGenomicBreaks", package = "OikScrambling")</a></code> for how the different GBreaks objects are prepared.</p>
 </div>
@@ -181,9 +181,9 @@
 <p>The number of detected inversions is further increased after double-coalescing, but not much.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="op">(</span><span class="va">invs_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
-  align  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
-  mapped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
-  map2   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagInversions.html" class="external-link">flagInversions</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>
+  align  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">flagInversions</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
+  mapped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">flagInversions</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>,
+  map2   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">flagInversions</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">inv</span><span class="op">)</span><span class="op">)</span>
 <span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##         align mapped map2</span>
 <span class="co">## Oki_Osa   614    670  704</span>
@@ -263,21 +263,144 @@
 <span class="va">invs_summary</span><span class="op">$</span><span class="va">target</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">invs_summary</span><span class="op">)</span><span class="op">)</span>
 <span class="va">invs_summary</span> <span class="op">&lt;-</span> <span class="va">invs_summary</span><span class="op">[</span><span class="va">invs_summary</span><span class="op">$</span><span class="va">class</span> <span class="op">!=</span> <span class="st">"Int/Rob – Oki"</span>,<span class="op">]</span>
 
-<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">invs_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">pairname_s</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span> <span class="op">(</span><span class="st">"Number of inversions found after different post-processings"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, ncol<span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+<span class="fu">ggplot</span><span class="op">(</span><span class="va">invs_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"map2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">aes</span><span class="op">(</span><span class="va">value</span>, <span class="va">pairname_s</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>col <span class="op">=</span> <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggtitle</span> <span class="op">(</span><span class="st">"Number of inversions found after different post-processings"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, ncol<span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p><img src="Inversions_files/figure-html/detect_trivial_invertions-1.png" width="768"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">invs_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mapped"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">genus</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">class</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span> <span class="op">(</span><span class="st">"Number of inversions found in mapped regions"</span><span class="op">)</span> </code></pre></div>
+<code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">invs_summary</span> |&gt; <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mapped"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">aes</span><span class="op">(</span><span class="va">value</span>, <span class="va">genus</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>col <span class="op">=</span> <span class="va">class</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggtitle</span> <span class="op">(</span><span class="st">"Number of inversions found in mapped regions"</span><span class="op">)</span> </code></pre></div>
 <p><img src="Inversions_files/figure-html/number_of_inversions-1.svg" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="motif-search">Motif search<a class="anchor" aria-label="anchor" href="#motif-search"></a>
 </h3>
 <p>Enrichment for motifs is being searched in <code><a href="../articles/PWM.html">vignette("PWM", package = "OikScrambling")</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="breakpoint-regions-flanking-inversions-in-the-same-population-alignments-">Breakpoint regions flanking inversions in the same-population alignments.<a class="anchor" aria-label="anchor" href="#breakpoint-regions-flanking-inversions-in-the-same-population-alignments-"></a>
+</h3>
+<p>Check <code><a href="../articles/ColinearityInterruptors.html">vignette("ColinearityInterruptors", package = "OikScrambling")</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="breakpoint-regions-flanking-large-inversions-in-the-northnorth-alignments-">Breakpoint regions flanking large inversions in the North–North alignments.<a class="anchor" aria-label="anchor" href="#breakpoint-regions-flanking-large-inversions-in-the-northnorth-alignments-"></a>
+</h3>
+<p>Let’s try to isolate some inversions that are easy to spot on a whole-chromosome alignment.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="st">"PAR"</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="op">(</span><span class="va">ROI1</span> <span class="op">&lt;-</span> <span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Bar</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"PAR"</span>, <span class="va">start</span> <span class="op">&gt;</span> <span class="fl">9e6</span>, <span class="va">end</span> <span class="op">&lt;</span> <span class="fl">14e6</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">start</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">7e6</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">end</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">12e6</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## GBreaks object with 35 ranges and 6 metadata columns:</span>
+<span class="co">##        seqnames            ranges strand |                 query      Arm</span>
+<span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |             &lt;GRanges&gt; &lt;factor&gt;</span>
+<span class="co">##    [1]      PAR   9112106-9113024      + |   PAR:7914713-7915633     long</span>
+<span class="co">##    [2]      PAR   9122674-9169015      + |   PAR:7647348-7694603     long</span>
+<span class="co">##    [3]      PAR   9169027-9383526      + |   PAR:7700204-7911308     long</span>
+<span class="co">##    [4]      PAR   9393845-9625372      - |   PAR:8648572-8868624     long</span>
+<span class="co">##    [5]      PAR   9625425-9626193      + |   PAR:8647713-8648486     long</span>
+<span class="co">##    ...      ...               ...    ... .                   ...      ...</span>
+<span class="co">##   [31]      PAR 12882838-12884857      + | PAR:11615009-11617029     long</span>
+<span class="co">##   [32]      PAR 12884875-13019548      - | PAR:10442170-10570866     long</span>
+<span class="co">##   [33]      PAR 13027569-13077236      - | PAR:10392248-10442013     long</span>
+<span class="co">##   [34]      PAR 13077254-13079729      + | PAR:11592137-11594612     long</span>
+<span class="co">##   [35]      PAR 13079758-13079924      + | PAR:10378144-10378306     long</span>
+<span class="co">##                                 rep   repOvlp            transcripts</span>
+<span class="co">##                     &lt;CharacterList&gt; &lt;integer&gt;                  &lt;Rle&gt;</span>
+<span class="co">##    [1]                         &lt;NA&gt;         0                   &lt;NA&gt;</span>
+<span class="co">##    [2]                   rnd,tandem      1671 g9531.t1;g9532.t1;g9..</span>
+<span class="co">##    [3]       rnd,unknown,tandem,...      4642 g9552.t1;g9553.t1;g9..</span>
+<span class="co">##    [4] rnd,tandem,LowComplexity,...      5474 g9629.t1;g9630.t1;g9..</span>
+<span class="co">##    [5]                         &lt;NA&gt;         0                   &lt;NA&gt;</span>
+<span class="co">##    ...                          ...       ...                    ...</span>
+<span class="co">##   [31]                          rnd      1167              g10776.t1</span>
+<span class="co">##   [32] tandem,rnd,LowComplexity,...      3102 g10777.t1;g10779.t1;..</span>
+<span class="co">##   [33]           unknown,rnd,tandem      1637 g10840.t1;g10841.t1;..</span>
+<span class="co">##   [34]                          rnd         0                   &lt;NA&gt;</span>
+<span class="co">##   [35]                         &lt;NA&gt;         0                   &lt;NA&gt;</span>
+<span class="co">##               flag</span>
+<span class="co">##        &lt;character&gt;</span>
+<span class="co">##    [1]        &lt;NA&gt;</span>
+<span class="co">##    [2]        &lt;NA&gt;</span>
+<span class="co">##    [3]        &lt;NA&gt;</span>
+<span class="co">##    [4]         Inv</span>
+<span class="co">##    [5]        &lt;NA&gt;</span>
+<span class="co">##    ...         ...</span>
+<span class="co">##   [31]        &lt;NA&gt;</span>
+<span class="co">##   [32]        &lt;NA&gt;</span>
+<span class="co">##   [33]        &lt;NA&gt;</span>
+<span class="co">##   [34]        &lt;NA&gt;</span>
+<span class="co">##   [35]        &lt;NA&gt;</span>
+<span class="co">##   -------</span>
+<span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></code></pre>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">ROI1</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># The contours of the main 4 blocks can be coalesced by applying a size threshold.</span>
+<span class="va">ROI1</span> |&gt; <span class="fu">coalesce_contigs</span><span class="op">(</span>min <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## GBreaks object with 4 ranges and 2 metadata columns:</span>
+<span class="co">##       seqnames            ranges strand |                 query     score</span>
+<span class="co">##          &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |             &lt;GRanges&gt; &lt;integer&gt;</span>
+<span class="co">##   [1]      PAR   9122674-9383526      + |   PAR:7647348-7911308    260853</span>
+<span class="co">##   [2]      PAR  9393845-10352419      - |   PAR:7917928-8868624    958575</span>
+<span class="co">##   [3]      PAR 10363392-11843885      + |  PAR:8872985-10375361   1480494</span>
+<span class="co">##   [4]      PAR 11852584-13077236      - | PAR:10392248-11592118   1224653</span>
+<span class="co">##   -------</span>
+<span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></code></pre>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># The gaps flanking the first inverted region are quite large!</span>
+<span class="op">(</span><span class="va">ROI1_gaps</span> <span class="op">&lt;-</span> <span class="va">ROI1</span> |&gt; <span class="fu">coalesce_contigs</span><span class="op">(</span>min <span class="op">=</span> <span class="fl">1e4</span><span class="op">)</span> |&gt; <span class="fu">cleanGaps</span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>w <span class="op">=</span> <span class="va">width</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## GRanges object with 3 ranges and 1 metadata column:</span>
+<span class="co">##       seqnames            ranges strand |         w</span>
+<span class="co">##          &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt;</span>
+<span class="co">##   [1]      PAR   9383527-9393844      * |     10318</span>
+<span class="co">##   [2]      PAR 10352420-10363391      * |     10972</span>
+<span class="co">##   [3]      PAR 11843886-11852583      * |      8698</span>
+<span class="co">##   -------</span>
+<span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></code></pre>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># The left-side gap contains no alignment at all even before discarding the short ones.</span>
+<span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="va">ROI1_gaps</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## GBreaks object with 4 ranges and 8 metadata columns:</span>
+<span class="co">##       seqnames            ranges strand |     score                 query</span>
+<span class="co">##          &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;             &lt;GRanges&gt;</span>
+<span class="co">##   [1]      PAR 10355613-10355774      - |       500     XSR:671520-671674</span>
+<span class="co">##   [2]      PAR 10355951-10356573      - |      1610     XSR:670597-671182</span>
+<span class="co">##   [3]      PAR 10356752-10361833      - |     13551     XSR:665505-670596</span>
+<span class="co">##   [4]      PAR 11847299-11849269      + |      5701 PAR:10385920-10388171</span>
+<span class="co">##            Arm             rep   repOvlp transcripts        flag    nonCoa</span>
+<span class="co">##       &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt; &lt;logical&gt;</span>
+<span class="co">##   [1]     long            &lt;NA&gt;         0        &lt;NA&gt;         Col     FALSE</span>
+<span class="co">##   [2]     long            &lt;NA&gt;         0        &lt;NA&gt;         Col     FALSE</span>
+<span class="co">##   [3]     long            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;     FALSE</span>
+<span class="co">##   [4]     long            &lt;NA&gt;         0   g10434.t1        &lt;NA&gt;      TRUE</span>
+<span class="co">##   -------</span>
+<span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></code></pre>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># The same region aligns well to Aomori, suggesting that it is not missassembled</span>
+<span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Aom</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"PAR"</span>, <span class="va">start</span> <span class="op">&gt;</span> <span class="fl">9e6</span>, <span class="va">end</span> <span class="op">&lt;</span> <span class="fl">14e6</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-3.png" width="700"></p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># The Osa–Bar unaligned regions appear to align well to Aom, but the first one is split</span>
+<span class="co"># and the second one contains a small inversion. Are there a hotspots ?</span>
+<span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span>, type <span class="op">=</span> <span class="st">"any"</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-4.png" width="700"></p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-5.png" width="700"></p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-6.png" width="700"></p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-7.png" width="700"></p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># In the alignment to Okinawa, it is scrambled.</span>
+<span class="va">coa2</span><span class="op">$</span><span class="va">Osa_Oki</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">seqnames</span> <span class="op">==</span> <span class="st">"PAR"</span>, <span class="va">start</span> <span class="op">&gt;</span> <span class="fl">9e6</span>, <span class="va">end</span> <span class="op">&lt;</span> <span class="fl">14e6</span><span class="op">)</span> |&gt; <span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="Inversions_files/figure-html/unnamed-chunk-1-8.png" width="700"></p>
 </div>
 </div>
   </div>
