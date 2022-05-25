@@ -363,134 +363,14 @@ gr2dna_seg_arr(transcripts$OKI2018.I69[11497331-11498497, 11498259-11511831], ) 
 
 
 
-#Oki range 1
-dna_seg1 <- gr2dna_seg_arr(transcripts$OKI2018.I69[11478580-11497681], ) 
-
-#gr1 <- as.data.frame(transcripts$OKI2018.I69)
-df4 <- data.frame(start1=dna_seg1$start,
- end1=dna_seg1$end,
- start2=dna_seg1$start,
- end2=dna_seg1$end)
-
-comp1 <- comparison(df4)
-
-
-#Oki range 2
-dna_seg2 <- gr2dna_seg_arr(transcripts$OKI2018.I69[11498259-11511831], ) 
-df5 <- data.frame(start1=dna_seg2$start,
- end1=dna_seg2$end,
- start2=dna_seg2$start,
- end2=dna_seg2$end)
-
-comp2 <- comparison(df5)
-
-#Range 2 (PAC3)
-dna_seg3 <- gr2dna_seg_arr(transcripts$OKI2018.I69[11497718-11498101], ) 
-
-comparisons <- list(comp1, comp2)
-
-
-dna_segs <- list(dna_seg1, dna_seg2, dna_seg3)
-
-
-plot_gene_map(dna_segs=dna_segs, comparisons=comparisons)
-
-
-
-#OKI_OSA
-daf1 <- data.frame(name=c("g1", "g2", "g3"),
- start=c(11478580, 11497718, 11498259),
- end=c(11497681, 11498101, 11511831),
- strand=c(-1, -1, -1),
- col=c("blue", "grey", "red"))
-
-dna_seg1a <- dna_seg(daf1)
-
-daf11 <- data.frame(start1=dna_seg1a$start,
- end1=dna_seg1a$end,
- start2=dna_seg1a$start,
- end2=dna_seg1a$end)
-
-
-
-
-#OKI_BAR
-daf2 <- data.frame(name=c("e1", "e2", "e3"),
- start=c(11478590, 11497717, 11498256),
- end=c(11497665, 11498108, 11511831),
- strand=c(+1, +1, +1),
- col=c("pink", "yellow", "green"))
-
-dna_seg2a <- dna_seg(daf2)
-
-daf22 <- data.frame(start1=dna_seg2a$start,
- end1=dna_seg2a$end,
- start2=dna_seg2a$start,
- end2=dna_seg2a$end)
-
-comp22 <- comparison(daf22)
-
-
-#OKI_NOR
-daf3 <- data.frame(name=c("e1", "e2", "e3"),
- start=c(11478590, 11497717, 11498256),
- end=c(11497665, 11498108, 11511831),
- strand=c(+1, -1, +1),
- col=c("gray", "blue", "red"))
-
-dna_seg3a <- dna_seg(daf3)
-
-daf33 <- data.frame(start1=dna_seg3a$start,
- end1=dna_seg3a$end,
- start2=dna_seg3a$start,
- end2=dna_seg3a$end)
-
-comp33 <- comparison(daf33)
-
-dna_segs2 <- list(dna_seg1a, dna_seg2a, dna_seg3a)
-
-compari2 <- comparison(comp22, comp33)
-
-
-
-
-
-
-
-
-
-
-
-#Osaka
-dna_seg2 <- gr2dna_seg_arr(transcripts$OSKA2016v1.9[582083:585144], ) |> list() |> plot_gene_map()
-
-
-dna_seg1$col <- c("blue","red", "green", "yellow", "pink")
-gr2dna_seg_arr(dna_seg1) |> list() |> plot_gene_map(main = "Scrambled", dna_seg_scale = T)
-
-
-
-dna_seg12 <- 
-
-
-dna_seg11 <- dna_seg1[,-1]
-rownames(dna_seg11) <- dna_seg1[,1]
-colnames(dna_seg11) <- c("start1", "end1", "start2", "end2")
-
-dna_seg11 |> select(start1, end1, start2, end2)
-
-comparison1 <- comparison(dna_seg11)
-
-
-
-
-
 #################
 ################
 PAC3 <- GRanges("chr1:11497331-11498497")
 
 coa$Oki_Osa |> subsetByOverlaps(PAC3)
 coa$Oki_Bar |> subsetByOverlaps(PAC3)
+coa$Oki_Kum |> subsetByOverlaps(PAC3)
+
 
 extract_transcript_coords <- function(gr, gene_name, upstream=0, downstream=0) {
   matching_gene_index <- which(mcols(gr)$tx_name == gene_name)
@@ -499,7 +379,9 @@ extract_transcript_coords <- function(gr, gene_name, upstream=0, downstream=0) {
   sgr
 }
 
-pac3_operon_oki <- extract_transcript_coords(transcripts$OKI2018.I69, 'g3146.t1', upstream=9, downstream=9)
+extract_transcript_coords()
+
+pac3_operon_oki <- extract_transcript_coords(transcripts$OKI2018.I69, 'g3146.t1', upstream=3, downstream=5)
 pac3_operon_osa <- extract_transcript_coords(transcripts$OSKA2016v1.9, 'g12442.t1', upstream=9, downstream=9)
 
 
@@ -543,6 +425,68 @@ operons$Osa <- calkOperons(transcripts$OSKA2016v1.9, window=500)
 operons$Bar <- calkOperons(transcripts$Bar2.p4, window=500)
 
 
+
+#hh <- as.vector(operons$Oki$tx_names)
+
+ss <- lapply(operons$Oki$tx_names,  function(x) 'g3146.t1' %in%  x)
+ss1 <- unlist(ss, recursive = T)
+  which(ss1)
+#700  
+xx <- as.data.frame(operons$Oki[700])
+
+
+
+#Function to find find upstream and downstream genes in specific operon 
+Find_UpAndDown <- function(op, gene_ofi) {
+  ss <- lapply(op$tx_names, function(x) gene_ofi %in% x) 
+  ss1 <- unlist(ss)
+  xx <- which(ss1)
+  yy <- as.data.frame(op[xx])
+  zz <- op$tx_names |> unlist ()
+  Pc3 == gene_ofi
+  gin <- which(Pc3 == gene_ofi)
+  b <- seq_along(Pc3)
+  #Uostream genes
+  bb <- Pc3[b < gin ]
+  #Downstream genes
+  cc <- Pc3[b > gin]
+  list(bb, cc)
+  
+}
+
+
+
+
+
+gg <- Find_UpAndDown(operons$Oki, 'g3146.t1')
+
+#op - operons$Oki
+#gene_ofi 'g3146.t1'
+
+
+#Function to know exactly how many genes are upstream and downstream -target gene- in operon
+UpDown <- function(
+    gg$tx_names |> unlist ()
+Pc3 == 'g3146.t1'
+gin <- which(Pc3 == 'g3146.t1')
+b <- seq_along(Pc3)
+
+#Uostream genes
+t <- Pc3[b < gin ]
+#Downstream genes
+t2 <- Pc3[b > gin]
+
+cat(sprintf(paste0('Upstream gene: %f Downstream genes: %f', t, t2)))
+
+
+
+N19 <- OikScrambling::load_one_to_ones(system.file("extdata/OrthoFinder/N19")
+)
+
+
+
+
+  
 gr2dna_seg <- function (gr, gene_of_interest=NULL, ...) {
   # DNA segments need unique names
   if (length(gr) == 0) return(NULL)
@@ -589,20 +533,22 @@ addMargins <- function(regs, inner.margin, outer.margin){
 
 
 
+
 plot_gene_map(
+#  apply_color_scheme(c(0.6, 0.4, 0.5), "grey"),
   dna_segs = list(
     Okinawa=gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'),
     Osaka=gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1')
   ),
-  addMargins(
+  dna_seg_scale = T, 
   annotations = list(
     dnaseg_to_annot(gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'), rot=10, col=rainbow(19)),
     dnaseg_to_annot(gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1'), rot=10, col=rainbow(19))
   ),
   comparisons = list(gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3))),
-  main = "PAC3 moved between chr1 and XSR")
+  main = "PAC3 moved from chr1 in Okinawa to XSR in Osaka")
  # par(mar=c(8,8,8,8))
-)
+
 
 
 
