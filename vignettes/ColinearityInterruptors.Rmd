@@ -198,10 +198,13 @@ ROI6_range <- ROI6 |> plyranges::filter(seqnames(query) == "contig_27_1") |> ran
 coa2$Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Double-collapsed collinear regions")
 coa $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Collinear regions")
 gbs $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Alignments")
+```
 
-# Sometimes, everything that remains is inversions
+Example of a part of ROI6 that can be collapsed if strand is ignored.
+
+```{r ROI6_invs2}
 ROI6[1:6] |> plotApairOfChrs()
-ROI6[1:6] |> dplyr::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChrs()
+ROI6[1:6] |> plyranges::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChrs()
 ```
 
 
