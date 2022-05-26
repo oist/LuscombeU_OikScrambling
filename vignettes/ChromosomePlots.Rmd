@@ -825,7 +825,7 @@ The 4 alignment categories we describe can vary between genomic compartments. In
 makeWholeGenomeObject <- function(aligned, unaligned) {
   isolated  <- aligned[aligned$nonCoa]
   collinear <- aligned[!aligned$nonCoa]
-  unmapped  <- unaligned[unaligned$nonCoa]
+  breakpoint  <- unaligned[unaligned$nonCoa]
   bridge    <- unaligned[!unaligned$nonCoa]
 
   # Let's keep only the common metadata
@@ -833,13 +833,13 @@ makeWholeGenomeObject <- function(aligned, unaligned) {
   mcols(collinear) <- mcols(collinear)[,colnames(mcols(unaligned))]
   
   # Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.
-  isolated$nonCoa <- collinear$nonCoa <- unmapped$nonCoa <- bridge$nonCoa <- NULL
+  isolated$nonCoa <- collinear$nonCoa <- breakpoint$nonCoa <- bridge$nonCoa <- NULL
   isolated$type   <- 'isolated'
   collinear$type  <- 'collinear'
-  unmapped$type   <- 'unmapped'
+  breakpoint$type <- 'breakpoint'
   bridge$type     <- 'bridge'
 
-  wholeGenome <- c(isolated, collinear, unmapped, bridge) |> sort(ignore.strand = TRUE)
+  wholeGenome <- c(isolated, collinear, breakpoint, bridge) |> sort(ignore.strand = TRUE)
   wholeGenome$type <- factor(wholeGenome$type)
   wholeGenome
 }
@@ -865,16 +865,16 @@ mcols(chrw$Oki) <- cbind(mcols(chrw$Oki), mcols(grWindows(genome=genomes$Oki, me
 
 chrw$Oki$ac.isolated.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Bar.type.isolated.count.total", "ac.Oki_Kum.type.isolated.count.total", "ac.Oki_Aom.type.isolated.count.total", "ac.Oki_Nor.type.isolated.count.total") |> as.data.frame() |> rowMeans()
 chrw$Oki$ac.collinear.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Bar.type.collinear.count.total", "ac.Oki_Kum.type.collinear.count.total", "ac.Oki_Aom.type.collinear.count.total", "ac.Oki_Nor.type.collinear.count.total") |> as.data.frame() |> rowMeans()
-chrw$Oki$ac.unmapped.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Bar.type.unmapped.count.total", "ac.Oki_Kum.type.unmapped.count.total", "ac.Oki_Aom.type.unmapped.count.total", "ac.Oki_Nor.type.unmapped.count.total") |> as.data.frame() |> rowMeans()
+chrw$Oki$ac.breakpoint.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Bar.type.breakpoint.count.total", "ac.Oki_Kum.type.breakpoint.count.total", "ac.Oki_Aom.type.breakpoint.count.total", "ac.Oki_Nor.type.breakpoint.count.total") |> as.data.frame() |> rowMeans()
 chrw$Oki$ac.bridge.mean <- chrw$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.bridge.count.total", "ac.Oki_Bar.type.bridge.count.total", "ac.Oki_Kum.type.bridge.count.total", "ac.Oki_Aom.type.bridge.count.total", "ac.Oki_Nor.type.bridge.count.total") |> as.data.frame() |> rowMeans()
 
 plots$Oki$categories <- list()
 
 plots$Oki$categories$oki_osa_classes <- chrw$Oki |>
   as.data.frame() |>
-  subset(select=c("seqnames", "start", "end", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
+  subset(select=c("seqnames", "start", "end", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
   plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
-  tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
+  tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
   ggplot() +
     aes(start, value, col = name) +
     facet_wrap(~seqnames, nrow = 1) +
@@ -883,9 +883,9 @@ plots$Oki$categories$oki_osa_classes <- chrw$Oki |>
 
 plots$Oki$categories$oki_osa_overall <- chrw$Oki |>
   as.data.frame() |>
-  subset(select=c("seqnames", "start", "end", "Arm", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
   plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
- tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
+ tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
   ggplot() +
     aes(value, paste0(seqnames, "_", Arm),  fill = name) +
     geom_bar(position='fill', stat='identity') +
@@ -894,9 +894,9 @@ plots$Oki$categories$oki_osa_overall <- chrw$Oki |>
 
 plots$Oki$categories$oki_osa_by_chr_position <- chrw$Oki |>
   as.data.frame() |>
-  subset(select=c("seqnames", "start", "end", "Arm", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Osa.type.bridge.count.total" )) |>
   plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
- tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
+ tidyr::pivot_longer(c("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Osa.type.bridge.count.total")) |>
   ggplot() +
     aes(as.factor(start), value, fill = name) +
     facet_wrap(~seqnames, nrow = 1, scales='free') +
@@ -908,9 +908,9 @@ plots$Oki$categories$oki_osa_by_chr_position <- chrw$Oki |>
 # Next, plot the means of ALL populations vs. Oki.
 plots$Oki$categories$mean_classes <- chrw$Oki |>
   as.data.frame() |>
-  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean" )) |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.breakpoint.mean", "ac.bridge.mean" )) |>
   plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
- tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean")) |>
+ tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.breakpoint.mean", "ac.bridge.mean")) |>
   ggplot() +
     aes(start, value, col = name) +
     facet_wrap(~seqnames, nrow = 1) +
@@ -919,9 +919,9 @@ plots$Oki$categories$mean_classes <- chrw$Oki |>
 
 plots$Oki$categories$mean_classes_overall <- chrw$Oki |>
   as.data.frame() |>
-  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean" )) |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.breakpoint.mean", "ac.bridge.mean" )) |>
   plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
- tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean")) |>
+ tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.breakpoint.mean", "ac.bridge.mean")) |>
   ggplot() +
     aes(value, paste0(seqnames, "_", Arm),  fill = name) +
     geom_bar(position='fill', stat='identity') +
@@ -930,9 +930,9 @@ plots$Oki$categories$mean_classes_overall <- chrw$Oki |>
 
 plots$Oki$categories$mean_classes_by_chr_position <- chrw$Oki |>
   as.data.frame() |>
-  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean" )) |>
+  subset(select=c("seqnames", "start", "end", "Arm", "ac.isolated.mean", "ac.collinear.mean", "ac.breakpoint.mean", "ac.bridge.mean" )) |>
   plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR')) |>
- tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.unmapped.mean", "ac.bridge.mean")) |>
+ tidyr::pivot_longer(c("ac.isolated.mean", "ac.collinear.mean", "ac.breakpoint.mean", "ac.bridge.mean")) |>
   ggplot() +
     aes(as.factor(start), value, fill = name) +
     facet_wrap(~seqnames, nrow = 1, scales='free') +
@@ -1185,7 +1185,7 @@ mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta
 mcols(chrt$Oki) <- cbind(mcols(chrt$Oki), mcols(grTiles(genome=genomes$Oki, meta=wgo2$Oki_Nor, n=nTiles, meta_prefix = 'ac.Oki_Nor.')))
 chrt$Oki$ac.isolated.mean <- chrt$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.isolated.count.total", "ac.Oki_Bar.type.isolated.count.total", "ac.Oki_Kum.type.isolated.count.total", "ac.Oki_Aom.type.isolated.count.total", "ac.Oki_Nor.type.isolated.count.total") |> as.data.frame() |> rowMeans()
 chrt$Oki$ac.collinear.mean <- chrt$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.collinear.count.total", "ac.Oki_Bar.type.collinear.count.total", "ac.Oki_Kum.type.collinear.count.total", "ac.Oki_Aom.type.collinear.count.total", "ac.Oki_Nor.type.collinear.count.total") |> as.data.frame() |> rowMeans()
-chrt$Oki$ac.unmapped.mean <- chrt$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.unmapped.count.total", "ac.Oki_Bar.type.unmapped.count.total", "ac.Oki_Kum.type.unmapped.count.total", "ac.Oki_Aom.type.unmapped.count.total", "ac.Oki_Nor.type.unmapped.count.total") |> as.data.frame() |> rowMeans()
+chrt$Oki$ac.breakpoint.mean <- chrt$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.breakpoint.count.total", "ac.Oki_Bar.type.breakpoint.count.total", "ac.Oki_Kum.type.breakpoint.count.total", "ac.Oki_Aom.type.breakpoint.count.total", "ac.Oki_Nor.type.breakpoint.count.total") |> as.data.frame() |> rowMeans()
 chrt$Oki$ac.bridge.mean <- chrt$Oki |> as.data.frame()|> select("ac.Oki_Osa.type.bridge.count.total", "ac.Oki_Bar.type.bridge.count.total", "ac.Oki_Kum.type.bridge.count.total", "ac.Oki_Aom.type.bridge.count.total", "ac.Oki_Nor.type.bridge.count.total") |> as.data.frame() |> rowMeans()
 
 mcols(chrt$Osa) <- cbind(mcols(chrt$Osa), mcols(grTiles(genome=genomes$Osa, meta=wgo2$Osa_Oki, n=nTiles, meta_prefix = 'ac.Osa_Oki.')))
@@ -1195,7 +1195,7 @@ mcols(chrt$Osa) <- cbind(mcols(chrt$Osa), mcols(grTiles(genome=genomes$Osa, meta
 mcols(chrt$Osa) <- cbind(mcols(chrt$Osa), mcols(grTiles(genome=genomes$Osa, meta=wgo2$Osa_Nor, n=nTiles, meta_prefix = 'ac.Osa_Nor.')))
 chrt$Osa$ac.isolated.mean <- chrt$Osa |> as.data.frame()|> select("ac.Osa_Oki.type.isolated.count.total", "ac.Osa_Bar.type.isolated.count.total", "ac.Osa_Kum.type.isolated.count.total", "ac.Osa_Aom.type.isolated.count.total", "ac.Osa_Nor.type.isolated.count.total") |> as.data.frame() |> rowMeans()
 chrt$Osa$ac.collinear.mean <- chrt$Osa |> as.data.frame()|> select("ac.Osa_Oki.type.collinear.count.total", "ac.Osa_Bar.type.collinear.count.total", "ac.Osa_Kum.type.collinear.count.total", "ac.Osa_Aom.type.collinear.count.total", "ac.Osa_Nor.type.collinear.count.total") |> as.data.frame() |> rowMeans()
-chrt$Osa$ac.unmapped.mean <- chrt$Osa |> as.data.frame()|> select("ac.Osa_Oki.type.unmapped.count.total", "ac.Osa_Bar.type.unmapped.count.total", "ac.Osa_Kum.type.unmapped.count.total", "ac.Osa_Aom.type.unmapped.count.total", "ac.Osa_Nor.type.unmapped.count.total") |> as.data.frame() |> rowMeans()
+chrt$Osa$ac.breakpoint.mean <- chrt$Osa |> as.data.frame()|> select("ac.Osa_Oki.type.breakpoint.count.total", "ac.Osa_Bar.type.breakpoint.count.total", "ac.Osa_Kum.type.breakpoint.count.total", "ac.Osa_Aom.type.breakpoint.count.total", "ac.Osa_Nor.type.breakpoint.count.total") |> as.data.frame() |> rowMeans()
 chrt$Osa$ac.bridge.mean <- chrt$Osa |> as.data.frame()|> select("ac.Osa_Oki.type.bridge.count.total", "ac.Osa_Bar.type.bridge.count.total", "ac.Osa_Kum.type.bridge.count.total", "ac.Osa_Aom.type.bridge.count.total", "ac.Osa_Nor.type.bridge.count.total") |> as.data.frame() |> rowMeans()
 
 mcols(chrt$Bar) <- cbind(mcols(chrt$Bar), mcols(grTiles(genome=genomes$Bar, meta=wgo2$Bar_Oki, n=nTiles, meta_prefix = 'ac.Bar_Oki.')))
@@ -1205,7 +1205,7 @@ mcols(chrt$Bar) <- cbind(mcols(chrt$Bar), mcols(grTiles(genome=genomes$Bar, meta
 mcols(chrt$Bar) <- cbind(mcols(chrt$Bar), mcols(grTiles(genome=genomes$Bar, meta=wgo2$Bar_Nor, n=nTiles, meta_prefix = 'ac.Bar_Nor.')))
 chrt$Bar$ac.isolated.mean <- chrt$Bar |> as.data.frame()|> select("ac.Bar_Oki.type.isolated.count.total", "ac.Bar_Osa.type.isolated.count.total", "ac.Bar_Kum.type.isolated.count.total", "ac.Bar_Aom.type.isolated.count.total", "ac.Bar_Nor.type.isolated.count.total") |> as.data.frame() |> rowMeans()
 chrt$Bar$ac.collinear.mean <- chrt$Bar |> as.data.frame()|> select("ac.Bar_Oki.type.collinear.count.total", "ac.Bar_Osa.type.collinear.count.total", "ac.Bar_Kum.type.collinear.count.total", "ac.Bar_Aom.type.collinear.count.total", "ac.Bar_Nor.type.collinear.count.total") |> as.data.frame() |> rowMeans()
-chrt$Bar$ac.unmapped.mean <- chrt$Bar |> as.data.frame()|> select("ac.Bar_Oki.type.unmapped.count.total", "ac.Bar_Osa.type.unmapped.count.total", "ac.Bar_Kum.type.unmapped.count.total", "ac.Bar_Aom.type.unmapped.count.total", "ac.Bar_Nor.type.unmapped.count.total") |> as.data.frame() |> rowMeans()
+chrt$Bar$ac.breakpoint.mean <- chrt$Bar |> as.data.frame()|> select("ac.Bar_Oki.type.breakpoint.count.total", "ac.Bar_Osa.type.breakpoint.count.total", "ac.Bar_Kum.type.breakpoint.count.total", "ac.Bar_Aom.type.breakpoint.count.total", "ac.Bar_Nor.type.breakpoint.count.total") |> as.data.frame() |> rowMeans()
 chrt$Bar$ac.bridge.mean <- chrt$Bar |> as.data.frame()|> select("ac.Bar_Oki.type.bridge.count.total", "ac.Bar_Osa.type.bridge.count.total", "ac.Bar_Kum.type.bridge.count.total", "ac.Bar_Aom.type.bridge.count.total", "ac.Bar_Nor.type.bridge.count.total") |> as.data.frame() |> rowMeans()
 
 
@@ -1244,7 +1244,7 @@ chrt_unified$breakpoints.count.mean <- data.frame(chrt_unified$Oki.bp.mean.break
 
 chrt_unified$categories.isolated.mean <- data.frame(chrt_unified$Oki.ac.isolated.mean, chrt_unified$Osa.ac.isolated.mean, chrt_unified$Bar.ac.isolated.mean) |> rowMeans()
 chrt_unified$categories.collinear.mean <- data.frame(chrt_unified$Oki.ac.collinear.mean, chrt_unified$Osa.ac.collinear.mean, chrt_unified$Bar.ac.collinear.mean) |> rowMeans()
-chrt_unified$categories.unmapped.mean <- data.frame(chrt_unified$Oki.ac.unmapped.mean, chrt_unified$Osa.ac.unmapped.mean, chrt_unified$Bar.ac.unmapped.mean) |> rowMeans()
+chrt_unified$categories.breakpoint.mean <- data.frame(chrt_unified$Oki.ac.breakpoint.mean, chrt_unified$Osa.ac.breakpoint.mean, chrt_unified$Bar.ac.breakpoint.mean) |> rowMeans()
 chrt_unified$categories.bridge.mean <- data.frame(chrt_unified$Oki.ac.bridge.mean, chrt_unified$Osa.ac.bridge.mean, chrt_unified$Bar.ac.bridge.mean) |> rowMeans()
 
 ```
@@ -1280,7 +1280,7 @@ p4 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=repeats.count.mean) + geom_po
 ( p1 / p2 / p3 / p4)
 ```
 
-What alignment categories correlate with breakpoints?
+What alignment categories correlate with alignment categories?
 
 ```{r chromosome_plots_tiles_3, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 tb <- chrt_unified |> as.data.frame()
@@ -1290,38 +1290,33 @@ p1 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.isolated.mean) + g
 
 p2 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.collinear.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('collinear')
 
-p3 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.unmapped.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('unmapped')
+p3 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.breakpoint.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('breakpoint')
 
 p4 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.bridge.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('bridge')
 
 ( p1 / p2 / p3 / p4)
 ```
 
-```{r chromosome_plots_tiles_4_points, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-p1 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=transcripts.dNdS.mean, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess', method.args = list(family = "symmetric")) + ylab('dN/dS') 
-p1 + ggtitle("Tiles (averages across Oki, Osa, Bar): Properties across genome")
 
-p2 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=breakpoints.count.mean , col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess', method.args = list(family = "symmetric")) + ylab('breakpoints') 
-p2 + ggtitle("Tiles (averages across Oki, Osa, Bar): Properties across genome")
-```
 
 ```{r chromosome_plots_tiles_5, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ggplot(chrt_unified |> as.data.frame()) +
   geom_smooth(aes(x=start, y=categories.isolated.mean,  col='isolated'), se=FALSE) +
   geom_smooth(aes(x=start, y=categories.collinear.mean, col='collinear'), se=FALSE) +
-  geom_smooth(aes(x=start, y=categories.unmapped.mean,  col='unmapped'), se=FALSE) +
+  geom_smooth(aes(x=start, y=categories.breakpoint.mean,  col='breakpoint'), se=FALSE) +
   geom_smooth(aes(x=start, y=categories.bridge.mean,    col='bridge'), se=FALSE) +
   ylab('pct') +
   facet_wrap(~seqnames, nrow=1) +
   ggtitle('Tiles (averages across Oki, Osa, Bar): Alignment categories by location')
+
 ```
 
 
 ```{r chromosome_plots_tiles_6, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 chrt_unified |>
   as.data.frame() |>
-  subset(select=c("seqnames", "start", "end", "Oki.Arm", "categories.isolated.mean", "categories.collinear.mean", "categories.unmapped.mean", "categories.bridge.mean" )) |>
- tidyr::pivot_longer(c("categories.isolated.mean", "categories.collinear.mean", "categories.unmapped.mean", "categories.bridge.mean")) |>
+  subset(select=c("seqnames", "start", "end", "Oki.Arm", "categories.isolated.mean", "categories.collinear.mean", "categories.breakpoint.mean", "categories.bridge.mean" )) |>
+ tidyr::pivot_longer(c("categories.isolated.mean", "categories.collinear.mean", "categories.breakpoint.mean", "categories.bridge.mean")) |>
   ggplot() +
     aes(value, paste0(seqnames, "_", Oki.Arm),  fill = name) +
     geom_bar(position='fill', stat='identity') +
@@ -1333,6 +1328,22 @@ chrt_unified |>
 library(ggpubr)
 tb <- chrt_unified |> as.data.frame()
 tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Oki.Arm)
+
+p0 <- tb |> subset(select=c("seqnames", "seqnames_arm", "start", "end", "Oki.Arm", "categories.isolated.mean", "categories.collinear.mean", "categories.breakpoint.mean", "categories.bridge.mean" )) |> tidyr::pivot_longer(c("categories.isolated.mean", "categories.collinear.mean", "categories.breakpoint.mean", "categories.bridge.mean")) |>
+   ggplot() +
+    aes(value, seqnames_arm,  fill = name) +
+    facet_wrap(seqnames~Oki.Arm, nrow=1, scales='free') +
+    geom_bar(position='fill', stat='identity') +
+    theme(axis.text.y=element_blank(), axis.ticks.y =element_blank()) +
+    ylab("chr and arm") +
+    xlab("category")
+p0 + ggtitle("Tiles (averages across Oki, Osa, Bar): Alignment categories across genome")
+
+p1 <- ggplot( tb ) + aes(x=start, y=transcripts.dNdS.mean, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess', method.args = list(family = "symmetric")) + ylab('dN/dS') 
+p1 + ggtitle("Tiles (averages across Oki, Osa, Bar): Properties across genome")
+
+p2 <- ggplot( tb ) + aes(x=start, y=breakpoints.count.mean , col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess', method.args = list(family = "symmetric")) + ylab('breakpoints') 
+p2 + ggtitle("Tiles (averages across Oki, Osa, Bar): Properties across genome")
 
 p3 <- ggboxplot(tb, x='seqnames_arm', y='breakpoints.count.mean', color='Oki.Arm', add='jitter') +
   theme(axis.text.x=element_text(angle=90)) +
@@ -1363,9 +1374,58 @@ B
 C
 D
 E
+F
 "
 
-( p1 / p4 / p2 / p3 / p5 ) + plot_layout(design = layout, guides = 'collect')
+( p0 / p1 / p4 / p2 / p3 / p5 ) #+ plot_layout(design = layout, guides = 'collect')
+( p0 / p1 / p4 / p2 / p3 )
+( p1 / p2 / p3 / p4 )
+( p1 / p2 / p3 )
+( p0 / p1 / p2 / p3 )
+
+detach('package:ggpubr')
+```
+
+
+```{r chromosome_plots_tiles_7_1, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+tb <- chrt_unified |> as.data.frame()
+tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Oki.Arm)
+#tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Osa.Arm)
+#tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Bar.Arm)
+
+p0 <- tb |> subset(select=c("seqnames", "seqnames_arm", "start", "end", "Oki.Arm", "categories.isolated.mean", "categories.collinear.mean", "categories.breakpoint.mean", "categories.bridge.mean" )) |> tidyr::pivot_longer(c("categories.isolated.mean", "categories.collinear.mean", "categories.breakpoint.mean", "categories.bridge.mean")) |>
+   ggplot() +
+    aes(value, seqnames_arm,  fill = name) +
+    facet_wrap(seqnames~Oki.Arm, nrow=1, scales='free') +
+    geom_bar(position='fill', stat='identity') +
+    theme(axis.text.y=element_blank(), axis.ticks.y =element_blank()) +
+    ylab("chr and arm") +
+    xlab("category")
+
+p0 + ggtitle("Tiles (averages across Oki, Osa, Bar): Alignment categories by position")
+
+p1 <- ggplot(tb) + aes(x=start, y=transcripts.dNdS.mean, col = Oki.Arm) + geom_boxplot(outlier.shape=NA) + geom_point() + facet_wrap(~seqnames, nrow = 1) + ylab('dN/dS')
+p1 + ggtitle("Tiles (averages across Oki, Osa, Bar): dN/dS across genome")
+p1 <- p1 + theme(axis.title.x=element_blank()) # remove X labels for later
+
+p2 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=breakpoints.count.mean , col = Oki.Arm) + geom_boxplot(outlier.shape=NA) + geom_point() + facet_wrap(~seqnames, nrow = 1) + ylab('Breakpoints')
+p2 + ggtitle("Tiles (averages across Oki, Osa, Bar): Breakpoints across genome")
+
+# And a correlation plot
+p3 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('dN/dS')
+
+p3 + ggtitle('Tiles (averages across Oki, Osa, Bar): dNdS per chr+arm')
+
+p3 <- p3 + theme(axis.title.x=element_blank()) # remove X labels for later
+
+p4 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=repeats.count.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('repeats') + xlab('Breakpoints')
+p4
+
+( p0 / p1 / p2 / p3 / p4 ) #+ plot_layout(design = layout, guides = 'collect')
+( p1 / p2 / p3 / p4 )
+( p1 / p2 / p3 )
+( p0 / p1 / p2 / p3 )
 
 detach('package:ggpubr')
 ```
