@@ -87,6 +87,24 @@ Enrichment for motifs is being searched in
 
 ## Breakpoint regions flanking inversions in the same-population alignments.
 
+### Large inversions
+
+The comparison of `contig_90_1` to Okinawa's chromosome 1 shows a large
+inversion.  Note that `contig_90_1` appears to be assembled in reverse
+orientation compared with the _short to long_ arm orientation that we chose
+in our chromosomal assemblies.
+
+```{r Kum_chr1_large_inversion}
+coa2$Oki_Kum |> swap() |> reverse () |> swap () |> plotApairOfChrs(chrQ = "contig_90_1")
+```
+
+```{r Kum_chr1_large_inversion_coordinates}
+coa2$Oki_Kum |> plyranges::filter(seqnames == "chr1", seqnames(query) == "contig_90_1", width > 1e3) |> coalesce_contigs()
+coa2$Oki_Kum |> plyranges::filter(seqnames == "chr1", seqnames(query) == "contig_90_1", width > 1e3) |> range()
+```
+
+### Small inversions.
+
 Check `vignette("ColinearityInterruptors", package = "OikScrambling")`.
 
 ## Breakpoint regions flanking large inversions in the North–North alignments.
