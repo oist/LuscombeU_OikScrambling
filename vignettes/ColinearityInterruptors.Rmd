@@ -50,7 +50,7 @@ which analysis to prioritise elsewhere.
 See `vignette("RegionsOfInterest", package = "OikScrambling")` for other regions
 of interest.
 
-# Aproximate assembly of Kume's chromosome 1.
+# Overview of Kume's chromosome 1.
 
 The best match for chr1 in the Kume assembly is `contig_3_1`.  It maps roughly
 in the 8,000,000 – 13,000,000 region.
@@ -69,7 +69,16 @@ coa$Oki_Kum |> plyranges::filter(seqnames == "chr1", seqnames(query)!="contig_3_
 coa$Oki_Kum |> plotApairOfChrs(chrQ = "contig_27_1")
 ```
 
-The assembly is continued in details in `vignette("ParallelPlots", package = "OikScrambling")`
+The next best match, `contig_90_1` is assembled in reverse direction, and contains
+an inversion.
+
+```{r Kum_chr1_assembly_3}
+coa$Oki_Kum |> plyranges::filter(seqnames == "chr1", ! seqnames(query) %in% c("contig_3_1", "contig_27_1")) |> bestMatch()
+coa$Oki_Kum |> plotApairOfChrs(chrQ = "contig_90_1")
+coa$Oki_Kum |> swap() |> reverse () |> swap () |> plotApairOfChrs(chrQ = "contig_90_1")
+```
+
+The assembly is dones in details in `vignette("ParallelPlots", package = "OikScrambling")`
 
 # Alignments are real (Region of Interest 1)
 
