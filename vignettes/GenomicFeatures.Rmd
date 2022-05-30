@@ -43,19 +43,20 @@ centered on alignment stops.
 
 ## GC
 
-Lets look at `GC` content before and after coalescing: 
+Lets look at `GC` content at the right-hand side of _breakpoint regions_ in
+Okinawa vs other genomes.
 
 ```{r echo=T, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
+brk <- sapply(wgo, \(gr) gr[gr$type == "breakpoint region"]) |> SimpleList()
 maxHeight <- 2000
-sm_GC2 <- sapply(coa[1:15],  bp_heatmap, win = 1000, pat = "GC", direction = "left") |>
+sm_GC2 <- sapply(brk[1:5],  bp_heatmap, win = 1000, pat = "GC", direction = "right") |>
           sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
 plotHeatmapList(sm_GC2[1:5])
 ```
 
-The alignment stops are ordered in such a way that start (or left breaks) are
-centred on the top half of the plot, and end alignment stops are centred on the
-bottom. This is why we see different directionality in the plots. At the
-alignment stops, the GC content seems to be lower, but higher once within the
+The windows are centred on the end of _breakpoint regions_, therefore left of
+the center is unmapped and right of the center is aligned. Just before the
+alignment starts, the GC content seems to be lower, but higher once within the
 aligned region, except for the Oki – Kum pair.
 
 ## TATA
