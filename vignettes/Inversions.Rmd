@@ -133,3 +133,28 @@ subsetByOverlaps(gbs$Osa_Aom, ROI1_gaps[3], type = "within") |> plotApairOfChrs(
 # In the alignment to Okinawa, it is scrambled.
 coa2$Osa_Oki |> plyranges::filter(seqnames == "PAR", start > 9e6, end < 14e6) |> plotApairOfChrs()
 ```
+
+# Export inversions to ZENBU
+
+## Okinawa
+
+```
+invs <- sapply(coa[1:5], inv2UCSCData) |> SimpleList()
+rtracklayer::export(invs$Oki_Osa, "inversions_v4.0.0_Oki_Osa.bed")
+rtracklayer::export(invs$Oki_Bar, "inversions_v4.0.0_Oki_Bar.bed")
+rtracklayer::export(invs$Oki_Kum, "inversions_v4.0.0_Oki_Kum.bed")
+rtracklayer::export(invs$Oki_Aom, "inversions_v4.0.0_Oki_Aom.bed")
+rtracklayer::export(invs$Oki_Nor, "inversions_v4.0.0_Oki_Nor.bed")
+```
+
+## Ōsaka
+
+```
+invsOska <- sapply(coa[6:10], inv2UCSCData) |> SimpleList()
+rtracklayer::export(invsOska$Osa_Oki, "inversions_v4.0.0_Osa_Oki.bed")
+rtracklayer::export(invsOska$Osa_Bar, "inversions_v4.0.0_Osa_Bar.bed")
+rtracklayer::export(invsOska$Osa_Kum, "inversions_v4.0.0_Osa_Kum.bed")
+rtracklayer::export(invsOska$Osa_Aom, "inversions_v4.0.0_Osa_Aom.bed")
+rtracklayer::export(invsOska$Osa_Nor, "inversions_v4.0.0_Osa_Nor.bed")
+```
+
