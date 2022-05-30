@@ -44,7 +44,8 @@ centered on alignment stops.
 ## GC
 
 Lets look at `GC` content at the right-hand side of _breakpoint regions_ in
-Okinawa vs other genomes.
+Okinawa vs other genomes.  Increase the range to `[1:15]` to compute for all
+_Oikopleura_ pairs.
 
 ```{r echo=T, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 brk <- sapply(wgo, \(gr) gr[gr$type == "breakpoint region"]) |> SimpleList()
@@ -57,37 +58,41 @@ plotHeatmapList(sm_GC2[1:5])
 The windows are centred on the end of _breakpoint regions_, therefore left of
 the center is unmapped and right of the center is aligned. Just before the
 alignment starts, the GC content seems to be lower, but higher once within the
-aligned region, except for the Oki – Kum pair.
+aligned region, except for the Oki – Kum pair.  This was also true when
+computing the plots over the two other chromosomal assemblies, _Osa_ and _Bar_.
 
 ## TATA
 
 Now looking at TATA content:
 
 ```{r TATA, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
-maxHeight <- 2000
-sm_GC2_TATA <- sapply(coa[1:15], bp_heatmap, window = 1000, pat = "TATA", direction = "left") |> 
+sm_GC2_TATA <- sapply(brk[1:5], bp_heatmap, window = 1000, pat = "TATA", direction = "right") |> 
                sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
 plotHeatmapList(sm_GC2_TATA[1:5])
 ```
 
-The directionaility here is consistent with the `GC` content analysis.
-Furthermore; "TATA box sequence can act as a basal promoter element not only for
-RNA polymerase II (RNAP II) transcription, but also for transcription by RNA
-polymerase III (RNAP III)" - Wang Y, Jensen RC, Stumph WE. Role of TATA box
-sequence and orientation in determining RNA polymerase II/III transcription
-specificity. Nucleic Acids Res. 1996;24(15):3100–3106.
-doi:10.1093/nar/24.15.3100. However, the areas are not particularly enriched
-for TATA boxes, so it does not necessarily show that breakpoints are occurring
-directly after promoter regions. 
+The directionality here is consistent with the `GC` content analysis.
 
+## Motifs
 
-```{r AAGCsGCwwmkCGrCTTyn, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
-maxHeight <- 2000
-sm_GC2_mot <- sapply(coa[1:15], bp_heatmap, window = 1000, pat = "AGCNGC", direction = "left") |> 
+See `vignette("PWM", package = "OikScrambling")` for how the different motifs
+objects are discovered.
+
+### `CCTGA.TCAGG`
+
+```{r motif_CCTGA.TCAGG, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
+sm_GC2_mot <- sapply(brk[1:5], bp_heatmap, window = 1000, pat = "CCTGANTCAGG", direction = "left") |> 
               sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
 plotHeatmapList(sm_GC2_mot[1:5])
 ```
 
+### `GCCGC`
+
+```{r motif_CCTGA.TCAGG, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
+sm_GC2_mot <- sapply(brk[1:5], bp_heatmap, window = 1000, pat = "GCCGC", direction = "left") |> 
+              sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
+plotHeatmapList(sm_GC2_mot[1:5])
+```
 
 ## Cluster analysis
 
