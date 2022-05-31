@@ -1,0 +1,151 @@
+---
+title: "Multiple-to-one relations among genomes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Region of interest: PAC3}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_knit$set(cache = TRUE)
+options(width = 200)
+```
+
+Load packages and data
+======================
+
+See `?OikScrambling:::loadAllGenomes()` and `vignette("LoadGenomicBreaks",
+package = "OikScrambling")` for how the different objects are prepared.
+
+```{r load_packages_and_data}
+suppressPackageStartupMessages({
+  library('GenomicBreaks')
+  library('ggplot2')
+  library("BreakpointsData")
+})
+genomes <- OikScrambling:::loadAllGenomes(compat = FALSE)
+# This isn't going to be very nice, but I have precomputed multiple-to-one GFF files from the 
+# .maf files in the various Breakpoints data sources.
+# On deigo, they can be found in:
+# /bucket/LuscombeU/live/michaelmansfield/Breakpoints/2022.03.29-tandem_inverted_duplications
+#many_to_one <- lapply(list.files('../../Alignments/1_converted_maf_03.split/Oidioi_v3/'), function(x)load_genomic_breaks(paste0('../../Alignments/1_converted_maf_03.split/Oidioi_v3/', x))) |> SimpleList()
+#names(many_to_one) <- sapply(list.files('../../Alignments/1_converted_maf_03.split/Oidioi_v3/'), function(s) unlist(strsplit(s, '.gff3'))[1])
+load("BreakPoints.Rdata")
+
+loadLongShort <- function(file, genome) {
+  file <- system.file(paste0("extdata/Annotations/", file), package = "BreakpointsData")
+  gr <- rtracklayer::import.gff3(file)
+  gr$source <- gr$type <- gr$score <- gr$phase <- NULL
+  GRanges(gr, seqinfo = seqinfo(getBSgenome(genome)), strand = "*")
+}
+
+flagLongShort_ <- function(gr, longShort) {
+  genomeT <- gr |> genome() |> unique()
+  if(genomeT %in% names(longShort))
+    gr <- flagLongShort(gr, longShort[[genomeT]])
+  if("GBreaks" %in% class(gr)) {
+      genomeQ <- gr$query |> genome() |> unique()
+      if(genomeQ %in% names(longShort)) {
+        # sort, flag, unsort, extract flag
+        grq <- gr$query
+        grq$idx <- seq_along(grq)
+        grq <- sort(grq, ignore.strand = TRUE)
+        grq <- flagLongShort(grq, longShort[[genomeQ]])
+        gr$query$Arm <- grq$Arm[order(grq$idx)]
+      }
+  }
+  gr
+}
+
+longShort <- SimpleList()
+longShort$OKI2018.I69   <- loadLongShort("OKI2018_I69.v2/OKI2018_I69.arms.gff3", "OKI2018.I69")
+longShort$OSKA2016v1.9  <- loadLongShort("OSKA2016v1.9/OSKA2016v1.9.arms.gff3",  "OSKA2016v1.9")
+longShort$Bar2.p4       <- loadLongShort("Bar2_p4.Flye/Bar2_p4.Flye.arms.gff3",  "Bar2.p4")
+
+# Local function to add extra annotation on long/short arms while loading data
+load_genomic_breaks_ <- function(file, prefix=NULL, genomeT, genomeQ, longShort=NULL) {
+  file <- paste0(prefix, file)
+  # Note that "match_part" is not present when the -J option is not used.
+  gb <- load_genomic_breaks(file, getBSgenome(genomeT),  getBSgenome(genomeQ), type="match")
+  flagLongShort_(gb, longShort)
+}
+
+m2o <- SimpleList()
+
+load_all_multi2ones <- function(prefix=NULL){
+  m2o <- SimpleList()
+  m2o$Oki_Osa <- load_genomic_breaks_("OKI2018_I69_1.0__OSKA2016v1.9.gff.gz", prefix=prefix, "OKI2018.I69",  "OSKA2016v1.9", longShort)
+  m2o$Oki_Bar <- load_genomic_breaks_("OKI2018_I69_1.0__Bar2_p4.gff.gz", prefix=prefix, "OKI2018.I69", "Bar2.p4", longShort)
+  m2o$Oki_Nor <- load_genomic_breaks_("OKI2018_I69_1.0__OdB3.gff.gz", prefix=prefix, "OKI2018.I69", "OdB3", longShort)
+  
+  m2o$Osa_Oki <- load_genomic_breaks_("OSKA2016v1.9__OKI2018_I69_1.0.gff.gz", prefix=prefix, "OSKA2016v1.9", "OKI2018.I69", longShort)
+  m2o$Osa_Bar <- load_genomic_breaks_("OSKA2016v1.9__Bar2_p4.gff.gz", prefix=prefix, "OSKA2016v1.9", "Bar2.p4", longShort)
+  m2o$Osa_Nor <- load_genomic_breaks_("OSKA2016v1.9__OdB3.gff.gz", prefix=prefix, "OSKA2016v1.9", "OdB3", longShort)
+  
+  m2o$Bar_Oki <- load_genomic_breaks_("Bar2_p4__OKI2018_I69_1.0.gff.gz", prefix=prefix, "Bar2.p4", "OKI2018.I69", longShort)
+  m2o$Bar_Osa <- load_genomic_breaks_("Bar2_p4__OSKA2016v1.9.gff.gz", prefix=prefix, "Bar2.p4", "OSKA2016v1.9", longShort)
+  m2o$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz", prefix=prefix, "Bar2.p4", "OdB3", longShort)
+  m2o
+}
+
+#m2o <- list(c("03.split", "05.split", "07.split"))
+m2o$split03      <- load_all_multi2ones(prefix="../../Alignments/1_converted_maf_03.split/Oidioi_v3/")
+m2o$split05      <- load_all_multi2ones(prefix="../../Alignments/1_converted_maf_05.split/Oidioi_v3/")
+m2o$postmasked07 <- load_all_multi2ones(prefix="../../Alignments/1_converted_maf_07.postmasked/Oidioi_v3/")
+
+```
+
+# Accounting for multiple-to-one alignments
+
+In general, we work at the level of one-to-one correspondence. However, some regions of the genome are actually mltiple
+
+```{r confirming_relationships}
+# Make sure that some target regions match more than one region in the query.
+paste0(seqnames(m2o$split03$Oki_Osa), "_", ranges(m2o$split03$Oki_Osa)) |> table() |> sort() |> tail()
+# Make sure each query region matches exactly one region.
+paste0(seqnames(m2o$split03$Oki_Osa$query), "_", ranges(m2o$split03$Oki_Osa$query)) |> table() |> sort() |> tail()
+
+# Check the range totals for each of these objects.
+(m2o$split03$Oki_Osa       |> width() |> sum() )
+(m2o$split03$Oki_Osa       |> reduce() |> width() |> sum() )
+(m2o$split03$Oki_Osa$query |> width() |> sum() )
+(m2o$split03$Oki_Osa$query |> reduce() |> width() |> sum() )
+
+(m2o$split05$Oki_Osa       |> width() |> sum() )
+(m2o$split05$Oki_Osa       |> reduce() |> width() |> sum() )
+(m2o$split05$Oki_Osa$query |> width() |> sum() )
+(m2o$split05$Oki_Osa$query |> reduce() |> width() |> sum() )
+
+(m2o$postmasked07$Oki_Osa       |> width() |> sum() )
+(m2o$postmasked07$Oki_Osa       |> reduce() |> width() |> sum() )
+(m2o$postmasked07$Oki_Osa$query |> width() |> sum() )
+(m2o$postmasked07$Oki_Osa$query |> reduce() |> width() |> sum() )
+
+(gbs$Oki_Osa |> width() |> sum())
+```
+
+```{r multiple_to_one}
+subset_more_than_one <- function(gr) {
+  gr$seq_loc <- paste0(seqnames(gr), "_", ranges(gr))
+  more_than_one <- names(which(gr$seq_loc |> table() > 1))
+  gr <- subset(gr, gr$seq_loc %in% more_than_one)
+  mcols(gr) <- mcols(gr)[,colnames(mcols(gr))!="seq_loc"]
+  gr
+}
+
+(subset_more_than_one(m2o$split03$Oki_Osa))
+(subset_more_than_one(m2o$split03$Oki_Osa) |> width() |> sum())
+(subset_more_than_one(m2o$split03$Oki_Osa) |> reduce() |> width() |> sum())
+```
+
+## General information.
+
+
+# Session information
+
+```{r session_information}
+sessionInfo()
+```
