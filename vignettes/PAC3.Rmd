@@ -29,6 +29,8 @@ library('OikScrambling')   |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes(compat = F)
 
 transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings()
+genes <- OikScrambling:::loadAllAnnotations()
+
 
 load("BreakPoints.Rdata")
 ```
@@ -353,7 +355,7 @@ gr2dna_seg_arr <- function (gr, ...) {
      strand = strand(gr)
    )
    genoPlotR::dna_seg(df, gene_type = "arrows", ...)
- 
+}
 
 
 comparisons[[1]]$
@@ -382,8 +384,10 @@ extract_transcript_coords <- function(gr, gene_name, upstream=0, downstream=0) {
 extract_transcript_coords()
 
 pac3_operon_oki <- extract_transcript_coords(transcripts$OKI2018.I69, 'g3146.t1', upstream=3, downstream=5)
-pac3_operon_osa <- extract_transcript_coords(transcripts$OSKA2016v1.9, 'g12442.t1', upstream=9, downstream=9)
-
+pac3_operon_osa <- extract_transcript_coords(transcripts$OSKA2016v1.9, 'g12442.t1', upstream=1, downstream=0)
+pac3_operon_bar <- extract_transcript_coords(transcripts$Bar2.p4, 'g12642.t1', upstream=0, downstream=2)
+#Remove alternative transcript
+pac3_operon_bar <- pac3_operon_bar[-2]
 
 
 
@@ -442,6 +446,10 @@ Find_UpAndDown <- function(op, gene_ofi) {
   ss1 <- unlist(ss)
   xx <- which(ss1)
   yy <- as.data.frame(op[xx])
+  yy
+}
+
+#This second part of the function doesnt work when g < 2
   zz <- op$tx_names |> unlist ()
   Pc3 == gene_ofi
   gin <- which(Pc3 == gene_ofi)
@@ -456,29 +464,20 @@ Find_UpAndDown <- function(op, gene_ofi) {
 
 
 
-
-
 gg <- Find_UpAndDown(operons$Oki, 'g3146.t1')
+qq <- Find_UpAndDown(operons$Osa, 'g12442.t1')
+rr <- Find_UpAndDown(operons$Bar, 'g12642.t1')
+
+qq$tx_names
+
 
 #op - operons$Oki
 #gene_ofi 'g3146.t1'
+# Find_UpAndDown(operons$Oki, 'g3146.t1')
+#[1] "g3143.t1" "g3144.t1" "g3145.t1"
+#[1] "g3147.t1" "g3148.t1" "g3149.t1" "g3150.t1" "g3151.t1"
 
-
-#Function to know exactly how many genes are upstream and downstream -target gene- in operon
-UpDown <- function(
-    gg$tx_names |> unlist ()
-Pc3 == 'g3146.t1'
-gin <- which(Pc3 == 'g3146.t1')
-b <- seq_along(Pc3)
-
-#Uostream genes
-t <- Pc3[b < gin ]
-#Downstream genes
-t2 <- Pc3[b > gin]
-
-cat(sprintf(paste0('Upstream gene: %f Downstream genes: %f', t, t2)))
-
-
+#Find_UpAndDown(operons$Oki, 'g3146.t1')
 
 N19 <- OikScrambling::load_one_to_ones(system.file("extdata/OrthoFinder/N19")
 )
@@ -529,23 +528,26 @@ addMargins <- function(regs, inner.margin, outer.margin){
 }
 
 
-
-
-
+PAC3_in_Osa <- GRanges("XSR:3162950-3168025")
 
 
 plot_gene_map(
 #  apply_color_scheme(c(0.6, 0.4, 0.5), "grey"),
   dna_segs = list(
-    Okinawa=gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'),
-    Osaka=gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1')
+    Okinawa_CHR1=gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'),
+    Osaka_XSR=reverse(gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1')),
+    Barcelona_XSR=gr2dna_seg(pac3_operon_bar, gene_of_interest ='g12642.t1')
   ),
   dna_seg_scale = T, 
   annotations = list(
-    dnaseg_to_annot(gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'), rot=10, col=rainbow(19)),
-    dnaseg_to_annot(gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1'), rot=10, col=rainbow(19))
+    dnaseg_to_annot(gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146.t1'), rot=15, col=rainbow(9)),
+    reverse(dnaseg_to_annot(gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442.t1'), rot=15, col=rainbow(2))),
+    dnaseg_to_annot(gr2dna_seg(pac3_operon_bar, gene_of_interest='g12642.t1'), rot=15, col=rainbow(2))
   ),
-  comparisons = list(gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3))),
+  comparisons = list(
+    reverse(gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3)), side=2), 
+    reverse(gb2comp(coa$Osa_Bar |> subsetByOverlaps(PAC3_in_Osa)), side=1)
+  ),
   main = "PAC3 moved from chr1 in Okinawa to XSR in Osaka")
  # par(mar=c(8,8,8,8))
 
