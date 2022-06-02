@@ -158,3 +158,81 @@ rtracklayer::export(invsOska$Osa_Aom, "inversions_v4.0.0_Osa_Aom.bed")
 rtracklayer::export(invsOska$Osa_Nor, "inversions_v4.0.0_Osa_Nor.bed")
 ```
 
+# Breakpoint regions flanking inversions
+
+Inversions break synteny.  Therefore, the unaligned regions flanking them are
+classified as _breakpoint regions_.  This means that they are not paired with
+the other genome.  Here, we will do the pairing by 1) flipping the inversions
+and re-coalescing the alignments, and 2) isolating the new bridge regions
+produced in that process.
+
+```{r bridges_of_inversions}
+flipInversions <- function(gb) {
+  Invs <- which(flagInversions(gb)$inv) + 1
+  strand(gb)[Invs] <- ifelse(strand(gb)[Invs] == "+", "-", "+")
+  gb
+}
+
+flippedInvs <- sapply(coa, flipInversions) |> SimpleList()
+
+# See https://github.com/oist/GenomicBreaks/issues/20
+bridgeRegions_ <- function(gb) {
+  if(sum(flagColinearAlignments(gb)$colinear) == 0) return(GBreaks())
+  bridgeRegions(gb)
+}
+
+flippedInvs_bri <- sapply(flippedInvs, bridgeRegions_) |> SimpleList()
+
+# Copied from the LoadGenomicBreaks vignette
+flagLongShort_ <- function(gr, longShort) {
+  genomeT <- gr |> genome() |> unique()
+  if(genomeT %in% names(longShort))
+    gr <- flagLongShort(gr, longShort[[genomeT]])
+  if("GBreaks" %in% class(gr)) {
+      genomeQ <- gr$query |> genome() |> unique()
+      if(genomeQ %in% names(longShort)) {
+        # sort, flag, unsort, extract flag
+        grq <- gr$query
+        grq$idx <- seq_along(grq)
+        grq <- sort(grq, ignore.strand = TRUE)
+        grq <- flagLongShort(grq, longShort[[genomeQ]])
+        gr$query$Arm <- grq$Arm[order(grq$idx)]
+      }
+  }
+  gr
+}
+
+flippedInvs_bri[1:15] <- BiocParallel::bplapply(flippedInvs_bri[1:15], flagLongShort_, longShort)
+
+
+# Copied from the RegionWidths vignette
+GBreaks2widthTibble <- function(gb, pair = NULL) {
+  df <- as.data.frame(gb)
+  if(is.null(df$Arm))       df$Arm        <- NA
+  if(is.null(df$rep))       df$rep        <- NA
+  if(is.null(df$query.rep)) df$query.rep  <- NA
+  tibble::tibble(target     = df$width,        query     = df$query.width,
+                 target.rep = ! is.na(df$rep), query.rep = ! is.na(df$query.rep),  # TRUE if overlaps a repeat
+                 pair = pair, Arm = df$Arm,
+                 dist = OikScrambling:::compDistance(pair))
+}
+
+ggPlotW2W <- function(tibble) {
+  ggplot(tibble) +
+    aes(target, query) +
+    geom_point(alpha = 0.05) +
+    geom_density_2d() +
+    scale_x_log10() +
+    scale_y_log10()
+}
+
+NULL -> flippedInvs_bri$Ply_Oki -> flippedInvs_bri$Rob_Oki
+
+w2w <- do.call(rbind, lapply(names(flippedInvs_bri),  \(name) GBreaks2widthTibble(flippedInvs_bri[[name]],  pair = name)))
+
+ggPlotW2W(w2w |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
+  ggtitle("Width of the target and query regions flanking inversions")
+
+ggPlotW2W(w2w)                              + facet_wrap(~dist) +
+  ggtitle("Width of the target and query regions flanking inversions")
+```
