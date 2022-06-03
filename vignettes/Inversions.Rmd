@@ -217,10 +217,14 @@ GBreaks2widthTibble <- function(gb, pair = NULL) {
                  dist = OikScrambling:::compDistance(pair))
 }
 
-ggPlotW2W <- function(tibble) {
+ggPlotW2W <- function(tibble, plus1 = FALSE, alpha = 0.05) {
+  if (plus1) {
+    tibble$target <- tibble$target + 1
+    tibble$query  <- tibble$query  + 1
+  }
   ggplot(tibble) +
     aes(target, query) +
-    geom_point(alpha = 0.05) +
+    geom_point(alpha = alpha) +
     geom_density_2d() +
     scale_x_log10() +
     scale_y_log10()
@@ -236,3 +240,76 @@ ggPlotW2W(w2w |> dplyr::filter(!is.na(Arm))) + facet_wrap(~Arm) +
 ggPlotW2W(w2w)                              + facet_wrap(~dist) +
   ggtitle("Width of the target and query regions flanking inversions")
 ```
+
+# Same-culture inversions
+
+```{r I28}
+# i28.gbs <- load_genomic_breaks("~/FromSango/I28-4.07.postmasked.gff.gz", type = "match",
+#                                target = genomes$OKI2018.I69, query = BSgenome.Oidioi.OIST.I28) |> flagLongShort(longShort$OKI2018.I69)
+# i28.coa <- coalesce_contigs(i28.gbs) |> flagLongShort(longShort$OKI2018.I69)
+# i28.briInv <- i28.coa |> flipInversions() |> bridgeRegions()
+# i28.briInv$wT <- width(i28.briInv)
+# i28.briInv$wQ <- width(i28.briInv$query)
+# i28.briInv <- dist2next(i28.briInv)
+# i28.w2w <- GBreaks2widthTibble(i28.briInv, pair = "Oki_Oki")
+# ggPlotW2W(i28.w2w)
+# ggPlotW2W(i28.w2w, plus1 = TRUE, alpha = .5)
+```
+
+It looks like some aligned inversions with zero-width bridges on both sides are flanked by tandem inverted unmapped regions.
+
+https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=f863qz3iKBFqUgA75J9BBC;loc=OKI2018_I69_1.0::chr1:7668403..7668663+
+
+A region in Oki that inverted but not in the other genomes, and maybe in only
+one haplotype.  The unaligned regions are shorter in Oki, suggesting that the
+lesion happened there.  They still contain repeats.
+
+https://fantom.gsc.riken.jp/zenbu/gLyphs/#config=Px8xzKj9BdRgDGPSmcNT_;loc=OKI2018_I69_1.0::PAR:16104430..16107799+
+
+```
+coa$Oki_Kum |> plyranges::filter(start >= 16098309, end <= 16113733, seqnames == 'PAR') |> dist2next(ignore.strand = T)
+```
+
+A region in Oki inverted compared to I28 and Kum, and maybe also Osaka, flanked
+by a pair of repeats of the same family that is inserted only in Oki (because
+gap length is near-zero in I28 and Kum).
+
+```{r ROI3_I28}
+# Add <- function(gb, n) {
+#   start(gb)       <- start(gb      ) - n
+#   end  (gb)       <- end  (gb      ) + n
+#   start(gb$query) <- start(gb$query) - n
+#   end  (gb$query) <- end  (gb$query) + n
+#   gb
+# }
+# 
+# (ROI3_I28 <- i28.gbs     |> plyranges::filter(start >= 10262805, end <= 10277383, seqnames == 'PAR') |> dist2next(ignore.strand = T))
+(ROI3_Kum <- coa$Oki_Kum |> plyranges::filter(start >= 10255040, end <= 10280531, seqnames == 'PAR') |> dist2next(ignore.strand = T))
+# 
+# # Sequence near the 
+# # Need to shrink to avoid zero-length regions not yet supported by cleanGaps.
+# # Add 10 to the gaps to see sequence
+((ROI3_Kum$query -1)|> cleanGaps() +10) |> getSeq()
+# ((ROI3_I28$query -1)|> cleanGaps() +10) |> getSeq()
+# 
+# ROI3_I28
+# pairwiseAlignment(ROI3_I28[1] |> Add(6) )
+# pairwiseAlignment(ROI3_I28[2] |> Add(8) )
+# getSeq(ROI3_I28[2] |> Add(8) |> plyranges::mutate(strand = "+"))
+# pairwiseAlignment(ROI3_I28[3] |> Add(6) )
+
+pairwiseAlignment(ROI3_Kum[1] |> Add(6) )
+pairwiseAlignment(ROI3_Kum[2] |> Add(8) )
+getSeq(ROI3_Kum[2] |> Add(8) |> plyranges::mutate(strand = "+"))
+pairwiseAlignment(ROI3_I28[3] |> Add(6) )
+```
+
+My hypothesis:
+
+  a) Ancestral version with no repeats.
+  b) One `i69_juicer_1_5_16917` repeat inserts next to `g11343.t3` gene
+  c) A second copy of `i69_juicer_1_5_16917` inserts on the other side of the gene,
+     in the opposite orientation.
+  d) Later, because of the tandem inverted repeat, the gene was inverted.
+  
+The repeats have inverted tandem sites `cagtcgactctggcaattacgag`
