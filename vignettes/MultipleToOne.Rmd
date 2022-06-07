@@ -3,7 +3,7 @@ title: "Multiple-to-one relations among genomes"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{Region of interest: PAC3}
+  %\VignetteIndexEntry{Multiple-to-one relationships}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
@@ -27,10 +27,7 @@ suppressPackageStartupMessages({
   library("BreakpointsData")
 })
 genomes <- OikScrambling:::loadAllGenomes(compat = FALSE)
-# This isn't going to be very nice, but I have precomputed multiple-to-one GFF files from the 
-# .maf files in the various Breakpoints data sources.
-# On deigo, they can be found in:
-# /bucket/LuscombeU/live/michaelmansfield/Breakpoints/2022.03.29-tandem_inverted_duplications
+
 load("BreakPoints.Rdata")
 
 loadLongShort <- function(file, genome) {
@@ -63,6 +60,23 @@ longShort$OKI2018.I69   <- loadLongShort("OKI2018_I69.v2/OKI2018_I69.arms.gff3",
 longShort$OSKA2016v1.9  <- loadLongShort("OSKA2016v1.9/OSKA2016v1.9.arms.gff3",  "OSKA2016v1.9")
 longShort$Bar2.p4       <- loadLongShort("Bar2_p4.Flye/Bar2_p4.Flye.arms.gff3",  "Bar2.p4")
 
+#' Loading functions from:
+#' \code{vignette("LoadGenomicBreaks", package = "OikScrambling")}
+```
+
+# Accounting for multiple-to-one alignments
+
+In general, we work at the level of one-to-one correspondence. However, some regions may have multiple-to-one correspondence, or else multiple-to-multiple correspondence. To disentangle these, we must examine the non-one-to-one alignments.
+
+Below, I take a look at the properties of these alignments.
+
+The precomputed `.gff` files were generated using `maf-convert` from the output of the pairwise alignment pipeline.
+
+On our cluster, the files are available on:
+
+`/bucket/LuscombeU/live/michaelmansfield/Breakpoints/2022.03.29-tandem_inverted_duplications`
+
+```{r original_alignments}
 # Local function to add extra annotation on long/short arms while loading data
 load_genomic_breaks_ <- function(file, prefix=NULL, genomeT, genomeQ, longShort=NULL) {
   file <- paste0(prefix, file)
@@ -71,41 +85,53 @@ load_genomic_breaks_ <- function(file, prefix=NULL, genomeT, genomeQ, longShort=
   flagLongShort_(gb, longShort)
 }
 
+#load('../../m2o.Rd')
+
 m2o <- SimpleList()
 
-load_all_multi2ones <- function(prefix=NULL){
-  m2o <- SimpleList()
-  m2o$Oki_Osa <- load_genomic_breaks_("OKI2018_I69_1.0__OSKA2016v1.9.gff.gz", prefix=prefix, "OKI2018.I69",  "OSKA2016v1.9", longShort)
-  m2o$Oki_Bar <- load_genomic_breaks_("OKI2018_I69_1.0__Bar2_p4.gff.gz", prefix=prefix, "OKI2018.I69", "Bar2.p4", longShort)
-  m2o$Oki_Nor <- load_genomic_breaks_("OKI2018_I69_1.0__OdB3.gff.gz", prefix=prefix, "OKI2018.I69", "OdB3", longShort)
+load_all_multi2ones <- function(prefix=NULL) {
+  many2one <- SimpleList()
+  many2one$Oki_Osa <- load_genomic_breaks_("Oki__OSKA2016v1.9.gff.gz", prefix=prefix, "OKI2018.I69",  "OSKA2016v1.9", longShort)
+  many2one$Oki_Aom <- load_genomic_breaks_("Oki__AOM-5-5f.gff.gz", prefix=prefix, "OKI2018.I69",  "AOM.5.5f", longShort)
+  many2one$Oki_Bar <- load_genomic_breaks_("Oki__Bar2_p4.gff.gz", prefix=prefix, "OKI2018.I69", "Bar2.p4", longShort)
+  many2one$Oki_Nor <- load_genomic_breaks_("Oki__OdB3.gff.gz", prefix=prefix, "OKI2018.I69", "OdB3", longShort)
+  many2one$Oki_Kum <- load_genomic_breaks_("Oki__KUM-M3-7f.gff.gz", prefix=prefix, "OKI2018.I69", "KUM.M3.7f", longShort)
   
-  m2o$Osa_Oki <- load_genomic_breaks_("OSKA2016v1.9__OKI2018_I69_1.0.gff.gz", prefix=prefix, "OSKA2016v1.9", "OKI2018.I69", longShort)
-  m2o$Osa_Bar <- load_genomic_breaks_("OSKA2016v1.9__Bar2_p4.gff.gz", prefix=prefix, "OSKA2016v1.9", "Bar2.p4", longShort)
-  m2o$Osa_Nor <- load_genomic_breaks_("OSKA2016v1.9__OdB3.gff.gz", prefix=prefix, "OSKA2016v1.9", "OdB3", longShort)
-  
-  m2o$Bar_Oki <- load_genomic_breaks_("Bar2_p4__OKI2018_I69_1.0.gff.gz", prefix=prefix, "Bar2.p4", "OKI2018.I69", longShort)
-  m2o$Bar_Osa <- load_genomic_breaks_("Bar2_p4__OSKA2016v1.9.gff.gz", prefix=prefix, "Bar2.p4", "OSKA2016v1.9", longShort)
-  m2o$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz", prefix=prefix, "Bar2.p4", "OdB3", longShort)
-  m2o
+  many2one$Osa_Oki <- load_genomic_breaks_("Osa__OKI2018_I69_1.0.gff.gz", prefix=prefix, "OSKA2016v1.9", "OKI2018.I69",  longShort)
+  many2one$Osa_Bar <- load_genomic_breaks_("Osa__Bar2_p4.gff.gz", prefix=prefix, "OSKA2016v1.9", "Bar2.p4",     longShort)
+  many2one$Osa_Kum <- load_genomic_breaks_("Osa__KUM-M3-7f.gff.gz", prefix=prefix, "OSKA2016v1.9", "KUM.M3.7f", longShort)
+  many2one$Osa_Aom <- load_genomic_breaks_("Osa__AOM-5-5f.gff.gz", prefix=prefix, "OSKA2016v1.9", "AOM.5.5f",   longShort)
+  many2one$Osa_Nor <- load_genomic_breaks_("Osa__OdB3.gff.gz", prefix=prefix, "OSKA2016v1.9", "OdB3",           longShort)
+
+  many2one$Bar_Oki <- load_genomic_breaks_("Bar__OKI2018_I69_1.0.gff.gz", prefix=prefix, "Bar2.p4", "OKI2018.I69", longShort)
+  many2one$Bar_Osa <- load_genomic_breaks_("Bar__OSKA2016v1.9.gff.gz", prefix=prefix, "Bar2.p4", "OSKA2016v1.9", longShort)
+  many2one$Bar_Kum <- load_genomic_breaks_("Bar__KUM-M3-7f.gff.gz", prefix=prefix, "Bar2.p4", "KUM.M3.7f", longShort)
+  many2one$Bar_Aom <- load_genomic_breaks_("Bar__AOM-5-5f.gff.gz", prefix=prefix, "Bar2.p4", "AOM.5.5f", longShort)
+  many2one$Bar_Nor <- load_genomic_breaks_("Bar__OdB3.gff.gz", prefix=prefix, "Bar2.p4", "OdB3", longShort)
+  many2one
 }
 
+m2o$original01   <- load_all_multi2ones(prefix="../../Alignments/1_converted_maf_01.original_alignment/Oidioi_v3/")
 m2o$split03      <- load_all_multi2ones(prefix="../../Alignments/1_converted_maf_03.split/Oidioi_v3/")
 m2o$split05      <- load_all_multi2ones(prefix="../../Alignments/1_converted_maf_05.split/Oidioi_v3/")
 m2o$postmasked07 <- load_all_multi2ones(prefix="../../Alignments/1_converted_maf_07.postmasked/Oidioi_v3/")
 
 ```
 
-# Accounting for multiple-to-one alignments
+Let's examine the properties of these alignments.
 
-In general, we work at the level of one-to-one correspondence. However, some regions of the genome are actually mltiple
-
-```{r confirming_relationships}
+```{r confirming_one_to_one_ness}
 # Make sure that some target regions match more than one region in the query.
 paste0(seqnames(m2o$split03$Oki_Osa), "_", ranges(m2o$split03$Oki_Osa)) |> table() |> sort() |> tail()
 # Make sure each query region matches exactly one region.
 paste0(seqnames(m2o$split03$Oki_Osa$query), "_", ranges(m2o$split03$Oki_Osa$query)) |> table() |> sort() |> tail()
 
 # Check the range totals for each of these objects.
+(m2o$split03$Oki_Osa       |> width() |> sum() )
+(m2o$split03$Oki_Osa       |> reduce() |> width() |> sum() )
+(m2o$split03$Oki_Osa$query |> width() |> sum() )
+(m2o$split03$Oki_Osa$query |> reduce() |> width() |> sum() )
+
 (m2o$split03$Oki_Osa       |> width() |> sum() )
 (m2o$split03$Oki_Osa       |> reduce() |> width() |> sum() )
 (m2o$split03$Oki_Osa$query |> width() |> sum() )
@@ -122,21 +148,249 @@ paste0(seqnames(m2o$split03$Oki_Osa$query), "_", ranges(m2o$split03$Oki_Osa$quer
 (m2o$postmasked07$Oki_Osa$query |> reduce() |> width() |> sum() )
 
 (gbs$Oki_Osa |> width() |> sum())
+(gbs$Oki_Osa$query |> width() |> sum())
 ```
 
-```{r multiple_to_one}
-subset_more_than_one <- function(gr) {
-  gr$seq_loc <- paste0(seqnames(gr), "_", ranges(gr))
-  more_than_one <- names(which(gr$seq_loc |> table() > 1))
-  gr <- subset(gr, gr$seq_loc %in% more_than_one)
-  mcols(gr) <- mcols(gr)[,colnames(mcols(gr))!="seq_loc"]
-  gr
+## Flagging alignment correspondence
+Alignments are originally created as multiple-to-multiple, or many-to-many, correspondence. However, not every segment
+within these regions is actually many-to-many. Below, I create some functions to return what kind of correspondence
+each aligned region has.
+
+N.B. Computing the `m2o_cor` requires lots of memory. I saved it to an `.Rdata` image which is not part of the vignette. This is commented out in the chunk below.
+
+```{r flagging_correspondence_1}
+#load('../../m2o_cor.Rd')
+
+# Function to report correspondence in GBreaks countOverlaps() for target and query.
+query_target_correspondence <- function(target_overlaps, query_overlaps) {
+  types <- rep(NA, length(target_overlaps))
+  for(i in seq_along(1:length(types))){
+    if(target_overlaps[i] == 1){
+      if(query_overlaps[i] == 1){
+        types[i] <- "one_to_one"
+      } else {
+        types[i] <- "one_to_many"
+      }
+    } else {
+      if(query_overlaps[i] == 1) {
+        types[i] <- "many_to_one"
+      } else {
+        types[i] <- "many_to_many"
+      }
+    }
+  }
+  types
 }
 
-(subset_more_than_one(m2o$split03$Oki_Osa))
-(subset_more_than_one(m2o$split03$Oki_Osa) |> width() |> sum())
-(subset_more_than_one(m2o$split03$Oki_Osa) |> reduce() |> width() |> sum())
+correspondence <- function(gb) {
+  gb$target_overlaps <- countOverlaps(gb)
+  gb$query_overlaps  <- countOverlaps(gb$query)
+  gb$correspondence <- query_target_correspondence(gb$target_overlaps, gb$query_overlaps)
+  gb
+}
+(correspondence(head(gbs$Oki_Osa, n=10)))
+
+m2o_cor <- SimpleList()
+load_all_multi2ones_correspondence <- function(prefix=NULL) {
+  many2one <- SimpleList()
+  many2one$Oki_Osa <- load_genomic_breaks_("Oki__OSKA2016v1.9.gff.gz", prefix=prefix, "OKI2018.I69",  "OSKA2016v1.9", longShort) |> correspondence()
+  many2one$Oki_Aom <- load_genomic_breaks_("Oki__AOM-5-5f.gff.gz", prefix=prefix, "OKI2018.I69",  "AOM.5.5f", longShort) |> correspondence()
+  many2one$Oki_Bar <- load_genomic_breaks_("Oki__Bar2_p4.gff.gz", prefix=prefix, "OKI2018.I69", "Bar2.p4", longShort) |> correspondence()
+  many2one$Oki_Nor <- load_genomic_breaks_("Oki__OdB3.gff.gz", prefix=prefix, "OKI2018.I69", "OdB3", longShort) |> correspondence()
+  many2one$Oki_Kum <- load_genomic_breaks_("Oki__KUM-M3-7f.gff.gz", prefix=prefix, "OKI2018.I69", "KUM.M3.7f", longShort) |> correspondence()
+  
+  many2one$Osa_Oki <- load_genomic_breaks_("Osa__OKI2018_I69_1.0.gff.gz", prefix=prefix, "OSKA2016v1.9", "OKI2018.I69",  longShort) |> correspondence() 
+  many2one$Osa_Bar <- load_genomic_breaks_("Osa__Bar2_p4.gff.gz", prefix=prefix, "OSKA2016v1.9", "Bar2.p4",     longShort) |> correspondence()
+  many2one$Osa_Kum <- load_genomic_breaks_("Osa__KUM-M3-7f.gff.gz", prefix=prefix, "OSKA2016v1.9", "KUM.M3.7f", longShort) |> correspondence()
+  many2one$Osa_Aom <- load_genomic_breaks_("Osa__AOM-5-5f.gff.gz", prefix=prefix, "OSKA2016v1.9", "AOM.5.5f",   longShort) |> correspondence()
+  many2one$Osa_Nor <- load_genomic_breaks_("Osa__OdB3.gff.gz", prefix=prefix, "OSKA2016v1.9", "OdB3",           longShort) |> correspondence()
+
+  many2one$Bar_Oki <- load_genomic_breaks_("Bar__OKI2018_I69_1.0.gff.gz", prefix=prefix, "Bar2.p4", "OKI2018.I69", longShort) |> correspondence()
+  many2one$Bar_Osa <- load_genomic_breaks_("Bar__OSKA2016v1.9.gff.gz", prefix=prefix, "Bar2.p4", "OSKA2016v1.9", longShort) |> correspondence()
+  many2one$Bar_Kum <- load_genomic_breaks_("Bar__KUM-M3-7f.gff.gz", prefix=prefix, "Bar2.p4", "KUM.M3.7f", longShort) |> correspondence()
+  many2one$Bar_Aom <- load_genomic_breaks_("Bar__AOM-5-5f.gff.gz", prefix=prefix, "Bar2.p4", "AOM.5.5f", longShort) |> correspondence()
+  many2one$Bar_Nor <- load_genomic_breaks_("Bar__OdB3.gff.gz", prefix=prefix, "Bar2.p4", "OdB3", longShort) |> correspondence()
+  many2one
+}
+
+m2o_cor$original01   <- load_all_multi2ones_correspondence(prefix="../../Alignments/1_converted_maf_01.original_alignment/Oidioi_v3/")
+m2o_cor$split03      <- load_all_multi2ones_correspondence(prefix="../../Alignments/1_converted_maf_03.split/Oidioi_v3/")
+m2o_cor$split05      <- load_all_multi2ones_correspondence(prefix="../../Alignments/1_converted_maf_05.split/Oidioi_v3/")
+m2o_cor$postmasked07 <- load_all_multi2ones_correspondence(prefix="../../Alignments/1_converted_maf_07.postmasked/Oidioi_v3/")
+
 ```
+
+```{r reduce_keep_meta}
+# Reduce a GRanges, turning all of the reduced metadata columns into lists and binding them
+# to the reduced GRanges.
+reduce_keepMeta <- function(gr, mc.cores=1){
+  gr_red <- reduce(gr, with.revmap=TRUE)
+  revmap <- mcols(gr_red)$revmap
+  gr_relist <- relist(gr[unlist(revmap)], revmap)
+  #gr_relist
+  gr_red$constituents <- gr_relist
+  #new_mcols <- mclapply(mc.cores=mc.cores, gr_red$constituents, function(constitutent) {
+  new_mcols <- lapply(gr_red$constituents, function(constitutent) {
+    mcol_names <- colnames(mcols(constitutent))
+    listed_mcols <- setNames(lapply(mcol_names, function(m) {
+      SimpleList(mcols(constitutent)[[m]])
+    }), mcol_names) |> SimpleList()
+    df <- do.call(cbind, listed_mcols)
+    return(df)
+  })
+  new_mcols <- do.call(rbind, new_mcols)
+  mcols(gr_red) <- cbind(mcols(gr_red), new_mcols)
+  mcols(gr_red) <- mcols(gr_red)[,which( ! colnames(mcols(gr_red)) %in% c('revmap', 'constituents'))]
+  gr_red
+}
+#reduce_keepMeta(m2o$original01$Oki_Osa, mc.cores=8)
+#load('../../m2o_red.Rd')
+m2o_red <- sapply(m2o, function(o) sapply(o, function(p) reduce_keepMeta(p)) |>SimpleList() ) |> SimpleList()
+
+```
+
+
+Below, I assess the one-to-one correspondence of a variety of alignments using a different method involving `GenomicRanges::reduce`. 
+N.B. As above, computing the `m2o_gr` object requires lots of memory. I saved it to an `.Rdata` image which is not part of the vignette. This is commented out in the chunk below.
+
+```{r flagging_correspondence_2}
+#load('../../m2o_gr.Rd')
+
+# An mc-version of the sapply function.
+# From https://stackoverflow.com/questions/31050556/parallel-version-of-sapply
+mcsapply <- function (X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE) {
+  FUN <- match.fun(FUN)
+  answer <- parallel::mclapply(X = X, FUN = FUN, ...)
+  if (USE.NAMES && is.character(X) && is.null(names(answer))) 
+    names(answer) <- X
+  if (!isFALSE(simplify) && length(answer)) 
+    simplify2array(answer, higher = (simplify == "array"))
+  else answer
+}
+
+query_target_correspondence_gr <- function(gb, mc.cores=1) {
+  # Reduce query and target with GenomicRanges::reduce.
+  gr_red <- reduce(gb, with.revmap=TRUE)
+  revmap <- mcols(gr_red)$revmap
+  gr_red$revmap_len <- unlist(lapply(revmap, length))
+  gr_relist <- relist(gb[unlist(revmap)], revmap)
+  # For every range within every split, reduced GRange, calculate one-to-one-ness.
+  q_revmaps <- mcsapply(mc.cores=mc.cores, seq_along(gr_relist), function(i) {
+    r <- unlist(gr_relist[i])
+    q <- r$query
+    q_red <- reduce(q, with.revmap=TRUE)
+    q_revmap <- mcols(q_red)$revmap
+    q_revmap
+  })
+
+  gr_red$q_revmap_len <- unlist(lapply(q_revmaps, length))
+  
+  compare_revmaps <- function(rv1, rv2) {
+    corres <- lapply(1:length(rv1), function(s) {
+      if(rv1[s] == 1 & rv2[s] == 1){
+        return('one_to_one')
+      } else if(rv1[s] > 1 & rv2[s] == 1){
+        return('many_to_one')
+      } else if(rv1[s] == 1 & rv2[s] > 1){
+        return('one_to_many')
+      } else if(rv1[s] > 1 & rv2[s] > 1){
+        return('many_to_many')
+      }
+    })
+    corres <- unlist(corres)
+    corres
+  }
+  gr_red$correspondence <- compare_revmaps(gr_red$revmap_len, gr_red$q_revmap_len)
+  gr_red
+}
+query_target_correspondence_gr(head(m2o$original01$Oki_Osa))
+
+m2o_gr <- SimpleList()
+m2o_gr$original01 <- sapply(m2o$original01, function(sp) query_target_correspondence_gr(sp, mc.cores=1)) |> SimpleList()
+m2o_gr$split03 <- sapply(m2o$split03, function(sp) query_target_correspondence_gr(sp, mc.cores=1)) |> SimpleList()
+m2o_gr$split05 <- sapply(m2o$split05, function(sp) query_target_correspondence(sp, mc.cores=1)) |> SimpleList()
+m2o_gr$postmasked07 <- sapply(m2o$postmasked07, function(sp) query_target_correspondence_gr(sp, mc.cores=1)) |> SimpleList()
+
+```
+
+The strategy above combines the multiple-to-one regions into single continuous stretches with `reduce()`, analogous to `GenomicBreaks::coalesce_contigs()`. The lengths of the reduced ranges in the target and query are used to annotate the one-to-one-ness of a segment.
+
+Now, examine the overlaps of one-to-one and non-one-to-one regions with different alignment categories.
+
+```{r flagging_correspondence_3, fig.width=8, fig.height=12, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+compare_m2o_o2o <- function(pair, m2o_obj, m2o_align, gr, one_to_one=TRUE) {
+  many2one <- m2o_obj[[m2o_align]][[pair]]
+  if(one_to_one) {
+    many2one <- many2one[many2one$correspondence == "one_to_one"]
+    correspondence <- "one_to_one"
+  } else {
+    many2one <- many2one[!many2one$correspondence == "one_to_one"]
+    correspondence  <- "not_one_to_one"
+  }
+  overlapN        <- sum(countOverlaps(gr[[pair]], many2one))
+  overlapSum      <- sum(width(subsetByOverlaps(gr[[pair]], many2one)))
+  overlapPctTotal <- overlapSum/sum(width(many2one))*100
+  df <- data.frame(pair=pair, correspondence=correspondence, overlapN=overlapN, overlapSum=overlapSum, overlapPctTotal=overlapPctTotal )
+  df
+}
+compare_m2o_o2o("Oki_Osa", m2o_gr, "original01", gbs, one_to_one = T)
+compare_m2o_o2o("Oki_Osa", m2o_gr, "original01", gbs, one_to_one = F)
+compare_m2o_o2o("Oki_Osa", m2o_gr, "split03", gbs, one_to_one = T)
+compare_m2o_o2o("Oki_Osa", m2o_gr, "split03", gbs, one_to_one = F)
+```
+
+## Plotting distribution of matches across genome
+
+In the following, I create some functions for visualising the distribution of alignment categories across the genome. 
+
+`binWidth` sets a constant bin size, while `nIntervals` sets a number of intervals to divide `start` into. Using this approach, the short and long arms or chromosomes will always have different numbers of observations.
+
+```{r, fig.width=8, fig.height=12, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+# Function to plot alignment categories across genome.
+plot_catDist <- function(gb, query=FALSE, nIntervals=NULL, binWidth=NULL, facet.by="seqnames_arm") {
+  df <- as.data.frame(gb)
+  df$seqnames_arm <- paste0(df$seqnames, "_", df$Arm)
+  if(!is.null(nIntervals)){
+    df <- df |> mutate(bin=cut_interval(start, nIntervals)) |> group_by(seqnames, Arm, seqnames_arm, bin, correspondence) |> summarise(n=n()) |> mutate(freq=n/sum(n)*100)
+  } else if(!is.null(binWidth)) {
+    df <- df |> mutate(bin=cut_width(start, binWidth, center=0)) |> group_by(seqnames, Arm, seqnames_arm, bin, correspondence) |> summarise(n=n()) |> mutate(freq=n/sum(n)*100)
+  }
+  p <- ggplot(df) + aes(x=bin, y=freq, fill=correspondence) + geom_bar(stat='identity', position='stack')+ facet_wrap(facet.by, nrow=1, scales='free_x') + theme(axis.text.x = element_blank())
+  
+  p
+}
+(plot_catDist(m2o$original01$Oki_Osa, nIntervals=25))
+```
+
+
+```{r}
+p1 <- plot_catDist(m2o$original01$Oki_Osa, nIntervals=12) + ggtitle('Oki-Osa: original01 alignment')
+p2 <- plot_catDist(m2o$original01$Oki_Bar, nIntervals=12) + ggtitle('Oki-Bar: original01 alignment')
+p3 <- plot_catDist(m2o$original01$Oki_Kum, nIntervals=12) + ggtitle('Oki-Kum: original01 alignment')
+p4 <- plot_catDist(m2o$original01$Osa_Bar, nIntervals=12) + ggtitle('Osa-Bar: original01 alignment')
+( p1 / p2 / p3 / p4 )
+
+p1 <- plot_catDist(m2o$original01$Bar_Oki, nIntervals=12) + ggtitle('Bar-Oki')
+p2 <- plot_catDist(m2o$original01$Bar_Osa, nIntervals=12) + ggtitle('Bar-Osa')
+p3 <- plot_catDist(m2o$original01$Bar_Nor, nIntervals=12) + ggtitle('Bar-Nor')
+( p1 / p2 / p3 )
+```
+
+```{r}
+plot_catDist_all <- function(pair, nIntervals=NULL, binWidth=NULL) {
+  p1 <- plot_catDist(m2o$original01[[pair]], nIntervals=nIntervals, binWidth=binWidth) + ggtitle(paste0(pair, ": original01 alignment"))
+  p2 <- plot_catDist(m2o$split03[[pair]], nIntervals=nIntervals, binWidth=binWidth) + ggtitle(paste0(pair, ": split03 alignment"))
+  p3 <- plot_catDist(m2o$split05[[pair]], nIntervals=nIntervals, binWidth=binWidth) + ggtitle(paste0(pair, ": split05 alignment"))
+  p4 <- plot_catDist(m2o$postmasked07[[pair]], nIntervals=nIntervals, binWidth=binWidth) + ggtitle(paste0(pair, ": postmasked alignment"))
+  (p1 / p2 / p3 / p4 )
+}
+(plot_catDist_all("Oki_Osa", nIntervals=12))
+(plot_catDist_all("Osa_Oki", nIntervals=12))
+(plot_catDist_all("Osa_Bar", nIntervals=12))
+(plot_catDist_all("Oki_Kum", nIntervals=12))
+
+```
+
 
 ## General information.
 
