@@ -837,6 +837,44 @@ Another characteristic of alignment stops that we can examine is the coverage de
 # cov_gr_O_Oki
 ```
 
+# Uncharted regions
+
+If a region contains no alignment, no gene, no repeat, then what does it contain?
+
+There is roughly ~3 Mb of uncharted DNA in the Okinawan genome that does not even
+align to Kume.  But there is ~11 uncharted DNA that does not align to the North lineages.
+
+```{r uncharted_regions}
+gene_regions_oki <- reduce(genes(annots$Oki), ignore.strand = T)
+repeat_regions_oki <- reduce(reps$OKI2018.I69, ignore.strand = T)
+aligned_regions_oki <- reduce(c(granges(gbs$Oki_Osa), granges(gbs$Oki_Bar), granges(gbs$Oki_Kum), granges(gbs$Oki_Aom), granges(gbs$Oki_Nor)), ignore.strand = T)
+aligned_regions_oki_noKume <- reduce(c(granges(gbs$Oki_Osa), granges(gbs$Oki_Bar), granges(gbs$Oki_Aom), granges(gbs$Oki_Nor)), ignore.strand = T)
+
+sum(width(gene_regions_oki))
+sum(width(repeat_regions_oki))
+sum(width(aligned_regions_oki))
+sum(width(aligned_regions_oki_noKume))
+
+sum(width(reduce(c(gene_regions_oki, repeat_regions_oki, aligned_regions_oki))))
+sum(width(reduce(c(gene_regions_oki, repeat_regions_oki, aligned_regions_oki_noKume))))
+sum(seqlengths(genomes$OKI2018.I69))
+
+uncharted_oki_noKume <- genomes$OKI2018.I69 |> seqinfo() |> as("GRanges") |> setdiff(reduce(c(gene_regions_oki, repeat_regions_oki, aligned_regions_oki_noKume)))
+
+# The longest one is a big tandem repeat near the putative centromere AACACTCTCACCTTAACAAGAACCCTTATTAAACCTAGCGACAACACAGGGAG
+uncharted_oki_noKume |> plyranges::arrange(width) |> tail (1) |> as.data.frame()
+# The second to last is subtelomeric
+uncharted_oki_noKume |> plyranges::arrange(width) |> head (-1) |> tail (1) |> as.data.frame()
+# Lots many-to-many alignments in the third.
+uncharted_oki_noKume |> plyranges::arrange(width) |> head (-2) |> tail (1) |> as.data.frame()
+
+# m2m <- load_genomic_breaks("~/FromSango/Oki_OSKA2016v1.9/OSKA2016v1.9.01.original_alignment.target.gff.gz", type="match")
+# aligned_regions_oki_osa_m2m <- reduce(m2m)
+# aligned_regions_oki_osa_o2o <- reduce(gbs$Oki_Osa)
+# setdiff(uncharted_oki_noKume, aligned_regions_oki_osa_m2m)
+# coverage(m2m) |> as("GRanges") |> plyranges::filter(score !=0) |> rtracklayer::export.bed("Oki_Osa_m2m_coverage.bed")
+```
+
 # Session information
 
 ```{r sessioninfo}
