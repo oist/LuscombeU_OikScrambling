@@ -396,19 +396,21 @@ compare_m2o_gb <- function(pair, m2o_obj, m2o_align, m2o_category=c("one_to_one"
   df
 }
 
-rbind(
-  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("one_to_one"), gb=coa$Oki_Osa[coa$Oki_Osa$nonCoa==FALSE], gb_name="collinear region"),
-  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("many_to_many"), coa$Oki_Osa[coa$Oki_Osa$nonCoa==FALSE], gb_name="collinear region"),
+category_df <- rbind(
+  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("one_to_one"), gb=wgo$Oki_Osa[wgo$Oki_Osa$type=='collinear alignment'], gb_name="collinear region"),
+  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("many_to_many"), wgo$Oki_Osa[wgo$Oki_Osa$type=='collinear alignment'], gb_name="collinear region"),
   
-  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("one_to_one"), gb=coa$Oki_Osa[coa$Oki_Osa$nonCoa==TRUE], gb_name="isolated alignment"),
-  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("many_to_many"),  gb=coa$Oki_Osa[coa$Oki_Osa$nonCoa==TRUE], gb_name="isolated alignment"),
+  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("one_to_one"), gb=wgo$Oki_Osa[wgo$Oki_Osa$type=='isolated alignment'], gb_name="isolated alignment"),
+  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("many_to_many"),  gb=wgo$Oki_Osa[wgo$Oki_Osa$type=='isolated alignment'], gb_name="isolated alignment"),
   
   compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("one_to_one"), gb=wgo$Oki_Osa[wgo$Oki_Osa$type=='breakpoint region'], gb_name="breakpoint region"),
   compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("many_to_many"), gb=wgo$Oki_Osa[wgo$Oki_Osa$type=='breakpoint region'], gb_name="breakpoint region"),
   
-  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("one_to_one"), gb=bri$Oki_Osa, gb_name="bridge region"),
-  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("many_to_many"), gb=bri$Oki_Osa, gb_name="bridge region")
+  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("one_to_one"), gb=wgo$Oki_Osa[wgo$Oki_Osa$type=='bridge region'], gb_name="bridge region"),
+  compare_m2o_gb(pair="Oki_Osa", m2o_obj=m2o_gr, m2o_align="original01", m2o_category=c("many_to_many"), gb=wgo$Oki_Osa[wgo$Oki_Osa$type=='bridge region'], gb_name="bridge region")
 )
+(category_df)
+(sum(category_df$overlapWidth))
 ```
 
 How much of each genome pair is neither one-to-one, nor one-to-many, nor many-to-many?
