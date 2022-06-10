@@ -221,6 +221,18 @@ load('../../m2o_cor.Rd')
 ```
 
 ```{r reduce_keep_meta}
+# An mc-version of the sapply function.
+# From https://stackoverflow.com/questions/31050556/parallel-version-of-sapply
+mcsapply <- function (X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE) {
+  FUN <- match.fun(FUN)
+  answer <- parallel::mclapply(X = X, FUN = FUN, ...)
+  if (USE.NAMES && is.character(X) && is.null(names(answer))) 
+    names(answer) <- X
+  if (!isFALSE(simplify) && length(answer)) 
+    simplify2array(answer, higher = (simplify == "array"))
+  else answer
+}
+
 # Reduce a GRanges, turning all of the reduced metadata columns into lists and binding them
 # to the reduced GRanges.
 reduce_keepMeta <- function(gr, mc.cores=1){
@@ -229,7 +241,7 @@ reduce_keepMeta <- function(gr, mc.cores=1){
   gr_relist <- relist(gr[unlist(revmap)], revmap)
   gr_red$constituents <- gr_relist
 
-  new_mcols <- lapply(gr_red$constituents, function(constitutent) {
+  new_mcols <- mcsapply(mc.cores=mc.cores, gr_red$constituents, function(constitutent) {
     mcol_names <- colnames(mcols(constitutent))
     listed_mcols <- setNames(lapply(mcol_names, function(m) {
       SimpleList(mcols(constitutent)[[m]])
@@ -260,18 +272,6 @@ The logic goes as follows:
 N.B. As above, computing the `m2o_gr` object requires lots of memory. I saved it to an `.Rdata` image which is not part of the vignette. This is commented out in the chunk below.
 
 ```{r flagging_correspondence_2}
-# An mc-version of the sapply function.
-# From https://stackoverflow.com/questions/31050556/parallel-version-of-sapply
-mcsapply <- function (X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE) {
-  FUN <- match.fun(FUN)
-  answer <- parallel::mclapply(X = X, FUN = FUN, ...)
-  if (USE.NAMES && is.character(X) && is.null(names(answer))) 
-    names(answer) <- X
-  if (!isFALSE(simplify) && length(answer)) 
-    simplify2array(answer, higher = (simplify == "array"))
-  else answer
-}
-
 query_target_correspondence_gr <- function(gb, mc.cores=1) {
   # Reduce query and target with GenomicRanges::reduce.
   gr_red <- reduce(gb, with.revmap=TRUE)
@@ -436,6 +436,79 @@ wgo_breaks <- wgo_breaks[match( names(breakpoints_without_any_alignment), names(
 (breakpoints_with_some_alignment/(wgo_breaks)*100)
 # Fraction of breakpoint regions without any alignments.
 (breakpoints_without_any_alignment/(wgo_breaks)*100)
+
+```
+
+## Coverage-based version
+An alternative design based on `GRanges::coverage()`.
+
+```{r flagging_correspondence_8}
+query_target_correspondence_cov <- function(gr) {
+  # Count overlaps, using coverage
+  t_gr <- gr |> coverage() |> as("GRanges")
+  # remove 0-width GRanges
+  t_gr <- t_gr |> plyranges::filter(score>0)
+  t_gr$correspondence <- NA
+  t_gr[t_gr$score==1]$correspondence <- "one_match"
+  t_gr[t_gr$score>1]$correspondence <- "not_one_match"
+  
+  # Repeat the above, but for query ranges.
+  q_gr <- gr$query |> coverage() |> as("GRanges")
+  q_gr <- q_gr |> plyranges::filter(score>0)
+  q_gr$correspondence <- NA
+  q_gr[q_gr$score==1]$correspondence <- "one_match"
+  q_gr[q_gr$score>1]$correspondence <- "not_one_match"
+  
+  result <- SimpleList()
+  result$target <- t_gr
+  result$query <- q_gr
+  result
+}
+(query_target_correspondence_cov(m2o$original01$Oki_Osa)) -> tmp
+(tmp$target)
+(tmp$query)
+
+#load('../../m2o_gr.Rd')
+m2o_cov <- sapply(m2o$original01, function(sp) query_target_correspondence_cov(sp)) |> SimpleList()
+```
+
+Using the `m2o_cov` object, it is easy to compare with different alignment categories.
+
+```{r flagging_correspondence_9}
+compare_cov_wgo <- function(pair, m2o_obj, wgo, m2o_category="one_match", alignment_category='breakpoint region') {
+  category_gr <- wgo[[pair]][wgo[[pair]]$type==alignment_category]
+  category_m2o <- m2o_obj[[pair]]$target
+  category_m2o <- category_m2o[category_m2o$correspondence == m2o_category]
+  
+  gr <- category_m2o |> subsetByOverlaps(category_gr)
+
+  full_wgo_size <- wgo[[pair]] |> width() |> sum()
+  category_size <- category_gr |> width() |> sum()
+  overlap_size <- gr |> width() |> sum()
+  
+  data.frame(pair=pair, alignment_category=alignment_category, m2o_category=m2o_category, category_size=category_size, overlap_size=overlap_size, category_pct=overlap_size/category_size*100, total_pct=overlap_size/full_wgo_size*100)
+}
+(compare_cov_wgo("Oki_Osa", m2o_cov, wgo, m2o_category="one_match", alignment_category="breakpoint region"))
+
+
+m2o_df <- do.call(rbind, lapply(unique(wgo$Oki_Osa$type), function(wgo_category) {
+  do.call(rbind, lapply(c("one_match", "not_one_match"), function(m2o_category) {
+    do.call(rbind, lapply(names(m2o_cov), function(pair) {
+      compare_cov_wgo(pair, m2o_cov, wgo, m2o_category=m2o_category, alignment_category=wgo_category)
+    }))
+  }))
+}))
+
+(m2o_df)
+```
+
+Making summary plots with `m2o_df`:
+
+```{r flagging_correspondence_10, fig.height=8, fig.width=12, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+ggplot(m2o_df) + aes(x=pair, y=overlap_size, fill=alignment_category) + facet_wrap(~m2o_category, nrow=2) + geom_bar(stat='identity', position='stack') + theme(axis.text.x=element_text(angle=90)) + ggtitle("Total overlap of alignment categories with regions in many-to-many alignments")
+
+ggplot(m2o_df) + aes(x=pair, y=total_pct, fill=alignment_category) + facet_wrap(~m2o_category, nrow=2) + geom_bar(stat='identity', position='stack') + theme(axis.text.x=element_text(angle=90)) + ggtitle("Percentage of total alignment category covered in many-to-many alignments")
+
 
 ```
 
