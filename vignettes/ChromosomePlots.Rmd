@@ -1097,7 +1097,7 @@ lapply(plots$Bar$boxplots, \(x) x)
 detach('package:ggpubr')
 ```
 
-## Transforming to a single coordinate system
+# Transforming to a single coordinate system
 In this section, I create some utility functions to scale genomic ranges to the same coordinate system, then calculate averages of some statistics over the windows in these regions.
 
 First, create some helper functions for tile-based indexing.
@@ -1370,6 +1370,7 @@ p9 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom
 
 Gene size and density vs. operon size and density, fixed scales.
 ```{r chromosome_plots_tiles_5_3, dependson="chromosome_plots_tiles_calcs", fig.height=10, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
 tb <- chrt_unified |> as.data.frame()
 tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Oki.Arm)
 
@@ -1389,6 +1390,18 @@ p8 <- ggplot( tb ) + aes(x=start, y=repeats.count.mean, col = Oki.Arm) + geom_po
 
 p9 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom_point() + geom_smooth(method='lm', col='red' , formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('dN/dS') + theme(axis.title.x=element_blank())
 
+p10 <- ggboxplot(tb, x='Oki.Arm', y='operons.length.mean', color='Oki.Arm', add='jitter') + theme(axis.text.x=element_text(angle=90)) + ylab('operon size') + stat_compare_means(comparison=list(c('short', 'long'), c('short', 'XSR'), c('long', 'XSR')), paired = FALSE, na.rm = TRUE, method='t.test', size=2.8) + theme_grey() + theme(axis.title.x=element_blank())
+
+p11 <- ggboxplot(tb, x='Oki.Arm', y='breakpoints.count.mean', color='Oki.Arm', add='jitter') + theme(axis.text.x=element_text(angle=90)) + ylab('breakpoints') + stat_compare_means(comparison=list(c('short', 'long'), c('short', 'XSR'), c('long', 'XSR')), paired = FALSE, na.rm = TRUE, method='t.test', size=2.8) + theme_grey() + theme(axis.title.x=element_blank())
+
+p12 <- ggboxplot(tb, x='Oki.Arm', y='transcripts.dNdS.mean', color='Oki.Arm', add='jitter') + theme(axis.text.x=element_text(angle=90)) + ylab('dN/dS') + stat_compare_means(comparison=list(c('short', 'long'), c('short', 'XSR'), c('long', 'XSR')), paired = FALSE, na.rm = TRUE, method='t.test', size=2.8) + theme_grey() + theme(axis.title.x=element_blank())
+
+layout <- "
+AAAAD
+BBBBE
+CCCCF
+"
+
 (p2 / p3 / p4 / p5 / p6 / p7 / p8 / p9) # all plots. Too much
 
 (p2 / p3 / p4 / p5 / p6 / p7) # No correlation
@@ -1400,6 +1413,10 @@ p9 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=transcripts.dNdS.mean) + geom
 (p3 / p5 / p6 / p7 / p9 ) # No densities + correlation
 
 (p3 / p5 / p6 / p7 / p8 / p9 ) # No densities, repeats, correlation
+
+( p5 / p7 / p6 / p10 / p11 / p12 ) + plot_layout(design = layout, guides = 'collect')
+
+#detach('package:ggpubr')
 
 ```
 
