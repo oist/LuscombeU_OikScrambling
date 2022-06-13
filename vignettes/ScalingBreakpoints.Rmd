@@ -1,0 +1,171 @@
+---
+title: "Scaling breakpoints"
+author: 
+ - "Michael Mansfield"
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Scaling breakpoints}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+# Introduction
+
+In this vignette I attempt to contextualize the observed number of breakpoints for a given species pair by a few key metrics: 
+
+* Millions of years since divergence
+* Branch length (i.e., a kind of substitution rate)
+* dN/dS
+
+The core functions used here are maintained in our _GenomicBreaks_ R package,
+which is fully documented at: <https://oist.github.io/GenomicBreaks>.
+
+## Load packages
+
+# Load R packages and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+library('dplyr') |> suppressPackageStartupMessages()
+genomes <- OikScrambling:::loadAllGenomes()
+library('ggtree') |> suppressPackageStartupMessages()
+library('treeio') |> suppressPackageStartupMessages()
+library('phangorn') |> suppressPackageStartupMessages()
+load("BreakPoints.Rdata")
+```
+
+
+## Inputting distance metrics
+
+```{r species_trees, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+species <- SimpleList()
+species$Oikopleura <- "(Kum:0.01136111178249175555,((Osa:0.00925951950869623869,Aom:0.00920798155370218530)100:0.05729289951873162146,(Bar:0.00721724152898447612,Nor:0.00688754343189192098)100:0.05951986243208125943)100:0.31437914450027298896,Oki:0.01142149265410641150);"
+species$Ciona <- "(Rob:0.03128841990749874763,(Ros:0.01304087257513942937,Ply:0.01288782021364278871)100:0.02128682526879402057,Sav:0.55033545948338902232);"
+
+## I nabbed this tree from the following:
+#     git clone https://github.com/SchriderLab/Drosophila_phylogeny
+## To extract the relevant clades, I used:
+#     tree <- read.tree('Drosophila_phylogeny/tree/iqtree.tre')
+#     tree <- drop.tip(tree, which(!tmp$tip.label %in% c('D_melanogaster', 'D_busckii', 'D_yakuba', 'D_subpulchrella', 'D_mauritiana')))
+#     write.tree(tree, 'drosophila_4spp.newick')
+
+species$Drosophila <- "(Dbu:0.3372973403,(Dsu:0.0947791254,(Dya:0.0703231461,(Dma:0.0280994984,Dme:0.0264284139)100_1_100:0.0267889071)100_1_100:0.0834632289)100_1_100:0.3712228549)100_1_100;"
+
+species <- lapply(species, function(tree) as.treedata(midpoint(read.tree(text=tree)))) |> SimpleList()
+
+nothing_special <- lapply(species, function(sp){
+  ggtree(sp, ladderize=T) + geom_tiplab(align=T) + hexpand(0.5) + geom_text(aes(x=branch, label=round(branch.length,2)), nudge_y=0.1) + geom_treescale() + geom_rootedge()
+})
+
+```
+
+With the species trees loaded, we can calculate per-pair branch length distances using `ape::cophenetic()`.
+
+```{r species_distances}
+species_dist <- SimpleList()
+species_dist$cophenetic <- lapply(species, function(sp) cophenetic.phylo(sp@phylo)) |> SimpleList()
+
+# These are taken from the molecular clock analysis.
+species_dist$mya <- SimpleList()
+species_dist$mya$Oikopleura <- data.frame(
+  'Oki'=c(0,       24.5347, 24.5347),
+  'Osa'=c(24.5347, 0,       7.2383),
+  'Bar'=c(24.5347, 7.2383,  0)
+)
+
+species_dist$mya$Ciona <- data.frame(
+  'Sav'=c(0,        101.4633, 101.4633),
+  'Rob'=c(101.4633, 0,        11.8551),
+  'Ply'=c(101.4633, 11.8551,  0)
+)
+
+# This is taken from https://www.sciencedirect.com/science/article/pii/S0960982221014962
+# Which links to https://github.com/SchriderLab/Drosophila_phylogeny
+species_dist$mya$Drosophila <- data.frame(
+  'Dbu'=c(0,      46.836,  46.836,  46.836,  46.836),
+  'Dsu'=c(46.836, 0,       13.1873, 13.1873, 13.1873),
+  'Dya'=c(46.836, 13.1873, 0,       6.7256,  6.7256),
+  'Dme'=c(46.836, 13.1873, 6.7256,  0,       3.6217),
+  'Dma'=c(46.836, 13.1873, 6.7256,  3.6217,  0)
+)
+
+species_dist$mya <- lapply(species_dist$mya, function(x) {
+  rownames(x) <- colnames(x)
+  x
+}) |> SimpleList()
+```
+
+
+```{r breakpoints_1}
+bp_vs_dist <- function(query, target, wgo, dist_type="mya", species){
+  dist_df <- species_dist[[dist_type]][[species]]
+  relevant_dist <- dist_df[rownames(dist_df)==query, colnames(dist_df)==target]
+  breakpoints <- wgo[wgo$type == "breakpoint region"]
+  wgo_size <- wgo |> width() |> sum()
+  wgo_size_mbp <- wgo_size/1000000
+  breakpoints_per_mbp = length(breakpoints)/wgo_size_mbp
+  breakpoints_per_mbp_per_dist = breakpoints_per_mbp/relevant_dist
+  
+  breakpoint_df <- data.frame(species=species, query=query, target=target, pair=paste0(query, "_", target), dist_type=dist_type, dist=relevant_dist, breakpoints=length(breakpoints), breakpoints_per_mbp=breakpoints_per_mbp, breakpoints_per_mbp_scaled=breakpoints_per_mbp_per_dist)
+  
+  breakpoint_df
+}
+
+mya_df <- rbind(
+  bp_vs_dist(query="Oki", target="Osa", wgo$Oki_Osa, dist_type="mya", "Oikopleura"),
+  bp_vs_dist(query="Oki", target="Bar", wgo$Oki_Bar, dist_type="mya", "Oikopleura"),
+  bp_vs_dist(query="Osa", target="Bar", wgo$Osa_Bar, dist_type="mya", "Oikopleura"),
+  
+  bp_vs_dist(query="Ply", target="Rob", wgo$Ply_Rob, dist_type="mya", "Ciona"),
+  bp_vs_dist(query="Ply", target="Sav", wgo$Ply_Sav, dist_type="mya", "Ciona"),
+  bp_vs_dist(query="Rob", target="Sav", wgo$Rob_Sav, dist_type="mya", "Ciona"),
+  
+  bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="mya", "Drosophila"),
+  bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="mya", "Drosophila"),
+  bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="mya", "Drosophila"),
+  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="mya", "Drosophila")
+)
+
+(mya_df)
+
+sub_df <- rbind(
+  bp_vs_dist(query="Oki", target="Osa", wgo$Oki_Osa, dist_type="cophenetic", "Oikopleura"),
+  bp_vs_dist(query="Oki", target="Bar", wgo$Oki_Bar, dist_type="cophenetic", "Oikopleura"),
+  bp_vs_dist(query="Osa", target="Bar", wgo$Osa_Bar, dist_type="cophenetic", "Oikopleura"),
+  
+  bp_vs_dist(query="Ply", target="Rob", wgo$Ply_Rob, dist_type="cophenetic", "Ciona"),
+  bp_vs_dist(query="Ply", target="Sav", wgo$Ply_Sav, dist_type="cophenetic", "Ciona"),
+  bp_vs_dist(query="Rob", target="Sav", wgo$Rob_Sav, dist_type="cophenetic", "Ciona"),
+  
+  bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="cophenetic", "Drosophila"),
+  bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="cophenetic", "Drosophila"),
+  bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="cophenetic", "Drosophila"),
+  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="cophenetic", "Drosophila")
+)
+(sub_df)
+```
+
+
+
+```{r breakpoints_2, dependson="breakpoints_1", fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(mya_df) + aes(x=pair, y=breakpoints, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints")
+ggplot(mya_df) + aes(x=pair, y=breakpoints_per_mbp, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned")
+ggplot(mya_df) + aes(x=pair, y=breakpoints_per_mbp_scaled, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned per million years diverged")
+
+ggplot(sub_df) + aes(x=pair, y=breakpoints_per_mbp_scaled, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned per substitution distance")
+```
+
+
+# Session information
+
+```{r sessionInfo}
+sessionInfo()
+```
