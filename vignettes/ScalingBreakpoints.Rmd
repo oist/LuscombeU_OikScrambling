@@ -133,7 +133,7 @@ mya_df <- rbind(
   bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="mya", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="mya", "Drosophila")
 )
-mya_df$species <- factor(mya_df$species, levels=sort(mya_df$species))
+mya_df$species <- factor(mya_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
 mya_df <- mya_df[order(mya_df$species, mya_df$breakpoints_per_mbp_scaled),]
 rownames(mya_df) <- NULL
 mya_df$pair <- factor(mya_df$pair, levels=mya_df$pair)
@@ -153,7 +153,7 @@ sub_df <- rbind(
   bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="cophenetic", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="cophenetic", "Drosophila")
 )
-sub_df$species <- factor(sub_df$species, levels=sort(sub_df$species))
+sub_df$species <- factor(sub_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
 sub_df <- sub_df[order(sub_df$species, sub_df$breakpoints_per_mbp_scaled),]
 rownames(sub_df) <- NULL
 sub_df$pair <- factor(sub_df$pair, levels=sub_df$pair)
