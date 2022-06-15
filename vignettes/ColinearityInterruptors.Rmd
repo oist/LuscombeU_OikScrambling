@@ -60,15 +60,16 @@ bestMatch <- function(gb)
   tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
 
 coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
-
-coa$Oki_Kum |> plotApairOfChrs()
 ```
 
-`contig_27_1` is most of chr1's short arm.
+The next best match, `contig_27_1` is most of chr1's short arm.
 
 ```{r Kum_chr1_assembly_2}
+coa$Oki_Kum |> plyranges::filter(seqnames == "chr1", seqnames(query)!="contig_3_1") |> bestMatch()
 coa$Oki_Kum |> plotApairOfChrs(chrQ = "contig_27_1")
 ```
+
+The assembly is continued in details in `vignette("ParallelPlots", package = "OikScrambling")`
 
 # Alignments are real (Region of Interest 1)
 
@@ -193,15 +194,21 @@ Inversions …
 # We start with a broader random region
 (ROI6 <- coa2$Oki_Kum |> flagAll() |> dplyr::slice(160:200))
 ROI6 |> plotApairOfChrs()
-coa2$Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Double-collapsed")
-coa $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Collapsed")
-gbs $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(range(ROI6)[7]), main = "Mapped")
-
-# Sometimes, everything that remains is inversions
-ROI6[1:6] |> plotApairOfChrs()
-ROI6[1:6] |> dplyr::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChrs()
+ROI6_range <- ROI6 |> plyranges::filter(seqnames(query) == "contig_27_1") |> range()
+coa2$Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Double-collapsed collinear regions")
+coa $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Collinear regions")
+gbs $Oki_Kum |> plotApairOfChrs(chrT = "chr1", chrQ = "contig_27_1", xlim = gb2xlim(ROI6_range), main = "Alignments")
 ```
 
+Example of a part of ROI6 that can be collapsed if strand is ignored.
+
+```{r ROI6_invs2}
+ROI6[1:6] |> plotApairOfChrs()
+ROI6[1:6] |> plyranges::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChrs()
+
+ROI6[13:23] |> plotApairOfChrs()
+ROI6[13:23] |> plyranges::mutate(strand = '*') |> coalesce_contigs() |> plotApairOfChrs()
+```
 
 # Filling inversions to better see the rest (ROI9)
 

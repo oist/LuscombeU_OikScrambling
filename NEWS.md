@@ -1,3 +1,19 @@
+# OikScrambling 4.0.0
+
+* Reformed the `wgo` object to match the 4 classes: _isolated alignment_,
+  _breakpoint region_, _collinear alignment_ and _bridge region_.
+
+# OikScrambling 3.0.6
+
+* Alignment features plotted on operon boundaries for Figure 3.
+* New chromosome plots for Figure 4.
+* New panel showing that short bridge regions are mostly made of short introns.
+
+# OikScrambling 3.0.5
+
+* Explore strand proportion indices.
+* New region width plots for Figure 2.
+
 # OikScrambling 3.0.4
 
 * Draft chromosome plots for Figure 4 (ex-3, ex-2b).
