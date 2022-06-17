@@ -1133,9 +1133,9 @@ grTiles <- function(genome, meta, n=100, meta_prefix=NULL){
 
 ```{r chromosome_plots_tiles_calcs, dependson="chromosome_plot_tiles_helper_fxns"}
 nTiles <- 100
-tiles_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToTiles(nTiles) |> plyranges::filter(seqnames %in% c("chr1", "chr2", "PAR", "XSR", "YSR"))
-tiles_Osa <- genomes$Osa |> BSgenomeToGR() |> genomeGRToTiles(nTiles) |> plyranges::filter(seqnames %in% c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
-tiles_Bar <- genomes$Bar |> BSgenomeToGR() |> genomeGRToTiles(nTiles) |> plyranges::filter(seqnames %in% c("Chr1", "Chr2", "PAR", "XSR", "YSR"))
+tiles_Oki <- genomes$Oki |> BSgenomeToGR() |> genomeGRToTiles(nTiles)
+tiles_Osa <- genomes$Osa |> BSgenomeToGR() |> genomeGRToTiles(nTiles)
+tiles_Bar <- genomes$Bar |> BSgenomeToGR() |> genomeGRToTiles(nTiles)
 
 chrt <- SimpleList()
 chrt$Oki <- grTiles(genome=genomes$Oki, meta=transcripts$Oki, n=nTiles, meta_prefix = 'transcripts.')
@@ -1722,6 +1722,7 @@ p6 + ggtitle('Tiles (averages across Oki, Osa, Bar): Breakpoints per chr+arm, ed
 
 
 p7 <- ggboxplot(tb, x='seqnames_arm_edge', y='transcripts.dNdS.mean', color='seqnames_arm', add='jitter') + ylab('dN/dS') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+
 p7 <- ggboxplot(tb, x='chr.arm.edge', y='transcripts.dNdS.mean', color='chr.arm.edge', add='jitter') + ylab('dN/dS') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
 p7 + ggtitle('Tiles (averages across Oki, Osa, Bar): dN/dS per chr+arm, edges vs. centres')
 detach('package:ggpubr')
@@ -1729,7 +1730,7 @@ detach('package:ggpubr')
 
 ## Pericentromeric and subtelomeric regions
 
-```{r chromosome_arm_edges_4}
+```{r chromosome_arm_edges_3}
 # Flag the first and last (percentile) of total width for every chromosome's individual arm.
 flag_subtelomeric_pericentromeric <- function(chrt, percentile=0.1, arm="Oki.Arm") {
   original_names <- names(chrt)
@@ -1756,12 +1757,9 @@ flag_subtelomeric_pericentromeric <- function(chrt, percentile=0.1, arm="Oki.Arm
   
   edge_annotations
 }
-chrt_unified |> flag_subtelomeric_pericentromeric() |> sort() -> chrt_unified_edge
-chrt_unified_edge$chr.arm.label |> table()
 ```
 
-
-```{chromosome_arm_edges_5, dependson="chromosome_arm_edges", fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r chromosome_arm_edges_4, dependson="chromosome_arm_edges", fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 library(ggpubr)
 compare_method = "t.test"
 #compare_method = "wilcox.test"
