@@ -1625,21 +1625,21 @@ p4
 detach('package:ggpubr')
 ```
 
-## Chromosome tiles: edges of arms vs. centres
-```{r chromosome_arm_edges}
+## Edges vs. centres of chromosomes
+```{r chromosome_arm_edges_1}
 # Flag the first and last (percentile) of total width for every chromosome.
 flag_chromosome_percentiles <- function(chrt, percentile=0.1) {
   original_names <- names(chrt)
   gr_list <- split(chrt, seqnames(chrt))
   edge_annotations <- endoapply(gr_list, function(gr){
-    gr$chr.edge <- FALSE
+    gr$chr.edge <- "centre"
     total_length <- gr |> width() |> sum()
     length_percentile <- end(gr)/total_length
     cumulative_length <- cumsum(gr |> width())
     cumulative_percentile <- cumulative_length/total_length
 
-    gr$chr.edge[cumulative_percentile<percentile] <- TRUE
-    gr$chr.edge[cumulative_percentile>(1-percentile)] <- TRUE
+    gr$chr.edge[cumulative_percentile<percentile] <- "edge"
+    gr$chr.edge[cumulative_percentile>(1-percentile)] <- "edge"
     
     gr
   })
@@ -1647,7 +1647,7 @@ flag_chromosome_percentiles <- function(chrt, percentile=0.1) {
   names(edge_annotations) <- original_names
   edge_annotations
 }
-chrt_unified <- flag_chromosome_percentiles(chrt_unified)
+#chrt_unified |> flag_chromosome_percentiles()
 
 # Flag the first and last (percentile) of total width for every chromosome's individual arm.
 flag_chromosome_arm_percentiles <- function(chrt, percentile=0.1, arm="Oki.Arm") {
@@ -1655,14 +1655,14 @@ flag_chromosome_arm_percentiles <- function(chrt, percentile=0.1, arm="Oki.Arm")
   chrt$seqnames_arm <- paste0(seqnames(chrt), "_", mcols(chrt)[[arm]])
   gr_list <- split(chrt, chrt$seqnames_arm)
   edge_annotations <- endoapply(gr_list, function(gr){
-    gr$chr.arm.edge <- FALSE
+    gr$chr.arm.edge <- "centre"
     total_length <- gr |> width() |> sum()
     length_percentile <- end(gr)/total_length
     cumulative_length <- cumsum(gr |> width())
     cumulative_percentile <- cumulative_length/total_length
 
-    gr$chr.arm.edge[cumulative_percentile<percentile] <- TRUE
-    gr$chr.arm.edge[cumulative_percentile>(1-percentile)] <- TRUE
+    gr$chr.arm.edge[cumulative_percentile<percentile] <- "edge"
+    gr$chr.arm.edge[cumulative_percentile>(1-percentile)] <- "edge"
     
     gr
   })
@@ -1670,8 +1670,160 @@ flag_chromosome_arm_percentiles <- function(chrt, percentile=0.1, arm="Oki.Arm")
   names(edge_annotations) <- original_names
   edge_annotations
 }
-chrt_unified <- flag_chromosome_arm_percentiles(chrt_unified)
+
 ```
+
+Assess the edges vs. centres of chromosomes for feature densities/counts.
+
+```{r chromosome_arm_edges_2, dependson="chromosome_arm_edges", fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+compare_method = "t.test"
+#compare_method = "wilcox.test"
+
+tb <- chrt_unified |> flag_chromosome_percentiles() |> flag_chromosome_arm_percentiles() |> as.data.frame()
+tb$seqnames_arm_edge <- paste0(tb$seqnames_arm, "_", tb$chr.arm.edge)
+tb$seqnames_arm_edge <- factor(tb$seqnames_arm_edge, levels=c("Chr1_short_edge", "Chr1_short_centre", "Chr1_long_edge",  "Chr1_long_centre", "Chr2_short_edge", "Chr2_short_centre", "Chr2_long_edge", "Chr2_long_centre", "PAR_short_edge", "PAR_short_centre", "PAR_long_edge", "PAR_long_centre", "XSR_XSR_edge", "XSR_XSR_centre"))
+
+p1 <- ggboxplot(tb, x='seqnames_arm_edge', y='repeats.count.mean', color='seqnames_arm', add='jitter') + ylab('repeats') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p1 + ggtitle('Tiles (averages across Oki, Osa, Bar): Repeats per chr+arm, edges vs. centres')
+
+p1 <- ggboxplot(tb, x='chr.arm.edge', y='repeats.count.mean', color='chr.arm.edge', add='jitter') + ylab('repeats') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p1 + ggtitle('Tiles (averages across Oki, Osa, Bar): Repeats per chr+arm, edges vs. centres')
+
+
+p2 <- ggboxplot(tb, x='seqnames_arm_edge', y='transcripts.count.mean', color='seqnames_arm', add='jitter') + ylab('transcripts') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p2 + ggtitle('Tiles (averages across Oki, Osa, Bar): Transcript number per chr+arm, edges vs. centres')
+p2 <- ggboxplot(tb, x='chr.arm.edge', y='transcripts.count.mean', color='chr.arm.edge', add='jitter') + ylab('transcripts') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p2 + ggtitle('Tiles (averages across Oki, Osa, Bar): Transcript number per chr+arm, edges vs. centres')
+
+
+p3 <- ggboxplot(tb, x='seqnames_arm_edge', y='transcripts.length.mean', color='seqnames_arm', add='jitter') + ylab('transcript length') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p3 + ggtitle('Tiles (averages across Oki, Osa, Bar): Transcript length per chr+arm, edges vs. centres')
+p3 <- ggboxplot(tb, x='chr.arm.edge', y='transcripts.length.mean', color='chr.arm.edge', add='jitter') + ylab('transcript length') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p3 + ggtitle('Tiles (averages across Oki, Osa, Bar): Transcript length per chr+arm, edges vs. centres')
+
+
+p4 <- ggboxplot(tb, x='seqnames_arm_edge', y='operons.count.mean', color='seqnames_arm', add='jitter') + ylab('operon count') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p4 + ggtitle('Tiles (averages across Oki, Osa, Bar): Operon number per chr+arm, edges vs. centres')
+p4 <- ggboxplot(tb, x='chr.arm.edge', y='operons.count.mean', color='chr.arm.edge', add='jitter') + ylab('operon count') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p4 + ggtitle('Tiles (averages across Oki, Osa, Bar): Operon number per chr+arm, edges vs. centres')
+
+
+p5 <- ggboxplot(tb, x='seqnames_arm_edge', y='operons.length.mean', color='seqnames_arm', add='jitter') + ylab('operon size') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p5 + ggtitle('Tiles (averages across Oki, Osa, Bar): Operon size per chr+arm, edges vs. centres')
+p5 <- ggboxplot(tb, x='chr.arm.edge', y='operons.length.mean', color='chr.arm.edge', add='jitter') + ylab('operon size') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p5 + ggtitle('Tiles (averages across Oki, Osa, Bar): Operon size per chr+arm, edges vs. centres')
+
+
+p6 <- ggboxplot(tb, x='seqnames_arm_edge', y='breakpoints.count.mean', color='seqnames_arm', add='jitter') + ylab('breakpoints') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p6 + ggtitle('Tiles (averages across Oki, Osa, Bar): Breakpoints per chr+arm, edges vs. centres')
+p6 <- ggboxplot(tb, x='chr.arm.edge', y='breakpoints.count.mean', color='chr.arm.edge', add='jitter') + ylab('breakpoints') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p6 + ggtitle('Tiles (averages across Oki, Osa, Bar): Breakpoints per chr+arm, edges vs. centres')
+
+
+p7 <- ggboxplot(tb, x='seqnames_arm_edge', y='transcripts.dNdS.mean', color='seqnames_arm', add='jitter') + ylab('dN/dS') + stat_compare_means(comparison=list(c('Chr1_short_edge', 'Chr1_short_centre'), c('Chr1_long_edge', 'Chr1_long_centre'), c('Chr2_short_edge', 'Chr2_short_centre'), c('Chr2_long_edge', 'Chr2_long_centre'), c('PAR_short_edge', 'PAR_short_centre'), c('PAR_long_edge', 'PAR_long_centre'), c('XSR_XSR_edge', 'XSR_XSR_centre')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p7 <- ggboxplot(tb, x='chr.arm.edge', y='transcripts.dNdS.mean', color='chr.arm.edge', add='jitter') + ylab('dN/dS') + stat_compare_means(comparison=list(c('centre', 'edge')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method) + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p7 + ggtitle('Tiles (averages across Oki, Osa, Bar): dN/dS per chr+arm, edges vs. centres')
+detach('package:ggpubr')
+```
+
+## Pericentromeric and subtelomeric regions
+
+```{r chromosome_arm_edges_4}
+# Flag the first and last (percentile) of total width for every chromosome's individual arm.
+flag_subtelomeric_pericentromeric <- function(chrt, percentile=0.1, arm="Oki.Arm") {
+  original_names <- names(chrt)
+  chrt$seqnames_arm <- paste0(seqnames(chrt), "_", mcols(chrt)[[arm]])
+  gr_list <- split(chrt, chrt$seqnames_arm)
+  edge_annotations <- endoapply(gr_list, function(gr){
+    gr$chr.arm.edge <- "centre"
+    total_length <- gr |> width() |> sum()
+    length_percentile <- end(gr)/total_length
+    cumulative_length <- cumsum(gr |> width())
+    cumulative_percentile <- cumulative_length/total_length
+
+    gr$chr.arm.label <- "centre"
+    gr$chr.arm.label[ mcols(gr)[[arm]] == "short" & cumulative_percentile<percentile ] <- "subtelomeric"
+    gr$chr.arm.label[ mcols(gr)[[arm]] == "short" & cumulative_percentile>(1-percentile) ] <- "pericentromeric"
+    gr$chr.arm.label[ mcols(gr)[[arm]] == "long" & cumulative_percentile<percentile ] <- "pericentromeric"
+    gr$chr.arm.label[ mcols(gr)[[arm]] == "long" & cumulative_percentile>(1-percentile) ] <- "subtelomeric"
+    gr$chr.arm.label[ mcols(gr)[[arm]] == "XSR" & cumulative_percentile<percentile ] <- "centre"
+    gr$chr.arm.label[ mcols(gr)[[arm]] == "XSR" & cumulative_percentile>(1-percentile) ] <- "subtelomeric"
+    gr
+  })
+  edge_annotations <- unlist(edge_annotations)
+  names(edge_annotations) <- original_names
+  
+  edge_annotations
+}
+chrt_unified |> flag_subtelomeric_pericentromeric() |> sort() -> chrt_unified_edge
+chrt_unified_edge$chr.arm.label |> table()
+```
+
+
+```{chromosome_arm_edges_5, dependson="chromosome_arm_edges", fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+compare_method = "t.test"
+#compare_method = "wilcox.test"
+
+percentile <- 0.1
+tb <- chrt_unified |> flag_chromosome_percentiles(percentile = percentile) |> flag_chromosome_arm_percentiles(percentile = percentile) |> flag_subtelomeric_pericentromeric(percentile = percentile) |> as.data.frame()
+
+tb$seqnames_arm_category <- paste0(tb$seqnames_arm, "_", tb$chr.arm.label)
+
+tb$seqnames_arm_category <- factor(tb$seqnames_arm_category, levels=c("Chr1_long_pericentromeric", "Chr1_long_centre", "Chr1_long_subtelomeric", "Chr1_short_subtelomeric", "Chr1_short_centre", "Chr1_short_pericentromeric", "Chr2_long_pericentromeric", "Chr2_long_centre", "Chr2_long_subtelomeric", "Chr2_short_subtelomeric", "Chr2_short_centre", "Chr2_short_pericentromeric", "PAR_long_pericentromeric", "PAR_long_centre", "PAR_long_subtelomeric", "PAR_short_subtelomeric", "PAR_short_centre", "PAR_short_pericentromeric", "XSR_XSR_centre", "XSR_XSR_subtelomeric"))
+
+# Check everything individually.
+# Repeats
+p1 <- ggboxplot(tb, x='seqnames_arm_category', y='repeats.count.mean', color='seqnames_arm', add='jitter') + ylab('repeats') + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p1 + ggtitle('Tiles (averages across Oki, Osa, Bar): repeats by genomic region')
+
+p2 <- ggboxplot(tb, x='chr.arm.label', y='repeats.count.mean', color='chr.arm.label', add='jitter') + ylab('repeats') + theme_classic() + theme(axis.text.x=element_text(angle=90)) + stat_compare_means(comparison=list(c('pericentromeric', 'centre'), c('pericentromeric', 'subtelomeric'), c('centre', 'subtelomeric')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method)
+p2 + ggtitle('Tiles (averages across Oki, Osa, Bar): repeats by genomic region')
+
+# Genes
+p3 <- ggboxplot(tb, x='seqnames_arm_category', y='transcripts.count.mean', color='seqnames_arm', add='jitter') + ylab('transcripts') + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p3 + ggtitle('Tiles (averages across Oki, Osa, Bar): transcripts by genomic region')
+
+p4 <- ggboxplot(tb, x='chr.arm.label', y='transcripts.count.mean', color='chr.arm.label', add='jitter') + ylab('transcripts') + theme_classic() + theme(axis.text.x=element_text(angle=90)) + stat_compare_means(comparison=list(c('pericentromeric', 'centre'), c('pericentromeric', 'subtelomeric'), c('centre', 'subtelomeric')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method)
+p4 + ggtitle('Tiles (averages across Oki, Osa, Bar): transcripts by genomic region')
+
+p5 <- ggboxplot(tb, x='seqnames_arm_category', y='transcripts.length.mean', color='seqnames_arm', add='jitter') + ylab('transcripts') + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p5 + ggtitle('Tiles (averages across Oki, Osa, Bar): transcript lengths by genomic region')
+
+p6 <- ggboxplot(tb, x='chr.arm.label', y='transcripts.length.mean', color='chr.arm.label', add='jitter') + ylab('transcripts') + theme_classic() + theme(axis.text.x=element_text(angle=90)) + stat_compare_means(comparison=list(c('pericentromeric', 'centre'), c('pericentromeric', 'subtelomeric'), c('centre', 'subtelomeric')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method)
+p6 + ggtitle('Tiles (averages across Oki, Osa, Bar): transcript lengths by genomic region')
+
+# Operons
+p7 <- ggboxplot(tb, x='seqnames_arm_category', y='operons.count.mean', color='seqnames_arm', add='jitter') + ylab('operons') + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p7 + ggtitle('Tiles (averages across Oki, Osa, Bar): operons by genomic region')
+
+p8 <- ggboxplot(tb, x='chr.arm.label', y='operons.count.mean', color='chr.arm.label', add='jitter') + ylab('operons') + theme_classic() + theme(axis.text.x=element_text(angle=90)) + stat_compare_means(comparison=list(c('pericentromeric', 'centre'), c('pericentromeric', 'subtelomeric'), c('centre', 'subtelomeric')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method)
+p8 + ggtitle('Tiles (averages across Oki, Osa, Bar): operons by genomic region')
+
+p9 <- ggboxplot(tb, x='seqnames_arm_category', y='operons.length.mean', color='seqnames_arm', add='jitter') + ylab('operon length') + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p9 + ggtitle('Tiles (averages across Oki, Osa, Bar): operon lengths by genomic region')
+
+p10 <- ggboxplot(tb, x='chr.arm.label', y='operons.length.mean', color='chr.arm.label', add='jitter') + ylab('operon length') + theme_classic() + theme(axis.text.x=element_text(angle=90)) + stat_compare_means(comparison=list(c('pericentromeric', 'centre'), c('pericentromeric', 'subtelomeric'), c('centre', 'subtelomeric')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method)
+p10 + ggtitle('Tiles (averages across Oki, Osa, Bar): operon lengths by genomic region')
+
+# Breakpoints
+p11 <- ggboxplot(tb, x='seqnames_arm_category', y='breakpoints.count.mean', color='seqnames_arm', add='jitter') + ylab('breakpoints') + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p11 + ggtitle('Tiles (averages across Oki, Osa, Bar): breakpoints by genomic region')
+
+p12 <- ggboxplot(tb, x='chr.arm.label', y='breakpoints.count.mean', color='chr.arm.label', add='jitter') + ylab('breakpoints') + theme_classic() + theme(axis.text.x=element_text(angle=90)) + stat_compare_means(comparison=list(c('pericentromeric', 'centre'), c('pericentromeric', 'subtelomeric'), c('centre', 'subtelomeric')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method)
+p12 + ggtitle('Tiles (averages across Oki, Osa, Bar): breakpoints by genomic region')
+
+# dN/dS
+p13 <- ggboxplot(tb, x='seqnames_arm_category', y='transcripts.dNdS.mean', color='seqnames_arm', add='jitter') + ylab('dN/dS') + theme_classic() + theme(axis.text.x=element_text(angle=90))
+p13 + ggtitle('Tiles (averages across Oki, Osa, Bar): dN/dS by genomic region')
+
+p14 <- ggboxplot(tb, x='chr.arm.label', y='transcripts.dNdS.mean', color='chr.arm.label', add='jitter') + ylab('dN/dS') + theme_classic() + theme(axis.text.x=element_text(angle=90)) + stat_compare_means(comparison=list(c('pericentromeric', 'centre'), c('pericentromeric', 'subtelomeric'), c('centre', 'subtelomeric')), label='p.signif', paired = FALSE, na.rm = TRUE, method=compare_method)
+p14 + ggtitle('Tiles (averages across Oki, Osa, Bar): dN/dS by genomic region')
+
+detach('package:ggpubr')
+```
+
 
 ## Checking my work
 
