@@ -814,6 +814,45 @@ mean(Oki_Osa_scr_ratio_short_arm)
 t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
 ```
 
+# Operon summary plots for Figure 3
+```{r operon_summary_stats_plots, dependson="chromosome_plots_transcripts", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Add an index for matching to scrambled set
+operons$Oki$index <- 1:length(operons$Oki)
+operons$Oki$scrambled <- 'no_breakpoint_region'
+operons$Oki$scrambled[match(subsetByOverlaps(operons$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa])$index, operons$Oki$index)] <- 'overlaps_breakpoint_region'
+
+operons$Osa$index <- 1:length(operons$Osa)
+operons$Osa$scrambled <- 'no_breakpoint_region'
+operons$Osa$scrambled[match(subsetByOverlaps(operons$Osa, unal$Osa_Oki[unal$Osa_Oki$nonCoa])$index, operons$Osa$index)] <- 'overlaps_breakpoint_region'
+
+tb1 <- operons$Oki
+# Note that the operon objects do not have unique names, which makes as.data.frame() complain.
+names(tb1) <- NULL
+p1 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, nrow=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
+p1
+
+tb2 <- operons$Osa
+names(tb2) <- NULL
+p2 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, nrow=2) + ggtitle("Osaka operons") + scale_y_discrete(drop=F)
+p2
+
+( p1 | p2 )
+
+p3 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
+p3
+
+p4 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Osaka operons") + scale_y_discrete(drop=F)
+p4
+
+( p3 / p4 )
+
+tb1$sp <- "Oki"
+tb2$sp <- "Osa"
+tb3 <- rbind(as.data.frame(tb1), as.data.frame(tb2))
+ggplot(tb3) + aes(x=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar(position='dodge', aes(fill=paste0(sp, "_", scrambled))) + scale_x_discrete(drop=F)
+```
+
+
 # Coverage
 
 _Needs coverage information to be recomputed_
