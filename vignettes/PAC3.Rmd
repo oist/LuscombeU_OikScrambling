@@ -25,20 +25,19 @@ See `?OikScrambling:::loadAllGenomes()` and `vignette("LoadGenomicBreaks",
 package = "OikScrambling")` for how the different objects are prepared.
 
 ```{r load_packages_and_data}
-library("purrr")
+library("purrr")              |> suppressPackageStartupMessages()
 library('OikScrambling')      |> suppressPackageStartupMessages()
 library('GenomicFeatures')    |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR()
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
 Genes <- sapply(annots, function(x) sort(genes(x))) |> SimpleList()
-operons <- lapply(annots, function(a) genes(a) |> OikScrambling:::calcOperons(window=500))
 load("BreakPoints.Rdata")
 #Loading this too early breaks the function calkOperons
-library("dplyr")
-library("stringr")
+library("dplyr")              |> suppressPackageStartupMessages()
+library("stringr")            |> suppressPackageStartupMessages()
 #library("Repitools")
-library("genoPlotR")  
+library("genoPlotR")          |> suppressPackageStartupMessages()
 ```
 
 
@@ -307,55 +306,7 @@ PAC3_XSR_Osa.aln.right |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unli
 
 Conserved and non-conserved operons documentation 
 
-## PAC 3 as arrows
-
-PAC3 Figure
-Identifying regions of interest
-
-```{r PAC3Figure}
-
-
-coa$Oki_Osa |> subsetByOverlaps(PAC3)
-coa$Oki_Bar |> subsetByOverlaps(PAC3)
-coa$Oki_Kum |> subsetByOverlaps(PAC3)
-
-
-extract_coords <- function(gr, gene_name, upstream=0, downstream=0) {
-  matching_gene_index <- which(mcols(gr)$gene_id == gene_name)
-  sgr <- gr[(matching_gene_index-upstream):(matching_gene_index+downstream),]
-
-  sgr
-}
-
-
-
-
-pac3_operon_oki <- extract_coords(Genes$Oki, 'g3146', upstream=3, downstream=5)
-pac3_operon_osa <- extract_coords(Genes$Osa, 'g12442', upstream=1, downstream=0)
-npac3_operon_osa <- extract_coords(Genes$Osa, 'g2061', upstream=5, downstream = 4)
-
-
-
-#Okinawa region g3143.t1 - g3145.t1
-First3GenesOki <- GRanges('chr1:11487473-11497595')
-RegionokiOsaNp3 <- subsetByOverlaps(coa$Oki_Osa, First3GenesOki)
-First3GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3$query)
-
-
-Last5GenesOki <- GRanges('chr1:11498263-11503891 ')
-RegionokiOsaNp3_5 <- subsetByOverlaps(coa$Oki_Osa, Last5GenesOki)
-Last5GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3_5$query)
-
-NotPAC3OpInOsa <- c(First3GenesOsa, Last5GenesOsa)
-
-
-#Not pac3
-notpac3 <- GRanges('Chr1:8150909-8166679')
-regionnotpac3 <- subsetByOverlaps(coa$Osa_Oki, notpac3)
-#8098120-8165043
-np3gr <- subsetByOverlaps(Genes$Osa, GRanges('Chr1:8150909-8166679'))
-```
-
+# PAC 3 context diagram
 
 
 Identifying operons  
@@ -391,76 +342,69 @@ calkOperons <- function(genes, window = 100) {
   operons - halfwin
 }
 
-
-
-operons0 <- SimpleList()
-operons0$Oki <- calkOperons(Genes$Oki, window = 500)
-operons0$Osa <- calkOperons(Genes$Osa, window=500)
-
-
-
-#Finding the index of the operon that contains that gene
-#PAC3
-ss <- lapply(annots$Oki |> genes(),  function(x) 'g3146.t1' %in%  x)
-ss1 <- unlist(ss, recursive = T)
-  which(ss1)
-#700  
-xx <- as.data.frame(operons$Oki[700])
-
-jajaje <- lapply(operons$Osa$tx_names,  function(x) 'g2061.t1' %in%  x)
-ss1de <- unlist(jajaje, recursive = T)
-  which(ss1de)
-#442  
-  
-#Conserved and non-conserved operons  
-#Select a random gene to find this operons
-j12 <- lapply(operons0$Oki$tx_names,  function(x) 'g13865.t1' %in%  x)
-j13 <- unlist(j12, recursive = T)
-  which(j13)  
-  
-  
-j14 <- lapply(operons0$Osa$tx_names,  function(x) 'g13865.t1' %in%  x)
-j15 <- unlist(j14, recursive = T)
-  which(j15)  
-#853
+operons <- SimpleList()
+operons$Oki <- calkOperons(Genes$Oki, window = 500) |> suppressWarnings()
+operons$Osa <- calkOperons(Genes$Osa, window=500)   |> suppressWarnings()
+operons$Bar <- calkOperons(Genes$Bar, window=500)   |> suppressWarnings()
 
 
 #Function to find find upstream and downstream genes in specific operon 
 Find_UpAndDown <- function(op, gene_ofi) {
-  ss <- lapply(op$tx_names, function(x) gene_ofi %in% x) 
+  ss <- lapply(op$gene_id, function(x) gene_ofi %in% x) 
   ss1 <- unlist(ss)
   xx <- which(ss1)
-  yy <- as.data.frame(op[xx])
+  #yy <- as.data.frame(op[xx])
+  yy <- op[xx]
   yy
 }
 
-#This second part of the function doesn't work when g < 2
-  zz <- op$tx_names |> unlist ()
-  Pc3 == gene_ofi
-  gin <- which(Pc3 == gene_ofi)
-  b <- seq_along(Pc3)
-  #Uostream genes
-  bb <- Pc3[b < gin ]
-  #Downstream genes
-  cc <- Pc3[b > gin]
-  list(bb, cc)
-  }
+pac3_operon_oki <- Find_UpAndDown(operons$Oki, 'g3146')
+pac3_operon_osa <- Find_UpAndDown(operons$Osa, 'g12442')
+pac3_operon_bar <- Find_UpAndDown(operons$Bar, 'g12642')
 
-
-
-gg <- Find_UpAndDown(operons$Oki, 'g3146.t1')
-qq <- Find_UpAndDown(operons$Osa, 'g12442.t1')
-rr <- Find_UpAndDown(operons$Bar, 'g12642.t1')
-
-hhhh <- Find_UpAndDown(operons$Osa, 'g4968.t1')
+hhhh <- Find_UpAndDown(operons$Osa, 'g4968')
 ```
 
 
-Ploting PAC3 Figure
-```{r}
+PAC3 Figure
+Identifying regions of interest
 
+```{r PAC3Figure, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+coa$Oki_Osa |> subsetByOverlaps(PAC3)
+coa$Oki_Bar |> subsetByOverlaps(PAC3)
+coa$Oki_Kum |> subsetByOverlaps(PAC3)
+
+extract_coords <- function(gr, gene_name, upstream=0, downstream=0) {
+  matching_gene_index <- which(mcols(gr)$gene_id == gene_name)
+  sgr <- gr[(matching_gene_index-upstream):(matching_gene_index+downstream),]
+
+  sgr
+}
+
+not_pac3_operon_osa <- extract_coords(Genes$Osa, 'g2061', upstream=5, downstream = 4)
+
+#Okinawa region g3143.t1 - g3145.t1
+First3GenesOki <- GRanges('chr1:11487473-11497595')
+RegionokiOsaNp3 <- subsetByOverlaps(coa$Oki_Osa, First3GenesOki)
+First3GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3$query)
+
+Last5GenesOki <- GRanges('chr1:11498263-11503891 ')
+RegionokiOsaNp3_5 <- subsetByOverlaps(coa$Oki_Osa, Last5GenesOki)
+Last5GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3_5$query)
+
+NotPAC3OpInOsa <- c(First3GenesOsa, Last5GenesOsa)
+
+#Not pac3
+notpac3 <- GRanges('Chr1:8150909-8166679')
+regionnotpac3 <- subsetByOverlaps(coa$Osa_Oki, notpac3)
+#8098120-8165043
+np3gr <- subsetByOverlaps(Genes$Osa, GRanges('Chr1:8150909-8166679'))
+```
+
+## Plotting PAC3 Figure
+```{r pac3_operon_diagram, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 #Gene Ranges to dna_segs
-gr2dna_seg <- function (gr, gene_of_interest=NULL, ...) {
+gr2dna_seg <- function (gr, gene_of_interest=NULL, gene_of_interest_colour='red', ...) {
   # DNA segments need unique names
   if (length(gr) == 0) return(NULL)
   if (is.null(names(gr))) names(gr) <- as.character(gr)
@@ -476,12 +420,12 @@ gr2dna_seg <- function (gr, gene_of_interest=NULL, ...) {
   dna_seg$col <- 'black'
   dna_seg$fill <- '#595959'
   if(!is.null(gene_of_interest)){
-    dna_seg$fill[which(dna_seg$name==gene_of_interest)] <- 'red'
+    dna_seg$fill[which(dna_seg$name==gene_of_interest)] <- gene_of_interest_colour
   }
   dna_seg
 }
 
-gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146') -> tmp_dnaseg
+tmp_dnaseg <- gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146')
 
 dnaseg_to_annot <- function(ds, ...) {
   annot <- annotation(x1=middle(ds), text=ds$name, ...)
@@ -489,30 +433,45 @@ dnaseg_to_annot <- function(ds, ...) {
 }
 dnaseg_to_annot(tmp_dnaseg)
 
-
 PAC3_in_Osa <- GRanges("XSR:3162950-3168025")
+
+operons_to_transcripts <- function(operons, genes){
+  operons$idx <- 1:length(operons)
+  operon_list <- endoapply(split(operons, operons$idx), function(o) {
+    gr <- genes[match(unlist(o$gene_id), genes$gene_id)]
+    gr$operon_idx <- o$idx
+    gr
+  })
+  operon_list <- unlist(operon_list)
+  # Avoid prepending the operon index to the names of the unlisted GRangesList.
+  names(operon_list) <- lapply(names(operon_list), function(x) unlist(strsplit(x, '\\.'))[2]) |> unname()
+  operon_list
+}
+operons_to_transcripts(pac3_operon_oki, Genes$Oki)
+
+pac3_operon_oki_genes <- operons_to_transcripts(pac3_operon_oki, Genes$Oki)
+pac3_operon_osa_genes <- operons_to_transcripts(pac3_operon_osa, Genes$Osa)
 
 
 plot_gene_map(
   dna_segs = list(
-    `Osaka\nChr1: 8145427 - 8174791`=reverse(gr2dna_seg(np3gr)),
-    `Okinawa\nchr1: 11487473 - 11503891`=gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146'),
-    `Osaka\nXSR: 11487473 - 11503891`=reverse(gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442'))
+    `Osaka\nChr1: 8145427 - 8174791`=reverse(gr2dna_seg(not_pac3_operon_osa)),
+    `Okinawa\nchr1: 11487473 - 11503891`=gr2dna_seg(pac3_operon_oki_genes, gene_of_interest='g3146'),
+    `Osaka\nXSR: 11487473 - 11503891`=reverse(gr2dna_seg(pac3_operon_osa_genes, gene_of_interest='g12442'))
   ),
   dna_seg_scale = T, 
   annotations = list(
-    dnaseg_to_annot(reverse(gr2dna_seg(np3gr)), rot=0, col=gray.colors(10, start = 0.33, end = 0.4)),
-    dnaseg_to_annot(gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146'), rot=0, col=gray.colors(9, start = 0.3, end =0.4)),
-    dnaseg_to_annot(reverse(gr2dna_seg(pac3_operon_osa, gene_of_interest='g12442')), rot=0, col=gray.colors(2,  start = 0.4, end =0.4))
+    dnaseg_to_annot(reverse(gr2dna_seg(not_pac3_operon_osa)), rot=0, col='grey80'),
+    dnaseg_to_annot(gr2dna_seg(pac3_operon_oki_genes, gene_of_interest='g3146'), rot=0, col='grey80'),
+    dnaseg_to_annot(reverse(gr2dna_seg(pac3_operon_osa_genes, gene_of_interest='g12442')), rot=0, col='grey80')
   ),
-  
   comparisons = list(
-    gb2comp(coa$Oki_Osa |> subsetByOverlaps(notpac3)) |> reverse(side = 1),
-    gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3))
-    
-  ),
+     gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap()) |> reverse(side=1),
+     gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3)) |> reverse(side = 2)
+   ),
 #  annotation_height = 2.9, annotation_cex = 0.9,
-  main = "The PAC3 gene in operon is conserved between Osaka and Barcelona in XSR chromosome but on CHR1 in Okinawa")
+  main = "The PAC3 gene in operon is conserved between Osaka and Barcelona in XSR chromosome but on CHR1 in Okinawa"
+)
 
 ```
 
