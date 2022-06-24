@@ -889,7 +889,7 @@ oki_feat_bp_ovl <- rbind(
   genes$Oki$scrambled |> table(),
   exons$Oki$scrambled |> table()
 ) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
-oki_feat_bp_ovl$pct <- oki_feat_bp_ovl[,2]/oki_feat_bp_ovl[,1]*100
+oki_feat_bp_ovl$pct <- oki_feat_bp_ovl[,2]/(oki_feat_bp_ovl[,1]+oki_feat_bp_ovl[,2])*100
 oki_feat_bp_ovl$type <- rownames(oki_feat_bp_ovl)
 
 osa_feat_bp_ovl <- rbind(
@@ -897,7 +897,7 @@ osa_feat_bp_ovl <- rbind(
   genes$Osa$scrambled |> table(),
   exons$Osa$scrambled |> table()
 ) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
-osa_feat_bp_ovl$pct <- osa_feat_bp_ovl[,2]/osa_feat_bp_ovl[,1]*100
+osa_feat_bp_ovl$pct <- osa_feat_bp_ovl[,2]/(osa_feat_bp_ovl[,1]+osa_feat_bp_ovl[,2])*100
 osa_feat_bp_ovl$type <- rownames(osa_feat_bp_ovl)
 
 
