@@ -46,7 +46,7 @@ calcOperons.onestrand <- function(genes, window = 100) {
   # Expand by `halfwin` nucleotides
   # We suppress warnings because coordinates at the edges of seqfeatures can
   # become transiently negative.
-  g <- trim(g + halfwin) |> suppressWarnings()
+  g <- (g + halfwin) |> suppressWarnings()
   # Merge into operons
   operons   <- reduce(g, min.gapwidth = 0L)
   # Remove the flanking sequences

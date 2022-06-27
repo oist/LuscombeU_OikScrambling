@@ -24,8 +24,16 @@ loadAllAnnotations <- function() {
     tx <- tx[!is.na(tx$mRNA)]
     # Remove "scaffoldA" objects in the OdB3 annotation
     tx <- tx[seqnames(tx) %in% seqnames(genome)]
+    # Prepare gene entries
     tx$ID <- tx$mRNA
-    tx <- GRanges(tx, seqinfo = seqinfo(genome))
+    tx$Parent <- ""
+    tx.genes <- tx
+    tx.genes$type <- "gene"
+    # Prepare transcript IDs
+    tx$type <- "transcript"
+    tx$Parent <- tx$ID
+    tx$ID <- paste0(tx$ID, ".t1")
+    tx <- GRanges(c(tx, tx.genes), seqinfo = seqinfo(genome))
     tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
   }
 
