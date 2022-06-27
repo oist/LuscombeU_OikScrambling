@@ -14,13 +14,16 @@ It has to be an even number.}
 }
 \value{
 A \code{GRanges} object representing operons, with a metadata column \code{n}
-reporting the number of genes in each operon.
+reporting the number of genes in each operon.  If the input object had a
+\code{gene_id} column, then the gene identifiers will be reported as a
+\code{IRanges::CharacterList()} in a \code{gene_id} column in the operons object.
 }
 \description{
 Takes a gene annotation and computes the coordinates of operons based on
 colinearity (all genes on the same strand with no interruption by
-opposite-strand gens, and distance (all genes within a maximal distance of
-each other).
+opposite-strand genes, and distance (all genes within a maximal distance of
+each other).  Nested genes on the opposite strand do not interrupt
+colinearity as they do not interrupt transcription.
 }
 \note{
 The \code{window} parameter must be an even number because the algorithm
@@ -31,5 +34,6 @@ the same as if the window were 1 base greater.
 \examples{
 genes <- GRanges(c("chr1:100-199:+", "chr1:300-400:+",
                    "chr1:500-600:+", "chr1:700-800:-"))
+genes$gene_id <- LETTERS[seq_along(genes)]
 calcOperons(genes, window = 100)
 }
