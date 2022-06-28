@@ -18,6 +18,7 @@ loadAllTranscriptsGR <- function(compat = TRUE) {
   annots <- OikScrambling:::loadAllAnnotations() |> suppressWarnings()
   # Convert to GRanges on transcript features.
   transcripts <- sapply(annots, GenomicFeatures::transcripts) |> SimpleList()
+  transcripts$Nor$tx_name <- transcripts$Nor$tx_name |> sub(pat = ".t1", rep = "")
   # Load dNdS values
   dnds <- SimpleList()
   dnds$dnds_guidance   <- OikScrambling:::loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'GUIDANCE2')
