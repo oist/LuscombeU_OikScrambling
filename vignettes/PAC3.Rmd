@@ -410,8 +410,8 @@ operons_to_transcripts <- function(operons, genes, buffer=NULL){
     if(!is.null(buffer)){
       if(buffer > 0){
         matches <- match(unlist(o$gene_id), genes$gene_id)
-        pre_buffer  <- genes[(min(matches)-buffer) : min(matches)-1]
-        post_buffer <- genes[max(matches) : (max(matches)+buffer)+1]
+        pre_buffer  <- genes[((min(matches)-buffer)-1) : min(matches)-1]
+        post_buffer <- genes[(max(matches)+1) : (max(matches)+buffer)+1]
         gr <- genes[matches]
         gr$operon <- 'operon'
         pre_buffer$operon <- 'buffer'
@@ -468,11 +468,10 @@ ganot_oki_genes <- operons_to_transcripts(ganot_oki, genes$Oki)
 ganot_osa_coa   <- gbs$Oki_Osa |> subsetByOverlaps(ganot_oki)
 ganot_osa       <- genes$Osa |> subsetByOverlaps(ganot_osa_coa$query)
 
-
 plot_gene_map(
   dna_segs = list(
-    "Okinawa"=reverse(gr2dna_seg(ganot_oki_genes)),
-    "Osaka"=gr2dna_seg(ganot_osa)
+    `Okinawa\nPAR: 15956464-15969225`=reverse(gr2dna_seg(ganot_oki_genes)),
+    `Osaka\nPAR: 10980213-10995025`=gr2dna_seg(ganot_osa)
   ),
   dna_seg_scale = T, 
   annotations = list(
