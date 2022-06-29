@@ -25,7 +25,6 @@ See `?OikScrambling:::loadAllGenomes()` and `vignette("LoadGenomicBreaks",
 package = "OikScrambling")` for how the different objects are prepared.
 
 ```{r load_packages_and_data}
-library("purrr")
 library('OikScrambling')      |> suppressPackageStartupMessages()
 library('GenomicFeatures')    |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
@@ -35,10 +34,13 @@ Genes <- sapply(annots, function(x) sort(genes(x))) |> SimpleList()
 operons <- lapply(annots, function(a) genes(a) |> OikScrambling:::calcOperons(window=500))
 load("BreakPoints.Rdata")
 #Loading this too early breaks the function calkOperons
+
 library("dplyr")
 library("stringr")
 #library("Repitools")
 library("genoPlotR")  
+library("eulerr")
+library("purrr")
 ```
 
 
@@ -306,7 +308,6 @@ PAC3_XSR_Osa.aln.right |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unli
 
 
 Conserved and non-conserved operons documentation 
-
 ## PAC 3 as arrows
 
 PAC3 Figure
@@ -314,12 +315,11 @@ Identifying regions of interest
 
 ```{r PAC3Figure}
 
-
 coa$Oki_Osa |> subsetByOverlaps(PAC3)
 coa$Oki_Bar |> subsetByOverlaps(PAC3)
 coa$Oki_Kum |> subsetByOverlaps(PAC3)
 
-
+#Extracting gene coordinates
 extract_coords <- function(gr, gene_name, upstream=0, downstream=0) {
   matching_gene_index <- which(mcols(gr)$gene_id == gene_name)
   sgr <- gr[(matching_gene_index-upstream):(matching_gene_index+downstream),]
@@ -328,40 +328,40 @@ extract_coords <- function(gr, gene_name, upstream=0, downstream=0) {
 }
 
 
-
-
 pac3_operon_oki <- extract_coords(Genes$Oki, 'g3146', upstream=3, downstream=5)
 pac3_operon_osa <- extract_coords(Genes$Osa, 'g12442', upstream=1, downstream=0)
-npac3_operon_osa <- extract_coords(Genes$Osa, 'g2061', upstream=5, downstream = 4)
+npac3_operon_osa <- extract_coords(Genes$Osa, 'g2061', upstream=4, downstream = 4)
 
-
-
-#Okinawa region g3143.t1 - g3145.t1
-First3GenesOki <- GRanges('chr1:11487473-11497595')
-RegionokiOsaNp3 <- subsetByOverlaps(coa$Oki_Osa, First3GenesOki)
-First3GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3$query)
-
-
-Last5GenesOki <- GRanges('chr1:11498263-11503891 ')
-RegionokiOsaNp3_5 <- subsetByOverlaps(coa$Oki_Osa, Last5GenesOki)
-Last5GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3_5$query)
-
-NotPAC3OpInOsa <- c(First3GenesOsa, Last5GenesOsa)
-
-
-#Not pac3
-notpac3 <- GRanges('Chr1:8150909-8166679')
-regionnotpac3 <- subsetByOverlaps(coa$Osa_Oki, notpac3)
-#8098120-8165043
-np3gr <- subsetByOverlaps(Genes$Osa, GRanges('Chr1:8150909-8166679'))
 ```
 
 
 
-Identifying operons  
-
+##Operon identification
+CalcOperons function 
 ```{r Identifying operons}
+#Takes a gene annotation and computes the coordinates of operons based on
+# colinearity (all genes on the same strand with no interruption by
+# opposite-strand genes, and distance (all genes within a maximal distance of
+# each other).  Nested genes on the opposite strand do not interrupt
+# colinearity as they do not interrupt transcription.
+# @param genes A `GRanges` object representing gene annotations.
+# @param window The maximum distance separating two genes of the same operon.
+
+### you should no longer use this function as the built-in calcOperons does this now
+
 calkOperons <- function(genes, window = 100) {
+ # Calculating operons on each strand separately so that nested genes do not
+ # interrupt collinearity
+ strands <- split(genes, strand(genes))
+ ops.plus  <- calcOperons.onestrand(strands[['+']], window = window)
+ ops.minus <- calcOperons.onestrand(strands[['-']], window = window)
+ sort(c(ops.plus, ops.minus), ignore.strand = TRUE)
+}
+
+calcOperons.onestrand <- function(genes, window = 100) {
+  if (identical(genes, GRanges())) return(GRanges())
+  if(nrun(strand(genes)) != 1)
+    stop("Do not use this function on GRanges objects with more than one strand")
   # Divide the window by two because we will expand both sides of the range.
   halfwin <- round(window / 2)
   # Sort the genes ignoring strand.
@@ -370,50 +370,40 @@ calkOperons <- function(genes, window = 100) {
   # We suppress warnings because coordinates at the edges of seqfeatures can
   # become transiently negative.
   g <- (g + halfwin) |> suppressWarnings()
-  # Give a unique ID to all runs of successive genes on the same strand of the
-  # same seqname, see also https://stackoverflow.com/questions/21421047 and
-  # data.table::rleid
-  g$namedStrand <- Rle(paste0(seqnames(g), strand(g)))
-  g$idx <- Rle(rep(seq_along(runValue(g$namedStrand))), runLength(g$namedStrand))
-  # Split the genes by run ID
-  opL <- GenomicRanges::split(g, g$idx)
-  # Remove all runs of length one
-  opL <- opL[runLength(strand(g)) > 1]
   # Merge into operons
-  operons   <- unlist(endoapply(opL, GenomicRanges::reduce, min.gapwidth = 0L)) |> suppressWarnings()
-  # Removed un-merged genes
-  operons$n <- countOverlaps(operons, genes)
-  ov <- findOverlaps(operons, genes)
-  # This function is the same as calcOperons but with the addition of a gene_id metadata column
-  operons$gene_id <- CharacterList(split(genes$gene_id[subjectHits(ov)], queryHits(ov))) |> unname()
-  operons <- operons[operons$n > 1]
+  operons   <- reduce(g, min.gapwidth = 0L)
+#  ov <- findOverlaps(operons, genes)
   # Remove the flanking sequences
-  operons - halfwin
+  operons <- operons - halfwin
+  # Count number of genes in operons
+  operons$n <- countOverlaps(operons, genes)
+  # This function is the same as calcOperons but with the addition of a gene_id metadata column
+  # Annotate operons with gene names.
+  if(!is.null(genes$gene_id)){
+    ov <- findOverlaps(operons, genes)
+    operons$gene_id <- CharacterList(split(genes$gene_id[subjectHits(ov)], queryHits(ov))) |> unname()
 }
-
+  # Remove non-merged genes and return
+  operons[operons$n > 1]
+}
 
 
 operons0 <- SimpleList()
 operons0$Oki <- calkOperons(Genes$Oki, window = 500)
+#3124
 operons0$Osa <- calkOperons(Genes$Osa, window=500)
+#2741
 
 
-
-#Finding the index of the operon that contains that gene
+#Finding the index of the operon that contains an specified gene
 #PAC3
-ss <- lapply(annots$Oki |> genes(),  function(x) 'g3146.t1' %in%  x)
-ss1 <- unlist(ss, recursive = T)
+Ge <- lapply(annots$Oki |> genes(),  function(x) 'g3146.t1' %in%  x)
+OpIndex <- unlist(ss, recursive = T)
   which(ss1)
 #700  
-xx <- as.data.frame(operons$Oki[700])
 
-jajaje <- lapply(operons$Osa$tx_names,  function(x) 'g2061.t1' %in%  x)
-ss1de <- unlist(jajaje, recursive = T)
-  which(ss1de)
-#442  
-  
-#Conserved and non-conserved operons  
-#Select a random gene to find this operons
+
+#Identify operons corresponding to specified gene
 j12 <- lapply(operons0$Oki$tx_names,  function(x) 'g13865.t1' %in%  x)
 j13 <- unlist(j12, recursive = T)
   which(j13)  
@@ -425,7 +415,7 @@ j15 <- unlist(j14, recursive = T)
 #853
 
 
-#Function to find find upstream and downstream genes in specific operon 
+#Function to find upstream and downstream genes in specific operon 
 Find_UpAndDown <- function(op, gene_ofi) {
   ss <- lapply(op$tx_names, function(x) gene_ofi %in% x) 
   ss1 <- unlist(ss)
@@ -453,11 +443,32 @@ qq <- Find_UpAndDown(operons$Osa, 'g12442.t1')
 rr <- Find_UpAndDown(operons$Bar, 'g12642.t1')
 
 hhhh <- Find_UpAndDown(operons$Osa, 'g4968.t1')
+
+
+#Okinawa region g3143.t1 - g3145.t1
+First3GenesOki <- GRanges('chr1:11487473-11497595')
+RegionokiOsaNp3 <- subsetByOverlaps(coa$Oki_Osa, First3GenesOki)
+First3GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3$query)
+
+
+Last5GenesOki <- GRanges('chr1:11498263-11503891 ')
+RegionokiOsaNp3_5 <- subsetByOverlaps(coa$Oki_Osa, Last5GenesOki)
+Last5GenesOsa <- subsetByOverlaps(operons0$Osa, RegionokiOsaNp3_5$query)
+
+NotPAC3OpInOsa <- c(First3GenesOsa, Last5GenesOsa)
+
+
+#Not pac3
+notpac3 <- GRanges('Chr1:8150909-8166679')
+regionnotpac3 <- subsetByOverlaps(coa$Osa_Oki, notpac3)
+#8098120-8165043
+np3gr <- subsetByOverlaps(Genes$Osa, GRanges('Chr1:8150909-8166679'))
+
 ```
 
 
-Ploting PAC3 Figure
-```{r}
+##Ploting PAC3 Figure
+```{r Ploting PAC3 Fig}
 
 #Gene Ranges to dna_segs
 gr2dna_seg <- function (gr, gene_of_interest=NULL, ...) {
@@ -519,7 +530,7 @@ plot_gene_map(
 
 
 Identifying conserved and non-conserved operons
-```{r}
+```{r Conserved&NonConserved}
 #Operon conservation algorithm
 N19 <- OikScrambling:::load_one_to_ones(system.file("extdata/OrthoFinder/N19.tsv", package="BreakpointsData"))
 #Subset BAR, OKI, OSA
@@ -539,9 +550,9 @@ GeneEquivTable <- rmSIOsa %>%
 
 
 #Gene equivalencies table. Genes version.
-fufu <- as.data.frame(unlist(lapply(GeneEquivTable$OKI2018_I69.v2.prot.longest.fa_1, function(x) unlist(strsplit(x, "\\."))[1])))
-fufu1 <- as.data.frame(unlist(lapply(GeneEquivTable$OSKA2016v1.9.prot.longest.fa_1, function(x) unlist(strsplit(x, "\\."))[1])))
-ActualGeneEquiv <- data.frame(fufu, fufu1)
+GEquivOki <- as.data.frame(unlist(lapply(GeneEquivTable$OKI2018_I69.v2.prot.longest.fa_1, function(x) unlist(strsplit(x, "\\."))[1])))
+GEquivOsa <- as.data.frame(unlist(lapply(GeneEquivTable$OSKA2016v1.9.prot.longest.fa_1, function(x) unlist(strsplit(x, "\\."))[1])))
+ActualGeneEquiv <- data.frame('GEquivOki', 'GEquivOsa')
 colnames(ActualGeneEquiv) <- c('Oki', 'Osa')
 
 
@@ -572,24 +583,28 @@ operons0$Osa$tx_names[853]
 
 
 
-
-
 #Find if genes match in candidate operons
 OpGeneMatch(operons0$Oki$tx_names[[1264]], 'OKI2018_I69.v2.prot.longest.fa_1', 'OSKA2016v1.9.prot.longest.fa_1', GeneEquivTable)
 OpGeneMatch(operons$Osa$tx_names[[853]], 'OKI2018_I69.v2.prot.longest.fa_1', 'OSKA2016v1.9.prot.longest.fa_1', GeneEquivTable) 
 
-hyhy <- OpGeneMatch(operons0$Oki$gene_id, 'OKI2018_I69.v2.prot.longest.fa_1', 'OSKA2016v1.9.prot.longest.fa_1', GeneEquivTable) 
-huhu <- OpGeneMatch(operons0$Osa$gene_id, 'OKI2018_I69.v2.prot.longest.fa_1', 'OSKA2016v1.9.prot.longest.fa_1', GeneEquivTable) 
+
+#This line answers the question of how many operons have an equivalent for all their genes in other species
+hyhy <- OpGeneMatch(operons0$Oki$gene_id, 'Oki', 'Osa', ActualGeneEquiv)
+huhu <- OpGeneMatch(operons0$Osa$gene_id, 'Oki', 'Osa', ActualGeneEquiv) 
+     
+
+gg <- data.frame(t(lapply(hyhy, na.omit)))
+ggg3 <- gg[ , apply(gg, 2, function(x) !any(is.na(x)))]
+gg4 <- gg %>%
+  select(where(where ~!any(is.na(.x))))
 
 
-OkiGenes <- annots$Oki |> genes()
+hyhy %>% unlist(recursive = F) %>% na.omit()
+hyhy %>% tibble()
 
-
-jajaje <- OpGeneMatch(OkiGenes$gene_id,   )
-
-
-
-hyhy1 <- unlist(hyhy)
+as_tibble(gg)
+sapply(hyhy, function(x) )
+list2d <- sapply(hyhy, cbind)
 
 
 hyhy1 <- hyhy %>% 
@@ -597,14 +612,49 @@ hyhy1 <- hyhy %>%
   compact()
 
 gygyg <- sapply(hyhy1, length)
-hyhy1[order(gygyg)]
+EquivOpsOkiOsa <- hyhy1[order(gygyg)]
+```
+
+
+##Venn Diagram
+```{r VennDiagram} 
+#OkiOperons: 2017
+#Osa Operons: 1736
+#Equivalent Operons: 582
+
+library("VennDiagram")
+OkiOperons <- operons0$Oki$gene_id
+OsaOperons <- operons0$Osa$gene_id
+Equivs <- as.data.frame(EquivOpsOkiOsa)
+
+max_length <- max(length(OkiOperons), length(OsaOperons), length(EquivOpsOkiOsa))
+
+ 
+dataforVD <- data.frame(col1=c(OkiOperons, rep(NA, max_length - length(OkiOperons))),  
+                        col2 = c(OsaOperons, rep(NA, max_length - length(OsaOperons))),
+                        col3 = c(EquivOpsOkiOsa, rep(NA, max_length - length(EquivOpsOkiOsa))))        
+                                                                                                
+mat <- cbind(A=OkiOperons, B=OsaOperons, C=EquivOpsOkiOsa)
+
+
+
+overlap <- calculate.overlap(x = list(OkiOps = OkiOperons, OsaOps = OsaOperons))
+venn <- draw.pairwise.venn(area1 = 2017, area2 = 1736, cross.area = 582, c("Okinawa", "Osaka"), fill = c(alpha("#0aab2e", 0.6), alpha("#2ed9e6", 0.6)), cat.pos = c(-40, 40), cat.dist = c(0.06, 0.06), cat.cex = 1.4, cex = 1.21, lty = "blank")
+                                                                  
+
+
+
+saveRDS(operons0, file = "Operons.RData")
+operons <- readRDS("Operons.RData")
+dds$Oki
 
 operons0$Oki[2103]
 
 
 
-write.csv(operons0$Oki, "OperonsInOki.csv", row.names = T)
-system("scp OperonsInOki.csv ")
+write.csv(operons0$Oki, "OperonsInOki2.csv", row.names = T)
+write.csv(operons0$Osa, "OperonsInOsa.csv", row.names = T)
+
 
 
 #Subsets of nucleotide alignments that match between species
@@ -623,14 +673,13 @@ OkiOpsAl <- subsetByOverlaps(operons$Oki, wgo$Oki_Osa[ !wgo$Oki_Osa$type=="align
 c2 <- subset(OkiOpsAl, n > 9)[3]
 c2$tx_names |> unlist()
 
+
+
+
 #Osa Operons
 OsaOpsAl <- subsetByOverlaps(operons$Osa, wgo$Osa_Oki[ !wgo$Osa_Oki$type=="breakpoint region"])
 c3 <- subset(OsaOpsAl, n > 9)[4]
 c3$tx_names |> unlist()
-
-
-gygyg <- OpGeneMatch(c2$tx_names[[1264]], 'OKI2018_I69.v2.prot.longest.fa_1', 'OSKA2016v1.9.prot.longest.fa_1', GeneEquivTable) 
-
 
 
 

@@ -1,3 +1,13 @@
+# OikScrambling 4.1.0
+
+* A lot of exploratory changes not documented about inversions (sorry), plus:
+* The Norway TxDB object now has a correct `genes()` output, and its transcript
+  IDs have an additionnal `.t1` suffix.
+* The `calcOperons` function now ignores nested genes, as they do not interrupt
+  collinearity.
+* These changes require the package to be reloaded, but the 4.0.0 RData object
+  can still be used.
+
 # OikScrambling 4.0.0
 
 * Reformed the `wgo` object to match the 4 classes: _isolated alignment_,

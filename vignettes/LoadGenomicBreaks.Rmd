@@ -690,9 +690,11 @@ genome_sizes[names(coa) |> sub(pat = "_.*", rep = "")]
 dens <- tibble::tibble(
   nbreak   = sapply(coa, length),
   nbreak2  = sapply(coa2, length),
+  nbreak3  = sapply(wgo, \(gr) sum(gr$type == "breakpoint region")),
   gsize    = genome_sizes[names(coa) |> sub(pat = "_.*", rep = "")],
   density  = nbreak  / gsize * 1e6,
   density2 = nbreak2 / gsize * 1e6,
+  density3 = nbreak3 / gsize * 1e6,
   pairname = names(coa),
   dist     = OikScrambling:::compDistance(pairname),
   genus    = dist |>
@@ -716,6 +718,14 @@ ggplot(dens) +
   geom_point(size = 5) +
   scale_x_continuous("Density (breakpoints / megabase)") +
   ggtitle("Density of breakpoints (double-coalesced) in paired comparisons, arranged per genus") +
+  scale_colour_manual(values=rainbow(11, s=.6, v=.9)[sample(1:11,11)])
+
+set.seed(1664)
+ggplot(dens) +
+  aes(density3, genus, col = dist, pch = genus) +
+  geom_point(size = 5) +
+  scale_x_continuous("Frequency (breakpoints / megabase)") +
+  ggtitle("Frequency of breakpoints regions in paired comparisons, arranged per genus") +
   scale_colour_manual(values=rainbow(11, s=.6, v=.9)[sample(1:11,11)])
 ```
 

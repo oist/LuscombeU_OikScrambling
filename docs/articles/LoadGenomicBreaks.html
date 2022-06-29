@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
       </span>
     </div>
 
@@ -54,6 +54,9 @@
   <ul class="dropdown-menu" role="menu">
 <li>
       <a href="../articles/CNEs.html">Conserved non-coding elements</a>
+    </li>
+    <li>
+      <a href="../articles/ChromosomePlots.html">Chromosome-scale feature density plots</a>
     </li>
     <li>
       <a href="../articles/CoalescingCutoffs.html">Modifying coalescent cutoffs</a>
@@ -138,7 +141,7 @@
       <h1 data-toc-skip>Load genomic break data</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">30 March, 2022</h4>
+            <h4 data-toc-skip class="date">27 June, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/LoadGenomicBreaks.Rmd" class="external-link"><code>vignettes/LoadGenomicBreaks.Rmd</code></a></small>
       <div class="hidden name"><code>LoadGenomicBreaks.Rmd</code></div>
@@ -411,35 +414,77 @@
 <div class="section level3">
 <h3 id="whole-genome-objects">Whole-genome objects<a class="anchor" aria-label="anchor" href="#whole-genome-objects"></a>
 </h3>
-<p>Let’s have objects that cover the whole genomes (with the possible exception of the telomeric regions) and contain non-overlapping aligned, unaligned and syntenic regions. These are <code>GRanges</code> objects, not <code>GBreaks</code>, since they contain unaligned regions.</p>
+<p>Let’s have objects that cover the whole genomes (with the possible exception of the telomeric regions) and contain <em>isolated alignments</em>, <em>breakpoint regions</em>, <em>colinear alignments</em> and <em>bridge regions</em>. These are <code>GRanges</code> objects, not <code>GBreaks</code>, since they contain unaligned regions.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">makeWholeGenomeObject</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">aligned</span>, <span class="va">unaligned</span>, <span class="va">coalesced</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">aligned_nonCoa</span>   <span class="op">&lt;-</span> <span class="va">aligned</span><span class="op">[</span><span class="va">aligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
-  <span class="va">unaligned_nonCoa</span> <span class="op">&lt;-</span> <span class="va">unaligned</span><span class="op">[</span><span class="va">unaligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
-  <span class="va">syntenic</span>         <span class="op">&lt;-</span> <span class="va">coalesced</span><span class="op">[</span> <span class="op">!</span> <span class="va">coalesced</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span>
+<code class="sourceCode R"><span class="va">makeWholeGenomeObject</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">aligned</span>, <span class="va">unaligned</span><span class="op">)</span> <span class="op">{</span>
+  <span class="co"># Isolated alignments are aligned regions not in collinear regions</span>
+  <span class="va">iso</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">aligned</span><span class="op">[</span><span class="va">aligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"isolated alignment"</span><span class="op">)</span>
+  <span class="co"># Breakpoint regions are unaligned regions not in collinear regions</span>
+  <span class="va">brk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">unaligned</span><span class="op">[</span><span class="va">unaligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span><span class="op">)</span>|&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"breakpoint region"</span><span class="op">)</span>
+  <span class="co"># Collinear alignments are aligned regions in collinear regions</span>
+  <span class="va">col</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">aligned</span><span class="op">[</span><span class="op">!</span><span class="va">aligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"collinear alignment"</span><span class="op">)</span>
+  <span class="co"># Bridge regions are unaligned regions in collinear regions</span>
+  <span class="va">bri</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/genomic-range-squeezers.html" class="external-link">granges</a></span><span class="op">(</span><span class="va">unaligned</span><span class="op">[</span><span class="op">!</span><span class="va">unaligned</span><span class="op">$</span><span class="va">nonCoa</span><span class="op">]</span><span class="op">)</span> |&gt; <span class="fu">plyranges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyranges/man/tidyverse-reexports.html" class="external-link">mutate</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"bridge region"</span><span class="op">)</span>
   
-  <span class="co"># Let's keep only the common metadata</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">aligned_nonCoa</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">aligned_nonCoa</span><span class="op">)</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">unaligned</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">syntenic</span><span class="op">)</span>       <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">syntenic</span><span class="op">)</span><span class="op">[</span>      ,<span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></span><span class="op">(</span><span class="va">unaligned</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
-  
-  <span class="co"># Let's replace the `nonCoa` flag by a `aligned`, `unaligned`, `syntenic` flag.</span>
-  <span class="va">aligned_nonCoa</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="va">unaligned_nonCoa</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="va">syntenic</span><span class="op">$</span><span class="va">nonCoa</span> <span class="op">&lt;-</span> <span class="cn">NULL</span>
-  <span class="va">aligned_nonCoa</span><span class="op">$</span><span class="va">type</span>   <span class="op">&lt;-</span> <span class="st">'aligned'</span>
-  <span class="va">unaligned_nonCoa</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="st">'unaligned'</span>
-  <span class="va">syntenic</span><span class="op">$</span><span class="va">type</span>         <span class="op">&lt;-</span> <span class="st">'syntenic'</span>
-
-  <span class="va">wholeGenome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">aligned_nonCoa</span>, <span class="va">unaligned_nonCoa</span>, <span class="va">syntenic</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+  <span class="va">wholeGenome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span><span class="va">iso</span>, <span class="va">brk</span>, <span class="va">col</span>, <span class="va">bri</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
   <span class="va">wholeGenome</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">wholeGenome</span><span class="op">$</span><span class="va">type</span><span class="op">)</span>
   <span class="va">wholeGenome</span>
 <span class="op">}</span>
 
-<span class="va">wgo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mapply.html" class="external-link">mapply</a></span><span class="op">(</span><span class="va">makeWholeGenomeObject</span>, <span class="va">gbs</span>, <span class="va">unal</span>, <span class="va">coa</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="va">wgo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mapply.html" class="external-link">mapply</a></span><span class="op">(</span><span class="va">makeWholeGenomeObject</span>, <span class="va">gbs</span>, <span class="va">unal</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">for_wgo_barplots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">wgo</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">gr</span><span class="op">)</span>, <span class="va">gr</span><span class="op">$</span><span class="va">type</span>, <span class="va">sum</span><span class="op">)</span><span class="op">)</span> |&gt;
+  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> |&gt;
+  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span>rownames <span class="op">=</span> <span class="st">"type"</span><span class="op">)</span> |&gt;
+  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="op">!</span><span class="va">type</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>distClass <span class="op">=</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistClass.html">compDistClass</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>genus <span class="op">=</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compGenus.html">compGenus</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">for_wgo_barplots</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Oikopleura"</span>, <span class="va">distClass</span> <span class="op">==</span> <span class="st">"distant"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">value</span>, fill <span class="op">=</span> <span class="va">type</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span> stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Oki or Kume vs other populations"</span><span class="op">)</span>
+
+<span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">for_wgo_barplots</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Oikopleura"</span>, <span class="va">distClass</span> <span class="op">==</span> <span class="st">"intermediate"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">value</span>, fill <span class="op">=</span> <span class="va">type</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span> stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span>  <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"North Atlantic vs North Pacific"</span><span class="op">)</span>
+
+<span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">for_wgo_barplots</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Oikopleura"</span>, <span class="va">distClass</span> <span class="op">==</span> <span class="st">"same_or_sister"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">value</span>, fill <span class="op">=</span> <span class="va">type</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span> stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"same population"</span><span class="op">)</span>
+
+<span class="va">p4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">for_wgo_barplots</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Drosophila"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">value</span>, fill <span class="op">=</span> <span class="va">type</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span> stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Drosophila (various evol. distances)"</span><span class="op">)</span>
+
+<span class="va">p5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">for_wgo_barplots</span> |&gt; <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">genus</span> <span class="op">==</span> <span class="st">"Ciona"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">value</span>, fill <span class="op">=</span> <span class="va">type</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span> stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Ciona (various evol. distances)"</span><span class="op">)</span></code></pre></div>
+<p>We can see that:</p>
+<ul>
+<li>The larger size of Okinawa and Kume genomes is explained by sequences that are not aligned. (Repeats ?)</li>
+<li>The fraction of isolated alignments is always small, but it is comparatively larger in Oiks compared to Drosophila and Ciona.</li>
+<li>The fraction of bridge regions increases with evolutionary distance, until becoming larger than the fraction of colinear alignments (<em>D. melanogaster</em> / <em>D. buskii</em>, <em>C. savignyi</em> / <em>C intestinalis or robusta</em>).</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://patchwork.data-imaginist.com" class="external-link">"patchwork"</a></span><span class="op">)</span>
+<span class="va">p1</span> <span class="op">/</span> <span class="va">p2</span> <span class="op">/</span> <span class="va">p3</span> <span class="op">/</span> <span class="va">p4</span> <span class="op">/</span> <span class="va">p5</span></code></pre></div>
+<p><img src="LoadGenomicBreaks_files/figure-html/proportion_of_genome_region_classes-1.svg" width="576"></p>
 </div>
 <div class="section level3">
 <h3 id="bridge-regions">Bridge regions<a class="anchor" aria-label="anchor" href="#bridge-regions"></a>
 </h3>
 <p>We can pair the unaligned regions that are between two colinearly aligned regions.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">bri</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">bridgeRegions</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html" class="external-link">as</a></span><span class="op">(</span><span class="st">"SimpleList"</span><span class="op">)</span>
 
 <span class="va">bri</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">bri</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">flagLongShort_</span>, <span class="va">longShort</span><span class="op">)</span>
@@ -450,7 +495,7 @@
 <h3 id="translocated-regions">Translocated regions<a class="anchor" aria-label="anchor" href="#translocated-regions"></a>
 </h3>
 <p>Here we compute new <code>GBreaks</code> objects representing the intervals between two regions that would be colinear if there would not be a translocation separating them.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">traGaps</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">coa</span><span class="op">)</span> <span class="op">{</span>
   <span class="co"># The input MUST already be coalesced.</span>
   <span class="va">tra</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="va">coa</span><span class="op">)</span>
@@ -473,7 +518,7 @@
 <h3 id="coalesce-again">Coalesce again<a class="anchor" aria-label="anchor" href="#coalesce-again"></a>
 </h3>
 <p>We remove the translocated regions that interrupt colinearity, where one of the colinear pairs is closer than 200 bp.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">removeTranslocationsOnTargetGenome</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>
   <span class="va">gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/dist2next.html" class="external-link">dist2next</a></span><span class="op">(</span><span class="va">gb</span>, step <span class="op">=</span> <span class="fl">2</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -500,7 +545,7 @@
 <h3 id="unmapped-regions-2">Unmapped regions 2<a class="anchor" aria-label="anchor" href="#unmapped-regions-2"></a>
 </h3>
 <p>The intervals between double-coalesced regions.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unmap2</span>  <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">cleanGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">unmap2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">unmap2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">flagLongShort_</span>, <span class="va">longShort</span><span class="op">)</span>
 <span class="va">unmap2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">unmap2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">annotateWithReps</span>, <span class="va">reps</span><span class="op">)</span>
@@ -510,7 +555,7 @@
 <h3 id="translocated-regions-2">Translocated regions 2<a class="anchor" aria-label="anchor" href="#translocated-regions-2"></a>
 </h3>
 <p>To check that we really removed the small ones as intented.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tra2</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">traGaps</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/as.html" class="external-link">as</a></span><span class="op">(</span><span class="st">"SimpleList"</span><span class="op">)</span>
 
 <span class="va">tra2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">BiocParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocParallel/man/bplapply.html" class="external-link">bplapply</a></span><span class="op">(</span><span class="va">tra2</span><span class="op">[</span><span class="va">Oik_Oik</span><span class="op">]</span>, <span class="va">flagLongShort_</span>, <span class="va">longShort</span><span class="op">)</span>
@@ -520,7 +565,7 @@
 <div class="section level3">
 <h3 id="numbers-of-blocks">Numbers of blocks<a class="anchor" aria-label="anchor" href="#numbers-of-blocks"></a>
 </h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">bp_summary</span> <span class="op">&lt;-</span> 
   <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>
     gbs     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span>,
@@ -559,7 +604,7 @@
 <span class="co">## Int/Rob – Sav 221.5000 4089.500</span>
 <span class="co">## North – North 205.5000 3670.750</span>
 <span class="co">## Oki – North   268.1250 8046.500</span></code></pre>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">bp_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">bp_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                 gbs    unal    coa  unmap unmap2     bri    tra  tra2   coa2</span>
 <span class="co">## Dme_Dbu       47893 47867.0 5959.0 5951.0 5869.0 41934.0  356.0 323.0 5877.0</span>
@@ -573,7 +618,7 @@
 <span class="co">## Int/Rob – Sav 69332 69275.0 4094.5 4068.5 4063.5 65237.5  223.0 221.5 4089.5</span>
 <span class="co">## North – North 24607 24103.5 4139.0 4081.5 3369.0 20434.5  403.0 182.5 3412.5</span>
 <span class="co">## Oki – North   31252 31041.5 8806.0 8785.0 8090.5 22446.0  453.0 258.5 8105.0</span></code></pre>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">bp_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">bp_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##                      gbs      unal       coa     unmap     unmap2        bri</span>
 <span class="co">## Dme_Dbu               NA        NA        NA        NA         NA         NA</span>
@@ -603,7 +648,7 @@
 <div class="section level3">
 <h3 id="fraction-of-the-genome-aligned-or-mapped">Fraction of the genome aligned or mapped<a class="anchor" aria-label="anchor" href="#fraction-of-the-genome-aligned-or-mapped"></a>
 </h3>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R">  <span class="va">aligned_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="va">mapped_tot</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,   \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="va">mapped2_tot</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>,  \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -644,7 +689,7 @@
 <span class="co">## Dme_Dsu 59.8730476 76.684629 76.712764</span>
 <span class="co">## Dme_Dya 76.9451636 84.778190 84.900306</span>
 <span class="co">## Dme_Dma 80.9637966 85.833201 86.001342</span></code></pre>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span>   |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               align_frac map_frac map2_frac</span>
 <span class="co">## Dme_Dbu             21.7     71.1      71.6</span>
@@ -658,7 +703,7 @@
 <span class="co">## Int/Rob – Sav       13.8     68.8      68.8</span>
 <span class="co">## North – North       70.6     83.9      84.2</span>
 <span class="co">## Oki – North         53.7     73.5      73.8</span></code></pre>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               align_frac map_frac map2_frac</span>
 <span class="co">## Dme_Dbu             21.7     71.1      71.6</span>
@@ -672,7 +717,7 @@
 <span class="co">## Int/Rob – Sav       13.8     68.8      68.8</span>
 <span class="co">## North – North       71.1     83.5      83.9</span>
 <span class="co">## Oki – North         53.9     73.3      73.6</span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">align_summary</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="va">align_summary</span><span class="op">)</span> |&gt; <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span>     |&gt; <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##               align_frac map_frac map2_frac</span>
 <span class="co">## Dme_Dbu               NA       NA        NA</span>
@@ -690,7 +735,7 @@
 <div class="section level3">
 <h3 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h3>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>
   gbs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">length</span><span class="op">)</span>,
   coa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">length</span><span class="op">)</span>,
@@ -707,7 +752,7 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Cumulative plot (gbs ⊃ coa ⊃ coa2) of the computed genomic regions"</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/summary-1.png" width="700"></p>
 <p>NOTE: how does that compare with ANI (Average Nucleotide Identity) ?</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">c</a></span><span class="op">(</span>`Bar2_p4__AOM-5-5f` <span class="op">=</span> <span class="fl">87.489</span>, Bar2_p4__Bar2_p4 <span class="op">=</span> <span class="fl">100</span>, `Bar2_p4__KUM-M3-7f` <span class="op">=</span> <span class="fl">78.45822</span>, 
 Bar2_p4__O_alb <span class="op">=</span> <span class="fl">69.79983</span>, Bar2_p4__O_lon <span class="op">=</span> <span class="fl">66.11535</span>, Bar2_p4__O_van <span class="op">=</span> <span class="fl">69.29796</span>, 
 Bar2_p4__OdB3 <span class="op">=</span> <span class="fl">97.7499</span>, Bar2_p4__OKI2018_I69_1.0 <span class="op">=</span> <span class="fl">78.68358</span>, 
@@ -835,7 +880,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning: Removed 1 rows containing missing values (geom_point).</span></code></pre>
 <p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">align_summary</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"– Oki"</span>, <span class="va">dist</span><span class="op">)</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -843,7 +888,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">10</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-2-2.png" width="700"></p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">align_summary</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"– Oki"</span>, <span class="va">dist</span><span class="op">)</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -851,7 +896,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/unnamed-chunk-2-3.png" width="700"></p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">genome_sizes</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Aom<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">AOM.5.5f</span><span class="op">)</span><span class="op">)</span>, Bar<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">Bar2.p4</span><span class="op">)</span><span class="op">)</span>,
                   Oki<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">OKI2018.I69</span><span class="op">)</span><span class="op">)</span>, Osa<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">OSKA2016v1.9</span><span class="op">)</span><span class="op">)</span>,
                   Kum<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">KUM.M3.7f</span><span class="op">)</span><span class="op">)</span>, Nor<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/seqinfo.html" class="external-link">seqlengths</a></span><span class="op">(</span><span class="va">genomes</span><span class="op">$</span><span class="va">OdB3</span><span class="op">)</span><span class="op">)</span>,
@@ -868,13 +913,15 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <span class="co">## 128639392 128639392 128639392 117529544 117529544 117529544 117529544 137547960 </span>
 <span class="co">##       Dme       Dme       Dme </span>
 <span class="co">## 137547960 137547960 137547960</span></code></pre>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dens</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
   nbreak   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">length</span><span class="op">)</span>,
   nbreak2  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">length</span><span class="op">)</span>,
+  nbreak3  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">wgo</span>, \<span class="op">(</span><span class="va">gr</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gr</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"breakpoint region"</span><span class="op">)</span><span class="op">)</span>,
   gsize    <span class="op">=</span> <span class="va">genome_sizes</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">coa</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span>pat <span class="op">=</span> <span class="st">"_.*"</span>, rep <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">]</span>,
   density  <span class="op">=</span> <span class="va">nbreak</span>  <span class="op">/</span> <span class="va">gsize</span> <span class="op">*</span> <span class="fl">1e6</span>,
   density2 <span class="op">=</span> <span class="va">nbreak2</span> <span class="op">/</span> <span class="va">gsize</span> <span class="op">*</span> <span class="fl">1e6</span>,
+  density3 <span class="op">=</span> <span class="va">nbreak3</span> <span class="op">/</span> <span class="va">gsize</span> <span class="op">*</span> <span class="fl">1e6</span>,
   pairname <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">coa</span><span class="op">)</span>,
   dist     <span class="op">=</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="va">pairname</span><span class="op">)</span>,
   genus    <span class="op">=</span> <span class="va">dist</span> |&gt;
@@ -892,7 +939,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Density of breakpoints in paired comparisons, arranged per genus"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">11</span>, s<span class="op">=</span><span class="fl">.6</span>, v<span class="op">=</span><span class="fl">.9</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/Bimap-envirAPI.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">11</span>,<span class="fl">11</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/breakpoints_per_Mb-1.png" width="700"></p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1664</span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dens</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">density2</span>, <span class="va">genus</span>, col <span class="op">=</span> <span class="va">dist</span>, pch <span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
@@ -901,12 +948,21 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Density of breakpoints (double-coalesced) in paired comparisons, arranged per genus"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">11</span>, s<span class="op">=</span><span class="fl">.6</span>, v<span class="op">=</span><span class="fl">.9</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/Bimap-envirAPI.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">11</span>,<span class="fl">11</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <p><img src="LoadGenomicBreaks_files/figure-html/breakpoints_per_Mb-2.png" width="700"></p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1664</span><span class="op">)</span>
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dens</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">density3</span>, <span class="va">genus</span>, col <span class="op">=</span> <span class="va">dist</span>, pch <span class="op">=</span> <span class="va">genus</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span><span class="st">"Frequency (breakpoints / megabase)"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Frequency of breakpoints regions in paired comparisons, arranged per genus"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">11</span>, s<span class="op">=</span><span class="fl">.6</span>, v<span class="op">=</span><span class="fl">.9</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/Bimap-envirAPI.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">11</span>,<span class="fl">11</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
+<p><img src="LoadGenomicBreaks_files/figure-html/breakpoints_per_Mb-3.png" width="700"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="save-data">Save data<a class="anchor" aria-label="anchor" href="#save-data"></a>
 </h2>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">unal</span>, <span class="va">coa</span>, <span class="va">unmap</span>, <span class="va">bri</span>, <span class="va">tra</span>, <span class="va">tra2</span>, <span class="va">coa2</span>, <span class="va">unmap2</span>, <span class="va">wgo</span>, <span class="va">longShort</span>, file <span class="op">=</span> <span class="st">"BreakPoints.Rdata"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"echo '9f273f099ecbfa44899b6c343d1382f1  BreakPoints.Rdata' | md5sum -c"</span>, intern <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning in system("echo '9f273f099ecbfa44899b6c343d1382f1 BreakPoints.Rdata'</span>
@@ -919,7 +975,7 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
 <span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span>
@@ -930,112 +986,114 @@ OSKA2016v1.9__OSKA2016v1.9 <span class="op">=</span> <span class="fl">100</span>
 <span class="co">## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0</span>
 <span class="co">## </span>
 <span class="co">## locale:</span>
-<span class="co">##  [1] LC_CTYPE=en_GB.UTF-8       LC_NUMERIC=C              </span>
-<span class="co">##  [3] LC_TIME=en_GB.UTF-8        LC_COLLATE=en_GB.UTF-8    </span>
-<span class="co">##  [5] LC_MONETARY=en_GB.UTF-8    LC_MESSAGES=en_GB.UTF-8   </span>
-<span class="co">##  [7] LC_PAPER=en_GB.UTF-8       LC_NAME=C                 </span>
+<span class="co">##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              </span>
+<span class="co">##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    </span>
+<span class="co">##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   </span>
+<span class="co">##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 </span>
 <span class="co">##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            </span>
-<span class="co">## [11] LC_MEASUREMENT=en_GB.UTF-8 LC_IDENTIFICATION=C       </span>
+<span class="co">## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       </span>
 <span class="co">## </span>
 <span class="co">## attached base packages:</span>
 <span class="co">## [1] stats4    stats     graphics  grDevices utils     datasets  methods  </span>
 <span class="co">## [8] base     </span>
 <span class="co">## </span>
 <span class="co">## other attached packages:</span>
-<span class="co">##  [1] BSgenome.Oidioi.genoscope.OdB3_1.0.0   </span>
-<span class="co">##  [2] BSgenome.Oidioi.OIST.AOM.5.5f_1.0.1    </span>
-<span class="co">##  [3] BSgenome.Oidioi.OIST.KUM.M3.7f_1.0.1   </span>
-<span class="co">##  [4] BSgenome.Oidioi.OIST.Bar2.p4_1.0.1     </span>
-<span class="co">##  [5] BSgenome.Oidioi.OIST.OSKA2016v1.9_1.0.0</span>
-<span class="co">##  [6] BSgenome.Oidioi.OIST.OKI2018.I69_1.0.1 </span>
-<span class="co">##  [7] BSgenome_1.62.0                        </span>
-<span class="co">##  [8] rtracklayer_1.54.0                     </span>
-<span class="co">##  [9] Biostrings_2.62.0                      </span>
-<span class="co">## [10] XVector_0.34.0                         </span>
-<span class="co">## [11] BreakpointsData_3.9.0                  </span>
-<span class="co">## [12] ggplot2_3.3.5                          </span>
-<span class="co">## [13] GenomicBreaks_0.13.1                   </span>
-<span class="co">## [14] GenomicRanges_1.46.1                   </span>
-<span class="co">## [15] GenomeInfoDb_1.30.1                    </span>
-<span class="co">## [16] IRanges_2.28.0                         </span>
-<span class="co">## [17] S4Vectors_0.32.3                       </span>
-<span class="co">## [18] BiocGenerics_0.40.0                    </span>
+<span class="co">##  [1] patchwork_1.1.1                        </span>
+<span class="co">##  [2] BSgenome.Oidioi.genoscope.OdB3_1.0.0   </span>
+<span class="co">##  [3] BSgenome.Oidioi.OIST.AOM.5.5f_1.0.1    </span>
+<span class="co">##  [4] BSgenome.Oidioi.OIST.KUM.M3.7f_1.0.1   </span>
+<span class="co">##  [5] BSgenome.Oidioi.OIST.Bar2.p4_1.0.1     </span>
+<span class="co">##  [6] BSgenome.Oidioi.OIST.OSKA2016v1.9_1.0.0</span>
+<span class="co">##  [7] BSgenome.Oidioi.OIST.OKI2018.I69_1.0.1 </span>
+<span class="co">##  [8] BSgenome_1.62.0                        </span>
+<span class="co">##  [9] rtracklayer_1.54.0                     </span>
+<span class="co">## [10] Biostrings_2.62.0                      </span>
+<span class="co">## [11] XVector_0.34.0                         </span>
+<span class="co">## [12] BreakpointsData_3.9.0                  </span>
+<span class="co">## [13] ggplot2_3.3.5                          </span>
+<span class="co">## [14] GenomicBreaks_0.13.1                   </span>
+<span class="co">## [15] GenomicRanges_1.46.1                   </span>
+<span class="co">## [16] GenomeInfoDb_1.30.1                    </span>
+<span class="co">## [17] IRanges_2.28.0                         </span>
+<span class="co">## [18] S4Vectors_0.32.3                       </span>
+<span class="co">## [19] BiocGenerics_0.40.0                    </span>
 <span class="co">## </span>
 <span class="co">## loaded via a namespace (and not attached):</span>
-<span class="co">##   [1] backports_1.4.1             Hmisc_4.6-0                </span>
-<span class="co">##   [3] BiocFileCache_2.2.1         systemfonts_1.0.3          </span>
-<span class="co">##   [5] plyr_1.8.6                  splines_4.1.2              </span>
-<span class="co">##   [7] BiocParallel_1.28.3         digest_0.6.29              </span>
-<span class="co">##   [9] htmltools_0.5.2             tiff_0.1-11                </span>
-<span class="co">##  [11] GO.db_3.14.0                gdata_2.18.0               </span>
-<span class="co">##  [13] fansi_1.0.2                 magrittr_2.0.2             </span>
-<span class="co">##  [15] checkmate_2.0.0             memoise_2.0.1              </span>
-<span class="co">##  [17] cluster_2.1.2               tzdb_0.2.0                 </span>
-<span class="co">##  [19] readr_2.1.2                 annotate_1.72.0            </span>
-<span class="co">##  [21] matrixStats_0.61.0          R.utils_2.11.0             </span>
-<span class="co">##  [23] pkgdown_2.0.2               prettyunits_1.1.1          </span>
-<span class="co">##  [25] jpeg_0.1-9                  colorspace_2.0-3           </span>
-<span class="co">##  [27] rappdirs_0.3.3              blob_1.2.2                 </span>
-<span class="co">##  [29] textshaping_0.3.6           xfun_0.30                  </span>
-<span class="co">##  [31] dplyr_1.0.8                 crayon_1.5.0               </span>
-<span class="co">##  [33] RCurl_1.98-1.6              jsonlite_1.8.0             </span>
-<span class="co">##  [35] lme4_1.1-28                 survival_3.2-13            </span>
-<span class="co">##  [37] glue_1.6.2                  gtable_0.3.0               </span>
-<span class="co">##  [39] zlibbioc_1.40.0             DelayedArray_0.20.0        </span>
-<span class="co">##  [41] weights_1.0.4               abind_1.4-5                </span>
-<span class="co">##  [43] scales_1.1.1                DBI_1.1.2                  </span>
-<span class="co">##  [45] Rcpp_1.0.8.3                plotrix_3.8-2              </span>
-<span class="co">##  [47] progress_1.2.2              genoPlotR_0.8.11           </span>
-<span class="co">##  [49] xtable_1.8-4                htmlTable_2.4.0            </span>
-<span class="co">##  [51] foreign_0.8-81              bit_4.0.4                  </span>
-<span class="co">##  [53] Formula_1.2-4               htmlwidgets_1.5.4          </span>
-<span class="co">##  [55] httr_1.4.2                  RColorBrewer_1.1-2         </span>
-<span class="co">##  [57] ellipsis_0.3.2              mice_3.14.0                </span>
-<span class="co">##  [59] farver_2.1.0                pkgconfig_2.0.3            </span>
-<span class="co">##  [61] XML_3.99-0.9                R.methodsS3_1.8.1          </span>
-<span class="co">##  [63] dbplyr_2.1.1                nnet_7.3-16                </span>
-<span class="co">##  [65] sass_0.4.0                  locfit_1.5-9.5             </span>
-<span class="co">##  [67] utf8_1.2.2                  labeling_0.4.2             </span>
-<span class="co">##  [69] tidyselect_1.1.2            rlang_1.0.2                </span>
-<span class="co">##  [71] reshape2_1.4.4              AnnotationDbi_1.56.2       </span>
-<span class="co">##  [73] munsell_0.5.0               tools_4.1.2                </span>
-<span class="co">##  [75] cachem_1.0.6                cli_3.2.0                  </span>
-<span class="co">##  [77] generics_0.1.2              RSQLite_2.2.10             </span>
-<span class="co">##  [79] ade4_1.7-18                 broom_0.7.12               </span>
-<span class="co">##  [81] OikScrambling_3.0.0         evaluate_0.15              </span>
-<span class="co">##  [83] stringr_1.4.0               fastmap_1.1.0              </span>
-<span class="co">##  [85] fftwtools_0.9-11            yaml_2.3.5                 </span>
-<span class="co">##  [87] ragg_1.2.1                  knitr_1.37                 </span>
-<span class="co">##  [89] bit64_4.0.5                 fs_1.5.2                   </span>
-<span class="co">##  [91] purrr_0.3.4                 heatmaps_1.18.0            </span>
-<span class="co">##  [93] KEGGREST_1.34.0             nlme_3.1-153               </span>
-<span class="co">##  [95] R.oo_1.24.0                 poweRlaw_0.70.6            </span>
-<span class="co">##  [97] xml2_1.3.3                  pracma_2.3.8               </span>
-<span class="co">##  [99] biomaRt_2.50.3              compiler_4.1.2             </span>
-<span class="co">## [101] rstudioapi_0.13             filelock_1.0.2             </span>
-<span class="co">## [103] curl_4.3.2                  png_0.1-7                  </span>
-<span class="co">## [105] tibble_3.1.6                bslib_0.3.1                </span>
-<span class="co">## [107] stringi_1.7.6               highr_0.9                  </span>
-<span class="co">## [109] GenomicFeatures_1.46.5      desc_1.4.1                 </span>
-<span class="co">## [111] lattice_0.20-45             CNEr_1.30.0                </span>
-<span class="co">## [113] Matrix_1.4-0                nloptr_1.2.2.3             </span>
-<span class="co">## [115] vctrs_0.3.8                 pillar_1.7.0               </span>
-<span class="co">## [117] lifecycle_1.0.1             jquerylib_0.1.4            </span>
-<span class="co">## [119] data.table_1.14.2           bitops_1.0-7               </span>
-<span class="co">## [121] R6_2.5.1                    BiocIO_1.4.0               </span>
-<span class="co">## [123] latticeExtra_0.6-29         KernSmooth_2.23-20         </span>
-<span class="co">## [125] gridExtra_2.3               boot_1.3-28                </span>
-<span class="co">## [127] gtools_3.9.2                MASS_7.3-54                </span>
-<span class="co">## [129] assertthat_0.2.1            SummarizedExperiment_1.24.0</span>
-<span class="co">## [131] rprojroot_2.0.2             rjson_0.2.21               </span>
-<span class="co">## [133] withr_2.5.0                 GenomicAlignments_1.30.0   </span>
-<span class="co">## [135] Rsamtools_2.10.0            GenomeInfoDbData_1.2.7     </span>
-<span class="co">## [137] parallel_4.1.2              hms_1.1.1                  </span>
-<span class="co">## [139] EBImage_4.36.0              grid_4.1.2                 </span>
-<span class="co">## [141] rpart_4.1-15                minqa_1.2.4                </span>
-<span class="co">## [143] tidyr_1.2.0                 rmarkdown_2.11             </span>
-<span class="co">## [145] MatrixGenerics_1.6.0        Biobase_2.54.0             </span>
-<span class="co">## [147] base64enc_0.1-3             restfulr_0.0.13</span></code></pre>
+<span class="co">##   [1] utf8_1.2.2                  R.utils_2.11.0             </span>
+<span class="co">##   [3] tidyselect_1.1.2            lme4_1.1-28                </span>
+<span class="co">##   [5] poweRlaw_0.70.6             RSQLite_2.2.10             </span>
+<span class="co">##   [7] AnnotationDbi_1.56.2        htmlwidgets_1.5.4          </span>
+<span class="co">##   [9] grid_4.1.2                  BiocParallel_1.28.3        </span>
+<span class="co">##  [11] OikScrambling_4.1.0         munsell_0.5.0              </span>
+<span class="co">##  [13] codetools_0.2-18            ragg_1.2.1                 </span>
+<span class="co">##  [15] withr_2.5.0                 colorspace_2.0-3           </span>
+<span class="co">##  [17] Biobase_2.54.0              filelock_1.0.2             </span>
+<span class="co">##  [19] highr_0.9                   knitr_1.37                 </span>
+<span class="co">##  [21] rstudioapi_0.13             genoPlotR_0.8.11           </span>
+<span class="co">##  [23] MatrixGenerics_1.6.0        labeling_0.4.2             </span>
+<span class="co">##  [25] GenomeInfoDbData_1.2.7      bit64_4.0.5                </span>
+<span class="co">##  [27] farver_2.1.0                rprojroot_2.0.2            </span>
+<span class="co">##  [29] vctrs_0.3.8                 generics_0.1.2             </span>
+<span class="co">##  [31] xfun_0.30                   BiocFileCache_2.2.1        </span>
+<span class="co">##  [33] R6_2.5.1                    locfit_1.5-9.5             </span>
+<span class="co">##  [35] heatmaps_1.18.0             bitops_1.0-7               </span>
+<span class="co">##  [37] cachem_1.0.6                DelayedArray_0.20.0        </span>
+<span class="co">##  [39] assertthat_0.2.1            BiocIO_1.4.0               </span>
+<span class="co">##  [41] scales_1.1.1                nnet_7.3-16                </span>
+<span class="co">##  [43] gtable_0.3.0                weights_1.0.4              </span>
+<span class="co">##  [45] rlang_1.0.2                 systemfonts_1.0.3          </span>
+<span class="co">##  [47] splines_4.1.2               broom_0.7.12               </span>
+<span class="co">##  [49] plyranges_1.14.0            checkmate_2.0.0            </span>
+<span class="co">##  [51] yaml_2.3.5                  reshape2_1.4.4             </span>
+<span class="co">##  [53] abind_1.4-5                 GenomicFeatures_1.46.5     </span>
+<span class="co">##  [55] backports_1.4.1             Hmisc_4.6-0                </span>
+<span class="co">##  [57] tools_4.1.2                 ellipsis_0.3.2             </span>
+<span class="co">##  [59] jquerylib_0.1.4             RColorBrewer_1.1-2         </span>
+<span class="co">##  [61] Rcpp_1.0.8.3                plyr_1.8.6                 </span>
+<span class="co">##  [63] base64enc_0.1-3             progress_1.2.2             </span>
+<span class="co">##  [65] zlibbioc_1.40.0             purrr_0.3.4                </span>
+<span class="co">##  [67] RCurl_1.98-1.6              prettyunits_1.1.1          </span>
+<span class="co">##  [69] rpart_4.1-15                SummarizedExperiment_1.24.0</span>
+<span class="co">##  [71] cluster_2.1.2               fs_1.5.2                   </span>
+<span class="co">##  [73] magrittr_2.0.2              data.table_1.14.2          </span>
+<span class="co">##  [75] matrixStats_0.61.0          hms_1.1.1                  </span>
+<span class="co">##  [77] fftwtools_0.9-11            evaluate_0.15              </span>
+<span class="co">##  [79] xtable_1.8-4                XML_3.99-0.9               </span>
+<span class="co">##  [81] jpeg_0.1-9                  gridExtra_2.3              </span>
+<span class="co">##  [83] compiler_4.1.2              biomaRt_2.50.3             </span>
+<span class="co">##  [85] tibble_3.1.6                mice_3.14.0                </span>
+<span class="co">##  [87] KernSmooth_2.23-20          crayon_1.5.0               </span>
+<span class="co">##  [89] minqa_1.2.4                 R.oo_1.24.0                </span>
+<span class="co">##  [91] htmltools_0.5.2             tzdb_0.2.0                 </span>
+<span class="co">##  [93] tiff_0.1-11                 Formula_1.2-4              </span>
+<span class="co">##  [95] tidyr_1.2.0                 DBI_1.1.2                  </span>
+<span class="co">##  [97] dbplyr_2.1.1                MASS_7.3-54                </span>
+<span class="co">##  [99] rappdirs_0.3.3              boot_1.3-28                </span>
+<span class="co">## [101] Matrix_1.4-0                ade4_1.7-18                </span>
+<span class="co">## [103] readr_2.1.2                 cli_3.2.0                  </span>
+<span class="co">## [105] R.methodsS3_1.8.1           gdata_2.18.0               </span>
+<span class="co">## [107] parallel_4.1.2              pkgconfig_2.0.3            </span>
+<span class="co">## [109] pkgdown_2.0.2               GenomicAlignments_1.30.0   </span>
+<span class="co">## [111] foreign_0.8-81              xml2_1.3.3                 </span>
+<span class="co">## [113] annotate_1.72.0             bslib_0.3.1                </span>
+<span class="co">## [115] stringr_1.4.0               digest_0.6.29              </span>
+<span class="co">## [117] pracma_2.3.8                CNEr_1.30.0                </span>
+<span class="co">## [119] rmarkdown_2.11              htmlTable_2.4.0            </span>
+<span class="co">## [121] restfulr_0.0.13             curl_4.3.2                 </span>
+<span class="co">## [123] EBImage_4.36.0              Rsamtools_2.10.0           </span>
+<span class="co">## [125] gtools_3.9.2                rjson_0.2.21               </span>
+<span class="co">## [127] nloptr_1.2.2.3              lifecycle_1.0.1            </span>
+<span class="co">## [129] nlme_3.1-153                jsonlite_1.8.0             </span>
+<span class="co">## [131] desc_1.4.1                  fansi_1.0.2                </span>
+<span class="co">## [133] pillar_1.7.0                lattice_0.20-45            </span>
+<span class="co">## [135] KEGGREST_1.34.0             fastmap_1.1.0              </span>
+<span class="co">## [137] httr_1.4.2                  plotrix_3.8-2              </span>
+<span class="co">## [139] survival_3.2-13             GO.db_3.14.0               </span>
+<span class="co">## [141] glue_1.6.2                  png_0.1-7                  </span>
+<span class="co">## [143] bit_4.0.4                   stringi_1.7.6              </span>
+<span class="co">## [145] sass_0.4.0                  blob_1.2.2                 </span>
+<span class="co">## [147] textshaping_0.3.6           latticeExtra_0.6-29        </span>
+<span class="co">## [149] memoise_2.0.1               dplyr_1.0.8</span></code></pre>
 </div>
   </div>
 
