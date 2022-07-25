@@ -276,13 +276,13 @@ by a pair of repeats of the same family that is inserted only in Oki (because
 gap length is near-zero in I28 and Kum).
 
 ```{r ROI3_I28}
-# Add <- function(gb, n) {
-#   start(gb)       <- start(gb      ) - n
-#   end  (gb)       <- end  (gb      ) + n
-#   start(gb$query) <- start(gb$query) - n
-#   end  (gb$query) <- end  (gb$query) + n
-#   gb
-# }
+Add <- function(gb, n) {
+  start(gb)       <- start(gb      ) - n
+  end  (gb)       <- end  (gb      ) + n
+  start(gb$query) <- start(gb$query) - n
+  end  (gb$query) <- end  (gb$query) + n
+  gb
+}
 # 
 # (ROI3_I28 <- i28.gbs     |> plyranges::filter(start >= 10262805, end <= 10277383, seqnames == 'PAR') |> dist2next(ignore.strand = T))
 (ROI3_Kum <- coa$Oki_Kum |> plyranges::filter(start >= 10255040, end <= 10280531, seqnames == 'PAR') |> dist2next(ignore.strand = T))
@@ -302,7 +302,7 @@ gap length is near-zero in I28 and Kum).
 pairwiseAlignment(ROI3_Kum[1] |> Add(6) )
 pairwiseAlignment(ROI3_Kum[2] |> Add(8) )
 getSeq(ROI3_Kum[2] |> Add(8) |> plyranges::mutate(strand = "+"))
-pairwiseAlignment(ROI3_I28[3] |> Add(6) )
+#pairwiseAlignment(ROI3_I28[3] |> Add(6) )
 ```
 
 My hypothesis:
