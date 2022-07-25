@@ -230,7 +230,8 @@ ggPlotW2W <- function(tibble, plus1 = FALSE, alpha = 0.05) {
     scale_y_log10()
 }
 
-NULL -> flippedInvs_bri$Ply_Oki -> flippedInvs_bri$Rob_Oki
+# Remove empty objects.
+flippedInvs_bri[sapply(flippedInvs_bri, length) == 0] <- NULL
 
 w2w <- do.call(rbind, lapply(names(flippedInvs_bri),  \(name) GBreaks2widthTibble(flippedInvs_bri[[name]],  pair = name)))
 
