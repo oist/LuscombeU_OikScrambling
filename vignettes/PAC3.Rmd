@@ -25,7 +25,6 @@ See `?OikScrambling:::loadAllGenomes()` and `vignette("LoadGenomicBreaks",
 package = "OikScrambling")` for how the different objects are prepared.
 
 ```{r load_packages_and_data}
-library("purrr")              |> suppressPackageStartupMessages()
 library('OikScrambling')      |> suppressPackageStartupMessages()
 library('GenomicFeatures')    |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
@@ -36,7 +35,7 @@ operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(wind
 operons$Nor <- OikScrambling:::calcOperons(window = 500, transcripts(annots$Nor) |> reduce()) |> suppressWarnings()
 
 load("BreakPoints.Rdata")
-#Loading this too early breaks the function calkOperons
+library("purrr")              |> suppressPackageStartupMessages()
 library("dplyr")              |> suppressPackageStartupMessages()
 library("stringr")            |> suppressPackageStartupMessages()
 #library("Repitools")
@@ -310,13 +309,9 @@ PAC3_XSR_Osa.aln.right |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unli
 Conserved and non-conserved operons documentation 
 
 # PAC 3 context diagram
-
-
 Identifying operons  
 
 ```{r Identifying operons}
-
-
 #Function to find find upstream and downstream genes in specific operon 
 Find_UpAndDown <- function(op, gene_ofi) {
   ss <- lapply(op$gene_id, function(x) gene_ofi %in% x) 
@@ -457,6 +452,55 @@ plot_gene_map(
   main = "The PAC3 gene in operon is conserved between Osaka and Barcelona in XSR chromosome but on CHR1 in Okinawa"
 )
 
+```
+
+```{r}
+gb2comp2 <- function (gb, rev_query=FALSE, rev_target=FALSE, color = NULL, ignore.strand = FALSE) 
+{
+    if(rev_query){
+      gb <- GenomicBreaks::reverse(gb)
+    }
+    if(rev_target){
+      gb$query <- GenomicBreaks::reverse(gb$query)
+    }
+    dna_segs <- gb2dna_seg(gb)
+    df <- data.frame(start1 = dna_segs$target$start, end1 = dna_segs$target$end, 
+        start2 = dna_segs$query$start, end2 = dna_segs$query$end)
+    cmp <- genoPlotR::as.comparison(df)
+    cmp$direction <- 1L
+    cmp$color <- "darksalmon"
+    if (isFALSE(ignore.strand)) {
+        onMinus <- decode(strand(gb) == "-")
+        cmp$direction[onMinus] <- -1
+        cmp$start2[onMinus] <- dna_segs$query$end[onMinus]
+        cmp$end2[onMinus] <- dna_segs$query$start[onMinus]
+        cmp$col[onMinus] <- "cornflowerblue"
+    }
+    if (!is.null(color)) {
+        cmp$col <- color
+    }
+    cmp
+}
+
+
+plot_gene_map(
+  dna_segs = list(
+    `Osaka\nChr1: 8145427 - 8174791`=gr2dna_seg(GenomicBreaks::reverse(not_pac3_operon_osa)),
+    `Okinawa\nchr1: 11487473 - 11503891`=gr2dna_seg(pac3_operon_oki_genes, gene_of_interest='g3146'),
+    `Osaka\nXSR: 11487473 - 11503891`=gr2dna_seg(GenomicBreaks::reverse(pac3_operon_osa_genes), gene_of_interest='g12442')
+  ),
+  dna_seg_scale = T, 
+  annotations = list(
+    dnaseg_to_annot(gr2dna_seg(GenomicBreaks::reverse(not_pac3_operon_osa)), rot=0, col='grey80'),
+    dnaseg_to_annot(gr2dna_seg(pac3_operon_oki_genes, gene_of_interest='g3146'), rot=0, col='grey80'),
+    dnaseg_to_annot(gr2dna_seg(GenomicBreaks::reverse(pac3_operon_osa_genes), gene_of_interest='g12442'), rot=0, col='grey80')
+  ),
+  comparisons = list(
+     gb2comp(GenomicBreaks::reverse( coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() )),
+     gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap() |> GenomicBreaks::reverse() |> swap())),
+#  annotation_height = 2.9, annotation_cex = 0.9,
+  main = "PAC3"
+)
 ```
 
 # Ganot operon
