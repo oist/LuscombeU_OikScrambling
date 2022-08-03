@@ -1,0 +1,59 @@
+---
+title: "Reciprocal alignment comparisons"
+author: 
+ - "Michael Mansfield"
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Reciprocal alignment comparisons}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+# Introduction
+
+In this vignette we examine the differences in alignment categories between 
+
+The core functions used here are maintained in our _GenomicBreaks_ R package,
+which is fully documented at: <https://oist.github.io/GenomicBreaks>.
+
+## Load packages
+
+# Load R packages and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+library('viridis') |> suppressPackageStartupMessages()
+library('dplyr') |> suppressPackageStartupMessages()
+genomes <- OikScrambling:::loadAllGenomes()
+transcripts <- OikScrambling:::loadAllTranscriptsGR()
+reps <- OikScrambling:::loadAllRepeats()
+load("BreakPoints.Rdata")
+```
+
+# Reciprocal category fractions 
+```{r category_fractions, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+d_oki <- wgo$Oki_Osa |> as.data.frame() |> dplyr::select(type, width) |> dplyr::group_by(type) |> dplyr::summarise(width=sum(width)) |> dplyr::mutate(pct=round(width/sum(width)*100, 1), target='Okinawa', query='Osaka')
+d_osa <- wgo$Osa_Oki |> as.data.frame() |> dplyr::select(type, width) |> dplyr::group_by(type) |> dplyr::summarise(width=sum(width)) |> dplyr::mutate(pct=round(width/sum(width)*100, 1), target='Osaka', query='Okinawa')
+
+
+as.data.frame(d_oki)
+as.data.frame(d_osa)
+
+d_osa$width/d_oki$width*100
+
+```
+
+
+# Session information
+
+```{r sessionInfo}
+sessionInfo()
+```
