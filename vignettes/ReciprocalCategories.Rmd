@@ -32,14 +32,16 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 library('OikScrambling') |> suppressPackageStartupMessages()
 library('viridis') |> suppressPackageStartupMessages()
 library('dplyr') |> suppressPackageStartupMessages()
-genomes <- OikScrambling:::loadAllGenomes()
+genomes     <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR()
+annots      <- OikScrambling:::loadAllAnnotations() |> suppressWarnings()
+genes       <- sapply(annots, function(s) genes(s) |> sort()) |> SimpleList()
 reps <- OikScrambling:::loadAllRepeats()
 load("BreakPoints.Rdata")
 ```
 
 # Reciprocal category fractions 
-```{r category_fractions, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r category_fractions}
 d_oki <- wgo$Oki_Osa |> as.data.frame() |> dplyr::select(type, width) |> dplyr::group_by(type) |> dplyr::summarise(width=sum(width)) |> dplyr::mutate(pct=round(width/sum(width)*100, 1), target='Okinawa', query='Osaka')
 d_osa <- wgo$Osa_Oki |> as.data.frame() |> dplyr::select(type, width) |> dplyr::group_by(type) |> dplyr::summarise(width=sum(width)) |> dplyr::mutate(pct=round(width/sum(width)*100, 1), target='Osaka', query='Okinawa')
 
@@ -51,6 +53,214 @@ d_osa$width/d_oki$width*100
 
 ```
 
+```{r category_fractions_2, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+genes_in_breakpoints <- SimpleList()
+genes_in_breakpoints$Oki_Osa <- genes$Oki[subjectHits(findOverlaps(  genes$Oki, wgo$Oki_Osa[wgo$Oki_Osa$type %in% c("breakpoint region")], type='within')) |> unique() |> sort()]
+genes_in_breakpoints$Oki_Bar <- genes$Oki[subjectHits(findOverlaps(  genes$Oki, wgo$Oki_Bar[wgo$Oki_Bar$type %in% c("breakpoint region")], type='within')) |> unique() |> sort()]
+genes_in_breakpoints$Oki_Kum <- genes$Oki[subjectHits(findOverlaps(  genes$Oki, wgo$Oki_Kum[wgo$Oki_Kum$type %in% c("breakpoint region")], type='within')) |> unique() |> sort()]
+genes_in_breakpoints$Osa_Bar <- genes$Osa[subjectHits(findOverlaps(  genes$Osa, wgo$Osa_Bar[wgo$Osa_Bar$type %in% c("breakpoint region")], type='within')) |> unique() |> sort()]
+
+
+read_pho <- function (file, species = NULL) {
+  pho <- read.delim(file, check.names = FALSE)
+  pho <- pho[, sapply(pho, function(col) !all(is.na(col)))]
+  if (!is.null(species))
+    pho <- pho[, c("HOG", "OG", "Gene Tree Parent Clade", species)]
+  nonempt <- do.call(cbind, lapply(pho, function(x) x != ""))
+  un.rows <- apply(nonempt, 1, all)
+  pho.un <- pho[un.rows, ]
+  as(pho.un, "DataFrame")
+}
+pho <- read_pho(system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData"))
+
+split_gene_id <- function(str, sep="\\.", field=3){
+  unlist(strsplit(str, sep))[field]
+}
+  
+replace_gene_ids <- function(str, sep="\\.", field=3){
+  # For every row in an orthologue table...
+  lapply(str, function(x){
+    # If commas are in the row, lapply over the list and split them all
+    if(grepl(",", x)){
+      ids <- unlist(strsplit(x, ', '))
+      return(CharacterList(lapply(ids, function(y) split_gene_id(y, sep=sep, field=field))))
+    } else {
+      return(split_gene_id(x, sep=sep, field=field))
+    }
+  }) |> unlist()
+}
+
+colnames(pho)[4:9] <- c('Aom', 'Bar', 'Kum', 'Oki', 'Osa', 'Nor')
+
+pho$Aom <- replace_gene_ids(pho$Aom, field=2)
+pho$Bar <- replace_gene_ids(pho$Bar, field=2)
+pho$Kum <- replace_gene_ids(pho$Kum, field=2)
+pho$Oki <- replace_gene_ids(pho$Oki, field=3)
+pho$Osa <- replace_gene_ids(pho$Osa, field=3)
+pho$Nor <- replace_gene_ids(pho$Nor, field=2)
+
+
+pho$Aom_count <- unlist(lapply(pho$Aom, length))
+pho$Bar_count <- unlist(lapply(pho$Bar, length))
+pho$Kum_count <- unlist(lapply(pho$Kum, length))
+pho$Oki_count <- unlist(lapply(pho$Oki, length))
+pho$Osa_count <- unlist(lapply(pho$Osa, length))
+pho$Nor_count <- unlist(lapply(pho$Nor, length))
+
+annotate_orthogroups <- function(gr, og, sp){
+  og_ids <- og[[sp]]
+  bp_ids <- gr$gene_id
+  check_in_og_list <- function(gene_id, og_list) {
+    oml <- lapply(og_list, function(x){
+      gene_id %in% as.character(x)
+    }) |> unlist()
+    #output_df <- data.frame(HOG=NA, OG=NA, )
+    if(any(oml)){
+      return(og[which(oml),])
+    } else {
+      tmp_output <- DataFrame(lapply(1:ncol(og[1,]), function(x) {x <- NA}))
+      colnames(tmp_output) <- colnames(og[1,])
+      return(tmp_output)
+    }
+  }
+  gr$og <- lapply(bp_ids, function(x) check_in_og_list(x, og_ids))
+  gr$hog <- lapply(gr$og, function(x) x$HOG) |> unlist()
+  gr$counts <- do.call(rbind, lapply(gr$og, function(x) x[,grep("count", colnames(x))]) |> unlist())
+  gr
+}
+
+genes_in_breakpoints_og <- SimpleList()
+genes_in_breakpoints_og$Oki_Osa <- annotate_orthogroups(genes_in_breakpoints$Oki_Osa, pho, "Oki")
+genes_in_breakpoints_og$Oki_Bar <- annotate_orthogroups(genes_in_breakpoints$Oki_Bar, pho, "Oki")
+genes_in_breakpoints_og$Oki_Kum <- annotate_orthogroups(genes_in_breakpoints$Oki_Kum, pho, "Oki")
+
+# How many genes in orthogroups are in breakpoint regions?
+genes_in_breakpoints_og$Oki_Osa$hog |> is.na() |> table()
+genes_in_breakpoints_og$Oki_Bar$hog |> is.na() |> table()
+genes_in_breakpoints_og$Oki_Kum$hog |> is.na() |> table()
+
+# Is there anything noteworthy about the orthogroup counts for genes in orthogroups?
+xf <- rbind(
+  # orthogroup counts of genes in breakpoint regions
+  genes_in_breakpoints_og$Oki_Osa[!is.na(genes_in_breakpoints_og$Oki_Osa$hog)]$counts$Oki_count |> as.data.frame() |> dplyr::rename(count=1) |> dplyr::mutate(set="genes_in_breakpoints") |> as_tibble(),
+  # orthogroup counts of NOT breakpoint regions
+  pho[ which(!pho$HOG %in% genes_in_breakpoints_og$Oki_Osa$hog[!is.na(genes_in_breakpoints_og$Oki_Osa$hog)] ),]$Oki_count |> as.data.frame() |> dplyr::rename(count=1) |> dplyr::mutate(set="other_genes") |> as_tibble()
+)
+lapply(split(xf, xf$set), function(x) summary(x$count))
+ggviolin(xf, x='set', y='count', fill='set') + theme_grey() + stat_compare_means(comparison=list(c('genes_in_breakpoints', 'other_genes')))
+
+xf <- rbind(
+  # orthogroup counts of genes in breakpoint regions
+  genes_in_breakpoints_og$Oki_Osa[!is.na(genes_in_breakpoints_og$Oki_Osa$hog)]$counts$Oki_count |> as.data.frame() |> dplyr::rename(count=1) |> dplyr::mutate(set="genes_in_breakpoints") |> as_tibble() |> dplyr::filter(count>1),
+  # orthogroup counts of NOT breakpoint regions
+  pho[ which(!pho$HOG %in% genes_in_breakpoints_og$Oki_Osa$hog[!is.na(genes_in_breakpoints_og$Oki_Osa$hog)] ),]$Oki_count |> as.data.frame() |> dplyr::rename(count=1) |> dplyr::mutate(set="other_genes") |> as_tibble() |> dplyr::filter(count>1)
+)
+lapply(split(xf, xf$set), function(x) summary(x$count))
+ggviolin(xf, x='set', y='count', fill='set') + theme_grey() + stat_compare_means(comparison=list(c('genes_in_breakpoints', 'other_genes')))
+```
+
+Note that the above use the `N19.tsv` file that does not include ALL Okinawa-Osaka orthologues. For that, we need another file.
+
+TODO: This is not in `BreakpointData` yet but I have it the folder I run Docker from.
+
+# Paired orthologues
+```{r paired_orthologues_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+read_pair_ortho <- function(file, sp1, sp2, field_sp1, field_sp2) {
+  df <- read.delim(file)
+  colnames(df) <- c("Orthogroup", sp1, sp2)
+  df[[sp1]] <- replace_gene_ids(df[[sp1]], field=field_sp1)
+  df[[sp2]] <- replace_gene_ids(df[[sp2]], field=field_sp2)
+  df[[paste0(sp1, "_count")]] <- unlist(lapply(df[[sp1]], length))
+  df[[paste0(sp2, "_count")]] <- unlist(lapply(df[[sp2]], length))
+  df <- DataFrame(df)
+  df
+}
+
+pair_ortho <- SimpleList()
+pair_ortho$Oki_Osa <- read_pair_ortho('../../OKI2018_I69.v2.prot.longest.fa_1__v__OSKA2016v1.9.prot.longest.fa_1.tsv', "Oki", "Osa", 3, 3)
+head(pair_ortho$Oki_Osa, n=15)
+
+pair_ortho$Oki_Bar <- read_pair_ortho('../../OKI2018_I69.v2.prot.longest.fa_1__v__Bar2_p4.Flye.prot.longest.fa_1.tsv', "Oki", "Bar", 3, 2)
+pair_ortho$Oki_Kum <- read_pair_ortho('../../OKI2018_I69.v2.prot.longest.fa_1__v__KUM-M3-7f.prot.longest.fa_1.tsv', "Oki", "Kum", 3, 2)
+pair_ortho$Osa_Bar <- read_pair_ortho('../../OSKA2016v1.9.prot.longest.fa_1__v__Bar2_p4.Flye.prot.longest.fa_1.tsv', "Osa", "Bar", 3, 2)
+
+
+annotate_orthogroup_pairs <- function(gr, og, sp){
+  og_ids <- og[[sp]]
+  bp_ids <- gr$gene_id
+  check_in_og_list <- function(gene_id, og_list) {
+    oml <- lapply(og_list, function(x){
+      gene_id %in% as.character(x)
+    }) |> unlist()
+    #output_df <- data.frame(HOG=NA, OG=NA, )
+    if(any(oml)){
+      return(og[which(oml),])
+    } else {
+      tmp_output <- DataFrame(lapply(1:ncol(og[1,]), function(x) {x <- NA}))
+      colnames(tmp_output) <- colnames(og[1,])
+      return(tmp_output)
+    }
+  }
+  df <- do.call(rbind, lapply(bp_ids, function(x) check_in_og_list(x, og_ids)))
+  #gr$hog <- lapply(gr$og, function(x) x$HOG) |> unlist()
+  #do.call(rbind, lapply(gr$og, function(x) x[,grep("count", colnames(x))]) )
+  mcols(gr) <- cbind(mcols(gr), df)
+  gr
+}
+
+genes_in_breakpoints_og_pair <- SimpleList()
+genes_in_breakpoints_og_pair$Oki_Osa <- annotate_orthogroup_pairs(genes_in_breakpoints$Oki_Osa, pair_ortho$Oki_Osa, "Oki")
+genes_in_breakpoints_og_pair$Oki_Bar <- annotate_orthogroup_pairs(genes_in_breakpoints$Oki_Bar, pair_ortho$Oki_Bar, "Oki")
+genes_in_breakpoints_og_pair$Oki_Kum <- annotate_orthogroup_pairs(genes_in_breakpoints$Oki_Kum, pair_ortho$Oki_Kum, "Oki")
+genes_in_breakpoints_og_pair$Osa_Bar <- annotate_orthogroup_pairs(genes_in_breakpoints$Osa_Bar, pair_ortho$Osa_Bar, "Osa")
+
+orthogroups_matching_genes <- function(gene_list, orthogroups, sp, reverse=FALSE){
+  o <- orthogroups[[sp]]
+  o <- lapply(o, as.character)
+  matching_ogs <- lapply(o, function(og){
+    any(gene_list %in% og)
+  }) |> unlist()
+  if(reverse){
+    matching_ogs <- !matching_ogs
+  }
+  orthogroups[matching_ogs,]
+}
+
+
+xf <- rbind(
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Oki_Osa$gene_id, pair_ortho$Oki_Osa, sp='Oki', reverse=FALSE) |> as_tibble() |> dplyr::mutate(set='genes_in_breakpoints'),
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Oki_Osa$gene_id, pair_ortho$Oki_Osa, sp='Oki', reverse=TRUE) |> as_tibble() |> dplyr::mutate(set='other_genes')
+)
+
+lapply(split(xf, xf$set), function(x) summary(x$Oki_count))
+ggviolin(xf, x='set', y='Oki_count', fill='set') + theme_grey() + stat_compare_means(comparison=list(c('genes_in_breakpoints', 'other_genes'))) + ggtitle("Okinawa-Osaka: Orthogroup sizes for genes in vs. outside breakpoints")
+
+
+xf <- rbind(
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Oki_Bar$gene_id, pair_ortho$Oki_Bar, sp='Oki', reverse=FALSE) |> as_tibble() |> dplyr::mutate(set='genes_in_breakpoints'),
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Oki_Bar$gene_id, pair_ortho$Oki_Bar, sp='Oki', reverse=TRUE) |> as_tibble() |> dplyr::mutate(set='other_genes')
+)
+lapply(split(xf, xf$set), function(x) summary(x$Oki_count))
+ggviolin(xf, x='set', y='Oki_count', fill='set') + theme_grey() + stat_compare_means(comparison=list(c('genes_in_breakpoints', 'other_genes'))) + ggtitle("Okinawa-Barcelona: Orthogroup sizes for genes in vs. outside breakpoints")
+
+
+
+xf <- rbind(
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Oki_Kum$gene_id, pair_ortho$Oki_Kum, sp='Oki', reverse=FALSE) |> as_tibble() |> dplyr::mutate(set='genes_in_breakpoints'),
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Oki_Kum$gene_id, pair_ortho$Oki_Kum, sp='Oki', reverse=TRUE) |> as_tibble() |> dplyr::mutate(set='other_genes')
+)
+lapply(split(xf, xf$set), function(x) summary(x$Oki_count))
+ggviolin(xf, x='set', y='Oki_count', fill='set') + theme_grey() + stat_compare_means(comparison=list(c('genes_in_breakpoints', 'other_genes'))) + ggtitle("Okinawa-Kume: Orthogroup sizes for genes in vs. outside breakpoints")
+
+
+xf <- rbind(
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Osa_Bar$gene_id, pair_ortho$Osa_Bar, sp='Osa', reverse=FALSE) |> as_tibble() |> dplyr::mutate(set='genes_in_breakpoints'),
+  orthogroups_matching_genes(genes_in_breakpoints_og_pair$Osa_Bar$gene_id, pair_ortho$Osa_Bar, sp='Osa', reverse=TRUE) |> as_tibble() |> dplyr::mutate(set='other_genes')
+)
+lapply(split(xf, xf$set), function(x) summary(x$Osa_count))
+ggviolin(xf, x='set', y='Osa_count', fill='set') + theme_grey() + stat_compare_means(comparison=list(c('genes_in_breakpoints', 'other_genes'))) + ggtitle("Osaka-Barcelona: Orthogroup sizes for genes in vs. outside breakpoints")
+
+```
 
 # Session information
 
