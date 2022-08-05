@@ -262,6 +262,76 @@ ggviolin(xf, x='set', y='Osa_count', fill='set') + theme_grey() + stat_compare_m
 
 ```
 
+# Overlap with repeats
+
+```{r repeats_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+annotate_reps <- function(wgo_gr, repeats, genes_gr){
+  categories <- wgo_gr$type |> unique()
+  
+  # add repeat annotations
+  ov <- findOverlaps(wgo_gr, repeats)
+  wgo_gr$repeat_count <- countOverlaps(wgo_gr, repeats)
+  wgo_gr$repeat_ids <- NA
+  wgo_gr$repeat_ids[queryHits(ov) |> unique()] <- CharacterList(split(repeats$Class[subjectHits(ov)], queryHits(ov))) |> unname()
+  rep_lvls <- levels(as.factor(unique(unlist(lapply(wgo_gr$repeat_ids, as.character)))))
+  wgo_gr$repeat_ids <- lapply(wgo_gr$repeat_ids, function(x) factor(x, levels=rep_lvls))
+  tbs <- do.call(rbind, lapply(wgo_gr$repeat_ids, table)) |> as.data.frame()
+  mcols(wgo_gr) <- cbind(mcols(wgo_gr), tbs)
+  wgo_gr$repeat_width <- NA
+  wgo_gr$repeat_width[queryHits(ov) |> unique()] <- NumericList(split(width(repeats)[subjectHits(ov)], queryHits(ov))) |> unname()
+  wgo_gr$repeat_width_sum <- lapply(wgo_gr$repeat_width, sum) |> unlist()
+  wgo_gr$repeat_fraction <- wgo_gr$repeat_width_sum/width(wgo_gr)*100
+  
+  # Add gene annotations
+  ov <- findOverlaps(wgo_gr, genes_gr)
+  wgo_gr$gene_count <- countOverlaps(wgo_gr, genes_gr)
+  wgo_gr$gene_ids <- NA
+  wgo_gr$gene_ids[queryHits(ov) |> unique()] <- CharacterList(split(genes_gr$gene_id[subjectHits(ov)], queryHits(ov))) |> unname()
+  wgo_gr$gene_width <- NA
+  wgo_gr$gene_width[queryHits(ov) |> unique()] <- NumericList(split(width(genes_gr)[subjectHits(ov)], queryHits(ov))) |> unname()
+  wgo_gr$gene_width_sum <- lapply(wgo_gr$gene_width, sum) |> unlist()
+  wgo_gr$gene_fraction <- wgo_gr$gene_width_sum/width(wgo_gr)*100
+  wgo_gr
+}
+wgoa <- SimpleList()
+wgoa$Oki_Osa <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki)
+wgoa$Oki_Bar <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki)
+wgoa$Oki_Kum <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki)
+wgoa$Osa_Bar <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa)
+```
+
+```{r repeats_2, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+ggplot(wgoa$Oki_Osa |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
+ggplot(wgoa$Oki_Osa |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Okinawa-Osaka: repeats per category")
+ggviolin(wgoa$Oki_Osa |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+ggviolin(wgoa$Oki_Osa |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+
+
+ggplot(wgoa$Oki_Bar |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
+ggplot(wgoa$Oki_Bar |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Okinawa-Barcelona: repeats per category")
+ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+
+
+ggplot(wgoa$Oki_Kum |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
+ggplot(wgoa$Oki_Kum |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Okinawa-Kume: repeats per category")
+ggviolin(wgoa$Oki_Kum |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+ggviolin(wgoa$Oki_Kum |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+
+
+ggplot(wgoa$Osa_Bar |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
+ggplot(wgoa$Osa_Bar |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Osaka-Barcelona: repeats per category")
+ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+
+
+ggplot(wgoa$Oki_Osa |> as.data.frame() ) + aes(x=type, y=sum(repeat_count)/sum(width)) + geom_bar(stat='identity')
+
+```
+
+
+
+
 # Session information
 
 ```{r sessionInfo}
