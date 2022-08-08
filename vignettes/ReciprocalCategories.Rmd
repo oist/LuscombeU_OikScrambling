@@ -29,9 +29,11 @@ which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 # Load R packages and data
 
 ```{r load_packages_and_data}
-library('OikScrambling') |> suppressPackageStartupMessages()
-library('viridis') |> suppressPackageStartupMessages()
-library('dplyr') |> suppressPackageStartupMessages()
+library("OikScrambling")   |> suppressPackageStartupMessages()
+library("viridis")         |> suppressPackageStartupMessages()
+library("dplyr")           |> suppressPackageStartupMessages()
+library("GenomicFeatures") |> suppressPackageStartupMessages()
+library("patchwork")       |> suppressPackageStartupMessages()
 genomes     <- OikScrambling:::loadAllGenomes()
 transcripts <- OikScrambling:::loadAllTranscriptsGR()
 annots      <- OikScrambling:::loadAllAnnotations() |> suppressWarnings()
@@ -265,72 +267,215 @@ ggviolin(xf, x='set', y='Osa_count', fill='set') + theme_grey() + stat_compare_m
 # Overlap with repeats
 
 ```{r repeats_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-annotate_reps <- function(wgo_gr, repeats, genes_gr){
+annotate_reps <- function(wgo_gr, repeats, genes_gr, overlap="within") {
+  wgo_gr <- sort(wgo_gr, ignore.strand=TRUE)
+  repeats <- sort(repeats, ignore.strand=TRUE)
+  # Some repeats overlap.
+  # Modify the repeats so that each repeat region has only one name.
+  # Note that regions with more than one name are simplified to the first - so
+  # e.g. if you have an tandem and an LTR that overlap, whichever comes first will 
+  # be the name here.
+  rep_reduced <- GenomicRanges::split(reduce(repeats, ignore.strand=TRUE), elementMetadata(repeats)$Class) |> unlist() |> sort(ignore.strand=T)
+  rep_reduced$Class <- names(rep_reduced)
+  names(rep_reduced) <- NULL
+  # Since I use repeats as an object name throughout the function, and since I am lazy,
+  # overwrite the input argument repeats with this reduced granges.
+  repeats <- sort(rep_reduced, ignore.strand=TRUE)
   categories <- wgo_gr$type |> unique()
   
   # add repeat annotations
-  ov <- findOverlaps(wgo_gr, repeats)
-  wgo_gr$repeat_count <- countOverlaps(wgo_gr, repeats)
+  # Here, the subjectHits are the hits within wgo_gr. The queryHits are the repeat matches.
+  ov <- findOverlaps(repeats, wgo_gr, type=overlap)
   wgo_gr$repeat_ids <- NA
-  wgo_gr$repeat_ids[queryHits(ov) |> unique()] <- CharacterList(split(repeats$Class[subjectHits(ov)], queryHits(ov))) |> unname()
+  wgo_gr$repeat_ids[subjectHits(ov) |> unique()] <- CharacterList(split(repeats$Class[queryHits(ov)], subjectHits(ov))) |> unname()
+  wgo_gr$repeat_count <- lapply(wgo_gr$repeat_ids, length) |> unlist()
   rep_lvls <- levels(as.factor(unique(unlist(lapply(wgo_gr$repeat_ids, as.character)))))
   wgo_gr$repeat_ids <- lapply(wgo_gr$repeat_ids, function(x) factor(x, levels=rep_lvls))
   tbs <- do.call(rbind, lapply(wgo_gr$repeat_ids, table)) |> as.data.frame()
   mcols(wgo_gr) <- cbind(mcols(wgo_gr), tbs)
-  wgo_gr$repeat_width <- NA
-  wgo_gr$repeat_width[queryHits(ov) |> unique()] <- NumericList(split(width(repeats)[subjectHits(ov)], queryHits(ov))) |> unname()
+  wgo_gr$repeat_width <- 0
+  wgo_gr$repeat_width[subjectHits(ov) |> unique()] <- NumericList(split(width(repeats)[queryHits(ov)], subjectHits(ov))) |> unname()
   wgo_gr$repeat_width_sum <- lapply(wgo_gr$repeat_width, sum) |> unlist()
   wgo_gr$repeat_fraction <- wgo_gr$repeat_width_sum/width(wgo_gr)*100
   
   # Add gene annotations
-  ov <- findOverlaps(wgo_gr, genes_gr)
-  wgo_gr$gene_count <- countOverlaps(wgo_gr, genes_gr)
+  # Some gene annotations also overlap. Merge them and get rid of some of the names, since we don't really care about those corner cases here.
+  genes_gr <- sort(genes_gr, ignore.strand=TRUE)
+  genes_gr <- GenomicRanges::split(reduce(genes_gr, ignore.strand=TRUE), elementMetadata(genes_gr)$gene_id) |> unlist() |> sort(ignore.strand=T)
+  genes_gr$gene_id <- names(genes_gr)
+  ov <- findOverlaps(genes_gr, wgo_gr, type=overlap)
   wgo_gr$gene_ids <- NA
-  wgo_gr$gene_ids[queryHits(ov) |> unique()] <- CharacterList(split(genes_gr$gene_id[subjectHits(ov)], queryHits(ov))) |> unname()
-  wgo_gr$gene_width <- NA
-  wgo_gr$gene_width[queryHits(ov) |> unique()] <- NumericList(split(width(genes_gr)[subjectHits(ov)], queryHits(ov))) |> unname()
+  wgo_gr$gene_ids[subjectHits(ov) |> unique()] <- CharacterList(split(genes_gr$gene_id[queryHits(ov)], subjectHits(ov))) |> unname()
+  wgo_gr$gene_count <- lapply(wgo_gr$gene_ids, length) |> unlist()
+  wgo_gr$gene_width <- 0
+  wgo_gr$gene_width[subjectHits(ov) |> unique()] <- NumericList(split(width(genes_gr)[queryHits(ov)], subjectHits(ov))) |> unname()
   wgo_gr$gene_width_sum <- lapply(wgo_gr$gene_width, sum) |> unlist()
   wgo_gr$gene_fraction <- wgo_gr$gene_width_sum/width(wgo_gr)*100
+  
+  # signify whether a segment is more non-coding or more coding
+  wgo_gr$coding_proportion <- wgo_gr$gene_fraction/wgo_gr$repeat_fraction
+  coding_signs <- sign(wgo_gr$gene_width_sum-wgo_gr$repeat_width_sum)
+  wgo_gr$coding_sign <- "other"
+  wgo_gr$coding_sign[coding_signs<0] <- "repetitive"
+  wgo_gr$coding_sign[coding_signs>0] <- "genic"
+
+  wgo_gr$other_width <- width(wgo_gr) - wgo_gr$repeat_width_sum - wgo_gr$gene_width_sum
   wgo_gr
 }
-wgoa <- SimpleList()
-wgoa$Oki_Osa <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki)
-wgoa$Oki_Bar <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki)
-wgoa$Oki_Kum <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki)
-wgoa$Osa_Bar <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa)
+wgoa$within <- SimpleList()
+wgoa$within$Oki_Osa <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki)
+wgoa$within$Oki_Bar <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki)
+wgoa$within$Oki_Kum <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki)
+wgoa$within$Osa_Bar <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa)
+
+wgoa$any <- SimpleList()
+wgoa$any$Oki_Osa <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki, overlap = "any")
+wgoa$any$Oki_Bar <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki, overlap = "any")
+wgoa$any$Oki_Kum <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki, overlap = "any")
+wgoa$any$Osa_Bar <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa, overlap = "any")
 ```
 
-```{r repeats_2, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-ggplot(wgoa$Oki_Osa |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
-ggplot(wgoa$Oki_Osa |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Okinawa-Osaka: repeats per category")
-ggviolin(wgoa$Oki_Osa |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
-ggviolin(wgoa$Oki_Osa |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+## Overlap plots - Within bounds
+### Okinawa-Osaka: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$within$Oki_Osa[order(wgoa$within$Oki_Osa$gene_fraction / wgoa$within$Oki_Osa$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$within$Oki_Osa |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Osaka: Fraction of alignment category that fully bounds repeats")
+p1
 
+p2 <- ggboxplot(wgoa$within$Oki_Osa |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Osaka: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
 
-ggplot(wgoa$Oki_Bar |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
-ggplot(wgoa$Oki_Bar |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Okinawa-Barcelona: repeats per category")
-ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
-ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+p3 <- ggboxplot(wgoa$within$Oki_Osa |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Osaka: Ratio of genic fraction to repeat fraction")
+p3
 
+wgoa$within$Oki_Osa |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Okinawa-Osaka: Segment majority by alignment category")
+```
 
-ggplot(wgoa$Oki_Kum |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
-ggplot(wgoa$Oki_Kum |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Okinawa-Kume: repeats per category")
-ggviolin(wgoa$Oki_Kum |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
-ggviolin(wgoa$Oki_Kum |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+### Okinawa-Barcelona: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_2, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$within$Oki_Bar[order(wgoa$within$Oki_Bar$gene_fraction / wgoa$within$Oki_Bar$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$within$Oki_Bar |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Barcelona: Fraction of alignment category that fully bounds repeats")
+p1
 
+p2 <- ggboxplot(wgoa$within$Oki_Bar |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Barcelona: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
 
-ggplot(wgoa$Osa_Bar |> as.data.frame()) + aes(x=type, y=gene_count, fill=type) + geom_violin()
-ggplot(wgoa$Osa_Bar |> as.data.frame()) + aes(x=type, y=repeat_count, fill=type) + geom_boxplot()  + facet_wrap(~seqnames, ncol=1) + scale_y_log10() + ggtitle("Osaka-Barcelona: repeats per category")
-ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='repeat_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
-ggviolin(wgoa$Oki_Bar |> as.data.frame(), x='type', y='gene_count', fill='type', ) + scale_y_log10()  + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')))
+p3 <- ggboxplot(wgoa$within$Oki_Bar |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Barcelona: Ratio of genic fraction to repeat fraction")
+p3
 
-
-ggplot(wgoa$Oki_Osa |> as.data.frame() ) + aes(x=type, y=sum(repeat_count)/sum(width)) + geom_bar(stat='identity')
-
+wgoa$within$Oki_Bar |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Okinawa-Barcelona: Segment majority by alignment category")
 ```
 
 
+### Okinawa-Kume: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_3, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$within$Oki_Kum[order(wgoa$within$Oki_Kum$gene_fraction / wgoa$within$Oki_Kum$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$within$Oki_Kum |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Kume: Fraction of alignment category that fully bounds repeats")
+p1
 
+p2 <- ggboxplot(wgoa$within$Oki_Kum |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Kume: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
+
+p3 <- ggboxplot(wgoa$within$Oki_Kum |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Kume: Ratio of genic fraction to repeat fraction")
+p3
+
+wgoa$within$Oki_Kum |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Okinawa-Kume: Segment majority by alignment category")
+```
+
+
+### Osaka-Barcelona: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_4, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$within$Osa_Bar[order(wgoa$within$Osa_Bar$gene_fraction / wgoa$within$Osa_Bar$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$within$Osa_Bar |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Osaka-Barcelona: Fraction of alignment category that fully bounds repeats")
+p1
+
+p2 <- ggboxplot(wgoa$within$Osa_Bar |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Osaka-Barcelona: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
+
+p3 <- ggboxplot(wgoa$within$Osa_Bar |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Osaka-Barcelona: Ratio of genic fraction to repeat fraction")
+p3
+
+wgoa$within$Osa_Bar |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Osaka-Barcelona: ")
+```
+
+## Overlap plots - Any (redundant) overlaps
+### Okinawa-Osaka: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$any$Oki_Osa[order(wgoa$any$Oki_Osa$gene_fraction / wgoa$any$Oki_Osa$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$any$Oki_Osa |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Osaka: Fraction of alignment category that fully bounds repeats")
+p1
+
+p2 <- ggboxplot(wgoa$any$Oki_Osa |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Osaka: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
+
+p3 <- ggboxplot(wgoa$any$Oki_Osa |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Osaka: Ratio of genic fraction to repeat fraction")
+p3
+
+wgoa$any$Oki_Osa |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Okinawa-Osaka: Segment majority by alignment category")
+```
+
+### Okinawa-Barcelona: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_2, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$any$Oki_Bar[order(wgoa$any$Oki_Bar$gene_fraction / wgoa$any$Oki_Bar$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$any$Oki_Bar |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Barcelona: Fraction of alignment category that fully bounds repeats")
+p1
+
+p2 <- ggboxplot(wgoa$any$Oki_Bar |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Barcelona: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
+
+p3 <- ggboxplot(wgoa$any$Oki_Bar |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Barcelona: Ratio of genic fraction to repeat fraction")
+p3
+
+wgoa$any$Oki_Bar |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Okinawa-Barcelona: Segment majority by alignment category")
+```
+
+
+### Okinawa-Kume: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_3, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$any$Oki_Kum[order(wgoa$any$Oki_Kum$gene_fraction / wgoa$any$Oki_Kum$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$any$Oki_Kum |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Kume: Fraction of alignment category that fully bounds repeats")
+p1
+
+p2 <- ggboxplot(wgoa$any$Oki_Kum |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Kume: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
+
+p3 <- ggboxplot(wgoa$any$Oki_Kum |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Kume: Ratio of genic fraction to repeat fraction")
+p3
+
+wgoa$any$Oki_Kum |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Okinawa-Kume: Segment majority by alignment category")
+```
+
+
+### Osaka-Barcelona: Segment genic/repetitive fractions per alignment category ("within" bounds)
+```{r repeats_within_4, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+wgoa$any$Osa_Bar[order(wgoa$any$Osa_Bar$gene_fraction / wgoa$any$Osa_Bar$repeat_fraction, decreasing=T)]
+p1 <- ggboxplot(wgoa$any$Osa_Bar |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Osaka-Barcelona: Fraction of alignment category that fully bounds repeats")
+p1
+
+p2 <- ggboxplot(wgoa$any$Osa_Bar |> as.data.frame(), x='type', y='gene_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Osaka-Barcelona: Fraction of alignment category that fully bounds genes")
+p2
+(p1 / p2)
+
+p3 <- ggboxplot(wgoa$any$Osa_Bar |> as.data.frame(), x='type', y='coding_proportion', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Osaka-Barcelona: Ratio of genic fraction to repeat fraction")
+p3
+
+wgoa$any$Osa_Bar |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_sign, levels=names(sort(table(coding_sign), decreasing=F))) ) |> ggplot() + aes(x=type, fill=coding_sign) + geom_bar() + ggtitle("Osaka-Barcelona: ")
+```
 
 # Session information
 
