@@ -267,9 +267,59 @@ ggviolin(xf, x='set', y='Osa_count', fill='set') + theme_grey() + stat_compare_m
 # Overlap with repeats
 
 ```{r repeats_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-annotate_reps <- function(wgo_gr, repeats, genes_gr, overlap="within") {
+# Some helper functions to facilitate repeat-gene overlaps
+BSgenomeToGR <- function(genome) {
+  as(seqinfo(genome), "GRanges")
+}
+(tmp <- genomes$Oki |> BSgenomeToGR())
+
+grTo1index <- function(gr){
+  gr|> tile(width=1) |> unlist() |> unname()
+}
+genes$Oki |> head(n=1) |> grTo1index()
+
+bases_overlapping <- function(gr, gene_gr, repeat_gr, which_return="neither"){
+  wgo_gr_list <- split(gr, 1:length(gr))
+  wgo_gr_1index <- parallel::mclapply(mc.cores=8, wgo_gr_list, function(reg) {
+    ind <- grTo1index(reg)
+    ind$overlaps_gene <- countOverlaps(ind, gene_gr)
+    ind$overlaps_rep  <- countOverlaps(ind, repeat_gr)
+    ind$overlaps_neither <- TRUE
+    ind$overlaps_neither[which(ind$overlaps_gene>0)] <- FALSE
+    ind$overlaps_neither[which(ind$overlaps_rep>0)] <- FALSE
+    ind$overlaps_both <- FALSE
+    ind$overlaps_both[ind$overlaps_rep==TRUE & ind$overlaps_gene==TRUE] <- TRUE
+    if(which_return=="neither"){
+      ind <- ind[ind$overlaps_neither==TRUE]
+    } else if (which_return=="gene") {
+      ind <- ind[ind$overlaps_gene==1]
+    } else if(which_return=="rep"){
+      ind <- ind[ind$overlaps_rep==1]
+    } else if(which_return=="both"){
+      ind <- ind[ind$overlaps_both==TRUE]
+    }
+    ind
+  })
+  lapply(wgo_gr_1index, function(x) sum(width(x))) |> unlist() |> unname()
+}
+head(wgo$Oki_Osa)
+bases_overlapping(head(wgo$Oki_Osa), genes$Oki, reps$Oki, which_return = 'gene')
+bases_overlapping(head(wgo$Oki_Osa), genes$Oki, reps$Oki, which_return = 'rep')
+bases_overlapping(head(wgo$Oki_Osa), genes$Oki, reps$Oki, which_return = 'both')
+bases_overlapping(head(wgo$Oki_Osa), genes$Oki, reps$Oki, which_return = 'neither')
+
+
+
+annotate_reps <- function(wgo_gr, repeats, genes_gr, BSGenome, overlap="within") {
   wgo_gr <- sort(wgo_gr, ignore.strand=TRUE)
   repeats <- sort(repeats, ignore.strand=TRUE)
+  
+  # Get totally non-covered positions
+  # I use this up front because I don't want to consider the positions that are removed when you
+  # reduce the genes and repeats individually later - I want just non-annotated positions.
+  # So this not_gene_or_repeat_gr is not used until some later lines.
+  not_gene_or_repeat_gr <- BSGenome |> BSgenomeToGR() |> grTo1index() |> subsetByOverlaps(genes_gr, invert=TRUE) |> subsetByOverlaps(repeats, invert=TRUE)
+
   # Some repeats overlap.
   # Modify the repeats so that each repeat region has only one name.
   # Note that regions with more than one name are simplified to the first - so
@@ -295,6 +345,31 @@ annotate_reps <- function(wgo_gr, repeats, genes_gr, overlap="within") {
   mcols(wgo_gr) <- cbind(mcols(wgo_gr), tbs)
   wgo_gr$repeat_width <- NA
   wgo_gr$repeat_width[subjectHits(ov) |> unique()] <- NumericList(split(width(repeats)[queryHits(ov)], subjectHits(ov))) |> unname()
+
+  # A method to attach names to the widths of elements
+  match_widths_id <- function(ids, widths){
+    names(widths) <- ids
+    widths
+  }
+  match_widths_ids <- function(list_of_ids, list_of_widths){
+    lapply(1:length(list_of_ids), function(x) {
+      thing <- match_widths_id(list_of_ids[[x]], list_of_widths[[x]])
+      data.frame(class=names(thing), width=unname(thing))
+    })
+  }
+  wgo_gr$repeat_width_df_all <- match_widths_ids(wgo_gr$repeat_ids, wgo_gr$repeat_width)
+  # Summarise the repeat widths by summing up each repeat category.
+  wgo_gr$repeat_width_df_summary <- lapply(wgo_gr$repeat_width_df_all, function(x) {
+    x |>
+      dplyr::mutate(class=factor(class, levels=rep_lvls)) |>
+      dplyr::group_by(class) |>
+      dplyr::summarise(count=sum(width)) |>
+      tidyr::complete(class) |>
+      tidyr::spread(class, count) |>
+      dplyr::mutate_all(~replace(., is.na(.), 0)) |>
+      dplyr::select(any_of(rep_lvls))
+  })
+
   wgo_gr$repeat_width_sum <- lapply(wgo_gr$repeat_width, sum) |> unlist()
   wgo_gr$repeat_fraction <- wgo_gr$repeat_width_sum/width(wgo_gr)*100
   
@@ -309,6 +384,7 @@ annotate_reps <- function(wgo_gr, repeats, genes_gr, overlap="within") {
   wgo_gr$gene_count <- lapply(wgo_gr$gene_ids, function(x) length(na.omit(x))) |> unlist()
   wgo_gr$gene_width <- NA
   wgo_gr$gene_width[subjectHits(ov) |> unique()] <- NumericList(split(width(genes_gr)[queryHits(ov)], subjectHits(ov))) |> unname()
+  # Name the widths according to their repeat categories for later
   wgo_gr$gene_width_sum <- lapply(wgo_gr$gene_width, sum) |> unlist()
   wgo_gr$gene_fraction <- wgo_gr$gene_width_sum/width(wgo_gr)*100
   
@@ -319,20 +395,27 @@ annotate_reps <- function(wgo_gr, repeats, genes_gr, overlap="within") {
   wgo_gr$coding_sign[coding_signs<0] <- "repetitive"
   wgo_gr$coding_sign[coding_signs>0] <- "genic"
 
-  wgo_gr$other_width <- width(wgo_gr) - wgo_gr$repeat_width_sum - wgo_gr$gene_width_sum
+  # not_gene_or_repeat_gr
+  ov <- findOverlaps(not_gene_or_repeat_gr, wgo_gr)
+  wgo_gr$uncovered_width <- 0
+  wgo_gr$uncovered_width[subjectHits(ov) |> unique()] <- lapply(split(not_gene_or_repeat_gr[queryHits(ov)], subjectHits(ov)), function(x) sum(width(x))) |> unlist() |> unname()
+  #wgo_gr$other_width <- neither_gene_nor_repeat(wgo_gr, gene_gr, repeats)
   wgo_gr
 }
+
+# Note that this takes forever. Good luck!
+wgoa <- SimpleList()
 wgoa$within <- SimpleList()
-wgoa$within$Oki_Osa <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki)
-wgoa$within$Oki_Bar <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki)
-wgoa$within$Oki_Kum <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki)
-wgoa$within$Osa_Bar <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa)
+wgoa$within$Oki_Osa <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki, genomes$Oki)
+wgoa$within$Oki_Bar <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki, genomes$Oki)
+wgoa$within$Oki_Kum <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki, genomes$Oki)
+wgoa$within$Osa_Bar <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa, genomes$Osa)
 
 wgoa$any <- SimpleList()
-wgoa$any$Oki_Osa <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki, overlap = "any")
-wgoa$any$Oki_Bar <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki, overlap = "any")
-wgoa$any$Oki_Kum <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki, overlap = "any")
-wgoa$any$Osa_Bar <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa, overlap = "any")
+wgoa$any$Oki_Osa    <- annotate_reps(wgo$Oki_Osa, reps$Oki, genes$Oki, genomes$Oki, overlap = "any")
+wgoa$any$Oki_Bar    <- annotate_reps(wgo$Oki_Bar, reps$Oki, genes$Oki, genomes$Oki, overlap = "any")
+wgoa$any$Oki_Kum    <- annotate_reps(wgo$Oki_Kum, reps$Oki, genes$Oki, genomes$Oki, overlap = "any")
+wgoa$any$Osa_Bar    <- annotate_reps(wgo$Osa_Bar, reps$Osa, genes$Osa, genomes$Osa, overlap = "any")
 ```
 
 ## Overlap plots - Within bounds
@@ -373,6 +456,11 @@ wgoa$within$Oki_Bar |> as.data.frame() |> dplyr::mutate(coding_sign=factor(codin
 
 ### Okinawa-Kume: Segment genic/repetitive fractions per alignment category ("within" bounds)
 ```{r repeats_within_3, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+wgoa$within$Oki_Kum |> as.data.frame() |> dplyr::select(type, "LowComplexity","ltr.1","rnd","SINE","tandem","unknown") |> tidyr::pivot_longer(cols=c(LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='repeat_category', values_to='count') |> dplyr::group_by(type, repeat_category) |> dplyr::group_by(type, repeat_category) |> dplyr::summarise(count=sum(count)) |> ggplot() + aes(y=repeat_category, x=count, fill=repeat_category) + geom_bar(stat='identity') + geom_text(aes(label=count, hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Kume: Repeat categories by alignment categories (fully bounded)")
+
+wgoa$within$Oki_Kum |> as.data.frame() |> dplyr::select(type, "gene_count", "LowComplexity","ltr.1","rnd","SINE","tandem","unknown")   |> dplyr::mutate(genes=gene_count) |> tidyr::pivot_longer(cols=c(genes, LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='category', values_to='count') |> dplyr::group_by(type, category)  |> dplyr::group_by(type, category) |> dplyr::summarise(count=sum(count))  |> ggplot() + aes(y=category, x=count, fill=category) + geom_bar(stat='identity') + geom_text(aes(label=count, hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Kume: Feature counts by alignment categories (fully bounded)")
+
+
 library(ggpubr)
 wgoa$within$Oki_Kum[order(wgoa$within$Oki_Kum$gene_fraction / wgoa$within$Oki_Kum$repeat_fraction, decreasing=T)]
 p1 <- ggboxplot(wgoa$within$Oki_Kum |> as.data.frame(), x='type', y='repeat_fraction', fill='type') + theme_grey() + stat_compare_means(comparisons = list(c('breakpoint region', 'bridge region'), c('breakpoint region', 'collinear alignment'), c('breakpoint region', 'isolated alignment'), c('collinear alignment', 'isolated alignment')), hide.ns = T) + ggtitle("Okinawa-Kume: Fraction of alignment category that fully bounds repeats")
@@ -478,15 +566,144 @@ wgoa$any$Osa_Bar |> as.data.frame() |> dplyr::mutate(coding_sign=factor(coding_s
 ```
 
 ## Breakpoint regions - properties of genes/repeats bounded within categories
-```{r repeats_within_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r repeats_categories_1, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+wgoa$within$Oki_Osa |> as.data.frame() |> dplyr::select(type, "LowComplexity","ltr.1","rnd","SINE","tandem","unknown") |> tidyr::pivot_longer(cols=c(LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='repeat_category', values_to='count') |> dplyr::group_by(type, repeat_category) |> dplyr::group_by(type, repeat_category) |> dplyr::summarise(count=sum(count)) |> ggplot() + aes(y=repeat_category, x=count, fill=repeat_category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Osaka: Repeat categories by alignment categories (fully bounded)")
+
+wgoa$within$Oki_Osa |> as.data.frame() |> dplyr::select(type, "gene_count", "LowComplexity","ltr.1","rnd","SINE","tandem","unknown")   |> dplyr::mutate(genes=gene_count) |> tidyr::pivot_longer(cols=c(genes, LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='category', values_to='count') |> dplyr::group_by(type, category)  |> dplyr::group_by(type, category) |> dplyr::summarise(count=sum(count))  |> ggplot() + aes(y=category, x=count, fill=category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Osaka: Repeat categories by alignment categories (fully bounded)")
+
+
+wgoa$within$Oki_Bar |> as.data.frame() |> dplyr::select(type, "LowComplexity","ltr.1","rnd","SINE","tandem","unknown") |> tidyr::pivot_longer(cols=c(LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='repeat_category', values_to='count') |> dplyr::group_by(type, repeat_category) |> dplyr::group_by(type, repeat_category) |> dplyr::summarise(count=sum(count)) |> ggplot() + aes(y=repeat_category, x=count, fill=repeat_category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Barcelona: Repeat categories by alignment categories (fully bounded)")
+
+wgoa$within$Oki_Bar |> as.data.frame() |> dplyr::select(type, "gene_count", "LowComplexity","ltr.1","rnd","SINE","tandem","unknown")   |> dplyr::mutate(genes=gene_count) |> tidyr::pivot_longer(cols=c(genes, LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='category', values_to='count') |> dplyr::group_by(type, category)  |> dplyr::group_by(type, category) |> dplyr::summarise(count=sum(count))  |> ggplot() + aes(y=category, x=count, fill=category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Barcelona: Feature counts by alignment categories (fully bounded)")
+
+
+wgoa$within$Oki_Kum |> as.data.frame() |> dplyr::select(type, "LowComplexity","ltr.1","rnd","SINE","tandem","unknown") |> tidyr::pivot_longer(cols=c(LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='repeat_category', values_to='count') |> dplyr::group_by(type, repeat_category) |> dplyr::group_by(type, repeat_category) |> dplyr::summarise(count=sum(count)) |> ggplot() + aes(y=repeat_category, x=count, fill=repeat_category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Kume: Repeat categories by alignment categories (fully bounded)")
+
+wgoa$within$Oki_Kum |> as.data.frame() |> dplyr::select(type, "gene_count", "LowComplexity","ltr.1","rnd","SINE","tandem","unknown")   |> dplyr::mutate(genes=gene_count) |> tidyr::pivot_longer(cols=c(genes, LowComplexity, ltr.1, rnd, SINE, tandem, unknown), names_to='category', values_to='count') |> dplyr::group_by(type, category)  |> dplyr::group_by(type, category) |> dplyr::summarise(count=sum(count))  |> ggplot() + aes(y=category, x=count, fill=category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Okinawa-Kume: Feature counts by alignment categories (fully bounded)")
+
+
+wgoa$within$Osa_Bar |> as.data.frame() |> dplyr::select(type, "LowComplexity","rnd","tandem","unknown") |> tidyr::pivot_longer(cols=c(LowComplexity, rnd, tandem, unknown), names_to='repeat_category', values_to='count') |> dplyr::group_by(type, repeat_category) |> dplyr::group_by(type, repeat_category) |> dplyr::summarise(count=sum(count)) |> ggplot() + aes(y=repeat_category, x=count, fill=repeat_category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Osaka-Barcelona: Repeat categories by alignment categories (fully bounded)")
+
+wgoa$within$Osa_Bar |> as.data.frame() |> dplyr::select(type, "gene_count", "LowComplexity","rnd","tandem","unknown")   |> dplyr::mutate(genes=gene_count) |> tidyr::pivot_longer(cols=c(genes, LowComplexity, rnd, tandem, unknown), names_to='category', values_to='count') |> dplyr::group_by(type, category)  |> dplyr::group_by(type, category) |> dplyr::summarise(count=sum(count))  |> ggplot() + aes(y=category, x=count, fill=category) + geom_bar(stat='identity') + geom_text(aes(label=scales::comma(count), hjust=-0.25), stat='identity' , col='#595959') + facet_wrap(~type, ncol=1) + ggtitle("Osaka-Barcelona: Feature counts by alignment categories (fully bounded)")
+
+```
+
+
+## Breakpoint regions - properties of genes/repeats bounded within categories
+### Bounded categories: Okinawa-Osaka
+These `dplyr` pipes are *really* getting out of hand.
+```{r repeats_categories_3,  fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 p1 <- wgoa$within$Oki_Osa |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(count=n()) |> ggplot() + aes(x=type, y=count, fill=type) + geom_bar(stat="identity")
 p1 + ggtitle("Okinawa-Osaka: Number of segments by category")
 
 p2 <- wgoa$within$Oki_Osa |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(bp=sum(width)) |> ggplot() + aes(x=type, y=bp, fill=type) + geom_bar(stat="identity")
 p2 + ggtitle("Okinawa-Osaka: Number of bases by category")
 
+wgoa$within$Oki_Osa |>
+  as.data.frame() |>
+  dplyr::select(type, gene_width_sum, repeat_width_sum, uncovered_width) |>
+  dplyr::bind_cols(do.call(rbind, wgoa$within$Oki_Osa$repeat_width_df_summary)) |>
+  dplyr::rename(genes=gene_width_sum) |>
+  dplyr::rename(not_gene_nor_repeat=uncovered_width) |>
+  dplyr::rename(all_repeats=repeat_width_sum) |>
+  tidyr::pivot_longer(cols=c("genes", "all_repeats", "not_gene_nor_repeat", "LowComplexity", "ltr-1", "rnd", "SINE", "tandem", "unknown"), names_to='category', values_to='width') |>
+  dplyr::group_by(type, category) |>
+  dplyr::summarise(width=sum(width, na.rm=T)) |>
+  dplyr::mutate(category=factor(category, levels=c("not_gene_nor_repeat", "genes", "all_repeats", "LowComplexity", "ltr-1", "rnd", "SINE", "tandem", "unknown"))) |>
+  ggplot() +
+    aes(y=category, x=width, fill=category, label=scales::comma(width) ) +
+    geom_bar(stat='identity') +
+    geom_text(aes(hjust=-0.25), stat='identity' , col='#595959') +
+    facet_wrap(~type, ncol=1) +
+    ggtitle("Okinawa-Osaka: Feature counts by alignment categories (fully bounded)") +
+    expand_limits(x=c(0,7800000))
+```
+
+### Bounded categories: Okinawa-Barcelona
+```{r repeats_categories_4,  fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- wgoa$within$Oki_Bar |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(count=n()) |> ggplot() + aes(x=type, y=count, fill=type) + geom_bar(stat="identity")
+p1 + ggtitle("Okinawa-Barcelona: Number of segments by category")
+
+p2 <- wgoa$within$Oki_Bar |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(bp=sum(width)) |> ggplot() + aes(x=type, y=bp, fill=type) + geom_bar(stat="identity")
+p2 + ggtitle("Okinawa-Barcelona: Number of bases by category")
+
+wgoa$within$Oki_Bar |>
+  as.data.frame() |>
+  dplyr::select(type, gene_width_sum, repeat_width_sum, uncovered_width) |>
+  dplyr::bind_cols(do.call(rbind, wgoa$within$Oki_Bar$repeat_width_df_summary)) |>
+  dplyr::rename(genes=gene_width_sum) |>
+  dplyr::rename(not_gene_nor_repeat=uncovered_width) |>
+  dplyr::rename(all_repeats=repeat_width_sum) |>
+  tidyr::pivot_longer(cols=c("genes", "all_repeats", "not_gene_nor_repeat", "LowComplexity", "ltr-1", "rnd", "SINE", "tandem", "unknown"), names_to='category', values_to='width') |>
+  dplyr::group_by(type, category) |>
+  dplyr::summarise(width=sum(width, na.rm=T)) |>
+  dplyr::mutate(category=factor(category, levels=c("not_gene_nor_repeat", "genes", "all_repeats", "LowComplexity", "ltr-1", "rnd", "SINE", "tandem", "unknown"))) |>
+  ggplot() +
+    aes(y=category, x=width, fill=category, label=scales::comma(width) ) +
+    geom_bar(stat='identity') +
+    geom_text(aes(hjust=-0.25), stat='identity' , col='#595959') +
+    facet_wrap(~type, ncol=1) +
+    ggtitle("Okinawa-Barcelona: Feature counts by alignment categories (fully bounded)") +
+    expand_limits(x=c(0,7800000))
+```
 
 
+
+### Bounded categories: Okinawa-Kume
+```{r repeats_categories_4,  fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- wgoa$within$Oki_Kum |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(count=n()) |> ggplot() + aes(x=type, y=count, fill=type) + geom_bar(stat="identity")
+p1 + ggtitle("Okinawa-Kume: Number of segments by category")
+
+p2 <- wgoa$within$Oki_Kum |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(bp=sum(width)) |> ggplot() + aes(x=type, y=bp, fill=type) + geom_bar(stat="identity")
+p2 + ggtitle("Okinawa-Kume: Number of bases by category")
+
+wgoa$within$Oki_Kum |>
+  as.data.frame() |>
+  dplyr::select(type, gene_width_sum, repeat_width_sum, uncovered_width) |>
+  dplyr::bind_cols(do.call(rbind, wgoa$within$Oki_Kum$repeat_width_df_summary)) |>
+  dplyr::rename(genes=gene_width_sum) |>
+  dplyr::rename(not_gene_nor_repeat=uncovered_width) |>
+  dplyr::rename(all_repeats=repeat_width_sum) |>
+  tidyr::pivot_longer(cols=c("genes", "all_repeats", "not_gene_nor_repeat", "LowComplexity", "ltr-1", "rnd", "SINE", "tandem", "unknown"), names_to='category', values_to='width') |>
+  dplyr::group_by(type, category) |>
+  dplyr::summarise(width=sum(width, na.rm=T)) |>
+  dplyr::mutate(category=factor(category, levels=c("not_gene_nor_repeat", "genes", "all_repeats", "LowComplexity", "ltr-1", "rnd", "SINE", "tandem", "unknown"))) |>
+  ggplot() +
+    aes(y=category, x=width, fill=category, label=scales::comma(width) ) +
+    geom_bar(stat='identity') +
+    geom_text(aes(hjust=-0.25), stat='identity' , col='#595959') +
+    facet_wrap(~type, ncol=1) +
+    ggtitle("Okinawa-Kume: Feature counts by alignment categories (fully bounded)") +
+    expand_limits(x=c(0,20000000))
+```
+
+
+### Bounded categories: Osaka-Barcelona
+```{r repeats_categories_4,  fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+p1 <- wgoa$within$Osa_Bar |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(count=n()) |> ggplot() + aes(x=type, y=count, fill=type) + geom_bar(stat="identity")
+p1 + ggtitle("Osaka-Barcelona: Number of segments by category")
+
+p2 <- wgoa$within$Osa_Bar |> as.data.frame() |> dplyr::group_by(type) |> dplyr::summarise(bp=sum(width)) |> ggplot() + aes(x=type, y=bp, fill=type) + geom_bar(stat="identity")
+p2 + ggtitle("Osaka-Barcelona: Number of bases by category")
+
+wgoa$within$Osa_Bar |>
+  as.data.frame() |>
+  dplyr::select(type, gene_width_sum, repeat_width_sum, uncovered_width) |>
+  dplyr::bind_cols(do.call(rbind, wgoa$within$Osa_Bar$repeat_width_df_summary)) |>
+  dplyr::rename(genes=gene_width_sum) |>
+  dplyr::rename(not_gene_nor_repeat=uncovered_width) |>
+  dplyr::rename(all_repeats=repeat_width_sum) |>
+  tidyr::pivot_longer(cols=c("genes", "all_repeats", "not_gene_nor_repeat", "LowComplexity", "rnd", "tandem", "unknown"), names_to='category', values_to='width') |>
+  dplyr::group_by(type, category) |>
+  dplyr::summarise(width=sum(width, na.rm=T)) |>
+  dplyr::mutate(category=factor(category, levels=c("not_gene_nor_repeat", "genes", "all_repeats", "LowComplexity", "rnd", "tandem", "unknown"))) |>
+  ggplot() +
+    aes(y=category, x=width, fill=category, label=scales::comma(width) ) +
+    geom_bar(stat='identity') +
+    geom_text(aes(hjust=-0.25), stat='identity' , col='#595959') +
+    facet_wrap(~type, ncol=1) +
+    ggtitle("Osaka-Barcelona: Feature counts by alignment categories (fully bounded)") +
+    expand_limits(x=c(0,20000000))
 ```
 
 
