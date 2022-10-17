@@ -27,11 +27,11 @@ package = "OikScrambling")` for how the different objects are prepared.
 ```{r load_packages_and_data}
 library('OikScrambling')      |> suppressPackageStartupMessages()
 library('GenomicFeatures')    |> suppressPackageStartupMessages()
-genomes <- OikScrambling:::loadAllGenomes()
-transcripts <- OikScrambling:::loadAllTranscriptsGR()
+genomes     <- OikScrambling:::loadAllGenomes()
+transcripts <- OikScrambling:::loadAllTranscriptsGR(compat=F) |> suppressWarnings()
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
-genes <- sapply(annots, function(x) sort(genes(x))) |> SimpleList()
-operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
+genes       <- sapply(annots, function(x) sort(genes(x))) |> SimpleList()
+operons     <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
 #operons$Nor <- OikScrambling:::calcOperons(window = 500, transcripts(annots$Nor) |> reduce()) |> suppressWarnings()
 
 load("BreakPoints.Rdata")
@@ -303,12 +303,7 @@ PAC3_XSR_Osa.aln.right <- list(
 PAC3_XSR_Osa.aln.right |> lapply(\(gb) gb + 90) |> lapply(getSeq) |> lapply(unlist) |> as("DNAStringSet") |> msa::msaClustalW() |> as("DNAMultipleAlignment") 
 ```
 
-
-
-
-Conserved and non-conserved operons documentation 
-
-# PAC 3 context diagram
+# PAC3 context diagram
 ```{r PAC3Figure, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Section of the genome that is shared the Okinawa's PAC3
 coa$Oki_Osa |> subsetByOverlaps(PAC3)
@@ -335,19 +330,7 @@ operon_of_gene <- function(operon, gene_of_interest, buffer=0) {
   }
   matching_operon
 }
-operon_of_gene(operons$Oki, 'g3146')
-
-#pac3_operon_oki <- extract_gene_coords(genes$Oki, 'g3146', upstream=3, downstream=5)
-pac3_operon_oki <- operon_of_gene(operons$Oki, 'g3146')
-#pac3_operon_osa <- extract_gene_coords(genes$Osa, 'g12442', upstream=1, downstream=0)
-pac3_operon_osa <- operon_of_gene(operons$Osa, 'g12442')
-#npac3_operon_osa <- extract_gene_coords(genes$Osa, 'g2061', upstream=5, downstream = 4)
-#not_pac3_operon_osa <- extract_gene_coords(genes$Osa, 'g2061', upstream=5, downstream = 4)
-not_pac3_operon_osa <- operon_of_gene(operons$Osa, 'g2061')
-
-# Osa-Nor PAC3 genes
-genes$Nor |> subsetByOverlaps(coa$Osa_Nor |> subsetByOverlaps(not_pac3_operon_osa) |> swap())
-genes$Nor |> subsetByOverlaps(coa$Oki_Nor |> subsetByOverlaps(pac3_operon_oki) |> swap())
+(operon_of_gene(operons$Oki, 'g3146'))
 
 genes_of_operon <- function(operon, gene, gene_of_interest=NULL, buffer=0) {
   if(!is.null(gene_of_interest)) {
@@ -365,8 +348,8 @@ genes_of_operon <- function(operon, gene, gene_of_interest=NULL, buffer=0) {
   }
   matching_genes
 }
-genes_of_operon(operons$Oki, genes$Oki, 'g3146')
-genes_of_operon(operons$Oki, genes$Oki, 'g3146', buffer=10)
+(genes_of_operon(operons$Oki, genes$Oki, 'g3146'))
+(genes_of_operon(operons$Oki, genes$Oki, 'g3146', buffer=10))
 
 
 gr2dna_seg <- function (gr, gene_of_interest=NULL, gene_of_interest_colour='red', ...) {
@@ -390,7 +373,7 @@ gr2dna_seg <- function (gr, gene_of_interest=NULL, gene_of_interest_colour='red'
   }
   dna_seg
 }
-gr2dna_seg(pac3_operon_oki, gene_of_interest='g3146')
+gr2dna_seg(genes_of_operon(operons$Oki, genes$Oki, 'g3146', buffer=10))
 
 op2dna_seg <- function (gene, operon, gene_of_interest=NULL, buffer=0, gene_fill="#d9d9d9", operon_fill="#595959", gene_of_interest_colour='red', ...) {
   gr <- genes_of_operon(operon, gene, gene_of_interest, buffer=buffer)
@@ -427,39 +410,373 @@ dnaseg_to_annot <- function(ds, ...) {
 
 ```
 
-## Including Norway
-```{r norway}
-#operon_of_gene(operons$Nor, "GSOIDT00012497001") |> genes_of_operon(genes$Nor)
-#coa$Osa_Nor |> swap()  |> subsetByOverlaps(GRanges('scaffold_42:91900-143964'))
-pac3_locus_nor <- coa$Osa_Nor |> subsetByOverlaps(pac3_operon_osa, ignore.strand=TRUE) |> swap()
-(pac3_locus_nor)
-operons$Nor |> subsetByOverlaps(pac3_locus_nor) |> genes_of_operon(genes$Nor)
-```
+## PAC3 context diagram (original annotations)
+```{r pac3_operon_diagram_1, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+pac3_operon_oki     <- operon_of_gene(operons$Oki, 'g3146')
+pac3_operon_osa     <- operon_of_gene(operons$Osa, 'g12442')
+not_pac3_operon_osa <- operon_of_gene(operons$Osa, 'g2061')
 
-## Plotting PAC3 Figure
-```{r pac3_operon_diagram, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-pac3_operon_oki_genes <- genes_of_operon(pac3_operon_oki, genes$Oki)
-pac3_operon_osa_genes <- genes_of_operon(pac3_operon_osa, genes$Osa)
+#pac3_operon_oki_genes     <- genes_of_operon(pac3_operon_oki, genes$Oki, gene_of_interest = 'g3146', buffer = 4)
+pac3_operon_oki_genes     <- extract_gene_coords(genes$Oki, 'g3146', upstream=5, downstream=8)
+#pac3_operon_osa_genes     <- genes_of_operon(pac3_operon_osa, genes$Osa, gene_of_interest = 'g12442', buffer = 1)
+pac3_operon_osa_genes     <- extract_gene_coords(genes$Osa, 'g12442', upstream=1, downstream=1)
+#not_pac3_operon_osa_genes <- genes_of_operon(not_pac3_operon_osa, genes$Osa, gene_of_interest = 'g2061', buffer = 5)
+not_pac3_operon_osa_genes <- extract_gene_coords(genes$Osa, 'g2061', upstream=8, downstream=7)
+
+#pac3_operon_oki_genes_seg <- op2dna_seg(genes$Oki, operons$Oki, 'g3146')
+pac3_operon_oki_genes_seg <- gr2dna_seg(pac3_operon_oki_genes)
+pac3_operon_oki_genes_seg$fill[which(pac3_operon_oki_genes_seg$name == 'g3146')] <- "red"
+pac3_operon_oki_genes_seg$name[which(pac3_operon_oki_genes_seg$name == 'g3146')] <- "PAC3\ng3146"
+pac3_operon_oki_genes_seg_annot <- pac3_operon_oki_genes_seg |> dnaseg_to_annot(rot=0, col='grey80')
+pac3_operon_oki_genes_seg_annot$color[which(pac3_operon_oki_genes_seg_annot$text == "PAC3\ng3146")] <- '#595959'
+
+not_pac3_operon_osa_genes_seg <- not_pac3_operon_osa_genes |> gr2dna_seg() |> reverse()
+not_pac3_operon_osa_genes_seg_annot <- dnaseg_to_annot(not_pac3_operon_osa_genes_seg, rot=0, col='grey80')
+
+pac3_operon_osa_genes_seg <- pac3_operon_osa_genes |> gr2dna_seg() |> reverse()
+pac3_operon_osa_genes_seg$fill[pac3_operon_osa_genes_seg$name == "g12442"] <- "red"
+pac3_operon_osa_genes_annot <- dnaseg_to_annot(pac3_operon_osa_genes_seg, rot=0, col='grey80')
+pac3_operon_osa_genes_annot$color[pac3_operon_osa_genes_annot$text== "g12442"] <- "#595959"
+pac3_operon_osa_genes_annot$text[pac3_operon_osa_genes_annot$text == "g12442"] <- "PAC3\ng12442"
 
 plot_gene_map(
   dna_segs = list(
-    `Osaka\nChr1: 8145427 - 8174791`=reverse(gr2dna_seg(genes_of_operon(operons$Osa, genes$Osa, 'g2061'))),
-    `Okinawa\nchr1: 11487473 - 11503891`=op2dna_seg(genes$Oki, operons$Oki, 'g3146'),
-    `Osaka\nXSR: 11487473 - 11503891`=op2dna_seg(genes$Osa, operons$Osa, 'g12442' ) |> reverse()
+    `Osaka\nChr1: 8145427 - 8174791 (-)`=not_pac3_operon_osa_genes_seg,
+    `Okinawa\nchr1: 11487473 - 11503891 (+)`=pac3_operon_oki_genes_seg,
+    `Osaka\nXSR: 11487473 - 11503891 (-)`=pac3_operon_osa_genes_seg
   ),
   dna_seg_scale = T, 
   annotations = list(
-    dnaseg_to_annot(reverse(gr2dna_seg(not_pac3_operon_osa)), rot=0, col='grey80'),
-    dnaseg_to_annot(gr2dna_seg(pac3_operon_oki_genes, gene_of_interest='g3146'), rot=0, col='grey80'),
-    dnaseg_to_annot(reverse(gr2dna_seg(pac3_operon_osa_genes, gene_of_interest='g12442')), rot=0, col='grey80')
+    not_pac3_operon_osa_genes_seg_annot,
+    pac3_operon_oki_genes_seg_annot,
+    pac3_operon_osa_genes_annot
   ),
   comparisons = list(
      gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap()) |> reverse(side=1),
      gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3)) |> reverse(side = 2)
    ),
-  main = "The PAC3 gene in operon is conserved between Osaka and Barcelona in XSR chromosome but on CHR1 in Okinawa"
+  main = "The PAC3 gene in operon is conserved between Osaka and Barcelona in XSR chromosome but on Chr1 in Okinawa"
 )
 
+```
+
+
+## Adding Norway to the PAC3 context diagram
+It is necessary to establish some baseline truths about what genes are present or absent in these operons, in which it seems that Okinawa has translocated the PAC3 gene. To do so, add Norway to this diagram, showing where PAC3 might be and where the not-PAC3 might be.
+
+Note that the comparisons below are based on `coa` and therefore the boundaries of the coalesced alignments do not necessarily correspond nicely to gene boundaries.
+
+```{r pac3_operon_diagram_2, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Find the corresponding PAC3 gene in Norway.
+pac3_nor_locus <- coa$Oki_Nor |> subsetByOverlaps(pac3_operon_oki, ignore.strand=T) |> swap()
+(pac3_nor_locus)
+# The first and third ranges are the not-PAC3 of Osaka, and the second is PAC3.
+# The first selection yields just the operons that overlap with the Osa-Nor PAC3-containing operon.
+# The second yields a larger area.
+# pac3_nor_operon_notpac3 <- operons$Nor |> subsetByOverlaps(c(pac3_nor_locus[1], pac3_nor_locus[3]), ignore.strand=T) |> genes_of_operon(genes$Nor)
+pac3_nor_operon_notpac3 <- extract_gene_coords(genes$Nor, 'GSOIDT00009294001', upstream=7, downstream=8)
+(pac3_nor_operon_notpac3)
+#pac3_nor_operon_pac3 <- operons$Nor |> subsetByOverlaps(pac3_nor_locus[2], ignore.strand=T) |> genes_of_operon(genes$Nor)
+pac3_nor_operon_pac3 <- extract_gene_coords(genes$Nor, 'GSOIDT00012497001', upstream=5, downstream=1)
+(pac3_nor_operon_pac3)
+# Thus GSOIDT00012497001 is the likely orthologue of PAC3 in Norway.
+
+# Make Norway's DNAseg and annotation objects.
+pac3_nor_operon_notpac3_seg <- pac3_nor_operon_notpac3 |> gr2dna_seg()
+pac3_nor_operon_notpac3_annot <- pac3_nor_operon_notpac3_seg |> dnaseg_to_annot(col='grey80')
+#pac3_nor_operon_notpac3_annot$rot <- 45
+
+pac3_nor_operon_pac3_seg <- pac3_nor_operon_pac3 |> gr2dna_seg()
+pac3_nor_operon_pac3_seg <- pac3_nor_operon_pac3_seg |> reverse()
+pac3_nor_operon_pac3_seg$fill[which(pac3_nor_operon_pac3_seg$name=='GSOIDT00012497001')] <- 'red'
+pac3_nor_operon_pac3_seg_annot <- pac3_nor_operon_pac3_seg |> dnaseg_to_annot(col='grey80')
+pac3_nor_operon_pac3_seg_annot$rot <- 45
+pac3_nor_operon_pac3_seg_annot$col[which(pac3_nor_operon_pac3_seg_annot$text=='GSOIDT00012497001')] <- '#595959'
+pac3_nor_operon_pac3_seg_annot$text[which(pac3_nor_operon_pac3_seg_annot$text=='GSOIDT00012497001')] <- 'PAC3 - GSOIDT00012497001'
+
+# Simple function to overwrite the colours of a comparison object. Needed for hacky things I do.
+comp_recolor <- function(comp, col='darksalmon'){
+  comp$color <- col
+  comp$col <- col
+  comp
+}
+
+# Note that the comparisons here become very complicated. 
+plot_gene_map(
+  dna_segs = list(
+    `Norway\nscaffold_3: 1859411 - 1879701 (+)`=pac3_nor_operon_notpac3_seg,
+    `Osaka\nChr1: 8145427 - 8174791 (-)`=not_pac3_operon_osa_genes_seg,
+    `Okinawa\nchr1: 11487473 - 11503891 (+)`=pac3_operon_oki_genes_seg,
+    `Osaka\nXSR: 11487473 - 11503891 (-)`=pac3_operon_osa_genes_seg,
+    `Norway\nscaffold_42: 104419 - 106562 (-)`=pac3_nor_operon_pac3_seg
+  ),
+  annotations = list(
+    pac3_nor_operon_notpac3_annot,
+    not_pac3_operon_osa_genes_seg_annot,
+    pac3_operon_oki_genes_seg_annot,
+    pac3_operon_osa_genes_annot,
+    pac3_nor_operon_pac3_seg_annot
+  ),
+  comparisons = list(
+    gb2comp(coa$Osa_Nor |> swap() |> subsetByOverlaps(pac3_nor_operon_notpac3, ignore.strand = T)) |> reverse(side=2),
+    gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3) |> swap()) |> reverse(side=1),
+    gb2comp(coa$Oki_Osa |> subsetByOverlaps(PAC3)) |> reverse(side = 2),
+    gb2comp(coa$Osa_Nor |> swap() |> subsetByOverlaps(pac3_nor_operon_pac3, ignore.strand = T) |> swap()) |> reverse(side=1) |> reverse(side=2) |> comp_recolor(col='cornflowerblue')
+  ),
+  dna_seg_scale = T
+)
+```
+
+## Adding orthologous pair annotations to PAC3 context diagram
+Just to make sure that genes are associated with other genes properly, ensure that the gene IDs computed with orthology finding lines up with the comparison here.
+
+Note that this section actually requires the `orthoPairs` object from the `OrthogroupSyntenies`. Much of this code is copied from that vignette. Please see that vignette for a proper description of what these steps are attempting to do.
+
+```{r pac3_operon_diagram_op, cache=TRUE, message=FALSE, warning=FALSE}
+orthoGroupFileNames <- SimpleList(
+  AOM.5.5f      = "AOM-5-5f.prot.longest.fa_1", 
+  Bar2.p4       = "Bar2_p4.Flye.prot.longest.fa_1", 
+  Ply           = "C_int_P.prot.longest.fa_1",
+  Ros           = "C_int_R.prot.longest.fa_1",
+  Int           = "Ciona_intestinalis.Uniprot.rn.fa_1",
+  Sav           = "Ciona_savignyi.Uniprot.rn.fa_1",
+  KUM.M3.7f     = "KUM-M3-7f.prot.longest.fa_1",
+  OKI2018.I69   = "OKI2018_I69.v2.prot.longest.fa_1",
+  OSKA2016v1.9  = "OSKA2016v1.9.prot.longest.fa_1",
+  OdB3          = "OdB3.v1.0.prot.fa_1.nohaplo"
+)
+
+orthoPairToGBreaks <- function(genome1, genome2, transcripts, treeName="N19", HOGs=NULL) {
+  if(is.null(HOGs))
+    HOGs <- OikScrambling:::load_one_to_ones(
+      system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
+      c(orthoGroupFileNames[[genome1]], orthoGroupFileNames[[genome2]]))
+
+  IDs2GRanges <- function (IDs, annot) {
+    prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
+    not_prefix <- Biobase::lcPrefix(annot$tx_name)    # Remove trailing characters that are part of the name
+    not_prefix <- paste0(not_prefix,"$")              # Anchor to end of the string
+    prefix <- sub(not_prefix, "", prefix)             # Finalise prefix
+    IDs <- sub(prefix, "", IDs)                       # Remove prefix from IDS
+    names(annot) <- annot$tx_name                     # Store transcript name in names slot
+    gr <- annot[IDs]                                  # Sort by ID
+    strand(gr) <- "*"                                 # Make strandless
+    gr                                                # Return the object
+  }
+  
+  gb       <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome1]]], transcripts[[genome1]])
+  if (!is.null(genomes[[genome1]]))
+    seqinfo(gb) <- seqinfo(genomes[[genome1]])
+  gb$query <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome2]]], transcripts[[genome2]])
+  if (!is.null(genomes[[genome2]]))
+   seqinfo(gb$query) <- seqinfo(genomes[[genome2]])
+  gb <- GenomicBreaks:::GBreaks(gb)
+  gb$HOG <- HOGs$HOG
+  gb$OG  <- HOGs$OG
+  sort(gb)
+}
+
+flagLongShort_ <- function(gr, transcripts) {
+  genome <- unique(genome(gr))
+  flagLongShort(gr, transcripts[[genome]])
+}
+
+orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
+  orthoPairs <- SimpleList()
+  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018.I69", "OSKA2016v1.9",   transcripts, treeName, HOGs)
+  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018.I69", "Bar2.p4",        transcripts, treeName, HOGs)
+  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018.I69", "KUM.M3.7f",      transcripts, treeName, HOGs)
+  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018.I69", "AOM.5.5f",       transcripts, treeName, HOGs)
+  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018.I69", "OdB3",           transcripts, treeName, HOGs)
+  
+  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9",   "Bar2.p4",     transcripts, treeName, HOGs)
+  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9",   "OKI2018.I69", transcripts, treeName, HOGs)
+  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9",   "KUM.M3.7f",   transcripts, treeName, HOGs)
+  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9",   "AOM.5.5f",    transcripts, treeName, HOGs)
+  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9",   "OdB3",        transcripts, treeName, HOGs)
+  
+  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2.p4",   "OSKA2016v1.9",     transcripts, treeName, HOGs)
+  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2.p4",   "OKI2018.I69",      transcripts, treeName, HOGs)
+  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2.p4",   "KUM.M3.7f",        transcripts, treeName, HOGs)
+  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2.p4",   "AOM.5.5f",         transcripts, treeName, HOGs)
+  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2.p4",   "OdB3",             transcripts, treeName, HOGs)
+  
+  orthoPairs <- sapply(orthoPairs,  flagLongShort_, longShort)
+  
+  SimpleList(orthoPairs)
+}
+
+orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
+orthoPairs$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N20")
+
+orthoPairs_core         <- orthoPairToGBreaks_all_Oiks("N3")
+orthoPairs_core$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N3")
+
+orthoPairs_one2oneInOiks <-
+  orthoPairToGBreaks_all_Oiks(treeName = NULL,
+                              HOGs = OikScrambling:::load_one_to_ones(
+                                       system.file("extdata/OrthoFinder/N19.tsv", package = "BreakpointsData")))
+
+flagOverlaps <- function(gr) {
+  # Find overlaps
+  ov <- findOverlaps(gr)
+  # Index of self hits in the gr object
+  idx <- queryHits(ov[!isSelfHit(ov)])
+  # Convert to Boolean indexing the gr object
+  seq_along(gr) %in% idx
+}
+
+orthoPairsFiltered <- sapply(orthoPairs, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+
+orthoPairsFiltered_core <- sapply(orthoPairs_core, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+
+orthoPairs_one2oneInOiks_Filtered <- sapply(orthoPairs_one2oneInOiks, function(gb) {
+  gb <- gb[!flagOverlaps(gb)]
+  gb <- gb[!flagOverlaps(gb$query)]
+  gb
+}) |> SimpleList()
+
+coalOrtho <- function(gb) {
+  # Coalesce
+  coal <- coalesce_contigs(gb)
+  
+  # Map annotations to the coalesced blocks
+  ov <- findOverlaps(coal, gb)
+  
+  # Extract gene names mapped to each blocks
+  coal$geneNames <- CharacterList(split(names(gb)[subjectHits(ov)], queryHits(ov))) |> unname()
+  # We can use the `ov` object for query ranges as well because of the way `coal` was constructed.
+  coal$query$geneNames <- CharacterList(split(names(gb$query)[subjectHits(ov)], queryHits(ov))) |> unname()
+  
+  # Extract dNdS values
+  coal$dNdS_GUIDANCE2  <- NumericList(split(gb$dNdS_GUIDANCE2 [subjectHits(ov)], queryHits(ov)))
+  coal$dNdS_HmmCleaner <- NumericList(split(gb$dNdS_HmmCleaner[subjectHits(ov)], queryHits(ov)))
+  coal$dNdS_PRANK      <- NumericList(split(gb$dNdS_PRANK     [subjectHits(ov)], queryHits(ov)))
+  # We just copy dNdS values to query ranges because they are the same.
+  coal$query$dNdS_GUIDANCE2  <- coal$dNdS_GUIDANCE2
+  coal$query$dNdS_HmmCleaner <- coal$dNdS_HmmCleaner
+  coal$query$dNdS_PRANK      <- coal$dNdS_PRANK
+
+  # Count genes per syntenic block
+  coal$geneNumber <- sapply(coal$geneNames, length)
+  
+  coal
+}
+
+orthoBlocks <- sapply(orthoPairsFiltered[1:15], coalOrtho) |> SimpleList()
+orthoBlocks$Ply_Ros <- coalesce_contigs(orthoPairsFiltered$Ply_Ros)
+orthoBlocks[ 1:15 ] <- sapply(orthoBlocks[ 1:15 ],  flagLongShort_, longShort)
+
+orthoBlocks_core <- sapply(orthoPairsFiltered_core[1:15], coalOrtho) |> SimpleList()
+orthoBlocks_core$Ply_Ros <- coalesce_contigs(orthoPairsFiltered_core$Ply_Ros)
+orthoBlocks_core[ 1:15 ] <- sapply(orthoBlocks_core[ 1:15 ],  flagLongShort_, longShort)
+
+orthoBlocks_one2oneInOiks <- sapply(orthoPairs_one2oneInOiks_Filtered, coalOrtho) |> SimpleList()
+orthoBlocks_one2oneInOiks <- sapply(orthoBlocks_one2oneInOiks,  flagLongShort_, longShort) |> SimpleList()
+```
+
+```{r pac3_operon_diagram_3, dependson="pac3_operon_diagram_op", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Create comparisons based on orthoPairs. Need 4 comparisons:
+#  - Norway not-PAC3 to Osaka not-PAC3
+#  - Osaka not-PAC3 to Okinawa PAC3
+#  - Okinawa PAC3 to Osaka PAC3
+#  - Osaka PAC3 to Norway PAC3
+op_norNP3_osaNP3      <- orthoPairs_one2oneInOiks$Osa_Nor |> swap() |> subsetByOverlaps( pac3_nor_operon_notpac3 )
+(op_norNP3_osaNP3)
+# Make a modified gb2comp that adds orthopair names.
+gb2comp_op <- function(gb, color = NULL, ignore.strand = FALSE) {
+    dna_segs <- gb2dna_seg(gb)
+    df <- data.frame(start1 = dna_segs$target$start, end1 = dna_segs$target$end, 
+        start2 = dna_segs$query$start, end2 = dna_segs$query$end)
+    cmp <- genoPlotR::as.comparison(df)
+    cmp$direction <- 1L
+    cmp$color <- "darksalmon"
+    if (isFALSE(ignore.strand)) {
+        onMinus <- decode(strand(gb) == "-")
+        cmp$direction[onMinus] <- -1
+        cmp$start2[onMinus] <- dna_segs$query$end[onMinus]
+        cmp$end2[onMinus] <- dna_segs$query$start[onMinus]
+        cmp$col[onMinus] <- "cornflowerblue"
+    }
+    if (!is.null(color)) {
+        cmp$col <- color
+    }
+    rownames(cmp) <- paste0(names(gb), "__", names(gb$query))
+    cmp
+}
+
+# Norway not-PAC3 to Osaka not-PAC3
+op_norNP3_osaNP3_comp        <- gb2comp_op(op_norNP3_osaNP3) |> reverse(side=2)
+op_norNP3_osaNP3_comp$etc    <- op_norNP3_osaNP3_comp$end1
+op_norNP3_osaNP3_comp$end1   <- op_norNP3_osaNP3_comp$start1
+op_norNP3_osaNP3_comp$start1 <- op_norNP3_osaNP3_comp$etc
+op_norNP3_osaNP3_comp$color  <- "cornflowerblue"
+op_norNP3_osaNP3_comp$col    <- "cornflowerblue"
+
+# Osaka not-PAC3 to Okinawa PAC3
+op_osaNP3_okiP3             <- orthoPairs_one2oneInOiks$Oki_Osa |> subsetByOverlaps( pac3_operon_oki_genes )  |> swap()
+op_osaNP3_okiP3_comp        <- gb2comp_op(op_osaNP3_okiP3) |> reverse(side=1)
+op_osaNP3_okiP3_comp$etc    <- op_osaNP3_okiP3_comp$end1
+op_osaNP3_okiP3_comp$end1   <- op_osaNP3_okiP3_comp$start1
+op_osaNP3_okiP3_comp$start1 <- op_osaNP3_okiP3_comp$etc
+op_osaNP3_okiP3_comp$color  <- "cornflowerblue"
+op_osaNP3_okiP3_comp$col    <- "cornflowerblue"
+
+# Okinawa PAC3 to Osaka PAC3
+op_okiP3_osaP3              <- orthoPairs_one2oneInOiks$Oki_Osa |> subsetByOverlaps( pac3_operon_oki_genes )
+op_okiP3_osaP3_comp         <- gb2comp_op(op_okiP3_osaP3) |> reverse(side=2)
+op_okiP3_osaP3_comp$etc     <- op_okiP3_osaP3_comp$end1
+op_okiP3_osaP3_comp$end1    <- op_okiP3_osaP3_comp$start1
+op_okiP3_osaP3_comp$start1  <- op_okiP3_osaP3_comp$etc
+op_okiP3_osaP3_comp$color   <- "cornflowerblue"
+op_okiP3_osaP3_comp$col     <- "cornflowerblue"
+
+# Osaka PAC3 to Norway PAC3
+op_osaP3_norP3              <- orthoPairs_one2oneInOiks$Osa_Nor |> subsetByOverlaps( pac3_operon_osa_genes )
+op_osaP3_norP3_comp         <- gb2comp_op(op_osaP3_norP3) |> reverse(side=1) |> reverse(side=2)
+#op_osaP3_norP3_comp$etc     <- op_osaP3_norP3_comp$end1
+#op_osaP3_norP3_comp$end1    <- op_osaP3_norP3_comp$start1
+#op_osaP3_norP3_comp$start1  <- op_osaP3_norP3_comp$etc
+op_osaP3_norP3_comp$color   <- "cornflowerblue"
+op_osaP3_norP3_comp$col     <- "cornflowerblue"
+
+# Note that the comparisons here become very complicated.
+plot_gene_map(
+  dna_segs = list(
+    `Norway\nscaffold_3: 1859411 - 1879701 (+)`=pac3_nor_operon_notpac3_seg,
+    `Osaka\nChr1: 8145427 - 8174791 (-)`=not_pac3_operon_osa_genes_seg,
+    `Okinawa\nchr1: 11487473 - 11503891 (+)`=pac3_operon_oki_genes_seg,
+    `Osaka\nXSR: 11487473 - 11503891 (-)`=pac3_operon_osa_genes_seg,
+    `Norway\nscaffold_42: 104419 - 106562 (-)`=pac3_nor_operon_pac3_seg
+  ),
+  annotations = list(
+    pac3_nor_operon_notpac3_annot,
+    not_pac3_operon_osa_genes_seg_annot,
+    pac3_operon_oki_genes_seg_annot,
+    pac3_operon_osa_genes_annot,
+    pac3_nor_operon_pac3_seg_annot
+  ),
+  comparisons = list(
+    op_norNP3_osaNP3_comp,
+    op_osaNP3_okiP3_comp,
+    op_okiP3_osaP3_comp,
+    op_osaP3_norP3_comp
+  ),
+  dna_seg_scale = T
+)
+```
+
+## Final, manual PAC3 annotations
+```{r pac3_operon_diagram_4, dependson="chromosome_plots_operons", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# To be done
 
 ```
 
