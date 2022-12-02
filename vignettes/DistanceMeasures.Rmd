@@ -126,78 +126,151 @@ library(patchwork)    |> suppressPackageStartupMessages()
 
 
 # Each pair produces a slightly different graph. However, hopefully the distribution is similar.
-plotdist(gbs$Oki_Osa |> strand() |> runLength() |> as.numeric())
-plotdist(gbs$Oki_Bar |> strand() |> runLength() |> as.numeric())
-plotdist(gbs$Osa_Bar |> strand() |> runLength() |> as.numeric())
+plotdist(gbs$Oki_Osa |> strand() |> runLength() |> as.numeric(), demp=TRUE)
+plotdist(gbs$Oki_Bar |> strand() |> runLength() |> as.numeric(), demp=TRUE)
+plotdist(gbs$Osa_Bar |> strand() |> runLength() |> as.numeric(), demp=TRUE)
+plotdist(gbs$Oki_Kum |> strand() |> runLength() |> as.numeric(), demp=TRUE)
+
+descdist(gbs$Oki_Osa |> strand() |> runLength() |> as.numeric(), boot = 10000)
+descdist(gbs$Oki_Bar |> strand() |> runLength() |> as.numeric(), boot = 10000)
+descdist(gbs$Osa_Bar |> strand() |> runLength() |> as.numeric(), boot = 10000)
+descdist(gbs$Oki_Kum |> strand() |> runLength() |> as.numeric(), boot = 10000)
+
 
 # Fit a numeric vector (i.e., the strand run length) to a number of probability distributions
-fit_distributions <- function(vec, distributions = c("nbinom", "pois", "lnorm", "norm", "exp", "gamma", "llogis"), method="mle") {
-  lapply(distributions, function(d) {
-    fitdist(vec, d, method=method)
-  })
+fit_distributions <- function(vec, distributions = c("nbinom", "pois", "lnorm", "norm", "exp", "gamma", "llogis", "weibull"), method="mle", ...) {
+  setNames(lapply(distributions, function(d) {
+    fitdist(vec, d, method=method, ...)
+  }), distributions)
 }
-p_oki_osa <- gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_distributions(method="mle")
-
-# You can evaluate the different models graphically. These plots are a little busy, though.
-p1 <- as.ggplot(function() denscomp(p_oki_osa) )
-p2 <- as.ggplot(function() qqcomp(p_oki_osa) )
-p3 <- as.ggplot(function() cdfcomp(p_oki_osa) )
-p4 <- as.ggplot(function() ppcomp(p_oki_osa) )
-(p1 | p2) / (p3 | p4)
-
-p_oki_bar <- gbs$Oki_Bar |> strand() |> runLength() |> as.numeric() |> fit_distributions(method="mle")
-p1 <- as.ggplot(function() denscomp(p_oki_bar) )
-p2 <- as.ggplot(function() qqcomp(p_oki_bar) )
-p3 <- as.ggplot(function() cdfcomp(p_oki_bar) )
-p4 <- as.ggplot(function() ppcomp(p_oki_bar) )
-(p1 | p2) / (p3 | p4)
-
-
-p_osa_bar <- gbs$Osa_Bar |> strand() |> runLength() |> as.numeric() |> fit_distributions(method="mle")
-p1 <- as.ggplot(function() denscomp(p_osa_bar) )
-p2 <- as.ggplot(function() qqcomp(p_osa_bar) )
-p3 <- as.ggplot(function() cdfcomp(p_osa_bar) )
-p4 <- as.ggplot(function() ppcomp(p_osa_bar) )
-(p1 | p2) / (p3 | p4)
 
 # We can evaluate them one at a time:
-comp_plots <- function(gr, method="mle", distribution="nbinom") {
+fit_then_compplot <- function(gr, method="mle", distributions=c("nbinom", "pois", "lnorm", "norm", "exp", "gamma", "llogis", "weibull"), fitlwd=0.5, fitpch=16, ...) {
   srl <- gr |> strand() |> runLength() |> as.numeric()
-  f <- fit_distributions(srl, distribution=distribution, method="mle")
-  p1 <- as.ggplot(function() denscomp(f))
-  p2 <- as.ggplot(function() qqcomp(f))
-  p3 <- as.ggplot(function() cdfcomp(f))
-  p4 <- as.ggplot(function() ppcomp(f))
+  f <- fit_distributions(srl, distributions=distributions, method=method, ...)
+  p1 <- denscomp(f, plotstyle='ggplot', addlegend = F, fitlwd = fitlwd)
+  p2 <- qqcomp(  f, plotstyle='ggplot', addlegend = T, fitpch=fitpch)
+  p3 <- cdfcomp( f, plotstyle='ggplot', addlegend = F, fitlwd = fitlwd) + theme_grey() + theme(legend.position='none')
+  p4 <- ppcomp(  f, plotstyle='ggplot', addlegend = T, fitpch=fitpch)
   (p1 | p2 ) / ( p3 | p4)
 }
 
-all_distributions <- c("nbinom", "pois", "lnorm", "exp", "gamma")
-lapply(all_distributions, function(d) comp_plots(gbs$Oki_Osa, distribution = d))
-lapply(all_distributions, function(d) comp_plots(gbs$Oki_Bar, distribution = d))
-lapply(all_distributions, function(d) comp_plots(gbs$Osa_Bar, distribution = d))
+# You can evaluate the different models graphically. These plots are a little busy, though.
+fit_then_compplot(gbs$Oki_Osa)
+fit_then_compplot(gbs$Oki_Bar)
+fit_then_compplot(gbs$Osa_Bar)
+fit_then_compplot(gbs$Oki_Kum)
+
 
 # Obtain goodness-of-fit statistics for each model to see which fits data best.
 # Then we can use the best-fitting model as a probability distribution to randomly
 # induce a realistic number of "flips", generating a randomly-flipped GBreaks object.
-(gofstat(p_oki_osa))
-(gofstat(p_oki_bar))
-(gofstat(p_osa_bar))
+(gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_distributions(method="mle") |> gofstat())
+(gbs$Oki_Bar |> strand() |> runLength() |> as.numeric() |> fit_distributions(method="mle") |> gofstat())
+(gbs$Osa_Bar |> strand() |> runLength() |> as.numeric() |> fit_distributions(method="mle") |> gofstat())
+(gbs$Oki_Kum |> strand() |> runLength() |> as.numeric() |> fit_distributions(method="mle") |> gofstat())
 
-gofstat(p_oki_osa  )$aic |> which.min() |> names()
-gofstat(p_oki_bar  )$aic |> which.min() |> names()
-gofstat(p_osa_bar  )$aic |> which.min() |> names()
 
-# All 3 agree that a log-normal distribution best describes the size of 
+# Similar to the above, but only plots the comparisons.
+just_compplot <- function(cpl, method="mle", distributions=c("nbinom", "pois", "lnorm", "norm", "exp", "gamma", "llogis", "weibull"), fitlwd=0.5, fitpch=16, ...) {
+  p1 <- denscomp(cpl, plotstyle='ggplot', addlegend = F, fitlwd = fitlwd)
+  p2 <- qqcomp(  cpl, plotstyle='ggplot', addlegend = T, fitpch=fitpch)
+  p3 <- cdfcomp( cpl, plotstyle='ggplot', addlegend = F, fitlwd = fitlwd) + theme_grey() + theme(legend.position='none')
+  p4 <- ppcomp(  cpl, plotstyle='ggplot', addlegend = T, fitpch=fitpch)
+  (p1 | p2 ) / ( p3 | p4)
+}
+
+# Now that there is some indication that log-normal is the best distribution for making
+# models, we can try different fitting methods, selecting the best from among them.
+# The available fitting methdos include:
+#  mle - maximum likelihood estimation
+#  mge - maximum goodness-of-fit
+#  mme - moment matching
+#  mse - maximum spacing estimation
 # 
-# randomly_flip_strand <- function(gr, seed=1992, flip_number_function=pois) {
-#   str <- strand(gr)
-#   indices <- length(gr)
-#   # The number
-#   number_of_flips <- 
-#   which.flips <- 
-#   
-# }
-# randomly_flip(gbs$Oki_Osa)
+# MGE has a number of methods available. Sometimes the plots are too complicated, so you can remove them.
+#   c('mge_cvm', 'mge_ks', 'mge_ad', 'mge_adr', 'mge_adl', 'mge_ad2r', 'mge_ad2l', 'mge_ad2')
+fit_methods <- function(vec, distribution="lnorm", includeMethods=c('mle', 'mge', 'mme', 'mse'), excludeMethods=NULL ) {
+  m <- list()
+  if('mle' %in% includeMethods){
+    m <- append(m, list('mle'=fitdist(vec, distribution, method='mle')))
+  }
+  if('mge' %in% includeMethods){
+    m <- append(m, list(
+          'mge_cvm'=fitdist(vec, distribution, method='mge', gof='CvM'),
+          'mge_ks'=fitdist(vec, distribution, method='mge', gof='KS'),
+          'mge_ad'=fitdist(vec, distribution, method='mge', gof='AD'),
+          'mge_adr'=fitdist(vec, distribution, method='mge', gof='ADR'),
+          'mge_adl'=fitdist(vec, distribution, method='mge', gof='ADL'),
+          'mge_ad2r'=fitdist(vec, distribution, method='mge', gof='AD2R'),
+          'mge_ad2l'=fitdist(vec, distribution, method='mge', gof='AD2L'),
+          'mge_ad2'=fitdist(vec, distribution, method='mge', gof='AD2')
+          )
+        )
+  }
+  if('mme' %in% includeMethods){
+    m <- append(m, list('mme'=fitdist(vec, distribution, method='mme')))
+  }
+  if('mse' %in% includeMethods){
+    m <- append(m, list('mse'=fitdist(vec, distribution, method='mse')))
+  }
+  m <- m[! names(m) %in% excludeMethods]
+  m
+}
+c_oki_osa <- gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods()
+c_oki_osa |> just_compplot()
+c_oki_osa |> gofstat()
+
+# As above, but for optimization testing.
+fit_optims <- function(vec, distribution="lnorm", method='mle', maxit=10000, ...) {
+  list('nelder_mead'=fitdist(vec, distribution, optim.method='Nelder-Mead', method=method, ...),
+       'bfgs'=fitdist(vec, distribution, optim.method='BFGS', method=method, ...),
+       'sann'=fitdist(vec, distribution, optim.method='SANN', method=method, ...),
+       'cg'=fitdist(vec, distribution,   optim.method='CG', control=list(maxit=maxit), method=method, ...)
+   )
+}
+o_oki_osa <- gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_optims()
+o_oki_osa |> just_compplot()
+o_oki_osa |> gofstat()
+
+
+# Based on the 
+# gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMethods = c('mse', 'mme', 'mge_cvm', 'mge_ks', 'mge_ad', 'mge_ad2r', 'mge_ad2l', 'mge_ad') ) |> just_compplot()
+
+
+# All 3 agree that a log-normal distribution best describes the size of strands.
+# Use this to generate randomly-generated GRanges.
+randomly_flip_strand <- function(gr, times=1000, seed=1992, distribution="lnorm", method="mle", ...) {
+  # Fit the strand run length to a log-normal distribution.
+  fit <- gr |> strand() |> runLength() |> as.numeric() |> fit_distributions(distributions = distribution, method=method, ...)
+  fit <- fit[[1]]
+  fit_mean <- tmp$estimate[1]
+  fit_sd   <- tmp$estimate[2]
+  
+  rng <- set.seed(seed)
+  
+  # Make a phony GRanges (with the same dimensions as input) where all strands are positive.
+  # Then iteratively flip them according to the probability of a flip.
+  phony_gr <- gr
+  strand(phony_gr) <- "+"
+  
+  # Flip a GRanges according to a probability distribution.
+  # We fit the strand run length to a distribution above. Then, use the estimated parameters of the
+  # fitted distribution to generate values (i.e., segments of length N), continuing until the length
+  # of all segments equals the length of the original GRanges. Then re-write the strand information
+  # according to the segments.
+  generate_random_values <- function(distribution) {
+    total_length <- length(gr)
+    while(total_length < total_length){
+      
+    }
+  }
+  
+  randomly_flipped_grs <- lapply(1:times, function(it){
+    flip_granges(phony_gr, distribution=distribution)
+  })
+}
+randomly_flip_strand(gbs$Oki_Osa)
 
 detach('package:fitdistrplus')
 detach('package:survival')
