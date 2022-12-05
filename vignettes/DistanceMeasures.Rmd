@@ -109,7 +109,9 @@ BiocParallel::bplapply(gbs,                 strand_randomisation_index  ) |> pai
 BiocParallel::bplapply(gbs, \(g) swap(g) |> strand_randomisation_index()) |> pairs2Kable6x3()
 ```
 
-In order to assess the extent to which the strand randomisation index may vary in a given pair of genomes, I do a simple permutation test. Given a `GBreaks` object, reverse the strand of a randomly-selected number of alignments drawn from a random distribution.
+## Strand randomisation index permutation testing
+
+In order to assess the extent to which the strand randomisation index may vary in a given pair of genomes, I do a simple permutation test. Given a `GBreaks` object, reverse the strand of a randomly-selected number of alignments drawn from a distribution according, by fitting it to a distribution that approximately describes strand orientation.
 
 You can evaluate the relative frequency of "flips", i.e., a possible inversion, by counting the frequency of changes in the strand. I check this quickly below. Then I use the shape of this distribution to select a random number of flips to make, then make 10,000 permutations of the alignment with the randomly-selected number of flips, then calculate strand randomization indices on these randomly-flipped alignments. 
 
@@ -121,7 +123,7 @@ library(MASS)         |> suppressPackageStartupMessages()
 library(survival)     |> suppressPackageStartupMessages()
 library(actuar)       |> suppressPackageStartupMessages()
 library(distrMod)     |> suppressPackageStartupMessages()
-library(ggplotify)    |> suppressPackageStartupMessages()
+library(parallel)     |> suppressPackageStartupMessages()
 library(patchwork)    |> suppressPackageStartupMessages()
 
 
@@ -240,38 +242,113 @@ o_oki_osa |> gofstat()
 
 # All 3 agree that a log-normal distribution best describes the size of strands.
 # Use this to generate randomly-generated GRanges.
-randomly_flip_strand <- function(gr, times=1000, seed=1992, distribution="lnorm", method="mle", ...) {
-  # Fit the strand run length to a log-normal distribution.
-  fit <- gr |> strand() |> runLength() |> as.numeric() |> fit_distributions(distributions = distribution, method=method, ...)
+randomly_flip_strand <- function(gr, times=1e4, seed=1992, threads=1, distribution="lnorm", method="mle", optim.method='Nelder-Mead',  ...) {
+  # Fit the strand run length to a given distribution.
+  fit <- gr |> strand() |> runLength() |> as.numeric() |> fit_distributions(distributions = distribution, method=method, optim.method=optim.method, ...)
   fit <- fit[[1]]
-  fit_mean <- tmp$estimate[1]
-  fit_sd   <- tmp$estimate[2]
-  
-  rng <- set.seed(seed)
   
   # Make a phony GRanges (with the same dimensions as input) where all strands are positive.
   # Then iteratively flip them according to the probability of a flip.
   phony_gr <- gr
   strand(phony_gr) <- "+"
-  
+
   # Flip a GRanges according to a probability distribution.
   # We fit the strand run length to a distribution above. Then, use the estimated parameters of the
   # fitted distribution to generate values (i.e., segments of length N), continuing until the length
   # of all segments equals the length of the original GRanges. Then re-write the strand information
   # according to the segments.
-  generate_random_values <- function(distribution) {
+  generate_random_strand <- function(gr, distribution, coef, child.seed) {
+    set.seed(child.seed)
     total_length <- length(gr)
-    while(total_length < total_length){
+    current_strand <- numeric()
+    while(sum(current_strand) < total_length){
+      # Get distribution function by distribution name
+      # "nbinom", "pois", "lnorm", "norm", "exp", "gamma", "llogis", "weibull"
+      if(distribution=="nbinom"){
+        dist_fun <- rnbinom
+        sel <- rnbinom(n=1, coef) |> ceiling()
+      } else if(distribution == "pois") {
+        dist_fun <- rpois
+        sel <- rpois(n=1, coef) |> ceiling()
+      } else if(distribution == "lnorm") {
+        dist_fun <- rlnorm
+        sel <- rlnorm(n=1, coef) |> ceiling()
+      } else if(distribution == "norm" ){
+        dist_fun <- rnorm
+        sel <- rnorm(n=1, coef) |> ceiling()
+      } else if(distribution == "exp") {
+        dist_fun <- rexp
+        sel <- rexp(n=1, coef) |> ceiling()
+      } else if(distribution == "gamma"){
+        dist_fun <- rgamma
+        sel <- rgamma(n=1, coef) |> ceiling()
+      } else if(distribution == "llogis"){
+        dist_fun <- rlogis
+        sel <- rlogis(n=1, coef) |> ceiling()
+      } else if(distribution == "weibull"){
+        dist_fun <- rweibull
+        sel <- rweibull(n=1, coef) |> ceiling()
+      } else {
+        cat(paste0("Error. Unknown distribution: ", distribution, ". Not sure what function to match to?\n"))
+        stop()
+      }
+      current_strand <- c(current_strand, sel)
+      #current_strand <- c(current_strand, ceiling(dist_fun(coef)) )
+    }
+
+    # If the length of the generated strand is greater than the length of the GRanges,
+    # correct the last item so that they are exactly equal in size.
+    if(sum(current_strand) > total_length ) {
+      # Shave off elements from the end until the random strand's length sum is smaller or equal to GRange length
+      while(sum(current_strand) > total_length){
+        current_strand <- head(current_strand, n=-1)
+      }
+      # If they are not equal, add a new one equal to the difference
+      if(sum(current_strand) != total_length){
+        current_strand <- c(current_strand, total_length-sum(current_strand) )
+      }
       
     }
+    current_strand
   }
   
-  randomly_flipped_grs <- lapply(1:times, function(it){
-    flip_granges(phony_gr, distribution=distribution)
+  random_strand_to_gr <- function(gr, random_strand, child.seed) {
+    # Make a strandless GRanges first. We'll replace the strand later.
+    stripped_gr <- gr
+    strand(stripped_gr) <- "*"
+    
+    # Determine whether the first block of the randomized strand is "+" or "-" strand.
+    set.seed(child.seed)
+    coin_flip <- rnorm(1)
+    if(coin_flip>=0) {
+      # Make all odd indices positive
+      strand(stripped_gr)[c(TRUE, FALSE)] <- "+"
+      # Make all even indices negative
+      strand(stripped_gr)[c(FALSE, TRUE)] <- "-"
+    } else {
+      # Make all odd indices negative
+      strand(stripped_gr)[c(TRUE, FALSE)] <- "-"
+      # Make all even indices positive
+      strand(stripped_gr)[c(FALSE, TRUE)] <- "+"
+    }
+    stripped_gr
+  }
+  # Use seed argument to generate a number of random seeds for further simulations
+  set.seed(seed)
+  child.seeds <- rnorm(times, mean=1e6, sd = 1e5)
+  
+  #strands <- mclapply(mc.cores=threads, 1:times, function(x) {
+  strands <- lapply(1:times, function(x) {
+    randomized_strand <- generate_random_strand(gr=gr, distribution=distribution, coef=coef(fit), child.seed=child.seeds[x])
+    randomized_strand_gr <- random_strand_to_gr(gr=gr, random_strand = randomized_strand, child.seed=child.seeds[x])
+    randomized_strand_gr
+    #sri <- strand_randomisation_index(randomized_strand_gr)
+    #sri
   })
+  strands
 }
-randomly_flip_strand(gbs$Oki_Osa)
-
+randomly_flip_strand(gbs$Oki_Osa, times=3)
+  
 detach('package:fitdistrplus')
 detach('package:survival')
 detach('package:actuar')
