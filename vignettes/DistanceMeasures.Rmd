@@ -236,11 +236,19 @@ o_oki_osa |> just_compplot()
 o_oki_osa |> gofstat()
 
 
-# Based on the 
-# gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMethods = c('mse', 'mme', 'mge_cvm', 'mge_ks', 'mge_ad', 'mge_ad2r', 'mge_ad2l', 'mge_ad') ) |> just_compplot()
+# Based on the results above, it seems that the best fits are MLE, MGE-ADR, and MGE-ADL.
+gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMethods = c('mse', 'mme', 'mge_cvm', 'mge_ks', 'mge_ad', 'mge_ad2r', 'mge_ad2l', 'mge_ad', 'mge_ad2') ) |> just_compplot()
+# Just to be clear, let's check them out.
+# ADL consistently underestimates the sizes. 
+gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMethods = c('mse', 'mme', 'mge_cvm', 'mge_ks', 'mge_ad', 'mge_ad2r', 'mge_ad2l', 'mge_ad', 'mge_ad2', 'mge_adr', 'mle') ) |> just_compplot()
+# ADR overestimates sizes.
+gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMethods = c('mse', 'mme', 'mge_cvm', 'mge_ks', 'mge_ad', 'mge_ad2r', 'mge_ad2l', 'mge_ad', 'mge_ad2', 'mge_adl', 'mle') ) |> just_compplot()
+
+# ADL and MLE are very close.
+gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMethods = c('mse', 'mme', 'mge_cvm', 'mge_ks', 'mge_ad', 'mge_ad2r', 'mge_ad2l', 'mge_ad', 'mge_ad2', 'mge_adr') ) |> just_compplot()
 
 
-# All 3 agree that a log-normal distribution best describes the size of strands.
+# All 3 agree that a log-normal distribution is the best fit to describe the run length distribution.
 # Use this to generate randomly-generated GRanges.
 randomly_flip_strand <- function(gr, times=1e4, seed=1992, threads=1, distribution="lnorm", method="mle", optim.method='Nelder-Mead',  ...) {
   # Fit the strand run length to a given distribution.
@@ -320,16 +328,11 @@ randomly_flip_strand <- function(gr, times=1e4, seed=1992, threads=1, distributi
     # Determine whether the first block of the randomized strand is "+" or "-" strand.
     set.seed(child.seed)
     coin_flip <- rnorm(1)
+    strand_length <- length(random_strand)
     if(coin_flip>=0) {
-      # Make all odd indices positive
-      strand(stripped_gr)[c(TRUE, FALSE)] <- "+"
-      # Make all even indices negative
-      strand(stripped_gr)[c(FALSE, TRUE)] <- "-"
+      strand(stripped_gr) <- strand(Rle(values=head(rep(c("+", "-"), times=length(random_strand)), n=length(random_strand)), lengths = random_strand))
     } else {
-      # Make all odd indices negative
-      strand(stripped_gr)[c(TRUE, FALSE)] <- "-"
-      # Make all even indices positive
-      strand(stripped_gr)[c(FALSE, TRUE)] <- "+"
+      strand(stripped_gr) <- strand(Rle(values=head(rep(c("-", "+"), times=length(random_strand)), n=length(random_strand)), lengths = random_strand))
     }
     stripped_gr
   }
@@ -337,18 +340,71 @@ randomly_flip_strand <- function(gr, times=1e4, seed=1992, threads=1, distributi
   set.seed(seed)
   child.seeds <- rnorm(times, mean=1e6, sd = 1e5)
   
-  #strands <- mclapply(mc.cores=threads, 1:times, function(x) {
-  strands <- lapply(1:times, function(x) {
+  randomized_strands <- mclapply(mc.cores=threads, 1:times, function(x) {
+  #randomized_strands <- lapply(1:times, function(x) {
     randomized_strand <- generate_random_strand(gr=gr, distribution=distribution, coef=coef(fit), child.seed=child.seeds[x])
     randomized_strand_gr <- random_strand_to_gr(gr=gr, random_strand = randomized_strand, child.seed=child.seeds[x])
-    randomized_strand_gr
-    #sri <- strand_randomisation_index(randomized_strand_gr)
-    #sri
+    #randomized_strand_gr
+    sri <- strand_randomisation_index(randomized_strand_gr)
+    sri
   })
-  strands
+  randomized_strands
 }
-randomly_flip_strand(gbs$Oki_Osa, times=3)
+randomly_flip_strand(gbs$Oki_Osa, times=10)
+
+
+# Make some plots comparing random strand randomisation indices to the observed values.
+randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle') |> unlist() |> hist(xlim=c(0,0.1), main="Oki-Osa: Histogram of random run length SRIs (MLE)", xlab='run length') |> abline(v=strand_randomisation_index(gbs$Oki_Osa), col='darkred') |> text(x=strand_randomisation_index(gbs$Oki_Osa), y=150,  label="overall", col='darkred') |> abline( v=gbs$Oki_Osa |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), lty=3, col='#595959'  ) |> text(x=gbs$Oki_Osa |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), y=150,  label="short", col='#595959') |> abline( v=gbs$Oki_Osa |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), lty=3, col='#595959'  )  |> text(x=gbs$Oki_Osa |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), y=150, label="long", col='#595959')
+
+# Make sure that the origin of the strand distribution doesn't affect the randomisation too much
+check_arm_rl_variance <- list(
+  overall1=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 1234)),
+  short1=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 1234)),
+  long1=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 1234)), 
   
+  overall2=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 4321)),
+  short2=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 4321)),
+  long2=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 4321)),
+  
+  overall3=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 6789)),
+  short3=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 6789)),
+  long3=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 6789)), 
+  
+  overall4=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 9876)),
+  short4=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 9876)),
+  long4=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 9876)),
+  
+  overall5=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 4567)),
+  short5=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 4567)),
+  long5=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 4567)) 
+)
+
+check_arm_rl_variance_df <- do.call(rbind, lapply(names(check_arm_rl_variance), function(n) {
+  cbind(n, check_arm_rl_variance[[n]])
+} )) |> as.data.frame() |> dplyr::rename(strand_randomisation_index=V2)
+check_arm_rl_variance_df$category <- sapply(check_arm_rl_variance_df$n, function(x) unlist(strsplit(x, '[[:digit:]]'))) |> unlist() |> unname()
+
+ggplot(check_arm_rl_variance_df) +
+  aes(x=as.numeric(strand_randomisation_index), fill=category) +
+  
+  geom_vline(xintercept = strand_randomisation_index(gbs$Oki_Osa), lwd=0.5, lty=3, col='#595959') +
+  annotate("label", x=strand_randomisation_index(gbs$Oki_Osa), y=160, label="overall") + 
+  
+  geom_vline(xintercept = strand_randomisation_index(gbs$Oki_Osa |> plyranges::filter(Arm=="long")), lwd=0.5, lty=3, col='#595959') +
+  annotate("label", x=strand_randomisation_index(gbs$Oki_Osa |> plyranges::filter(Arm=="long")), y=130, label="long") + 
+  
+  geom_vline(xintercept = strand_randomisation_index(gbs$Oki_Osa |> plyranges::filter(Arm=="short")), lwd=0.5, lty=3, col='#595959') +
+  annotate("label", x=strand_randomisation_index(gbs$Oki_Osa |> plyranges::filter(Arm=="short")), y=130, label="short") + 
+  
+  geom_histogram() +
+  ylim(c(0, 180)) + 
+  facet_wrap(~n)
+
+
+
+# Osa-Bar
+randomly_flip_strand(gbs$Osa_Bar, times=1000, threads=4, method='mle') |> unlist() |> hist(xlim=c(0,1), main="Osa-Bar: Histogram of random run length SRIs (MLE)", xlab='run length') |> abline(v=strand_randomisation_index(gbs$Osa_Bar), col='darkred') |> text(x=strand_randomisation_index(gbs$Osa_Bar), y=150,  label="overall", col='darkred') |> abline( v=gbs$Osa_Bar |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), lty=3, col='#595959'  ) |> text(x=gbs$Osa_Bar |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), y=150,  label="short", col='#595959') |> abline( v=gbs$Osa_Bar |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), lty=3, col='#595959'  )  |> text(x=gbs$Osa_Bar |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), y=150, label="long", col='#595959')
+
 detach('package:fitdistrplus')
 detach('package:survival')
 detach('package:actuar')
