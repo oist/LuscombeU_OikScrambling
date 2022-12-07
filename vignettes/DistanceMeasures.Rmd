@@ -247,7 +247,6 @@ gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMet
 # ADL and MLE are very close.
 gbs$Oki_Osa |> strand() |> runLength() |> as.numeric() |> fit_methods(excludeMethods = c('mse', 'mme', 'mge_cvm', 'mge_ks', 'mge_ad', 'mge_ad2r', 'mge_ad2l', 'mge_ad', 'mge_ad2', 'mge_adr') ) |> just_compplot()
 
-
 # All 3 agree that a log-normal distribution is the best fit to describe the run length distribution.
 # Use this to generate randomly-generated GRanges.
 randomly_flip_strand <- function(gr, times=1e4, seed=1992, threads=1, distribution="lnorm", method="mle", optim.method='Nelder-Mead',  ...) {
@@ -338,50 +337,50 @@ randomly_flip_strand <- function(gr, times=1e4, seed=1992, threads=1, distributi
   }
   # Use seed argument to generate a number of random seeds for further simulations
   set.seed(seed)
-  child.seeds <- rnorm(times, mean=1e6, sd = 1e5)
+  child.seeds <- sample(x=times*10, size = times, replace = F)
   
   randomized_strands <- mclapply(mc.cores=threads, 1:times, function(x) {
   #randomized_strands <- lapply(1:times, function(x) {
     randomized_strand <- generate_random_strand(gr=gr, distribution=distribution, coef=coef(fit), child.seed=child.seeds[x])
     randomized_strand_gr <- random_strand_to_gr(gr=gr, random_strand = randomized_strand, child.seed=child.seeds[x])
-    #randomized_strand_gr
     sri <- strand_randomisation_index(randomized_strand_gr)
     sri
-  })
+  }) |> unlist()
   randomized_strands
 }
 randomly_flip_strand(gbs$Oki_Osa, times=10)
 
 
 # Make some plots comparing random strand randomisation indices to the observed values.
-randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle') |> unlist() |> hist(xlim=c(0,0.1), main="Oki-Osa: Histogram of random run length SRIs (MLE)", xlab='run length') |> abline(v=strand_randomisation_index(gbs$Oki_Osa), col='darkred') |> text(x=strand_randomisation_index(gbs$Oki_Osa), y=150,  label="overall", col='darkred') |> abline( v=gbs$Oki_Osa |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), lty=3, col='#595959'  ) |> text(x=gbs$Oki_Osa |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), y=150,  label="short", col='#595959') |> abline( v=gbs$Oki_Osa |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), lty=3, col='#595959'  )  |> text(x=gbs$Oki_Osa |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), y=150, label="long", col='#595959')
+randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle') |> hist(xlim=c(0,0.1), main="Oki-Osa: Histogram of random run length SRIs (MLE)", xlab='run length') |> abline(v=strand_randomisation_index(gbs$Oki_Osa), col='darkred') |> text(x=strand_randomisation_index(gbs$Oki_Osa), y=150,  label="overall", col='darkred') |> abline( v=gbs$Oki_Osa |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), lty=3, col='#595959'  ) |> text(x=gbs$Oki_Osa |> plyranges::filter(Arm=="short") |> strand_randomisation_index(), y=150,  label="short", col='#595959') |> abline( v=gbs$Oki_Osa |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), lty=3, col='#595959'  )  |> text(x=gbs$Oki_Osa |> plyranges::filter(Arm=="long") |> strand_randomisation_index(), y=150, label="long", col='#595959')
 
-# Make sure that the origin of the strand distribution doesn't affect the randomisation too much
 check_arm_rl_variance <- list(
-  overall1=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 1234)),
-  short1=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 1234)),
-  long1=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 1234)), 
+  overall1=unlist(randomly_flip_strand(gbs$Oki_Osa, times=500, threads=4, method='mle', seed = 1234)),
+  short1=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=500, threads=4, method='mle', seed = 1234)),
+  long1=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=500, threads=4, method='mle', seed = 1234)), 
   
-  overall2=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 4321)),
-  short2=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 4321)),
-  long2=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 4321)),
+  overall2=unlist(randomly_flip_strand(gbs$Oki_Osa, times=500, threads=4, method='mle', seed = 4321)),
+  short2=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=500, threads=4, method='mle', seed = 4321)),
+  long2=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=500, threads=4, method='mle', seed = 4321)),
   
-  overall3=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 6789)),
-  short3=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 6789)),
-  long3=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 6789)), 
+  overall3=unlist(randomly_flip_strand(gbs$Oki_Osa, times=500, threads=4, method='mle', seed = 6789)),
+  short3=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=500, threads=4, method='mle', seed = 6789)),
+  long3=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=500, threads=4, method='mle', seed = 6789)), 
   
-  overall4=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 9876)),
-  short4=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 9876)),
-  long4=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 9876)),
+  overall4=unlist(randomly_flip_strand(gbs$Oki_Osa, times=500, threads=4, method='mle', seed = 9876)),
+  short4=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=500, threads=4, method='mle', seed = 9876)),
+  long4=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=500, threads=4, method='mle', seed = 9876)),
   
-  overall5=unlist(randomly_flip_strand(gbs$Oki_Osa, times=1000, threads=4, method='mle', seed = 4567)),
-  short5=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=1000, threads=4, method='mle', seed = 4567)),
-  long5=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=1000, threads=4, method='mle', seed = 4567)) 
+  overall5=unlist(randomly_flip_strand(gbs$Oki_Osa, times=500, threads=4, method='mle', seed = 4567)),
+  short5=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="short"), times=500, threads=4, method='mle', seed = 4567)),
+  long5=unlist(randomly_flip_strand(gbs$Oki_Osa |> plyranges::filter(Arm=="long"), times=500, threads=4, method='mle', seed = 4567)) 
 )
 
+# Turn above list into a DF
 check_arm_rl_variance_df <- do.call(rbind, lapply(names(check_arm_rl_variance), function(n) {
   cbind(n, check_arm_rl_variance[[n]])
 } )) |> as.data.frame() |> dplyr::rename(strand_randomisation_index=V2)
+
 check_arm_rl_variance_df$category <- sapply(check_arm_rl_variance_df$n, function(x) unlist(strsplit(x, '[[:digit:]]'))) |> unlist() |> unname()
 
 ggplot(check_arm_rl_variance_df) +
@@ -398,7 +397,7 @@ ggplot(check_arm_rl_variance_df) +
   
   geom_histogram() +
   ylim(c(0, 180)) + 
-  facet_wrap(~n)
+  facet_wrap(~n, nrow=3)
 
 
 
@@ -413,6 +412,222 @@ detach('package:ggplotify')
 detach('package:patchwork')
 ```
 
+## Strand randomisation index bootstrap tests
+
+Another way to assess the stability of the strand randomisation index is with bootstrapping, by removing some percentage of the underlying data and measuring how variable the index is.
+
+```{r strand_randomisation_index_boot}
+gr_boot <- function(gr, seed=1992, keep=0.9){
+  set.seed <- seed
+  gr_indices <- 1:length(gr)
+  gr_keep <- sample(gr_indices, keep*length(gr), replace = F)
+  gr <- gr[gr_keep] |> sort()
+  gr
+}
+#gr_boot(gbs$Oki_Osa)
+
+run_sri_bootstraps <- function(gr, seed=1992, n=1000, keep=0.9, threads=1){
+  set.seed(seed)
+  child.seeds <- sample(x=n*10, size = n, replace = F)
+  sri_boot <- mclapply(mc.cores=threads, 1:length(child.seeds), function(s) {
+    seed <- child.seeds[s]
+    boot_gr <- gr_boot(gr, seed=seed, keep=keep)
+    sri <- strand_randomisation_index(boot_gr)
+    sri
+  }) |> unlist()
+  sri_boot
+}
+#run_sri_bootstraps(gbs$Oki_Osa, seed=1992, n=10, keep=0.9) |> hist()
+
+run_sri_bootstraps_reps <- function(gr, seed=1992, n=1000, keep=0.9, threads=1, replicates=3) {
+  set.seed(seed)
+  child.seeds <- sample(x=replicates*10, size = replicates, replace = F)
+  reps <- lapply(1:replicates, function(r){
+    run_sri_bootstraps(gr, seed=child.seeds[r], n=n, keep=keep, threads=threads)
+  })
+  names(reps) <- paste0("rep", 1:replicates)
+  reps
+}
+
+run_boots_across_arms <- function(gr, seed=1992, num_boots=100, threads=1, replicates=3) {
+  rbind(
+    run_sri_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.9) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.9", arm='all'),
+    run_sri_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.8) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.8", arm='all'),
+    run_sri_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.7) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.7", arm='all'),
+    run_sri_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.6) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.6", arm='all'),
+    run_sri_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.5) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.5", arm='all'),
+    
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.9) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.9", arm='short'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.8) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.8", arm='short'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.7) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.7", arm='short'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.6) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.6", arm='short'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.5) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.5", arm='short'),
+    
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.9) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.9", arm='long'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.8) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.8", arm='long'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.7) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.7", arm='long'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.6) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.6", arm='long'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.5) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.5", arm='long'),
+    
+        
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.9) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.9", arm='XSR'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.8) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.8", arm='XSR'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.7) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.7", arm='XSR'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.6) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.6", arm='XSR'),
+    run_sri_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, keep=0.5) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(keep_fraction="0.5", arm='XSR')
+  )
+}
+
+num_boots <- 100
+boots_across_arms <- SimpleList()
+# Oki-Osa
+boots_across_arms$Oki_Osa <- run_boots_across_arms(gbs$Oki_Osa, num_boots = num_boots, threads=4, replicates=3)
+boots_across_arms$Oki_Osa |> ggplot() + aes(x=keep_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Oki-Osa: Bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+# Oki-Bar
+boots_across_arms$Oki_Bar <- run_boots_across_arms(gbs$Oki_Bar, num_boots = num_boots, threads=4, replicates=3)
+boots_across_arms$Oki_Bar |> ggplot() + aes(x=keep_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Oki-Osa: Bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+# Osa-Bar
+boots_across_arms$Osa_Bar <- run_boots_across_arms(gbs$Osa_Bar, num_boots = num_boots, threads=4, replicates=3)
+boots_across_arms$Osa_Bar |> ggplot() + aes(x=keep_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Osa-Bar: Bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+# Oki-Kum
+boots_across_arms$Oki_Kum <- run_boots_across_arms(gbs$Oki_Kum, num_boots = num_boots, threads=4, replicates=3)
+boots_across_arms$Oki_Kum |> ggplot() + aes(x=keep_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Oki-Kum: Bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+```
+
+## Strand randomisation bootstrap-flipping
+As above, but instead of randomly subsetting a `GBreaks` before caculating SRI, instead randomly flip some proportion of it, then calculate SRI.
+
+```{r strand_randomisation_index_boot}
+flip_strand <- function(strand_rle) {
+  runValues <- runValue(strand_rle)
+  runLengths <- runLength(strand_rle)
+  flipped_strand <- as.character(runValue(strand_rle))
+  flipped_strand <- gsub("\\+", "F", flipped_strand)
+  flipped_strand <- gsub("\\-", "+", flipped_strand)
+  flipped_strand <- gsub("F", "-", flipped_strand)
+  flipped_strand <- Rle(factor(flipped_strand, levels=c("+", "-", "*")), lengths = runLengths)
+  flipped_strand
+} 
+# flip_strand(head(strand(gbs$Oki_Osa)))
+
+gr_boot_flipper <- function(gr, seed=1992, flip=0.01){
+  set.seed(seed)
+  gr_indices <- 1:length(gr)
+  gr_to_flip <- sample(gr_indices, flip*length(gr), replace = F) |> sort()
+  strand(gr[gr_to_flip]) <- flip_strand(strand(gr[gr_to_flip]))
+  gr
+}
+# gbs$Oki_Osa[strand(gbs$Oki_Osa) != strand(gr_boot_flipper(gbs$Oki_Osa, seed=1992))]
+
+run_sri_flip_bootstraps <- function(gr, seed=1992, n=1000, flip=0.01, threads=1){
+  set.seed(seed)
+  child.seeds <- sample(x=n*10, size=n, replace=F)
+  sri_boot <- mclapply(mc.cores=threads, 1:length(child.seeds), function(s) {
+    seed <- child.seeds[s]
+    boot_gr <- gr_boot_flipper(gr, seed=seed, flip=flip)
+    sri <- strand_randomisation_index(boot_gr)
+    sri
+  }) |> unlist()
+  sri_boot
+}
+#run_sri_flip_bootstraps(gbs$Oki_Osa, seed=1992, n=10, flip=0.01, threads=1)
+
+
+run_sri_flip_bootstraps_reps <- function(gr, seed=1992, n=1000, flip=0.01, threads=1, replicates=3) {
+  set.seed(seed)
+  child.seeds <- sample(x=n*10, size=n, replace=F)
+  reps <- lapply(1:replicates, function(r){
+    run_sri_flip_bootstraps(gr, seed=child.seeds[r], n=n, flip=flip, threads=threads)
+  })
+  names(reps) <- paste0("rep", 1:replicates)
+  reps
+}
+# run_sri_flip_bootstraps_reps(gbs$Oki_Osa, seed=1992, n=10, flip=0.01, threads=1, replicates=3)
+
+
+run_flip_boots_across_arms <- function(gr, seed=1992, num_boots=100, threads=1, replicates=3) {
+  rbind(
+    run_sri_flip_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.01) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.01", arm='all'),
+    run_sri_flip_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.05) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.05", arm='all'),
+    run_sri_flip_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.10) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.10", arm='all'),
+    run_sri_flip_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.25) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.25", arm='all'),
+    run_sri_flip_bootstraps_reps(gr, seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.50) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.50", arm='all'),
+    
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.01) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.01", arm='short'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.05) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.05", arm='short'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.10) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.10", arm='short'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.25) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.25", arm='short'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="short"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.50) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.50", arm='short'),
+    
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.01) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.01", arm='long'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.05) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.05", arm='long'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.10) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.10", arm='long'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.25) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.25", arm='long'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="long"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.50) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.50", arm='long'),
+    
+    
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.01) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.01", arm='XSR'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.05) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.05", arm='XSR'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.10) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.10", arm='XSR'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.25) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.25", arm='XSR'),
+    run_sri_flip_bootstraps_reps(gr |> plyranges::filter(Arm=="XSR"), seed=seed, n=num_boots, threads=threads, replicates=replicates, flip=0.50) |> as.data.frame() |> tidyr::pivot_longer(cols=paste0('rep', 1:3), names_to='rep', values_to='strand_randomisation_index') |> dplyr::mutate(flip_fraction="0.50", arm='XSR')
+  )
+}
+
+
+# Oki-Osa
+num_boots <- 100
+flip_boots <- SimpleList()
+flip_boots$Oki_Osa <- run_flip_boots_across_arms(gbs$Oki_Osa, seed=1234, num_boots = num_boots, replicates = 3, threads=6)
+flip_boots$Oki_Osa |> ggplot() + aes(x=flip_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Oki-Osa: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+# Oki-Bar
+flip_boots$Oki_Bar <- run_flip_boots_across_arms(gbs$Oki_Bar, seed=1234, num_boots = 100, replicates = 3, threads=6)
+flip_boots$Oki_Bar |> ggplot() + aes(x=flip_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Oki-Bar: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+# Osa-Bar
+flip_boots$Osa_Bar <- run_flip_boots_across_arms(gbs$Osa_Bar, seed=1234, num_boots = 100, replicates = 3, threads=6)
+flip_boots$Osa_Bar |> ggplot() + aes(x=flip_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Osa-Bar: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+# Oki-Kum
+flip_boots$Oki_Kum <- run_flip_boots_across_arms(gbs$Oki_Kum, seed=1234, num_boots = 100, replicates = 3, threads=6)
+flip_boots$Oki_Kum |> ggplot() + aes(x=flip_fraction, y=strand_randomisation_index, fill=rep) + facet_wrap(~arm, nrow=1) + geom_boxplot() + ggtitle(paste0("Oki-Kum: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+
+
+
+# Plots as above but with lines for the actual values
+plot_sri_with_obs <- function(gr, flip_boots) {
+  sri_lines <- data.frame(obs_sri=factor(c("overall", "long", "short"), levels=c('overall', 'long', 'short')),
+                        start=c(0,0,0),
+                        end=c(6,6,6),
+                        lty=c(2,3,4),
+                        col=c("#595959","#595959","#595959"),
+                        y=c(strand_randomisation_index(gr),
+                            strand_randomisation_index(gr |> plyranges::filter(Arm=="long")),
+                            strand_randomisation_index(gr |> plyranges::filter(Arm=="short")))
+                      )
+  flip_boots |> ggplot() +
+    aes(x=flip_fraction, y=strand_randomisation_index, fill=rep) +
+    facet_wrap(~arm, nrow=1) +
+    geom_blank() +
+    geom_segment(data=sri_lines, inherit.aes=FALSE, aes(x=start, xend=end, y=y, yend=y, lty=obs_sri)) +
+    geom_boxplot() +
+    ylim(c(0, max(c(sri_lines$y, flip_boots$strand_randomisation_index))))
+
+}
+# Oki-Osa
+plot_sri_with_obs(gbs$Oki_Osa, flip_boots$Oki_Osa) + ggtitle(paste0("Oki-Osa: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+# Oki-Bar
+plot_sri_with_obs(gbs$Oki_Bar, flip_boots$Oki_Bar) + ggtitle(paste0("Oki-Bar: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+# Osa-Bar
+plot_sri_with_obs(gbs$Osa_Bar, flip_boots$Osa_Bar) + ggtitle(paste0("Osa-Bar: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+# Oki-Kum
+plot_sri_with_obs(gbs$Oki_Kum, flip_boots$Oki_Kum) + ggtitle(paste0("Oki-Kum: Flip-bootstrap stability of strand randomisation index (n=", num_boots, ")"))
+```
 
 # Strand proportion index
 
