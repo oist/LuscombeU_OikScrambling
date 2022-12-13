@@ -94,3 +94,174 @@ saveRDS(pwmMatchesOnOsa_12_95, "pwmMatchesOsa_12_95.Rds")
 }
 
 ```
+
+
+## CTCF sites
+```{r ctcf_1}
+search_ctcf <- function(genome, pwm_id="MA0139.1", mc.cores=1, allowed_chr_names = c("chr1", "Chr1", "chr2", "Chr2", "PAR", "XSR", "YSR")) {
+  query <- PWMatrixList[[pwm_id]]
+  chr <- seqnames(genome)[seqnames(genome) %in% allowed_chr_names]
+  genome_seqs <- getSeq(genome, chr) #lapply(seqnames(genome), \(name) genome[[name]]) |> as("DNAStringSet")
+  siteSet <- TFBSTools::searchSeq(query, genome_seqs, mc.cores = mc.cores) |> suppressWarnings()
+  gr <- as(siteSet, "GRanges")
+  strand(gr) <- "*"
+  unique(sort(gr, ignore.strand=TRUE))
+}
+
+ctcf <- SimpleList()
+ctcf$Oki <- search_ctcf(genomes$Oki, mc.cores=8)
+ctcf$Osa <- search_ctcf(genomes$Osa, mc.cores=8)
+```
+
+The code below is from the whole-chromosome plots vignette.
+```{r ctcf_w}
+# Make a BSgenome into a GRanges object, one range per chromosome
+BSgenomeToGR <- function(genome) {
+  as(seqinfo(genome), "GRanges")
+}
+
+# Make a genome into a bunch of windows of length N
+genomeGRToWindows <- function(gr, windowSize=10000) {
+  tile(gr, w=windowSize) |> unlist() |> unname()
+}
+
+# Match ranges to a single bin by reducing each range to its center.
+# Returns the index of the matched bins
+matchToOneBin <- function(ranges, bins) {
+  # Ensure that a range overlaps with only one bin
+  safeRanges <- ranges |> resize(1, fix="center")
+  o <- findOverlaps(safeRanges, bins, type = 'within')
+  subjectHits(o)
+}
+(matchToOneBin(transcripts$Oki, tmp)) |> head()
+
+# Apply one function to data grouped by bins, and array it according to the
+# original bins (that is, insert NAs for bins that contained no data).
+# This function only works as intended if the bins fully tile the genome.
+binApply <- function(f, bins, data, index, ...) {
+  res <- rep(NA, length(bins))
+  vals <-tapply(data, index, f, ...)
+  res[as.numeric(names(vals))] <- unname(vals)
+  res
+}
+(binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE)) |> head(100)
+
+# Intersect each genome window with some other GRange (meta, as in metadata)
+metaPerWindow <- function(genomeWindows, meta, meta_prefix=NULL) {
+  idx <- matchToOneBin(meta, genomeWindows)
+  for (name in colnames(mcols(meta))) {
+    data <- mcols(meta)[[name]]
+    if(is.numeric(data)) {
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]       <- binApply(length, genomeWindows, data, idx)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".median")]]      <- binApply(median, genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".mean")]]        <- binApply(mean,   genomeWindows, data, idx, na.rm = TRUE)
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".sd")]]          <- binApply(sd,     genomeWindows, data, idx, na.rm = TRUE)
+    } else if(is.character(data) ) {
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count")]]       <- binApply(length, genomeWindows, data, idx)
+    } else if(is.factor(data)) {
+      mcols(genomeWindows)[[paste0(meta_prefix, name, ".count.total")]] <- binApply(length, genomeWindows, data, idx)
+      if(length(levels(data)) > 1) {
+        binned_list_of_tables <- binApply(table,  genomeWindows, data, idx)
+        binned_DataFrame <- do.call(rbind, binned_list_of_tables) |> DataFrame()
+        colnames(binned_DataFrame) <- paste0(meta_prefix, name, ".", colnames(binned_DataFrame), ".count.total")
+        mcols(genomeWindows) <- cbind(mcols(genomeWindows), binned_DataFrame)
+      }
+    }
+  }
+  genomeWindows
+}
+
+# Function to do everything
+grWindows <- function(genome, meta, windowSize=10000, meta_prefix=NULL){
+  genome <- BSgenomeToGR(genome)                                 # Make GRanges from genome
+  genome <- genomeGRToWindows(genome, windowSize=windowSize)     # Make a windowed GRange from chromosome GRanges
+  mpw <-    metaPerWindow(genome, meta, meta_prefix=meta_prefix) # Make metadata column windows and intersect
+  mpw
+}
+
+
+chrw <- SimpleList()
+chrw$Oki <- grWindows(genome=getSeq(genomes$Oki, c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')), meta=ctcf$Oki, windowSize=1e5, meta_prefix = 'ctcf.')
+chrw$Oki <- flagLongShort(chrw$Oki, longShort$OKI2018.I69)
+chrw$Osa <- grWindows(genome=getSeq(genomes$Osa, c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')), meta=ctcf$Osa, windowSize=1e5, meta_prefix = 'ctcf.')
+chrw$Osa <- flagLongShort(chrw$Osa, longShort$OSKA2016v1.9)
+
+library(ggplot2)
+library(ggpubr)
+ggplot(as.data.frame(chrw$Oki)) + aes(x=start, y=ctcf.absScore.count, col=Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula = y~x)
+ggplot(as.data.frame(chrw$Osa)) + aes(x=start, y=ctcf.absScore.count, col=Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula = y~x)
+
+
+tb <- chrw$Oki |> as.data.frame()
+tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Arm)
+ggboxplot(tb, x='seqnames_arm', y='ctcf.absScore.count', color='seqnames', add='jitter') +
+  theme(axis.text.x=element_text(angle=90)) +
+  ylab('operon density per window') +
+  stat_compare_means(comparison=list(c('chr1_short', 'chr1_long'), c('chr2_short', 'chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'YSR_YSR'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
+  ggtitle('Okinawa: CTCF density by chr+arm')
+
+tb <- chrw$Osa |> as.data.frame()
+tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Arm)
+ggboxplot(tb, x='seqnames_arm', y='ctcf.absScore.count', color='seqnames', add='jitter') +
+  theme(axis.text.x=element_text(angle=90)) +
+  ylab('operon density per window') +
+  stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'YSR_YSR'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
+  ggtitle('Osaka: CTCF density by chr+arm')
+
+
+# Well, there seems to be an Arm relationship with CTCF. But GC is different between arms, and 
+# CTCF binding sites may be GC biased, so this arm relationship need not be specific to
+# the activity of CTCF so much as reflecting biased sequence composition.
+calc_GC_dnaseg <- function(gr, si, mc.cores=1) {
+  orig_seqinfo <- seqinfo(gr)
+  new_gr <- gr
+  seqlevels(new_gr) <- seqlevels(si)
+  seqinfo(new_gr) <- si
+  grl <- split(new_gr, 1:length(new_gr))
+  gc <- mclapply(mc.cores=mc.cores, grl, function(x) {
+    dna <- getSeq(x)
+    lp <- letterFrequency(letters="GC", dna, as.prob = T) * 100
+    lp
+  } )
+  gr$GC <- unlist(gc)
+  
+  gr
+}
+
+# How is GC content in CTCF sites?
+ctcf$Oki <- calc_GC_dnaseg(ctcf$Oki, seqinfo(genomes$Oki), mc.cores=8)
+ctcf$Osa <- calc_GC_dnaseg(ctcf$Osa, seqinfo(genomes$Osa), mc.cores=8)
+
+(ctcf$Oki$GC |> summary())
+ctcf$Oki$GC |> hist()
+(ctcf$Osa$GC |> summary())
+ctcf$Osa$GC |> hist()
+
+chrw$Oki <- calc_GC_dnaseg(chrw$Oki, seqinfo(genomes$Oki), mc.cores=8)
+chrw$Osa <- calc_GC_dnaseg(chrw$Osa, seqinfo(genomes$Osa), mc.cores=8)
+
+# From https://cran.r-project.org/web/packages/ggpmisc/vignettes/model-based-annotations.html#stat_poly_eq-and-stat_poly_line
+library(ggpmisc)
+
+ggplot(as.data.frame(chrw$Oki)) +
+  aes(x=GC, y=ctcf.absScore.count, col=seqnames) +
+  geom_point() +
+  geom_smooth(method='lm', formula = y~x) +
+  ggtitle("Okinawa: CTCF sites vs. GC content") +
+  facet_wrap(~paste0(seqnames, "_", Arm), nrow=1, scales='free') +
+  stat_poly_eq(aes(label =  paste(after_stat(rr.label), "*\", \"*", 
+                                  after_stat(p.value.label), "*\"\"",
+                                  sep = "")))
+
+
+ggplot(as.data.frame(chrw$Osa)) +
+  aes(x=GC, y=ctcf.absScore.count, col=seqnames) +
+  geom_point() +
+  geom_smooth(method='lm', formula = y~x) +
+  ggtitle("Osaka: CTCF sites vs. GC content") +
+  facet_wrap(~paste0(seqnames, "_", Arm), nrow=1, scales='free') +
+  stat_poly_eq(aes(label =  paste(after_stat(rr.label), "*\", \"*", 
+                                  after_stat(p.value.label), "*\"\"",
+                                  sep = "")))
+
+```
