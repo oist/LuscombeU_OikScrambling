@@ -207,7 +207,7 @@ genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick
 
 ### Parallel plot
 
-```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=7, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 dsList4 <- list(
     KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
     OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
@@ -220,6 +220,10 @@ compList4 <- list(
     Oki_Osa = compList[[1]],
     Osa_Bar = compList[["Osa_Bar"]]
   )
+
+dsList4$KUM$col <- dsList4$KUM$fill <- dsList4$OKI$col <- dsList4$OKI$fill <-
+  dsList4$OSA$col <- dsList4$OSA$fill <- dsList4$BAR$col <- dsList4$BAR$fill <-
+  "#A6D854"
 
 genoPlotR::plot_gene_map(dsList4, compList4, dna_seg_scale = FALSE,
                          tree = ade4::newick2phylog(addRoot(treeNode(treeNode("OKI", "KUM"), treeNode("OSA", "BAR")))),
