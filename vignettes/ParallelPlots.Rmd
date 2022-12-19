@@ -225,6 +225,13 @@ dsList4$KUM$col <- dsList4$KUM$fill <- dsList4$OKI$col <- dsList4$OKI$fill <-
   dsList4$OSA$col <- dsList4$OSA$fill <- dsList4$BAR$col <- dsList4$BAR$fill <-
   "#A6D854"
 
+compList4$Oki_Kum$color <- compList4$Oki_Osa$color <- compList4$Osa_Bar$color <- "#F8766D"
+
+compList4$Oki_Kum$col <- ifelse(compList4$Oki_Kum$col == "darksalmon", "#F8766D", "#00BFC4")
+compList4$Osa_Bar$col <- ifelse(compList4$Osa_Bar$col == "darksalmon", "#F8766D", "#00BFC4")
+compList4$Oki_Osa$col <- ifelse(compList4$Oki_Osa$col == "darksalmon", "#F8766D", "#00BFC4")
+
+
 genoPlotR::plot_gene_map(dsList4, compList4, dna_seg_scale = FALSE,
                          tree = ade4::newick2phylog(addRoot(treeNode(treeNode("OKI", "KUM"), treeNode("OSA", "BAR")))),
                          main = "Chromosome 2 in four Oikopleura genome assemblies")
