@@ -374,6 +374,27 @@ library("patchwork")
 p1 / p2 / p3 / p4 / p5
 ```
 
+```{r proportion_of_genome_region_classes_oiks, fig.width=6, fig.height=18, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+for_wgo_barplots2 <- sapply(wgo, \(gr) tapply(width(gr), gr$type, sum)) |>
+  prop.table(2) |>
+  as.data.frame() |>
+  tibble::as_tibble(rownames = "type") |>
+  tidyr::pivot_longer(!type) |>
+  dplyr::mutate(distClass = OikScrambling:::compDistClass(name)) |>
+  dplyr::mutate(genus = OikScrambling:::compGenus(name))
+
+for_wgo_barplots2$type <- for_wgo_barplots2$type |> factor(c("isolated alignment", "bridge region", "collinear alignment", "breakpoint region"))
+
+ggplot(for_wgo_barplots2 |> dplyr::filter(genus == "Oikopleura")) +
+  aes(name, value, fill = type) +
+  ggplot2::coord_flip() +
+  geom_bar( stat = "identity") +
+  ggtitle("Proportion of the genome in aligned, bridge and breakpoint regions") +
+  facet_grid(distClass ~ ., scales = "free", space = "free") +
+  theme_bw() +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+```
+
 Bridge regions
 --------------
 
