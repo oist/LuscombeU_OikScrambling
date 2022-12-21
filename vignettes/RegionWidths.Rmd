@@ -694,6 +694,27 @@ gg_freq_poly(w |> dplyr::filter(class == "distant"), scale = "natural") +
   scale_x_continuous(limits = c(0, 3e3))
 ```
 
+```{r compound1_alignment_classes_part, fig.width=10, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+wfreq <- w |>
+  filter(class == "distant") |>
+  count(aliclass, name, width) |>
+  group_by(aliclass, name) |>          
+  mutate(prop = prop.table(n))
+
+wfreq |>
+  filter(width <= 1e3) |>
+  ggplot() +
+  aes(width, prop, col = aliclass) +
+  geom_smooth(span = .15, method = "loess", fill = NA) +
+  scale_x_continuous(limits = c(0, 5e2)) + theme_bw()
+
+wfreq |>
+  filter(width > 1e3) |>
+  ggplot() +
+  aes(width, prop, col = aliclass) +
+  geom_smooth(fill = NA) +
+  scale_x_continuous(limits = c(1e3, 1e5)) + theme_bw()
+```
 
 ## "isolated", "unmapped", "colinear regions", "bridge" and "colinear alingments"
 
