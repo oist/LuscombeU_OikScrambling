@@ -710,20 +710,21 @@ wfreq <- w |>
 # Smoothing with loess to see the 3 peaks in bridge regions
 
 wfreq |>
-  filter(width <= 1e3) |>
+  filter(width <= 500, aliclass != "Col reg") |>
   ggplot() +
   aes(width, prop, col = aliclass) +
   geom_smooth(span = .15, method = "loess", fill = NA) +
-  scale_x_continuous(limits = c(0, 5e2)) + theme_bw()
+  scale_x_continuous(limits = c(0, 500)) + theme_bw()
 
-# Default smoothing because loess is to slow
+# Plotting the collinear regions separately because their length distribution is
+# on a different scale.
 
 wfreq |>
-  filter(width > 1e3) |>
+  filter(width >= 250, aliclass == "Col reg") |>
   ggplot() +
   aes(width, prop, col = aliclass) +
-  geom_smooth(fill = NA) +
-  scale_x_continuous(limits = c(1e3, 1e5)) + theme_bw()
+  geom_smooth(span = .15, method = "loess", fill = NA) +
+  scale_x_log10(limits = c(250, 1e5)) + theme_bw()
 ```
 
 ## "isolated", "unmapped", "colinear regions", "bridge" and "colinear alingments"
