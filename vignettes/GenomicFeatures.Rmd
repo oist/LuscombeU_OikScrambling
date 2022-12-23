@@ -834,6 +834,10 @@ operons$Osa$index <- 1:length(operons$Osa)
 operons$Osa$scrambled <- 'no_breakpoint_region'
 operons$Osa$scrambled[operons$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
 
+operons$Bar$index <- 1:length(operons$Bar)
+operons$Bar$scrambled <- 'no_breakpoint_region'
+operons$Bar$scrambled[operons$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
+
 tb1 <- operons$Oki
 # Note that the operon objects do not have unique names, which makes as.data.frame() complain.
 names(tb1) <- NULL
@@ -899,6 +903,7 @@ oki_feat_bp_ovl <- rbind(
 ) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
 oki_feat_bp_ovl$pct <- oki_feat_bp_ovl[,2]/(oki_feat_bp_ovl[,1]+oki_feat_bp_ovl[,2])*100
 oki_feat_bp_ovl$type <- rownames(oki_feat_bp_ovl)
+oki_feat_bp_ovl$species <- "Okinawa"
 
 osa_feat_bp_ovl <- rbind(
   operons$Osa$scrambled |> table(),
@@ -907,7 +912,16 @@ osa_feat_bp_ovl <- rbind(
 ) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
 osa_feat_bp_ovl$pct <- osa_feat_bp_ovl[,2]/(osa_feat_bp_ovl[,1]+osa_feat_bp_ovl[,2])*100
 osa_feat_bp_ovl$type <- rownames(osa_feat_bp_ovl)
+osa_feat_bp_ovl$species <- "Osaka"
 
+bar_feat_bp_ovl <- rbind(
+  operons$Bar$scrambled |> table(),
+  genes$Bar$scrambled |> table(),
+  exons$Bar$scrambled |> table()
+) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
+bar_feat_bp_ovl$pct <- bar_feat_bp_ovl[,2]/(bar_feat_bp_ovl[,1]+bar_feat_bp_ovl[,2])*100
+bar_feat_bp_ovl$type <- rownames(bar_feat_bp_ovl)
+bar_feat_bp_ovl$species <- "Barcelona"
 
 df <- operons$Oki
 names(df) <- NULL
@@ -925,12 +939,23 @@ osa_feat_bp_ovl_join <- rbind(
   as.data.frame(exons$Osa) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
 ) |> dplyr::mutate(species='Osa')
 
-p1 <- ggplot(oki_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Okinawa feature plot') + ylim(c(0, max(oki_feat_bp_ovl$pct, osa_feat_bp_ovl$pct)))
-p1
+p1 <- ggplot(oki_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Okinawa feature plot') + ylim(c(0, 50)) + theme_bw()
 
-p2 <- ggplot(osa_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Osaka feature plot') + ylim(c(0, max(oki_feat_bp_ovl$pct, osa_feat_bp_ovl$pct)))
-p2 
-( p1 | p2 )
+p2 <- ggplot(osa_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Osaka feature plot') + ylim(c(0, 50)) + theme_bw()
+
+p3 <- ggplot(bar_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Barcelona feature plot') + ylim(c(0, 50)) + theme_bw()
+
+( p1 | p2 | p3)
+```
+
+```{r operon_overlap_stats_plot, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "pdf", "png")}
+rbind(oki_feat_bp_ovl, osa_feat_bp_ovl, bar_feat_bp_ovl) |>
+  ggplot() +
+  aes(pct, type, col = type, pch = species, size = 2) +
+  geom_point() +
+  scale_y_discrete("") +
+  scale_x_continuous("Percentage of features overlaping a breakpoint region") +
+  theme_bw()
 ```
 
 # Coverage
