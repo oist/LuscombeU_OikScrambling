@@ -823,15 +823,16 @@ t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
 ```
 
 # Operon summary plots for Figure 3
+
 ```{r operon_summary_stats_plots, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 # Add an index for matching to scrambled set
 operons$Oki$index <- 1:length(operons$Oki)
 operons$Oki$scrambled <- 'no_breakpoint_region'
-operons$Oki$scrambled[match(subsetByOverlaps(operons$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa])$index, operons$Oki$index)] <- 'overlaps_breakpoint_region'
+operons$Oki$scrambled[operons$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
 
 operons$Osa$index <- 1:length(operons$Osa)
 operons$Osa$scrambled <- 'no_breakpoint_region'
-operons$Osa$scrambled[match(subsetByOverlaps(operons$Osa, unal$Osa_Oki[unal$Osa_Oki$nonCoa])$index, operons$Osa$index)] <- 'overlaps_breakpoint_region'
+operons$Osa$scrambled[operons$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
 
 tb1 <- operons$Oki
 # Note that the operon objects do not have unique names, which makes as.data.frame() complain.
@@ -862,15 +863,15 @@ ggplot(tb3) + aes(x=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + g
 
 ```{r operon_summary_stats_plots_2, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 genes$Oki$scrambled <- 'no_breakpoint_region'
-genes$Oki$scrambled[match(subsetByOverlaps(genes$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa]) |> names() , names(genes$Oki))] <- 'overlaps_breakpoint_region'
+genes$Oki$scrambled[genes$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
 genes$Oki$scrambled |> table()
 
 genes$Osa$scrambled <- 'no_breakpoint_region'
-genes$Osa$scrambled[match(subsetByOverlaps(genes$Osa, unal$Osa_Oki[unal$Osa_Oki$nonCoa]) |> names() , names(genes$Osa))] <- 'overlaps_breakpoint_region'
+genes$Osa$scrambled[genes$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
 genes$Osa$scrambled |> table()
 
 genes$Bar$scrambled <- 'no_breakpoint_region'
-genes$Bar$scrambled[match(subsetByOverlaps(genes$Bar, unal$Bar_Oki[unal$Bar_Oki$nonCoa]) |> names() , names(genes$Bar))] <- 'overlaps_breakpoint_region'
+genes$Bar$scrambled[genes$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
 genes$Bar$scrambled |> table()
 
 exons <- sapply(annots, function(a) sort(exons(a))) |> SimpleList()
@@ -880,15 +881,15 @@ exons <- sapply(exons, function(e) {
 }) |> SimpleList()
 
 exons$Oki$scrambled <- 'no_breakpoint_region'
-exons$Oki$scrambled[match(subsetByOverlaps(exons$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa]) |> names() , names(exons$Oki))] <- 'overlaps_breakpoint_region'
+exons$Oki$scrambled[exons$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
 exons$Oki$scrambled |> table()
 
 exons$Osa$scrambled <- 'no_breakpoint_region'
-exons$Osa$scrambled[match(subsetByOverlaps(exons$Osa, unal$Osa_Oki[unal$Osa_Oki$nonCoa]) |> names() , names(exons$Osa))] <- 'overlaps_breakpoint_region'
+exons$Osa$scrambled[exons$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
 exons$Osa$scrambled |> table()
 
 exons$Bar$scrambled <- 'no_breakpoint_region'
-exons$Bar$scrambled[match(subsetByOverlaps(exons$Bar, unal$Bar_Oki[unal$Bar_Oki$nonCoa]) |> names() , names(exons$Bar))] <- 'overlaps_breakpoint_region'
+exons$Bar$scrambled[exons$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
 exons$Bar$scrambled |> table()
 
 oki_feat_bp_ovl <- rbind(
