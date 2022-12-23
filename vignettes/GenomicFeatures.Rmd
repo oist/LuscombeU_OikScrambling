@@ -849,8 +849,19 @@ names(tb2) <- NULL
 p2 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, nrow=2) + ggtitle("Osaka operons") + scale_y_discrete(drop=F)
 p2
 
-( p1 | p2 )
-
+rbind(
+  operons$Oki |> as.data.frame() |> mutate(species="Okinawa"),
+  operons$Osa |> as.data.frame() |> mutate(species="Osaka"),
+  operons$Bar |> as.data.frame() |> mutate(species="Barcelona")
+) |> ggplot() +
+  aes(y=factor(n)) +
+  geom_bar() +
+  facet_wrap(~scrambled + species) +
+  geom_text(stat='count', aes(label=..count.., hjust=-0.2)) +
+  theme_bw() +
+  scale_x_continuous("Number operons", limits = c(0,1200)) +
+  scale_y_discrete("Number of genes in operon")
+  
 p3 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
 p3
 
