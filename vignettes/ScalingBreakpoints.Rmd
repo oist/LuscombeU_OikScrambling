@@ -72,23 +72,39 @@ With the species trees loaded, we can calculate per-pair branch length distances
 ```{r species_distances}
 species_dist <- SimpleList()
 species_dist$cophenetic <- lapply(species, function(sp) cophenetic.phylo(sp@phylo)) |> SimpleList()
+```
 
+For tunicates, the distances expressed in million years are taken from the
+molecular clock analysis **except** for the same-species pairs where they are
+arbitrarily set to 3, as an upper-bound estimate.  The rationale is that as we
+are testing for speed, using the maximally conceivable distance prevents us from
+overestimating that speed.
+
+```{r clock_distances}
 # These are taken from the molecular clock analysis.
 species_dist$mya <- SimpleList()
 species_dist$mya$Oikopleura <- data.frame(
-  'Oki'=c(0,       24.5347, 24.5347),
-  'Osa'=c(24.5347, 0,       7.2383),
-  'Bar'=c(24.5347, 7.2383,  0)
+  'Oki'=c(0,       3,       24.5347, 24.5347, 24.5347),
+  'Kum'=c(3,       0,       24.5347, 24.5347, 24.5347),
+  'Osa'=c(24.5347, 24.5347, 0,       7.2383,  3),
+  'Bar'=c(24.5347, 24.5347, 7.2383,  0,       7.2383),
+  'Aom'=c(24.5347, 24.5347, 3,       7.2383,  0)
 )
 
 species_dist$mya$Ciona <- data.frame(
-  'Sav'=c(0,        101.4633, 101.4633),
-  'Rob'=c(101.4633, 0,        11.8551),
-  'Ply'=c(101.4633, 11.8551,  0)
+  'Sav'=c(0,        101.4633, 101.4633, 101.4633),
+  'Rob'=c(101.4633, 0,        11.8551, 11.8551),
+  'Ply'=c(101.4633, 11.8551,  0, 3),
+  'Ros'=c(101.4633, 11.8551,  3, 0)
 )
+```
 
-# This is taken from https://www.sciencedirect.com/science/article/pii/S0960982221014962
-# Which links to https://github.com/SchriderLab/Drosophila_phylogeny
+For Drosophila, the numbers are taken from https://www.sciencedirect.com/science/article/pii/S0960982221014962
+which links to <https://github.com/SchriderLab/Drosophila_phylogeny>.  Note that
+the smallest distance here is 3.6 million years, close to our upper-bound
+estimate for same-species tunicate populations.
+
+```{r published_distances}
 species_dist$mya$Drosophila <- data.frame(
   'Dbu'=c(0,      46.836,  46.836,  46.836,  46.836),
   'Dsu'=c(46.836, 0,       13.1873, 13.1873, 13.1873),
@@ -103,123 +119,111 @@ species_dist$mya <- lapply(species_dist$mya, function(x) {
 }) |> SimpleList()
 ```
 
+## Normalised breakpoint accumulation
 
-```{r breakpoints_1}
-bp_vs_dist <- function(query, target, wgo, dist_type="mya", species){
+```{r breakpoints_mya}
+bp_vs_dist <- function(query, target, wgo, dist_type="mya", species, extra = FALSE) {
   dist_df <- species_dist[[dist_type]][[species]]
   relevant_dist <- dist_df[rownames(dist_df)==query, colnames(dist_df)==target]
   breakpoints <- wgo[wgo$type == "breakpoint region"]
   wgo_size <- wgo |> width() |> sum()
-  wgo_size_mbp <- wgo_size/1000000
+  wgo_size_mbp <- wgo_size / 1000000
   breakpoints_per_scale = length(breakpoints)/relevant_dist
   breakpoints_per_mbp = length(breakpoints)/wgo_size_mbp
-  breakpoints_per_mbp_per_dist = breakpoints_per_mbp/relevant_dist
-  
-  breakpoint_df <- data.frame(species=species, query=query, target=target, pair=paste0(query, "_", target), dist_type=dist_type, dist=relevant_dist, breakpoints=length(breakpoints), breakpoints_per_scale=breakpoints_per_scale, breakpoints_per_mbp=breakpoints_per_mbp, breakpoints_per_mbp_scaled=breakpoints_per_mbp_per_dist)
-  
-  breakpoint_df
+  data.frame(
+    species                    = species,
+    query                      = query,
+    target                     = target,
+    pair                       = paste0(query, "_", target),
+    dist_type                  = dist_type,
+    dist                       = relevant_dist,
+    breakpoints                = length(breakpoints),
+    breakpoints_per_scale      = breakpoints_per_scale,
+    breakpoints_per_mbp        = breakpoints_per_mbp,
+    breakpoints_per_mbp_scaled = breakpoints_per_mbp / relevant_dist,
+    extra                      = extra)
 }
 
 mya_df <- rbind(
-  bp_vs_dist(query="Oki", target="Osa", wgo$Oki_Osa, dist_type="mya", "Oikopleura"),
-  bp_vs_dist(query="Oki", target="Bar", wgo$Oki_Bar, dist_type="mya", "Oikopleura"),
+  bp_vs_dist(query="Osa", target="Oki", wgo$Osa_Oki, dist_type="mya", "Oikopleura"),
+  bp_vs_dist(query="Oki", target="Bar", wgo$Oki_Bar, dist_type="mya", "Oikopleura", extra = TRUE),
   bp_vs_dist(query="Osa", target="Bar", wgo$Osa_Bar, dist_type="mya", "Oikopleura"),
-  
-  bp_vs_dist(query="Ply", target="Rob", wgo$Ply_Rob, dist_type="mya", "Ciona"),
+  bp_vs_dist(query="Bar", target="Aom", wgo$Bar_Aom, dist_type="mya", "Oikopleura", extra = TRUE),
+  bp_vs_dist(query="Osa", target="Aom", wgo$Osa_Aom, dist_type="mya", "Oikopleura"),
+  bp_vs_dist(query="Oki", target="Kum", wgo$Oki_Kum, dist_type="mya", "Oikopleura", extra = TRUE),
+
   bp_vs_dist(query="Ply", target="Sav", wgo$Ply_Sav, dist_type="mya", "Ciona"),
-  bp_vs_dist(query="Rob", target="Sav", wgo$Rob_Sav, dist_type="mya", "Ciona"),
-  
+  bp_vs_dist(query="Rob", target="Sav", wgo$Rob_Sav, dist_type="mya", "Ciona", extra = TRUE),
+  bp_vs_dist(query="Ply", target="Rob", wgo$Ply_Rob, dist_type="mya", "Ciona"),
+  bp_vs_dist(query="Rob", target="Ros", wgo$Rob_Ros, dist_type="mya", "Ciona", extra = TRUE),
+  bp_vs_dist(query="Ply", target="Ros", wgo$Ply_Ros, dist_type="mya", "Ciona"),
+
   bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="mya", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="mya", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="mya", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="mya", "Drosophila")
 )
 mya_df$species <- factor(mya_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
-mya_df <- mya_df[order(mya_df$species, mya_df$breakpoints_per_mbp_scaled),]
+mya_df$pair <- factor(mya_df$pair,
+                      levels=c("Dme_Dbu", "Dme_Dsu", "Dme_Dya",
+                               "Ply_Sav", "Rob_Sav", "Ply_Rob", "Rob_Ros", "Ply_Ros",
+                               "Osa_Oki", "Oki_Bar", "Osa_Bar", "Bar_Aom", "Osa_Aom", "Oki_Kum"))
 rownames(mya_df) <- NULL
-mya_df$pair <- factor(mya_df$pair, levels=mya_df$pair)
+mya_df$comp <- factor(c("far", "far", "mid", "mid", "close", "close",
+                        "far", "far", "mid", "mid", "close",
+                        "far", "mid", "close"),
+                      levels=c("close", "mid", "far"))
 (mya_df)
+```
 
+Breakpoint computation is tricky as expected number increases with time but the
+sensitivity of the counting decreases with distance.  For instance we might need
+to mask repeat movements, which count as breakpoints but are better detected in
+closely related genomes.  Also the Drosophila centromeres may need to be masked.
+But at this level of manual curation it may be better to find a more robust
+metric instead.
+
+```{r breakpoints_sum}
 sub_df <- rbind(
-  bp_vs_dist(query="Oki", target="Osa", wgo$Oki_Osa, dist_type="cophenetic", "Oikopleura"),
-  bp_vs_dist(query="Oki", target="Bar", wgo$Oki_Bar, dist_type="cophenetic", "Oikopleura"),
+  bp_vs_dist(query="Osa", target="Oki", wgo$Osa_Oki, dist_type="cophenetic", "Oikopleura"),
   bp_vs_dist(query="Osa", target="Bar", wgo$Osa_Bar, dist_type="cophenetic", "Oikopleura"),
-  
+  bp_vs_dist(query="Osa", target="Aom", wgo$Osa_Aom, dist_type="cophenetic", "Oikopleura"),
+
+  bp_vs_dist(query="Ply", target="Ros", wgo$Ply_Ros, dist_type="cophenetic", "Ciona"),
   bp_vs_dist(query="Ply", target="Rob", wgo$Ply_Rob, dist_type="cophenetic", "Ciona"),
   bp_vs_dist(query="Ply", target="Sav", wgo$Ply_Sav, dist_type="cophenetic", "Ciona"),
-  bp_vs_dist(query="Rob", target="Sav", wgo$Rob_Sav, dist_type="cophenetic", "Ciona"),
-  
+
   bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="cophenetic", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="cophenetic", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="cophenetic", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="cophenetic", "Drosophila")
 )
 sub_df$species <- factor(sub_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
 sub_df <- sub_df[order(sub_df$species, sub_df$breakpoints_per_mbp_scaled),]
 rownames(sub_df) <- NULL
 sub_df$pair <- factor(sub_df$pair, levels=sub_df$pair)
+sub_df$comp <- factor(c("far", "mid", "close"), levels=c("close", "mid", "far"))
 (sub_df)
 ```
 
+This said, O. dioica is always ahead of other species pairs after normalising by
+sequence length and evolutionary distance.
 
-```{r breakpoints_2, dependson="breakpoints_1", fig.height=4, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-ggplot(mya_df) + aes(x=pair, y=breakpoints, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints")
-ggplot(mya_df) + aes(x=pair, y=breakpoints_per_scale, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per million years")
-ggplot(mya_df) + aes(x=pair, y=breakpoints_per_mbp, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned")
-ggplot(mya_df) + aes(x=pair, y=breakpoints_per_mbp_scaled, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned per million years diverged")
+```{r breakpoints_2, dependson="breakpoints_1", fig.height=3, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+customPlot <- function(df, what, title, extra = "drop") {
+  if (extra == "drop" & ! is.null(df$extra)) df <- df[! df$extra,]
+  ggplot(df) +
+    aes(x=.data[[what]], y = pair, fill = species) +
+    geom_bar(stat='identity') +
+    facet_wrap(~comp, scales="free") +
+    theme_bw() +
+    ggtitle(title)
+}
 
-ggplot(sub_df) + aes(x=pair, y=breakpoints_per_mbp_scaled, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned per substitution distance")
-```
-
-
-As above, but with same-population comparisons removed.
-```{r breakpoints_3, dependson="breakpoints_1", fig.height=4, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-mya_df <- rbind(
-  bp_vs_dist(query="Oki", target="Osa", wgo$Oki_Osa, dist_type="mya", "Oikopleura"),
-  bp_vs_dist(query="Oki", target="Bar", wgo$Oki_Bar, dist_type="mya", "Oikopleura"),
-  bp_vs_dist(query="Osa", target="Bar", wgo$Osa_Bar, dist_type="mya", "Oikopleura"),
-  
-  bp_vs_dist(query="Ply", target="Rob", wgo$Ply_Rob, dist_type="mya", "Ciona"),
-  bp_vs_dist(query="Ply", target="Sav", wgo$Ply_Sav, dist_type="mya", "Ciona"),
-  bp_vs_dist(query="Rob", target="Sav", wgo$Rob_Sav, dist_type="mya", "Ciona"),
-  
-  bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="mya", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="mya", "Drosophila"),
-  #bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="mya", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="mya", "Drosophila")
-)
-mya_df$species <- factor(mya_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
-mya_df <- mya_df[order(mya_df$species, mya_df$breakpoints_per_mbp_scaled),]
-rownames(mya_df) <- NULL
-mya_df$pair <- factor(mya_df$pair, levels=mya_df$pair)
-(mya_df)
-
-sub_df <- rbind(
-  bp_vs_dist(query="Oki", target="Osa", wgo$Oki_Osa, dist_type="cophenetic", "Oikopleura"),
-  bp_vs_dist(query="Oki", target="Bar", wgo$Oki_Bar, dist_type="cophenetic", "Oikopleura"),
-  bp_vs_dist(query="Osa", target="Bar", wgo$Osa_Bar, dist_type="cophenetic", "Oikopleura"),
-  
-  bp_vs_dist(query="Ply", target="Rob", wgo$Ply_Rob, dist_type="cophenetic", "Ciona"),
-  bp_vs_dist(query="Ply", target="Sav", wgo$Ply_Sav, dist_type="cophenetic", "Ciona"),
-  bp_vs_dist(query="Rob", target="Sav", wgo$Rob_Sav, dist_type="cophenetic", "Ciona"),
-  
-  bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="cophenetic", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="cophenetic", "Drosophila"),
-  #bp_vs_dist(query="Dme", target="Dma", wgo$Dme_Dma, dist_type="cophenetic", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="cophenetic", "Drosophila")
-)
-sub_df$species <- factor(sub_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
-sub_df <- sub_df[order(sub_df$species, sub_df$breakpoints_per_mbp_scaled),]
-rownames(sub_df) <- NULL
-sub_df$pair <- factor(sub_df$pair, levels=sub_df$pair)
-(sub_df)
-
-ggplot(mya_df) + aes(x=pair, y=breakpoints, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints")
-ggplot(mya_df) + aes(x=pair, y=breakpoints_per_scale, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per million years")
-ggplot(mya_df) + aes(x=pair, y=breakpoints_per_mbp, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned")
-ggplot(mya_df) + aes(x=pair, y=breakpoints_per_mbp_scaled, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned per million years diverged")
-
-ggplot(sub_df) + aes(x=pair, y=breakpoints_per_mbp_scaled, fill=species) + geom_bar(stat='identity') + theme(axis.text.x = element_text(angle=90)) + ggtitle("Number of breakpoints per megabase aligned per substitution distance")
+customPlot(mya_df, 'breakpoints', 'Number of breakpoints')
+customPlot(mya_df, 'breakpoints_per_scale', 'Number of breakpoints per million years')
+customPlot(mya_df, 'breakpoints_per_mbp', 'Number of breakpoints per megabase aligned')
+customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged')
+customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged', extra = TRUE)
+customPlot(sub_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per substitution distance')
 ```
 
 # Session information
