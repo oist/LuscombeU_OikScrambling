@@ -824,7 +824,7 @@ t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
 
 # Operon summary plots for Figure 3
 
-```{r operon_summary_stats_plots, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r operon_summary_stats_plots, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
 # Add an index for matching to scrambled set
 operons$Oki$index <- 1:length(operons$Oki)
 operons$Oki$scrambled <- 'no_breakpoint_region'
@@ -850,9 +850,9 @@ p2 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n,
 p2
 
 rbind(
-  operons$Oki |> as.data.frame() |> mutate(species="Okinawa"),
-  operons$Osa |> as.data.frame() |> mutate(species="Osaka"),
-  operons$Bar |> as.data.frame() |> mutate(species="Barcelona")
+  operons$Oki |> as.data.frame() |> dplyr::mutate(species="Okinawa"),
+  operons$Osa |> as.data.frame() |> dplyr::mutate(species="Osaka"),
+  operons$Bar |> as.data.frame() |> dplyr::mutate(species="Barcelona")
 ) |> ggplot() +
   aes(y=factor(n)) +
   geom_bar() +
