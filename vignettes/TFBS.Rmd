@@ -71,3 +71,26 @@ saveRDS(pwmMatchesOnOki,       "pwmMatchesOki.Rds")
 saveRDS(pwmMatchesOnOki_12_95, "pwmMatchesOki_12_95.Rds")
 }
 ```
+
+
+```{r scan_TFBS_osa}
+if (! file.exists("pwmMatchesOsa.Rds")) {
+
+Osa_DNAStringSet <- lapply(seqnames(genomes$Osa), \(name) genomes$Osa[[name]]) |> as("DNAStringSet")
+names(Osa_DNAStringSet) <- seqnames(genomes$Osa)
+
+pwmMatchesOnOsa <- lapply(PWMatrixList |> as.list(), searchSeq2GB, Osa_DNAStringSet)
+# x_15_98 <- lapply(pwmMatchesOnOsa, \(gr) gr[gr$relScore > 0.98 & gr$absScore > 15]) |> as("GRangesList") |> unlist() |> reduce()
+# x_10_95 <- lapply(pwmMatchesOnOsa, \(gr) gr[gr$relScore > 0.95 & gr$absScore > 10]) |> as("GRangesList") |> unlist() |> reduce()
+# x_15_95 <- lapply(pwmMatchesOnOsa, \(gr) gr[gr$relScore > 0.95 & gr$absScore > 15]) |> as("GRangesList") |> unlist() |> reduce()
+# x_12_90 <- lapply(pwmMatchesOnOsa, \(gr) gr[gr$relScore > 0.90 & gr$absScore > 12]) |> as("GRangesList") |> unlist() |> reduce()
+# x_15_90 <- lapply(pwmMatchesOnOsa, \(gr) gr[gr$relScore > 0.90 & gr$absScore > 15]) |> as("GRangesList") |> unlist() |> reduce()
+# Selected this one as a compromise between lower baseline and visible peaks.
+pwmMatchesOnOsa_12_95 <- lapply(pwmMatchesOnOsa, \(gr) gr[gr$relScore > 0.95 & gr$absScore > 12]) |> as("GRangesList") |> unlist() |> reduce()
+# x_10_99 <- lapply(pwmMatchesOnOsa, \(gr) gr[gr$relScore > 0.99 & gr$absScore > 10]) |> as("GRangesList") |> unlist() |> reduce()
+
+saveRDS(pwmMatchesOnOsa,       "pwmMatchesOsa.Rds")
+saveRDS(pwmMatchesOnOsa_12_95, "pwmMatchesOsa_12_95.Rds")
+}
+
+```
