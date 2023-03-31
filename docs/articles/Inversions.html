@@ -101,6 +101,9 @@
       <a href="../articles/RepeatRegions.html">Repeat regions</a>
     </li>
     <li>
+      <a href="../articles/ScalingBreakpoints.html">Scaling breakpoints</a>
+    </li>
+    <li>
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
     </li>
     <li>
@@ -141,7 +144,7 @@
       <h1 data-toc-skip>Inversions</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">09 September, 2022</h4>
+            <h4 data-toc-skip class="date">06 January, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/Inversions.Rmd" class="external-link"><code>vignettes/Inversions.Rmd</code></a></small>
       <div class="hidden name"><code>Inversions.Rmd</code></div>
@@ -363,7 +366,7 @@
 <span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></code></pre>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># The left-side gap contains no alignment at all even before discarding the short ones.</span>
-<span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="va">ROI1_gaps</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Bar</span>, <span class="va">ROI1_gaps</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## GBreaks object with 4 ranges and 8 metadata columns:</span>
 <span class="co">##       seqnames            ranges strand |     score                 query</span>
 <span class="co">##          &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;             &lt;GRanges&gt;</span>
@@ -386,16 +389,16 @@
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># The Osa–Bar unaligned regions appear to align well to Aom, but the first one is split</span>
 <span class="co"># and the second one contains a small inversion. Are there a hotspots ?</span>
-<span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span>, type <span class="op">=</span> <span class="st">"any"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span>, type <span class="op">=</span> <span class="st">"any"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="Inversions_files/figure-html/unnamed-chunk-1-4.png" width="700"></p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="Inversions_files/figure-html/unnamed-chunk-1-5.png" width="700"></p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="Inversions_files/figure-html/unnamed-chunk-1-6.png" width="700"></p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/findOverlaps-methods.html" class="external-link">subsetByOverlaps</a></span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Osa_Aom</span>, <span class="va">ROI1_gaps</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="Inversions_files/figure-html/unnamed-chunk-1-7.png" width="700"></p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># In the alignment to Okinawa, it is scrambled.</span>

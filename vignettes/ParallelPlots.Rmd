@@ -205,7 +205,9 @@ genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick
 
 ## Plot chr2 in four species (double-collapsed)
 
-```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+### Parallel plot
+
+```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=7, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 dsList4 <- list(
     KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
     OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
@@ -219,9 +221,58 @@ compList4 <- list(
     Osa_Bar = compList[["Osa_Bar"]]
   )
 
+dsList4$KUM$col <- dsList4$KUM$fill <- dsList4$OKI$col <- dsList4$OKI$fill <-
+  dsList4$OSA$col <- dsList4$OSA$fill <- dsList4$BAR$col <- dsList4$BAR$fill <-
+  "#A6D854"
+
+compList4$Oki_Kum$color <- compList4$Oki_Osa$color <- compList4$Osa_Bar$color <- "#D4EACC"
+
+compList4$Oki_Kum$col <- ifelse(compList4$Oki_Kum$col == "darksalmon", "#D4EACC", "#00A08E")
+compList4$Osa_Bar$col <- ifelse(compList4$Osa_Bar$col == "darksalmon", "#D4EACC", "#00A08E")
+compList4$Oki_Osa$col <- ifelse(compList4$Oki_Osa$col == "darksalmon", "#D4EACC", "#00A08E")
+
+
 genoPlotR::plot_gene_map(dsList4, compList4, dna_seg_scale = FALSE,
                          tree = ade4::newick2phylog(addRoot(treeNode(treeNode("OKI", "KUM"), treeNode("OSA", "BAR")))),
                          main = "Chromosome 2 in four Oikopleura genome assemblies")
+```
+
+### Strand randomisation indexes
+
+This is to enhance the figure in the paper.
+
+```{r SR_index_for_tree_with_Kume}
+chr2Long <-  \(gb) plyranges::filter(gb, seqnames %in% c("chr2", "Chr2"), seqnames(query) %in% c("chr2", "Chr2"), Arm == "long",  query$Arm == "long")
+chr2short <- \(gb) plyranges::filter(gb, seqnames %in% c("chr2", "Chr2"), seqnames(query) %in% c("chr2", "Chr2"), Arm == "short", query$Arm == "short")
+chr2both <- \(gb) plyranges::filter(gb, seqnames %in% c("chr2", "Chr2"), seqnames(query) %in% c("chr2", "Chr2"))
+
+KumChr2$query$Arm <- Rle("long")
+KumChr2$query$Arm[end(KumChr2) <= end(contigsToMerge_oldPos["contig_16_1"]) & seqnames(KumChr2) == "chr2" & seqnames(KumChr2$query) == "chr2"] <- "short"
+
+SRI_Both_Strands <- \(gb) mean(c(strand_randomisation_index(gb)
+                                ,strand_randomisation_index(swap(gb))))
+
+KumChr2 |> chr2Long()  |> SRI_Both_Strands()
+KumChr2 |> chr2short() |> SRI_Both_Strands()
+KumChr2 |> chr2both()  |> SRI_Both_Strands()
+
+coa$Oki_Osa |> chr2Long() |> SRI_Both_Strands()
+coa$Osa_Oki |> chr2Long() |> SRI_Both_Strands()
+
+coa$Oki_Osa |> chr2short() |> SRI_Both_Strands()
+coa$Osa_Oki |> chr2short() |> SRI_Both_Strands()
+
+coa$Oki_Osa |> chr2both() |> SRI_Both_Strands()
+coa$Osa_Oki |> chr2both() |> SRI_Both_Strands()
+
+coa$Osa_Bar |> chr2Long() |> SRI_Both_Strands()
+coa$Bar_Osa |> chr2Long() |> SRI_Both_Strands()
+
+coa$Osa_Bar |> chr2short() |> SRI_Both_Strands()
+coa$Bar_Osa |> chr2short() |> SRI_Both_Strands()
+
+coa$Osa_Bar |> chr2both() |> SRI_Both_Strands()
+coa$Bar_Osa |> chr2both() |> SRI_Both_Strands()
 ```
 
 ## Region that is conserved between Osaka and Barcelona

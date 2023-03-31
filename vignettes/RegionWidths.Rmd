@@ -694,6 +694,38 @@ gg_freq_poly(w |> dplyr::filter(class == "distant"), scale = "natural") +
   scale_x_continuous(limits = c(0, 3e3))
 ```
 
+#### For figure 2
+
+```{r compound1_alignment_classes_part, fig.width=10, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+library(dplyr)
+
+# Frequency table is pre-computed so that ggplot2 can smooth over the different alignment pairs
+
+wfreq <- w |>
+  filter(class == "distant") |>
+  count(aliclass, name, width) |>
+  group_by(aliclass, name) |>          
+  mutate(prop = prop.table(n))
+
+# Smoothing with loess to see the 3 peaks in bridge regions
+
+wfreq |>
+  filter(width <= 500, aliclass != "Col reg") |>
+  ggplot() +
+  aes(width, prop, col = aliclass) +
+  geom_smooth(span = .15, method = "loess", fill = NA) +
+  scale_x_continuous(limits = c(0, 500)) + theme_bw()
+
+# Plotting the collinear regions separately because their length distribution is
+# on a different scale.
+
+wfreq |>
+  filter(width >= 250, aliclass == "Col reg") |>
+  ggplot() +
+  aes(width, prop, col = aliclass) +
+  geom_smooth(span = .15, method = "loess", fill = NA) +
+  scale_x_log10(limits = c(250, 1e5)) + theme_bw()
+```
 
 ## "isolated", "unmapped", "colinear regions", "bridge" and "colinear alingments"
 
