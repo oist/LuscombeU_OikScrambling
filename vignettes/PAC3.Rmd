@@ -1030,44 +1030,19 @@ plot_hox_locus <- function(gene_oki, gene_osa, gene_bar, gene_window=10, gene_of
     main=main
   )
 }
-plot_hox_locus(gene_oki = 'g8043', gene_osa = 'g6520', gene_bar = 'g4409', comp_oki_osa = gbs$Oki_Osa, comp_oki_bar = gbs$Oki_Bar, comp_osa_bar = gbs$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_oki = TRUE, rev_osa=TRUE, comp_ignore_strand = FALSE)
-```
-g_w <- 10
-
-hox1_gr <- list(
-  `Okinawa`=extract_gene_coords(sort(genes$Oki, ignore.strand=TRUE), gene_name='g8043', upstream=g_w, downstream=g_w),
-  `Osaka`=extract_gene_coords(sort(genes$Osa, ignore.strand=TRUE), gene_name='g6520', upstream = g_w, downstream = g_w),
-  `Barcelona`=extract_gene_coords(sort(genes$Bar, ignore.strand=TRUE), gene_name = 'g4409', upstream = g_w, downstream = g_w)
-)
-
-hox1_dnaseg <- list(
-  `Okinawa`=hox1_gr$Okinawa |> gr2dna_seg(gene_of_interest = 'g8043') |> genoPlotR::reverse(),
-  `Osaka`=hox1_gr$Osaka |> gr2dna_seg(gene_of_interest = 'g6520') |> genoPlotR::reverse(),
-  `Barcelona`=hox1_gr$Barcelona |> gr2dna_seg(gene_of_interest = 'g4409')
-)
-
-hox1_annot <- lapply(hox1_dnaseg, dnaseg_to_annot)
-
-plot_gene_map(
-  dna_segs = hox1_dnaseg,
-  dna_seg_scale = T, 
-  annotations = hox1_annot,
-  comparisons=list(
-    gb2comp(coa$Oki_Osa, ignore.strand = F) |> genoPlotR::reverse(side=3),
-    gb2comp(coa$Osa_Bar, ignore.strand = F) |> genoPlotR::reverse(side=1)
-  ),
-  main = "Hox1 locus in Okinawa, Osaka, and Barcelona"
-)
+plot_hox_locus(gene_oki = 'g8043', gene_osa = 'g6520', gene_bar = 'g4409', comp_oki_osa = gbs$Oki_Osa, comp_oki_bar = gbs$Oki_Bar, comp_osa_bar = gbs$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_oki = TRUE, rev_osa=TRUE, comp_ignore_strand = FALSE, main='Hox1')
 
 # Where did the genes in the locus end up?
-coa$Oki_Osa |> subsetByOverlaps(hox1_gr$Okinawa) |> plotApairOfChrs(dna_seg_labels = c('Oki chr2', 'Osa chr2') )
-coa$Oki_Bar |> subsetByOverlaps(hox1_gr$Okinawa) |> plotApairOfChrs(dna_seg_labels = c('Oki chr2', 'Bar Chr2'))
-coa$Osa_Bar |> subsetByOverlaps(hox1_gr$Osaka)   |> plotApairOfChrs(dna_seg_labels = c('Osa Chr2', 'Bar Chr2'))
+gbs$Oki_Osa |> subsetByOverlaps(hox1_gr$Okinawa) |> plotApairOfChrs(dna_seg_labels = c('Oki chr2', 'Osa chr2') )
+gbs$Oki_Bar |> subsetByOverlaps(hox1_gr$Okinawa) |> plotApairOfChrs(dna_seg_labels = c('Oki chr2', 'Bar Chr2'))
+gbs$Osa_Bar |> subsetByOverlaps(hox1_gr$Osaka)   |> plotApairOfChrs(dna_seg_labels = c('Osa Chr2', 'Bar Chr2'))
+
 
 ```
 
 ## Hox2
-```
+```{r hox_2, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+plot_hox_locus(gene_oki = 'g2590', gene_osa = 'g1327', gene_bar = 'g2590', comp_oki_osa = gbs$Oki_Osa, comp_oki_bar = gbs$Oki_Bar, comp_osa_bar = gbs$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_osa = TRUE, rev_oki=FALSE, rev_bar=FALSE, comp_ignore_strand = FALSE, main='Hox2')
 ```
 
 # Session information
