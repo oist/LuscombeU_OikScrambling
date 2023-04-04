@@ -332,7 +332,7 @@ makeOxfordPlots( flipContigsForOxfordPlot(Osa_Aom_YSR, flip_which = c('contig_27
 
 #### Bringing it together
 
-```{Osa_Aom_sc_all_1, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+```{r Osa_Aom_sc_all_1, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
 # scaffolding function to return a chromosome-scale GRange based on a list of contigs and a set of orientations
 #  inputs: a Gbreaks object, and a named list of chromosomes containing contigs to scaffold
 #    The "chr" object should look like this:
@@ -409,6 +409,9 @@ By identifying the contigs that need to flip, we can repeat this process for the
 Much of this code comes from the `OrthogroupSyntenies` vignette so please inspect this.
 
 ```{r Osa_Aom_sc_og}
+annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
+transcripts <- OikScrambling:::loadAllTranscriptsGR()
+
 orthoGroupFileNames <- SimpleList(
   AOM.5.5f      = "AOM-5-5f.prot.longest.fa_1", 
   Bar2.p4       = "Bar2_p4.Flye.prot.longest.fa_1", 
