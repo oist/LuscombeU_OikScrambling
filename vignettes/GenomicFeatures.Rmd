@@ -299,7 +299,8 @@ Given a `GBreaks` relating one-to-ones between species, calculate how many genes
 
 This section uses two key functions, `gene_equivalence` and `operon_equivalence`.
 * `gene_equivalence`: Input is the sanitised `data.frame` of the phylogenetic hierarchical orthogroups produced by OrthoFinder (named `pho` above), and one gene identifier. It checks whether this identifier has an equivalent gene within the orthogroups according to the `criterion` argument, returning `TRUE` or `FALSE`. There are two options for equivalence, `one_to_one` (strict) or `same_hierarchical_orthogroup` (slightly more permissive), or `same_orthogroup` (extremely permissive).
-* `operon_equivalence`: Input is an `orthoPair` `GBreaks` object, and two sets of operons (one for the query, one for the target). It checks every operon longer than `min_size` in `sp1` for an equivalent operon in `sp2` according to both `single_gene_criterion` and `operon_criterion`. Arguments to `operon_criterion` can be either `exact` (every gene in the operon is in an operon of the same size in the other species), `drop_1` (operon considered equivalent if there is a match minus one gene), or `drop_2` (considered equivalent if there is a match minus two genes).
+* `operon_equivalence`: Input is an `orthoPair` `GBreaks` object, and two sets of operons (one for the query, one for the target). It checks every operon longer than `min_size` in `sp1` for an equivalent operon in `sp2` according to both `single_gene_criterion` and `operon_criterion`. Arguments to `operon_criterion` can be either `exact` (every gene in the operon is in an operon of the same size in the other species), `drop_1` (operon considered equivalent if there is a match minus one gene), or `drop_2` (considered equivalent if there is a match minus two genes). 
+** `drop_1` explanation: There are two ways that we can consider operons equivalent by dropping 1 gene from them. The first is `drop_location`=`"ends"`. If this is true, then all of the genes in one species' operon are equivalent to the second species' operon after removing either 1 gene from the beginning (`FALSE TRUE TRUE ...`), or 1 gene from the end (`...TRUE TRUE FALSE`). The second possibility is when a gene can be inserted in the middle of an operon. In this author's opinion, that should count as breaking an operon (`...TRUE FALSE TRUE...`). However, it is included here using `drop_location`=`"any"`.
 
 ```{r confirm_operon_size_3}
 gene_equivalence <- function(pho, target_gene, target_sp, query_sp, criterion="one_to_one"){
@@ -365,14 +366,11 @@ gene_equivalence(pho, target_sp="Oki", query_sp="Bar", target_gene="g7782", crit
 # It has a somewhat punny name. Sorry, I can't help myself.
 gene_equivalents <- function(pho, target_gene, target_sp, query_sp, criterion="one_to_one"){
   equivalents <- NA
-  # If target gene not in orthogroup table, it is species-specific and therefore FALSE
   if(target_gene %in% unlist(pho[[target_sp]])) {
     matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist()
     target_hog <- pho[[target_sp]][matching_target_index] |> unlist()
     query_hog  <- pho[[query_sp]][matching_target_index]  |> unlist()
     if(criterion=="one_to_one"){
-      # A HOG entry can be either NA or a list of gene IDs as processed above.
-      # Check if NA and check the length.
       if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)==1 && length(query_hog)==1){
         equivalents <- query_hog
       }
@@ -384,7 +382,6 @@ gene_equivalents <- function(pho, target_gene, target_sp, query_sp, criterion="o
       if(!all(is.na(target_hog)) && length(target_hog)>=1) {
         target_og <- pho[["OG"]][matching_target_index]
         query_sp_in_target_og <- pho[[query_sp]][pho$OG == target_og]
-        # If ANY sequence of the query species is within the same orthogroup, it is equivalent.
         any_query_sp_in_target_og <- any(unlist(lapply(query_sp_in_target_og, function(x) !is.na(x) )))
         if(any_query_sp_in_target_og){
           equivalents <- query_sp_in_target_og |> unlist() |> na.omit()
@@ -423,23 +420,151 @@ gene_to_gene_equivalents <- function(pho, list_of_target_genes, target_sp, query
     gene_equivalents(pho=pho, target_gene=gene, target_sp = target_sp, query_sp=query_sp, criterion=criterion)
   })
 }
+# Hint: the function above by itself is sufficient to answer the question of how many 
+# operons are conserved. See commented regions below.
+# operons$Oki$Osa_orthologues <- mclapply(mc.cores=8, operons$Oki$gene_id, function(g) sapply(unlist(g), function(x) gene_equivalents(pho = pho, target_gene=x, target_sp = "Oki", query_sp = "Osa", criterion = "one_to_one") ) |> unlist())
+# operons$Oki$Bar_orthologues <- mclapply(mc.cores=8, operons$Oki$gene_id, function(g) sapply(unlist(g), function(x) gene_equivalents(pho = pho, target_gene=x, target_sp = "Oki", query_sp = "Bar", criterion = "one_to_one") ) |> unlist())
+# operons$Osa$Oki_orthologues <- mclapply(mc.cores=8, operons$Osa$gene_id, function(g) sapply(unlist(g), function(x) gene_equivalents(pho = pho, target_gene=x, target_sp = "Osa", query_sp = "Oki", criterion = "one_to_one") ) |> unlist())
+# operons$Osa$Bar_orthologues <- mclapply(mc.cores=8, operons$Osa$gene_id, function(g) sapply(unlist(g), function(x) gene_equivalents(pho = pho, target_gene=x, target_sp = "Osa", query_sp = "Bar", criterion = "one_to_one") ) |> unlist())
+# operons$Bar$Oki_orthologues <- mclapply(mc.cores=8, operons$Bar$gene_id, function(g) sapply(unlist(g), function(x) gene_equivalents(pho = pho, target_gene=x, target_sp = "Bar", query_sp = "Oki", criterion = "one_to_one") ) |> unlist())
+# operons$Bar$Osa_orthologues <- mclapply(mc.cores=8, operons$Bar$gene_id, function(g) sapply(unlist(g), function(x) gene_equivalents(pho = pho, target_gene=x, target_sp = "Bar", query_sp = "Osa", criterion = "one_to_one") ) |> unlist())
+# operons$Oki[lapply(operons$Oki$Osa_orthologues, function(x) all(!is.na(x)))|>unlist()] |> as.data.frame() |> View()
+#  
+
+
+# A function that tests if a specific gene in query species should be
+# considered equivalent to a specific gene in target species.
+gene_equivalence_test <- function(pho, target_gene, target_sp, query_gene, query_sp, criterion="one_to_one"){
+  test <- FALSE
+  # If target gene not in orthogroup table, it is species-specific and therefore FALSE
+  if(target_gene %in% unlist(pho[[target_sp]]) && query_gene %in% unlist(pho[[query_sp]]) ) {
+    matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist() |> which()
+    matching_query_index  <- lapply(pho[[query_sp]], function(x) query_gene %in% x) |> unlist() |> which()
+
+    g_t <- pho[[target_sp]][matching_target_index] |> unlist()
+    g_q <- pho[[query_sp]][matching_query_index]   |> unlist()
+    if(criterion=="one_to_one") {
+      if(matching_target_index == matching_query_index) {
+        if(length(g_t)==1 && length(g_q)==1) {
+          test <- TRUE
+        }
+      }
+    } else if(criterion=="same_hierarchical_orthogroup"){
+      if(matching_target_index == matching_query_index) {
+        test <- TRUE
+      }
+    } else if(criterion=="same_orthogroup") {
+      if(pho[["OG"]][matching_target_index] == pho[["OG"]][matching_query_index]) {
+        test <- TRUE
+      }
+    }
+  }
+  test
+}
+
+# (pho[pho$Oki == "g16808",]) # Single-copy gene
+gene_equivalence_test(pho=pho, target_gene = "g16808", target_sp = "Oki", query_gene="g12947", query_sp="Osa", criterion = "one_to_one")
+# (pho[pho$Oki == "g10565",]) # Non-PHO gene
+gene_equivalence_test(pho=pho, target_gene = "g16808", target_sp = "Oki", query_gene="g9811", query_sp="Osa", criterion = "one_to_one")
+# (pho[pho$Oki == "g9611",]) # Non-single-copy gene
+gene_equivalence_test(pho=pho, target_gene = "g9611", target_sp = "Oki", query_gene="g4413", query_sp="Osa", criterion = "one_to_one")
+gene_equivalence_test(pho=pho, target_gene = "g9611", target_sp = "Oki", query_gene="g4413", query_sp="Osa", criterion = "same_hierarchical_orthogroup")
+gene_equivalence_test(pho=pho, target_gene = "g9611", target_sp = "Oki", query_gene="g4413", query_sp="Osa", criterion = "same_orthogroup")
+# (pho[pho$Oki == "g10223",]) # Big orthogroup with many HOGs
+# (pho[pho$OG  == "OG0000000",])
+gene_equivalence_test(pho=pho, target_gene = "g9611", target_sp = "Oki", query_gene="g10171", query_sp="Osa", criterion = "same_orthogroup")
 ```
 
 With a good single-gene comparison function on hand, we expand this to compare operons. 
 
 ```{r confirm_operon_size_4}
+# A couple helper functions that may be necessary
 operon_of_gene <- function(id, op) {
   matching_operon <- which(lapply(op$gene_id, function(o) id %in% o) |> unlist()) |> unname()
   op[matching_operon]
 }
 operon_of_gene("g57", operons$Oki) 
 
+which_operon <- function(id, op) {
+  which(lapply(op$gene_id, function(o) id %in% o) |> unlist()) |> unname()
+}
+which_operon("g57", operons$Oki)
+
 genes_of_operon <- function(op) {
-  op$gene_id |> unlist()
+  op$gene_id
 }
 operon_of_gene("g57", operons$Oki) |> genes_of_operon()
+```
+```{r whatever}
+compare_operons <- function(op_sp1, op_sp2, operon_criterion="exact", pho, target_sp, query_sp, single_gene_criterion="one_to_one", drop_location="ends") {
+  equivalent <- FALSE
+  # Do a check that there are no 0-length operons first...
+  if(length(op_sp1)!=0 && length(op_sp2)!=0){
+    strand_op1 <- strand(op_sp1)
+    strand_op2 <- strand(op_sp2)
+    genes_sp1 <- op_sp1$gene_id |> unlist()
+    genes_sp2 <- op_sp2$gene_id |> unlist()
+    if(as.character(strand_op1) == "-") {
+      genes_sp1 <- rev(genes_sp1)
+    }
+    if(as.character(strand_op2) == "-") {
+      genes_sp2 <- rev(genes_sp2)
+    }
+  
+    if(operon_criterion=="exact") {
+      # Exact-matching operons must be the same length.
+      # If the lengths differ, they can never be equivalent under "exact".
+      if(!length(genes_sp1)!=length(genes_sp2)) {
+        gene_checks <- lapply(1:length(genes_sp1), function(i) {
+          gene_equivalence_test(pho=pho, target_gene=genes_sp1[i], target_sp=target_sp, query_gene=genes_sp2[i], query_sp=query_sp, criterion=single_gene_criterion)
+        }) |> unlist()
+        if(all(gene_checks)){
+          equivalent <- TRUE
+        }
+      } 
+    } else if (operon_criterion == "drop_1") {
+      # The two operons can be differ in length by at most 1 gene.
+        gene_checks <- lapply(1:length(genes_sp1), function(i) {
+          print()
+          gene_equivalence_test(pho=pho, target_gene=genes_sp1[i], target_sp=target_sp, query_gene=genes_sp2[i], query_sp=query_sp, criterion=single_gene_criterion)
+      }) |> unlist()
+        if(all(gene_checks)){
+          equivalent <- TRUE
+        } else if(drop_location=="ends") {
+          drop_first <- gene_checks[2:length(gene_checks)]
+          drop_last  <- gene_checks[1:length(gene_checks)-1]
+          if(all(drop_first) || all(drop_last)) {
+            equivalent <- TRUE
+          }
+        }
+      }
+  }
+  equivalent
+}
+# Easy examples:
+# compare_operons(pho=pho, operon_of_gene("g57", operons$Oki), operon_of_gene("g383", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one")
+# compare_operons(pho=pho, operon_of_gene("g57", operons$Oki), operon_of_gene("g3848", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one")
 
+# A probable example of a 5' missing gene in Osaka (where "drop_1" is helpful).
+operon_of_gene("g1814", operons$Oki)
+gene_equivalents(pho, "g1814", target_sp="Oki", query_sp="Osa")
+gene_equivalents(pho, "g1815", target_sp="Oki", query_sp="Osa")
+gene_equivalents(pho, "g1816", target_sp="Oki", query_sp="Osa")
+gene_equivalents(pho, "g1817", target_sp="Oki", query_sp="Osa")
+operon_of_gene("g1120", operons$Osa)
+gene_equivalents(pho, "g1120", target_sp="Osa", query_sp="Oki")
+gene_equivalents(pho, "g1119", target_sp="Osa", query_sp="Oki")
+gene_equivalents(pho, "g1118", target_sp="Osa", query_sp="Oki")
 
+subsetByOverlaps(coa$Oki_Osa, operon_of_gene("g1814", operons$Oki)) |> plotApairOfChrs()
+subsetByOverlaps(coa$Oki_Osa, GRanges("chr1:6756288-7006643")) |> plotApairOfChrs()
+
+compare_operons(pho=pho, operon_of_gene("g1814", operons$Oki), operon_of_gene("g1120", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "drop_1")
+# gene_equivalents(pho=pho, target_gene="g1681", target_sp="Oki", query_sp="Osa", criterion = "same_hierarchical_orthogroup")
+# operon_of_gene("g181", operons$Oki)
+```
+```
+# gene_equivalents
 # The operon_equivalence function matches a set of operons in one species to a set of 
 # operons in a second species.
 # It checks every operon above min_size for being equivalent for a matching equivalent
@@ -475,28 +600,30 @@ operon_equivalence <- function(pho, operons_sp1, operons_sp2, target_sp=NULL, qu
       # then make sure they are also in an operon in sp2.
       if(all(check_gene_equivalence)) {
         # Retrieve all sp2 genes for every equivalent gene in the sp1 operon.
-        # Note that by definition some genes have multiple equivalent
+        # Note that, by definition, some genes have multiple equivalent
         # genes, so you have to iterate over a few things.
         gene_matches <- gene_to_gene_equivalents(pho=pho, list_of_target_genes = target_operon_genes, criterion = single_gene_criterion, target_sp=target_sp, query_sp=query_sp)
-        # Remove genes not in operons.
+        # Remove equivalent genes of sp2 which are not in operons.
         gene_matches <- sapply(gene_matches, function(x) x[x %in% unlist(operons_sp2$gene_id)])
-
         # Retrieve operons for all equivalent genes from sp2.
-        operons_of_matches <- sapply(gene_matches, function(target_match) {
+        operons_of_matches <- lapply(gene_matches, function(target_match) {
           q_t_operons <- lapply(target_match, function(query) {
             r <- operon_of_gene(query,  op=operons_sp2) |> genes_of_operon()
             r
-          }) 
+          })
+          # For every gene, if 
+          #print(q_t_operons )
          })
-        print(operons_of_matches)
+        #print(operons_of_matches)
+        gene_matches
       }
     }
-    equivalent
+   # equivalent
   }) |> unlist()
   sp1_checks
 }
 #operon_equivalence(pho=pho, operons$Oki[1], operons$Osa, target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "exact")
-#operon_equivalence(pho=pho, operons$Oki[6], operons$Osa, target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "exact")
+operon_equivalence(pho=pho, operons$Oki[6], operons$Osa, target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "exact")
 # operon_equivalence(pho=pho, operons$Oki[6], operons$Osa, target_sp="Oki", query_sp="Osa", single_gene_criterion = "same_hierarchical_orthogroup", operon_criterion = "exact")
 operon_equivalence(pho=pho, operons$Oki[6], operons$Osa, target_sp="Oki", query_sp="Osa", single_gene_criterion = "same_orthogroup", operon_criterion = "exact")
 ```
