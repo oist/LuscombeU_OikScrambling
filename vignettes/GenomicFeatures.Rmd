@@ -1,16 +1,16 @@
 ---
 title: "Genomic features of the breakpoints"
 author: 
- - "Charlotte West"
- - "Charles Plessy"
+- "Charlotte West"
+- "Charles Plessy"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{Genomic features of the breakpoints}
-  %\VignetteEngine{knitr::rmarkdown}
+%\VignetteEncoding{UTF-8}
+%\VignetteIndexEntry{Genomic features of the breakpoints}
+%\VignetteEngine{knitr::rmarkdown}
 editor_options: 
-  chunk_output_type: console
+chunk_output_type: console
 ---
 
 Load packages and data
@@ -49,7 +49,7 @@ Lets look at `GC` content before and after coalescing:
 ```{r echo=T, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 maxHeight <- 2000
 sm_GC2 <- sapply(coa[1:15],  bp_heatmap, win = 1000, pat = "GC", direction = "left") |>
-          sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
+        sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
 plotHeatmapList(sm_GC2[1:5])
 ```
 
@@ -66,7 +66,7 @@ Now looking at TATA content:
 ```{r TATA, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 maxHeight <- 2000
 sm_GC2_TATA <- sapply(coa[1:15], bp_heatmap, window = 1000, pat = "TATA", direction = "left") |> 
-               sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
+             sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
 plotHeatmapList(sm_GC2_TATA[1:5])
 ```
 
@@ -84,7 +84,7 @@ directly after promoter regions.
 ```{r AAGCsGCwwmkCGrCTTyn, fig.height=6, fig.width=12, message=FALSE, warning=FALSE}
 maxHeight <- 2000
 sm_GC2_mot <- sapply(coa[1:15], bp_heatmap, window = 1000, pat = "AGCNGC", direction = "left") |> 
-              sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
+            sapply(smoothHeatmap, output.size = c(maxHeight,     500), algorithm = "kernel") |> SimpleList()
 plotHeatmapList(sm_GC2_mot[1:5])
 ```
 
@@ -193,24 +193,24 @@ The operon of [Ganot et al., 2004](https://journals.asm.org/doi/10.1128/MCB.24.1
 appears to be conserved in OKI and OSA (near `OSKA2016v1.9::PAR:10984831-10995276`).
 In the annotation visible in ZENBU and NCBI:
 
- - `Oidioi.mRNA.OKI2018_I69.PAR.g12978` is the most likely start of the Ganot operon as
-   it starts downstream of a CAGE TSS peak and has no trans-splicing site.  It is
-   homologous to `g10133 (PAR:10985271..10985910+)` in OSKA2016v1.9 which also has a
-   transcription start site and no trans-splicing site.  Best Norwegian hit is `CBY19033`.
-   Gene name is unclear but weaker blast hits suggest _centrosomal POC5 isoform X1_.
- - IQ domain-containing protein K isoform X2 is `Oidioi.mRNA.OKI2018_I69.PAR.g12977`
-   and is `g10134` in OSKA2016.  It has a bona fide trans-splicing site in both genomes.
-   It is `CBY19034` in Norway. (Not reported in Ganot et al., 2004).
- - Exportin 7 is `Oidioi.mRNA.OKI2018_I69.PAR.g12976`. (First member
-   of the operon of Ganot et al., 2004, which calls it Ran-binding protein 16).  In the current annotation of the OSKA2016v1.9
-   genome, `g10135` matches well but misses the N-terminal part. Nevertheless a blastx
-   search in region `PAR:10986742..10988032+` finds it.  In line with this, there is
-   a trans-splicing site upstream the unannotated area.
- - Dynein light chain is `Oidioi.mRNA.OKI2018_I69.PAR.g12975`.
- - Delta tubulin is `Oidioi.mRNA.OKI2018_I69.PAR.g12974`.
- - _MBF_ is `Oidioi.mRNA.OKI2018_I69.PAR.g12973`.  Also called _enthelial differenciation-related factor 1_ in other species.
- - CycD is `Oidioi.mRNA.OKI2018_I69.PAR.g12972` and `g10138` in OSKA. Polyadenylation signal conserved.
- 
+- `Oidioi.mRNA.OKI2018_I69.PAR.g12978` is the most likely start of the Ganot operon as
+ it starts downstream of a CAGE TSS peak and has no trans-splicing site.  It is
+ homologous to `g10133 (PAR:10985271..10985910+)` in OSKA2016v1.9 which also has a
+ transcription start site and no trans-splicing site.  Best Norwegian hit is `CBY19033`.
+ Gene name is unclear but weaker blast hits suggest _centrosomal POC5 isoform X1_.
+- IQ domain-containing protein K isoform X2 is `Oidioi.mRNA.OKI2018_I69.PAR.g12977`
+ and is `g10134` in OSKA2016.  It has a bona fide trans-splicing site in both genomes.
+ It is `CBY19034` in Norway. (Not reported in Ganot et al., 2004).
+- Exportin 7 is `Oidioi.mRNA.OKI2018_I69.PAR.g12976`. (First member
+ of the operon of Ganot et al., 2004, which calls it Ran-binding protein 16).  In the current annotation of the OSKA2016v1.9
+ genome, `g10135` matches well but misses the N-terminal part. Nevertheless a blastx
+ search in region `PAR:10986742..10988032+` finds it.  In line with this, there is
+ a trans-splicing site upstream the unannotated area.
+- Dynein light chain is `Oidioi.mRNA.OKI2018_I69.PAR.g12975`.
+- Delta tubulin is `Oidioi.mRNA.OKI2018_I69.PAR.g12974`.
+- _MBF_ is `Oidioi.mRNA.OKI2018_I69.PAR.g12973`.  Also called _enthelial differenciation-related factor 1_ in other species.
+- CycD is `Oidioi.mRNA.OKI2018_I69.PAR.g12972` and `g10138` in OSKA. Polyadenylation signal conserved.
+
 (Note that the transcripts IDs here differ from the public ones.)
 
 Ganot et al., 2004 reported very small (<30) intercistronic regions and Denoeud
@@ -251,19 +251,19 @@ operon_window_factor <- lapply(operon_windows, function(x) paste0("cutoff_", x))
 operon_window_factor <- factor(operon_window_factor, levels=operon_window_factor)
 
 operons_diff_sizes <- sapply(c("Oki", "Osa", "Bar"), function(sp) {
-  o <- lapply(operon_windows, function(size) {
-    genes[[sp]] |> OikScrambling:::calcOperons(window = size) |> suppressWarnings()
-  }) |> SimpleList()
-  names(o) <- operon_window_factor
-  o
+o <- lapply(operon_windows, function(size) {
+  genes[[sp]] |> OikScrambling:::calcOperons(window = size) |> suppressWarnings()
+}) |> SimpleList()
+names(o) <- operon_window_factor
+o
 }) |> SimpleList()
 names(operons_diff_sizes) <- c("Oki", "Osa", "Bar")
 
 # How many operons do we get per species at these cutoffs?
 operons_diff_sizes_df <- rbind(
-  lapply(operons_diff_sizes$Oki, function(x) length(x) ) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::rename(count=V1, cutoff=rowname) |> dplyr::mutate(species="Okinawa"),
-  lapply(operons_diff_sizes$Osa, function(x) length(x) ) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::rename(count=V1, cutoff=rowname) |> dplyr::mutate(species="Osaka"),
-  lapply(operons_diff_sizes$Bar, function(x) length(x) ) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::rename(count=V1, cutoff=rowname) |> dplyr::mutate(species="Barcelona") 
+lapply(operons_diff_sizes$Oki, function(x) length(x) ) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::rename(count=V1, cutoff=rowname) |> dplyr::mutate(species="Okinawa"),
+lapply(operons_diff_sizes$Osa, function(x) length(x) ) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::rename(count=V1, cutoff=rowname) |> dplyr::mutate(species="Osaka"),
+lapply(operons_diff_sizes$Bar, function(x) length(x) ) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::rename(count=V1, cutoff=rowname) |> dplyr::mutate(species="Barcelona") 
 )
 ggplot(operons_diff_sizes_df) + aes(x=factor(cutoff, levels=operon_window_factor), y=count, fill=species) + geom_bar(stat='identity') + facet_wrap(~species, ncol=1) + ggtitle("Operons per species vs. distance cutoffs") + xlab('Distance cutoff') + theme(axis.text.x = element_text(angle = 90))
 ```
@@ -276,14 +276,14 @@ pho <- pho[,!apply(pho, 2, function(d) all(is.na(d)))]
 colnames(pho) <- c('HOG', 'OG', 'GTPC', 'Aom', 'Bar', 'Kum', 'Oki', 'Osa', 'Nor')
 
 of_to_list <- function(of_ids, gene_id_separator='\\.', gene_id_field=2){
-  of_list <- strsplit(of_ids, ', ')
-  lapply(of_list, function(hog) {
-    if(length(hog)==0){ 
-      return(NA)
-    } else {
-      r <- lapply(hog, function(h) unlist(strsplit(h, gene_id_separator))[gene_id_field]) |> unlist()
-    }
-  })
+of_list <- strsplit(of_ids, ', ')
+lapply(of_list, function(hog) {
+  if(length(hog)==0){ 
+    return(NA)
+  } else {
+    r <- lapply(hog, function(h) unlist(strsplit(h, gene_id_separator))[gene_id_field]) |> unlist()
+  }
+})
 }
 of_to_list(pho$Aom)
 
@@ -304,35 +304,35 @@ This section uses two key functions, `gene_equivalence` and `operon_equivalence`
 
 ```{r confirm_operon_size_3}
 gene_equivalence <- function(pho, target_gene, target_sp, query_sp, criterion="one_to_one"){
-  equivalence <- FALSE
-  # If target gene not in orthogroup table, it is species-specific and therefore FALSE
-  if(target_gene %in% unlist(pho[[target_sp]])) {
-    matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist()
-    target_hog <- pho[[target_sp]][matching_target_index] |> unlist()
-    query_hog  <- pho[[query_sp]][matching_target_index]  |> unlist()
-    if(criterion=="one_to_one"){
-      # A HOG entry can be either NA or a list of gene IDs as processed above.
-      # Check if NA and check the length.
-      if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)==1 && length(query_hog)==1){
+equivalence <- FALSE
+# If target gene not in orthogroup table, it is species-specific and therefore FALSE
+if(target_gene %in% unlist(pho[[target_sp]])) {
+  matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist()
+  target_hog <- pho[[target_sp]][matching_target_index] |> unlist()
+  query_hog  <- pho[[query_sp]][matching_target_index]  |> unlist()
+  if(criterion=="one_to_one"){
+    # A HOG entry can be either NA or a list of gene IDs as processed above.
+    # Check if NA and check the length.
+    if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)==1 && length(query_hog)==1){
+      equivalence <- TRUE
+    }
+  } else if(criterion=="same_hierarchical_orthogroup") {
+    if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)>=1 && length(query_hog)>=1) {
+      equivalence <- TRUE
+    }
+  } else if (criterion=="same_orthogroup"){
+    if(!all(is.na(target_hog)) && length(target_hog)>=1) {
+      target_og <- pho[["OG"]][matching_target_index]
+      query_sp_in_target_og <- pho[[query_sp]][pho$OG == target_og]
+      # If ANY sequence of the query species is within the same orthogroup, it is equivalent.
+      any_query_sp_in_target_og <- any(unlist(lapply(query_sp_in_target_og, function(x) !is.na(x) )))
+      if(any_query_sp_in_target_og){
         equivalence <- TRUE
-      }
-    } else if(criterion=="same_hierarchical_orthogroup") {
-      if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)>=1 && length(query_hog)>=1) {
-        equivalence <- TRUE
-      }
-    } else if (criterion=="same_orthogroup"){
-      if(!all(is.na(target_hog)) && length(target_hog)>=1) {
-        target_og <- pho[["OG"]][matching_target_index]
-        query_sp_in_target_og <- pho[[query_sp]][pho$OG == target_og]
-        # If ANY sequence of the query species is within the same orthogroup, it is equivalent.
-        any_query_sp_in_target_og <- any(unlist(lapply(query_sp_in_target_og, function(x) !is.na(x) )))
-        if(any_query_sp_in_target_og){
-          equivalence <- TRUE
-        }
       }
     }
   }
-  equivalence
+}
+equivalence
 }
 # 1-to-1s
 (pho[pho$Oki == "g16808",]) # Single-copy gene
@@ -365,31 +365,31 @@ gene_equivalence(pho, target_sp="Oki", query_sp="Bar", target_gene="g7782", crit
 # So that we can check which operons those genes are in later.
 # It has a somewhat punny name. Sorry, I can't help myself.
 gene_equivalents <- function(pho, target_gene, target_sp, query_sp, criterion="one_to_one"){
-  equivalents <- NA
-  if(target_gene %in% unlist(pho[[target_sp]])) {
-    matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist()
-    target_hog <- pho[[target_sp]][matching_target_index] |> unlist()
-    query_hog  <- pho[[query_sp]][matching_target_index]  |> unlist()
-    if(criterion=="one_to_one"){
-      if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)==1 && length(query_hog)==1){
-        equivalents <- query_hog
-      }
-    } else if(criterion=="same_hierarchical_orthogroup") {
-      if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)>=1 && length(query_hog)>=1) {
-        equivalents <- query_hog
-      }
-    } else if (criterion=="same_orthogroup"){
-      if(!all(is.na(target_hog)) && length(target_hog)>=1) {
-        target_og <- pho[["OG"]][matching_target_index]
-        query_sp_in_target_og <- pho[[query_sp]][pho$OG == target_og]
-        any_query_sp_in_target_og <- any(unlist(lapply(query_sp_in_target_og, function(x) !is.na(x) )))
-        if(any_query_sp_in_target_og){
-          equivalents <- query_sp_in_target_og |> unlist() |> na.omit()
-        }
+equivalents <- NA
+if(target_gene %in% unlist(pho[[target_sp]])) {
+  matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist()
+  target_hog <- pho[[target_sp]][matching_target_index] |> unlist()
+  query_hog  <- pho[[query_sp]][matching_target_index]  |> unlist()
+  if(criterion=="one_to_one"){
+    if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)==1 && length(query_hog)==1){
+      equivalents <- query_hog
+    }
+  } else if(criterion=="same_hierarchical_orthogroup") {
+    if(!all(is.na(target_hog)) && !all(is.na(query_hog)) && length(target_hog)>=1 && length(query_hog)>=1) {
+      equivalents <- query_hog
+    }
+  } else if (criterion=="same_orthogroup"){
+    if(!all(is.na(target_hog)) && length(target_hog)>=1) {
+      target_og <- pho[["OG"]][matching_target_index]
+      query_sp_in_target_og <- pho[[query_sp]][pho$OG == target_og]
+      any_query_sp_in_target_og <- any(unlist(lapply(query_sp_in_target_og, function(x) !is.na(x) )))
+      if(any_query_sp_in_target_og){
+        equivalents <- query_sp_in_target_og |> unlist() |> na.omit()
       }
     }
   }
-  equivalents
+}
+equivalents
 }
 # 1-to-1s
 (pho[pho$Oki == "g16808",]) # Single-copy gene
@@ -416,9 +416,9 @@ gene_equivalents(pho, target_sp="Oki", query_sp="Bar", target_gene="g7782", crit
 # A function to quickly iterate over a list of genes and get the genes that satisfy
 # gene_equivalents - i.e., genes in an operon.
 gene_to_gene_equivalents <- function(pho, list_of_target_genes, target_sp, query_sp, criterion="one_to_one") {
-  sapply(list_of_target_genes, function(gene) {
-    gene_equivalents(pho=pho, target_gene=gene, target_sp = target_sp, query_sp=query_sp, criterion=criterion)
-  })
+sapply(list_of_target_genes, function(gene) {
+  gene_equivalents(pho=pho, target_gene=gene, target_sp = target_sp, query_sp=query_sp, criterion=criterion)
+})
 }
 # Hint: the function above by itself is sufficient to answer the question of how many 
 # operons are conserved. See commented regions below.
@@ -435,31 +435,31 @@ gene_to_gene_equivalents <- function(pho, list_of_target_genes, target_sp, query
 # A function that tests if a specific gene in query species should be
 # considered equivalent to a specific gene in target species.
 gene_equivalence_test <- function(pho, target_gene, target_sp, query_gene, query_sp, criterion="one_to_one"){
-  test <- FALSE
-  # If target gene not in orthogroup table, it is species-specific and therefore FALSE
-  if(target_gene %in% unlist(pho[[target_sp]]) && query_gene %in% unlist(pho[[query_sp]]) ) {
-    matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist() |> which()
-    matching_query_index  <- lapply(pho[[query_sp]], function(x) query_gene %in% x) |> unlist() |> which()
+test <- FALSE
+# If target gene not in orthogroup table, it is species-specific and therefore FALSE
+if(target_gene %in% unlist(pho[[target_sp]]) && query_gene %in% unlist(pho[[query_sp]]) && !is.na(target_gene) && !is.na(query_gene) ) {
+  matching_target_index <- lapply(pho[[target_sp]], function(x) target_gene %in% x) |> unlist() |> which()
+  matching_query_index  <- lapply(pho[[query_sp]], function(x) query_gene %in% x) |> unlist() |> which()
 
-    g_t <- pho[[target_sp]][matching_target_index] |> unlist()
-    g_q <- pho[[query_sp]][matching_query_index]   |> unlist()
-    if(criterion=="one_to_one") {
-      if(matching_target_index == matching_query_index) {
-        if(length(g_t)==1 && length(g_q)==1) {
-          test <- TRUE
-        }
-      }
-    } else if(criterion=="same_hierarchical_orthogroup"){
-      if(matching_target_index == matching_query_index) {
-        test <- TRUE
-      }
-    } else if(criterion=="same_orthogroup") {
-      if(pho[["OG"]][matching_target_index] == pho[["OG"]][matching_query_index]) {
+  g_t <- pho[[target_sp]][matching_target_index] |> unlist()
+  g_q <- pho[[query_sp]][matching_query_index]   |> unlist()
+  if(criterion=="one_to_one") {
+    if(matching_target_index == matching_query_index) {
+      if(length(g_t)==1 && length(g_q)==1) {
         test <- TRUE
       }
     }
+  } else if(criterion=="same_hierarchical_orthogroup"){
+    if(matching_target_index == matching_query_index) {
+      test <- TRUE
+    }
+  } else if(criterion=="same_orthogroup") {
+    if(pho[["OG"]][matching_target_index] == pho[["OG"]][matching_query_index]) {
+      test <- TRUE
+    }
   }
-  test
+}
+test
 }
 
 # (pho[pho$Oki == "g16808",]) # Single-copy gene
@@ -480,22 +480,27 @@ With a good single-gene comparison function on hand, we expand this to compare o
 ```{r confirm_operon_size_4}
 # A couple helper functions that may be necessary
 operon_of_gene <- function(id, op) {
-  matching_operon <- which(lapply(op$gene_id, function(o) id %in% o) |> unlist()) |> unname()
-  op[matching_operon]
+matching_operon <- which(lapply(op$gene_id, function(o) id %in% o) |> unlist()) |> unname()
+op[matching_operon]
 }
 operon_of_gene("g57", operons$Oki) 
 
 which_operon <- function(id, op) {
-  which(lapply(op$gene_id, function(o) id %in% o) |> unlist()) |> unname()
+which(lapply(op$gene_id, function(o) id %in% o) |> unlist()) |> unname()
 }
 which_operon("g57", operons$Oki)
 
 genes_of_operon <- function(op) {
-  op$gene_id
+op$gene_id
 }
 operon_of_gene("g57", operons$Oki) |> genes_of_operon()
 ```
-```{r whatever}
+
+Now to make a function that compares one operon to another operon given some gene matching and operon matching criteria.
+
+This is a bit involved, and quite slow. Basically, the function has to check all the combinations of genes to check for weird cases. These are commented below.
+
+```{r confirm_operon_size_5}
 compare_operons <- function(op_sp1, op_sp2, operon_criterion="exact", pho, target_sp, query_sp, single_gene_criterion="one_to_one", drop_location="ends") {
   equivalent <- FALSE
   # Do a check that there are no 0-length operons first...
@@ -510,7 +515,7 @@ compare_operons <- function(op_sp1, op_sp2, operon_criterion="exact", pho, targe
     if(as.character(strand_op2) == "-") {
       genes_sp2 <- rev(genes_sp2)
     }
-  
+    
     if(operon_criterion=="exact") {
       # Exact-matching operons must be the same length.
       # If the lengths differ, they can never be equivalent under "exact".
@@ -524,52 +529,80 @@ compare_operons <- function(op_sp1, op_sp2, operon_criterion="exact", pho, targe
       } 
     } else if (operon_criterion == "drop_1") {
       # The two operons can be differ in length by at most 1 gene.
-        gene_checks <- lapply(1:length(genes_sp1), function(i) {
-          print()
-          gene_equivalence_test(pho=pho, target_gene=genes_sp1[i], target_sp=target_sp, query_gene=genes_sp2[i], query_sp=query_sp, criterion=single_gene_criterion)
-      }) |> unlist()
-        if(all(gene_checks)){
+      # Because 1 gene can be dropped, and there are 2 different
+      # strategies for dropping 1 gene, you have to check
+      # whether every gene in sp1 has an equivalent gene in sp2.
+      # So gene_checks becomes a matrix here rather than a list.
+      gene_checks <- sapply(1:length(genes_sp1), function(i) {
+        sapply(1:length(genes_sp2), function(j) {
+          gene_equivalence_test(pho=pho, target_gene=genes_sp1[i], target_sp=target_sp, query_gene=genes_sp2[j], query_sp=query_sp, criterion=single_gene_criterion)
+        })
+      })
+      all_sp1_checks <- apply(gene_checks, 2, any)
+
+      if(all(gene_checks)) {
+        # Even in drop_1 mode, the two operons can still be exactly equivalent.
+        equivalent <- TRUE
+      } else if(drop_location=="ends") {
+        # In "ends" mode, either the first or the last gene can be
+        # FALSE in its gene check. Everything in the middle must be TRUE.
+        drop_first <- gene_checks[2:length(gene_checks)]
+        drop_last  <- gene_checks[1:length(gene_checks)-1]
+        if(all(drop_first) || all(drop_last)) {
           equivalent <- TRUE
-        } else if(drop_location=="ends") {
-          drop_first <- gene_checks[2:length(gene_checks)]
-          drop_last  <- gene_checks[1:length(gene_checks)-1]
-          if(all(drop_first) || all(drop_last)) {
-            equivalent <- TRUE
-          }
+        }
+      } else if(drop_location == "any") {
+        # In "any" drop mode, any of the genes missing in one species
+        # can be missing in the other species.
+        # As long as the number of TRUE comparisons in all_sp1_checks
+        # is 1 less than the number of genes in either species, then it's a match.
+        if(length(which(all_sp1_checks)) >= max(c(length(genes_sp1), length(genes_sp2)))  - 1 ) {
+          equivalent <- TRUE
         }
       }
+    }
   }
   equivalent
 }
-# Easy examples:
-# compare_operons(pho=pho, operon_of_gene("g57", operons$Oki), operon_of_gene("g383", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one")
-# compare_operons(pho=pho, operon_of_gene("g57", operons$Oki), operon_of_gene("g3848", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one")
 
-# A probable example of a 5' missing gene in Osaka (where "drop_1" is helpful).
+# A probable example of an operon with a single missing gene in Osaka.
+# This is a case where "drop_1" is helpful, as the two operons are 
+# identical except for one gene on the end.
 operon_of_gene("g1814", operons$Oki)
-gene_equivalents(pho, "g1814", target_sp="Oki", query_sp="Osa")
-gene_equivalents(pho, "g1815", target_sp="Oki", query_sp="Osa")
-gene_equivalents(pho, "g1816", target_sp="Oki", query_sp="Osa")
-gene_equivalents(pho, "g1817", target_sp="Oki", query_sp="Osa")
-operon_of_gene("g1120", operons$Osa)
-gene_equivalents(pho, "g1120", target_sp="Osa", query_sp="Oki")
-gene_equivalents(pho, "g1119", target_sp="Osa", query_sp="Oki")
-gene_equivalents(pho, "g1118", target_sp="Osa", query_sp="Oki")
 
+# Check the orthology of every gene in the operon with the following.
+# Names are genes in target, result is gene in query.
+sapply(unlist(operon_of_gene("g1814", operons$Oki)$gene_id), function(gene) gene_equivalents(pho, gene, target_sp="Oki", query_sp="Osa"))
+operon_of_gene("g1120", operons$Osa)
+sapply(unlist(operon_of_gene("g1120", operons$Osa)$gene_id), function(gene) gene_equivalents(pho, gene, target_sp="Osa", query_sp="Oki"))
+
+# This is what they look like.
 subsetByOverlaps(coa$Oki_Osa, operon_of_gene("g1814", operons$Oki)) |> plotApairOfChrs()
 subsetByOverlaps(coa$Oki_Osa, GRanges("chr1:6756288-7006643")) |> plotApairOfChrs()
 
-compare_operons(pho=pho, operon_of_gene("g1814", operons$Oki), operon_of_gene("g1120", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "drop_1")
-# gene_equivalents(pho=pho, target_gene="g1681", target_sp="Oki", query_sp="Osa", criterion = "same_hierarchical_orthogroup")
-# operon_of_gene("g181", operons$Oki)
+compare_operons(pho=pho, operon_of_gene("g1814", operons$Oki), operon_of_gene("g1120", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "drop_1", drop_location="ends")
+compare_operons(pho=pho, operon_of_gene("g1814", operons$Oki), operon_of_gene("g1120", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "drop_1", drop_location = "any")
+
+# Make a fake operon where the gene order is wrong, to test the "any" parameter.
+set.seed(1992)
+scrambled_operon_example_oki <- operon_of_gene("g1814", operons$Oki)
+scrambled_operon_example_oki$gene_id[[1]] <- sample(scrambled_operon_example_oki$gene_id[[1]], 4)
+# 14 = NA, 15=20, 16=19, 17=18
+# So "ends" is wrong, here...
+compare_operons(pho=pho, scrambled_operon_example, operon_of_gene("g1120", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "drop_1", drop_location="ends")
+# But "any" is true.
+compare_operons(pho=pho, scrambled_operon_example, operon_of_gene("g1120", operons$Osa), target_sp="Oki", query_sp="Osa", single_gene_criterion = "one_to_one", operon_criterion = "drop_1", drop_location = "any")
 ```
-```
-# gene_equivalents
+
+Finally, compare all of the operons in one species to the operons of another species, using some arbitrary gene matching and operon matching combinations.
+
+We'll be doing this all in parallel soon enough.
+
+```{r confirm_operon_size_5}
 # The operon_equivalence function matches a set of operons in one species to a set of 
 # operons in a second species.
 # It checks every operon above min_size for being equivalent for a matching equivalent
 # in a second species.
-#
 # 
 # List of acceptable operon matching operations:
 # 'exact'  = all genes in sp1 operon must be exactly equivalent in an operon of sp2
@@ -586,7 +619,7 @@ operon_equivalence <- function(pho, operons_sp1, operons_sp2, target_sp=NULL, qu
   operon_names_sp2 <- paste0("o", 1:length(operons_sp2))
   names(operons_sp1$gene_id) <- operon_names_sp1
   names(operons_sp2$gene_id) <- operon_names_sp2
-
+  
   sp1_checks <- lapply(operons_sp1$gene_id, function(target_operon_genes) {
     equivalent <- FALSE
     # First check how many genes satisfy the criterion set for gene equivalence
@@ -613,12 +646,12 @@ operon_equivalence <- function(pho, operons_sp1, operons_sp2, target_sp=NULL, qu
           })
           # For every gene, if 
           #print(q_t_operons )
-         })
+        })
         #print(operons_of_matches)
         gene_matches
       }
     }
-   # equivalent
+    # equivalent
   }) |> unlist()
   sp1_checks
 }
@@ -633,35 +666,35 @@ operon_equivalence(pho=pho, operons$Oki[6], operons$Osa, target_sp="Oki", query_
 
 ```{r genomic_features_byType_accessory_Functions}
 prepareFreqPlot <- function(gb, annot = NULL, rep = NULL, cne = NULL, tfbs = NULL, operons = NULL, win = 1000, direction = "left", withGenes=c("yes", "no", "only")) {
-  withGenes <- match.arg(withGenes)
-  l <- list()
-  # Note that get_bps(direction="mid") is probably not what you think.
-  if(direction == "mid") {
-    gb <- resize(gb, 1, "center")
-    direction <- "left"
+withGenes <- match.arg(withGenes)
+l <- list()
+# Note that get_bps(direction="mid") is probably not what you think.
+if(direction == "mid") {
+  gb <- resize(gb, 1, "center")
+  direction <- "left"
+}
+if (!is.null(annot)) {
+  if (withGenes %in% c("yes", "only")) {
+    l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = direction)
   }
-  if (!is.null(annot)) {
-    if (withGenes %in% c("yes", "only")) {
-      l$genes  <- feature_coverage(gb,     genes(annot),         win = win, lab = "genes",  direction = direction)
-    }
-    if (withGenes %in% c("yes", "no")) {
-      l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = direction)
-      l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = direction)
-      #reorder
-      newOrder <- order(rowSums(l$intron@image))
-      l$intron@image <- l$intron@image[newOrder,]
-      l$exon@image   <- l$exon@image[newOrder,]
-    }
+  if (withGenes %in% c("yes", "no")) {
+    l$intron <- feature_coverage(gb,     intronicParts(annot), win = win, lab = "intron", direction = direction)
+    l$exon   <- feature_coverage(gb,     exonicParts(annot),   win = win, lab = "exon",   direction = direction)
+    #reorder
+    newOrder <- order(rowSums(l$intron@image))
+    l$intron@image <- l$intron@image[newOrder,]
+    l$exon@image   <- l$exon@image[newOrder,]
   }
-  if (!is.null(operons))
-    l$operons<-feature_coverage(gb,    operons,              win = win, lab = "operons",direction = direction)
-  if (!is.null(rep))
-    l$reps   <- feature_coverage(gb,   rep,                  win = win, lab = "repeats",direction = direction)
-  if (!is.null(cne))
-    l$CNE   <- feature_coverage(gb,    cne,                  win = win, lab = "CNE",    direction = direction)
-  if (!is.null(tfbs))
-    l$tfbs  <- feature_coverage(gb,    tfbs,                 win = win, lab = "TFBS",   direction = direction)
-  l
+}
+if (!is.null(operons))
+  l$operons<-feature_coverage(gb,    operons,              win = win, lab = "operons",direction = direction)
+if (!is.null(rep))
+  l$reps   <- feature_coverage(gb,   rep,                  win = win, lab = "repeats",direction = direction)
+if (!is.null(cne))
+  l$CNE   <- feature_coverage(gb,    cne,                  win = win, lab = "CNE",    direction = direction)
+if (!is.null(tfbs))
+  l$tfbs  <- feature_coverage(gb,    tfbs,                 win = win, lab = "TFBS",   direction = direction)
+l
 }
 
 #' Prepare a long tibble for frequency plotting
@@ -678,12 +711,12 @@ prepareFreqPlot <- function(gb, annot = NULL, rep = NULL, cne = NULL, tfbs = NUL
 #' `desc` arguments.  The other columns (`val`, `freq` and `pos`) originate from
 #' the `Heatmap_to_freq_tibble` function call.
 prepareGGFreqPlot <- function(x, desc = NULL) {
-  l <- lapply(names(x), \(name){
-    tib <- Heatmap_to_freq_tibble(x[[name]], desc = desc)
-    tib$what <- name
-    tib
-  })
-   do.call(rbind, l)
+l <- lapply(names(x), \(name){
+  tib <- Heatmap_to_freq_tibble(x[[name]], desc = desc)
+  tib$what <- name
+  tib
+})
+ do.call(rbind, l)
 }
 
 #' Heatmap to long tibble for ggplot
@@ -699,11 +732,11 @@ prepareGGFreqPlot <- function(x, desc = NULL) {
 #'
 #' @return a `tibble` with `val`, `freq` and `pos` columns
 Heatmap_to_freq_tibble <- function(h, desc = NULL) {
-  val  <- colSums(h@image)
-  tibble::tibble( val  = val
-                , freq = val / nrow(h@image)
-                , pos  = 1:ncol(h@image) - round(ncol(h@image)) / 2
-                , desc = desc)
+val  <- colSums(h@image)
+tibble::tibble( val  = val
+              , freq = val / nrow(h@image)
+              , pos  = 1:ncol(h@image) - round(ncol(h@image)) / 2
+              , desc = desc)
 }
 
 ```
@@ -748,51 +781,51 @@ coalesced mapped regions, the exon annotations are over-represented.
 #'
 #' @return A `SimpleList` of Heatmap objects
 computePlotData <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left") {
-  pair <- paste(target, query, sep = "_")
-  current_GB_aln_nonCoa     <- gbs[[pair]][   gbs[[pair]]$nonCoa]
-  current_GB_aln_coa        <- gbs[[pair]][ ! gbs[[pair]]$nonCoa]
-  current_GB_syn_block      <- coa[[pair]][ ! coa[[pair]]$nonCoa]
-  # We do not use unal, because it overlaps with bri
-  current_GB_unmap          <- unmap[[pair]]
-  current_GB_bri        <- bri[[pair]]
-  
-  targetGenome <- unique(genome(gbs[[pair]]))
-  
-  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
-  
-  hmList <- SimpleList()
-  hmList$aln_nonCoa <- prepareFreqPlot_default(current_GB_aln_nonCoa)
-  hmList$aln_coa    <- prepareFreqPlot_default(current_GB_aln_coa)
-  hmList$syn_block  <- prepareFreqPlot_default(current_GB_syn_block)
-  hmList$unmap      <- prepareFreqPlot_default(current_GB_unmap)
-  hmList$bri        <- prepareFreqPlot_default(current_GB_bri)
-  hmList
+pair <- paste(target, query, sep = "_")
+current_GB_aln_nonCoa     <- gbs[[pair]][   gbs[[pair]]$nonCoa]
+current_GB_aln_coa        <- gbs[[pair]][ ! gbs[[pair]]$nonCoa]
+current_GB_syn_block      <- coa[[pair]][ ! coa[[pair]]$nonCoa]
+# We do not use unal, because it overlaps with bri
+current_GB_unmap          <- unmap[[pair]]
+current_GB_bri        <- bri[[pair]]
+
+targetGenome <- unique(genome(gbs[[pair]]))
+
+prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
+
+hmList <- SimpleList()
+hmList$aln_nonCoa <- prepareFreqPlot_default(current_GB_aln_nonCoa)
+hmList$aln_coa    <- prepareFreqPlot_default(current_GB_aln_coa)
+hmList$syn_block  <- prepareFreqPlot_default(current_GB_syn_block)
+hmList$unmap      <- prepareFreqPlot_default(current_GB_unmap)
+hmList$bri        <- prepareFreqPlot_default(current_GB_bri)
+hmList
 }
 
 hmList_to_plot_noncoding <- computePlotData("Oki", "Osa", reps = reps, CE = ces$ce__50__48)
 hmList_to_plot_coding    <- computePlotData("Oki", "Osa", annots = annots, operons = operons)
 
 list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
-  tib <-rbind(
-    hmList_to_plot$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
-    hmList_to_plot$unmap       |> prepareGGFreqPlot("02_unmapped"),
-    hmList_to_plot$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
-    hmList_to_plot$bri         |> prepareGGFreqPlot("04_bridge"),
-    hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
-  )
-  tib$desc2 <- desc
-  tib
+tib <-rbind(
+  hmList_to_plot$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
+  hmList_to_plot$unmap       |> prepareGGFreqPlot("02_unmapped"),
+  hmList_to_plot$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
+  hmList_to_plot$bri         |> prepareGGFreqPlot("04_bridge"),
+  hmList_to_plot$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
+)
+tib$desc2 <- desc
+tib
 }
 
 rbind(
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding, "noncoding"),
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_coding, "coding")
+list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding, "noncoding"),
+list_of_heatmaps_to_long_tibble(hmList_to_plot_coding, "coding")
 ) |> ggplot() +
-  aes(pos, freq, col = what) +
-  geom_line() +
-  facet_wrap(~desc2 + desc, nrow = 2) +
-  theme_bw() +
-  ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
+aes(pos, freq, col = what) +
+geom_line() +
+facet_wrap(~desc2 + desc, nrow = 2) +
+theme_bw() +
+ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
 ```
 
 Most of the narrow-width aligned regions did not coalesce.  We use this
@@ -806,19 +839,19 @@ almost all the information present in the 5-panel version above.
 
 ```{r genomic_features_byType_2, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left", withGenes = c("yes", "no", "only")) {
-  withGenes <- match.arg(withGenes)
-  pair <- paste(target, query, sep = "_")
-  current_GB_brk <- unmap[[pair]] |> subsetByOverlaps(coa[[pair]][!coa[[pair]]$nonCoa] + 1) # The unmapped region flanking colinear regions
-  current_GB_bri <- bri[[pair]]
-  
-  targetGenome <- unique(genome(gbs[[pair]]))
-  
-  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction, withGenes = withGenes)
-  
-  hmList <- SimpleList()
-  hmList$brk <- prepareFreqPlot_default(current_GB_brk)
-  hmList$bri <- prepareFreqPlot_default(current_GB_bri)
-  hmList
+withGenes <- match.arg(withGenes)
+pair <- paste(target, query, sep = "_")
+current_GB_brk <- unmap[[pair]] |> subsetByOverlaps(coa[[pair]][!coa[[pair]]$nonCoa] + 1) # The unmapped region flanking colinear regions
+current_GB_bri <- bri[[pair]]
+
+targetGenome <- unique(genome(gbs[[pair]]))
+
+prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction, withGenes = withGenes)
+
+hmList <- SimpleList()
+hmList$brk <- prepareFreqPlot_default(current_GB_brk)
+hmList$bri <- prepareFreqPlot_default(current_GB_bri)
+hmList
 }
 
 hmList_to_plot_noncoding    <- computePlotData_simplified("Oki", "Osa", reps = reps, CE = ces$ce__50__48, direction = "right")
@@ -826,24 +859,24 @@ hmList_to_plot_genesoperons <- computePlotData_simplified("Oki", "Osa", annots =
 hmList_to_plot_exonintron   <- computePlotData_simplified("Oki", "Osa", annots = annots, direction = "right", withGenes = "no")
 
 list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
-  tib <-rbind(
-    hmList_to_plot$brk         |> prepareGGFreqPlot("01_break"),
-    hmList_to_plot$bri         |> prepareGGFreqPlot("02_bridge")
-  )
-  tib$desc2 <- desc
-  tib
+tib <-rbind(
+  hmList_to_plot$brk         |> prepareGGFreqPlot("01_break"),
+  hmList_to_plot$bri         |> prepareGGFreqPlot("02_bridge")
+)
+tib$desc2 <- desc
+tib
 }
 
 rbind(
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding,    "noncoding"),
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_genesoperons, "genes and operons"),
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_exonintron,   "exons and introns")
+list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding,    "noncoding"),
+list_of_heatmaps_to_long_tibble(hmList_to_plot_genesoperons, "genes and operons"),
+list_of_heatmaps_to_long_tibble(hmList_to_plot_exonintron,   "exons and introns")
 ) |> ggplot() +
-  aes(pos, freq, col = what) +
-  geom_line() +
-  facet_wrap(~desc2 + desc, nrow = 3) +
-  theme_bw() +
-  ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
+aes(pos, freq, col = what) +
+geom_line() +
+facet_wrap(~desc2 + desc, nrow = 3) +
+theme_bw() +
+ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
 ```
 
 ### Bridge regions classified by width.
@@ -853,45 +886,45 @@ which may be in introns.
 
 ```{r bridge_width_features}
 computePlotData_for_bridge <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left") {
-  pair <- paste(target, query, sep = "_")
+pair <- paste(target, query, sep = "_")
 
-  current_GB_bri       <- bri[[pair]]
-  current_GB_bri_small <- current_GB_bri[width(current_GB_bri) <  150]
-  current_GB_bri_long  <- current_GB_bri[width(current_GB_bri) >= 150]
+current_GB_bri       <- bri[[pair]]
+current_GB_bri_small <- current_GB_bri[width(current_GB_bri) <  150]
+current_GB_bri_long  <- current_GB_bri[width(current_GB_bri) >= 150]
 
-  targetGenome <- unique(genome(gbs[[pair]]))
-  
-  prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
-  
-  hmList <- SimpleList()
-  hmList$bri       <- prepareFreqPlot_default(current_GB_bri)
-  hmList$bri_small <- prepareFreqPlot_default(current_GB_bri_small)
-  hmList$bri_long  <- prepareFreqPlot_default(current_GB_bri_long)
-  hmList
+targetGenome <- unique(genome(gbs[[pair]]))
+
+prepareFreqPlot_default <- \(x) prepareFreqPlot(x, annot = annots[[target]], rep = reps[[targetGenome]], cne = CE[[pair]], tfbs = tfbs, operons = operons[[target]], direction = direction)
+
+hmList <- SimpleList()
+hmList$bri       <- prepareFreqPlot_default(current_GB_bri)
+hmList$bri_small <- prepareFreqPlot_default(current_GB_bri_small)
+hmList$bri_long  <- prepareFreqPlot_default(current_GB_bri_long)
+hmList
 }
 
 hmList_to_plot_noncoding <- computePlotData_for_bridge("Oki", "Osa", reps = reps, CE = ces$ce__50__48)
 hmList_to_plot_coding    <- computePlotData_for_bridge("Oki", "Osa", annots = annots, operons = operons)
 
 list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
-  tib <-rbind(
-    hmList_to_plot$bri         |> prepareGGFreqPlot("01_bridge"),
-    hmList_to_plot$bri_small   |> prepareGGFreqPlot("02_bridge_small"),
-    hmList_to_plot$bri_long    |> prepareGGFreqPlot("02_bridge_long")
-  )
-  tib$desc2 <- desc
-  tib
+tib <-rbind(
+  hmList_to_plot$bri         |> prepareGGFreqPlot("01_bridge"),
+  hmList_to_plot$bri_small   |> prepareGGFreqPlot("02_bridge_small"),
+  hmList_to_plot$bri_long    |> prepareGGFreqPlot("02_bridge_long")
+)
+tib$desc2 <- desc
+tib
 }
 
 rbind(
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding, "noncoding"),
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_coding, "coding")
+list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding, "noncoding"),
+list_of_heatmaps_to_long_tibble(hmList_to_plot_coding, "coding")
 ) |> ggplot() +
-  aes(pos, freq, col = what) +
-  geom_line() +
-  facet_wrap(~desc2 + desc, nrow = 2) +
-  theme_bw() +
-  ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
+aes(pos, freq, col = what) +
+geom_line() +
+facet_wrap(~desc2 + desc, nrow = 2) +
+theme_bw() +
+ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
 ```
 
 ### Aligning on center instead of border.
@@ -900,32 +933,32 @@ rbind(
 hmList_to_plot.centered <- computePlotData("Oki", "Osa", annots = annots, CE = ces$ce__50__48, tfbs =  tfbs, operons = operons, direction = "mid")
 
 (p_boundary <- rbind(
-  hmList_to_plot.centered$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
-  hmList_to_plot.centered$unmap       |> prepareGGFreqPlot("02_unmapped"),
-  hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
-  hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge"),
-  hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
+hmList_to_plot.centered$aln_nonCoa  |> prepareGGFreqPlot("01_isolated_alns"),
+hmList_to_plot.centered$unmap       |> prepareGGFreqPlot("02_unmapped"),
+hmList_to_plot.centered$syn_block   |> prepareGGFreqPlot("03_colinear_reg"),
+hmList_to_plot.centered$bri         |> prepareGGFreqPlot("04_bridge"),
+hmList_to_plot.centered$aln_coa     |> prepareGGFreqPlot("05_colinear_alns")
 
 )|> ggplot() +
-  aes(pos, freq, col = what) +
-  geom_line() +
-  facet_wrap(~desc, nrow = 1) +
-  theme_bw() +
-  ggtitle("Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"))
+aes(pos, freq, col = what) +
+geom_line() +
+facet_wrap(~desc, nrow = 1) +
+theme_bw() +
+ggtitle("Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"))
 ```
 
 ### Splice junctions
 
 ```{r splice_junctions}
 rbind(
-  feature_coverage(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
-    Heatmap_to_freq_tibble("01_isolated"),
-  feature_coverage(unal$Oki_Osa[unal$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
-    Heatmap_to_freq_tibble("02_unaligned"),
-  feature_coverage(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
-    Heatmap_to_freq_tibble("03_colinear_reg"),
-  feature_coverage(bri$Oki_Osa, intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
-    Heatmap_to_freq_tibble("04_bridge") 
+feature_coverage(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+  Heatmap_to_freq_tibble("01_isolated"),
+feature_coverage(unal$Oki_Osa[unal$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+  Heatmap_to_freq_tibble("02_unaligned"),
+feature_coverage(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+  Heatmap_to_freq_tibble("03_colinear_reg"),
+feature_coverage(bri$Oki_Osa, intronicParts(annots$Oki) |> resize(1), window = 1000, lab = "splicejunctions", dir = "left") |>
+  Heatmap_to_freq_tibble("04_bridge") 
 ) |> ggplot() + aes(pos, freq, col = desc) + geom_line()
 ```
 
@@ -1036,22 +1069,22 @@ regions is higher than 0.6 on both side of operon boundaries.
 
 ```{r operons}
 feature_coverage_on_operons <- {
-  function(feat, desc)
-    feature_coverage(operons$Oki, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+function(feat, desc)
+  feature_coverage(operons$Oki, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
 }
 
 pairname <- "Oki_Bar"
 pairname <- "Oki_Osa"
 
 p_op_scrambling <- rbind(
-  feature_coverage_on_operons(gbs[[pairname]][gbs[[pairname]]$nonCoa], "01_isolated"),
-  feature_coverage_on_operons(unal[[pairname]][unal[[pairname]]$nonCoa], "02_unaligned"),
-  feature_coverage_on_operons(gbs[[pairname]][!gbs[[pairname]]$nonCoa], "03_colinear_aln"),
-  #feature_coverage_on_operons(subsetByOverlaps(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], granges(coa$Oki_Osa[!coa$Oki_Osa$nonCoa] - 1),type = "within"), "03b_colinear_aln_intern"),
-  #feature_coverage_on_operons(subsetByOverlaps(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], unal$Oki_Osa[unal$Oki_Osa$nonCoa] + 1), "03c_colinear_aln_extern"),
+feature_coverage_on_operons(gbs[[pairname]][gbs[[pairname]]$nonCoa], "01_isolated"),
+feature_coverage_on_operons(unal[[pairname]][unal[[pairname]]$nonCoa], "02_unaligned"),
+feature_coverage_on_operons(gbs[[pairname]][!gbs[[pairname]]$nonCoa], "03_colinear_aln"),
+#feature_coverage_on_operons(subsetByOverlaps(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], granges(coa$Oki_Osa[!coa$Oki_Osa$nonCoa] - 1),type = "within"), "03b_colinear_aln_intern"),
+#feature_coverage_on_operons(subsetByOverlaps(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], unal$Oki_Osa[unal$Oki_Osa$nonCoa] + 1), "03c_colinear_aln_extern"),
 
-  feature_coverage_on_operons(bri[[pairname]], "04_bridge"),
-  feature_coverage_on_operons(coa[[pairname]][!coa[[pairname]]$nonCoa], "05_colinear_reg")
+feature_coverage_on_operons(bri[[pairname]], "04_bridge"),
+feature_coverage_on_operons(coa[[pairname]][!coa[[pairname]]$nonCoa], "05_colinear_reg")
 ) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("operons", subtitle = "n = 2017") + theme_bw()
 ```
 
@@ -1064,29 +1097,29 @@ genes_inside_operons  <- subsetByOverlaps(genes(annots$Oki),           operons$O
 genes_outside_operons <- subsetByOverlaps(genes(annots$Oki), cleanGaps(operons$Oki),   type = "within")
 
 feature_coverage_on_genes <- {
-  function(feat, desc)
-    feature_coverage(genes_inside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+function(feat, desc)
+  feature_coverage(genes_inside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
 }
 
 p_gene_int_scrambling <- rbind(
-  feature_coverage_on_genes(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
-  feature_coverage_on_genes(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unmapped"),
-  feature_coverage_on_genes(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
-  feature_coverage_on_genes(bri$Oki_Osa, "04_bridge"),
-  feature_coverage_on_genes(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
+feature_coverage_on_genes(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
+feature_coverage_on_genes(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unmapped"),
+feature_coverage_on_genes(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
+feature_coverage_on_genes(bri$Oki_Osa, "04_bridge"),
+feature_coverage_on_genes(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
 ) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_internal_to_operons", subtitle = "n = 1348") + theme_bw()
 
 feature_coverage_on_genes_outside <- {
-  function(feat, desc)
-    feature_coverage(genes_outside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
+function(feat, desc)
+  feature_coverage(genes_outside_operons, feat, window = 1000, lab = "", dir = "left") |> Heatmap_to_freq_tibble(desc)
 }
 
 p_gene_ext_scrambling <- rbind(
-  feature_coverage_on_genes_outside(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
-  feature_coverage_on_genes_outside(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unmapped"),
-  feature_coverage_on_genes_outside(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
-  feature_coverage_on_genes_outside(bri$Oki_Osa, "04_bridge"),
-  feature_coverage_on_genes_outside(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
+feature_coverage_on_genes_outside(gbs$Oki_Osa[gbs$Oki_Osa$nonCoa], "01_isolated"),
+feature_coverage_on_genes_outside(unal$Oki_Osa[unal$Oki_Osa$nonCoa], "02_unmapped"),
+feature_coverage_on_genes_outside(gbs$Oki_Osa[!gbs$Oki_Osa$nonCoa], "03_colinear_aln"),
+feature_coverage_on_genes_outside(bri$Oki_Osa, "04_bridge"),
+feature_coverage_on_genes_outside(coa$Oki_Osa[!coa$Oki_Osa$nonCoa], "05_colinear_reg")
 ) |> ggplot() + aes(pos, freq, col = desc) + geom_line() + ggtitle("genes_outside_operons", subtitle = "n = 11688") + theme_bw()
 ```
 
@@ -1128,15 +1161,15 @@ scr_g_tbl <- table(paste(seqnames(    scrambled_genes), scrambled_genes$Arm))
 nsc_g_tbl <- table(paste(seqnames(not_scrambled_genes), not_scrambled_genes$Arm))
 
 Oki_Osa_scr_ratio_long_arm <- c(
-  scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
-  scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
-  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
+scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
+scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
 )
 mean(Oki_Osa_scr_ratio_long_arm)
 Oki_Osa_scr_ratio_short_arm <- c(
-  scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
-  scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
-  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
+scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
+scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
 )
 mean(Oki_Osa_scr_ratio_short_arm)
 
@@ -1157,14 +1190,14 @@ scr_g_tbl <- table(paste(seqnames(    scrambled_genes), scrambled_genes$Arm))
 nsc_g_tbl <- table(paste(seqnames(not_scrambled_genes), not_scrambled_genes$Arm))
 
 Bar_Kum_scr_ratio_long_arm <- c(
-  scr_g_tbl[["Chr1 long"]] / ( scr_g_tbl[["Chr1 long"]] + nsc_g_tbl[["Chr1 long"]]),
-  scr_g_tbl[["Chr2 long"]] / ( scr_g_tbl[["Chr2 long"]] + nsc_g_tbl[["Chr2 long"]]),
-  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+scr_g_tbl[["Chr1 long"]] / ( scr_g_tbl[["Chr1 long"]] + nsc_g_tbl[["Chr1 long"]]),
+scr_g_tbl[["Chr2 long"]] / ( scr_g_tbl[["Chr2 long"]] + nsc_g_tbl[["Chr2 long"]]),
+scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
 )
 Bar_Kum_scr_ratio_short_arm <- c(
-  scr_g_tbl[["Chr1 short"]] / ( scr_g_tbl[["Chr1 short"]] + nsc_g_tbl[["Chr1 short"]]),
-  scr_g_tbl[["Chr2 short"]] / ( scr_g_tbl[["Chr2 short"]] + nsc_g_tbl[["Chr2 short"]]),
-  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+scr_g_tbl[["Chr1 short"]] / ( scr_g_tbl[["Chr1 short"]] + nsc_g_tbl[["Chr1 short"]]),
+scr_g_tbl[["Chr2 short"]] / ( scr_g_tbl[["Chr2 short"]] + nsc_g_tbl[["Chr2 short"]]),
+scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
 )
 
 t.test(Bar_Kum_scr_ratio_long_arm, Bar_Kum_scr_ratio_short_arm, paired = TRUE)
@@ -1174,9 +1207,9 @@ t.test(Bar_Kum_scr_ratio_long_arm, Bar_Kum_scr_ratio_short_arm, paired = TRUE)
 mean(c(Oki_Osa_scr_ratio_long_arm, Bar_Kum_scr_ratio_long_arm))
 mean(c(Oki_Osa_scr_ratio_short_arm, Bar_Kum_scr_ratio_short_arm))
 t.test(
-  c(Oki_Osa_scr_ratio_long_arm, Bar_Kum_scr_ratio_long_arm),
-  c(Oki_Osa_scr_ratio_short_arm, Bar_Kum_scr_ratio_short_arm),
-  paired = TRUE
+c(Oki_Osa_scr_ratio_long_arm, Bar_Kum_scr_ratio_long_arm),
+c(Oki_Osa_scr_ratio_short_arm, Bar_Kum_scr_ratio_short_arm),
+paired = TRUE
 )
 ```
 
@@ -1194,15 +1227,15 @@ scr_g_tbl <- table(paste(seqnames(    scrambled_exons), scrambled_exons$Arm))
 nsc_g_tbl <- table(paste(seqnames(not_scrambled_exons), not_scrambled_exons$Arm))
 
 Oki_Osa_scr_ratio_long_arm <- c(
-  scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
-  scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
-  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
+scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
+scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
 )
 mean(Oki_Osa_scr_ratio_long_arm)
 Oki_Osa_scr_ratio_short_arm <- c(
-  scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
-  scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
-  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
+scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
+scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
 )
 mean(Oki_Osa_scr_ratio_short_arm)
 
@@ -1237,18 +1270,18 @@ p2 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n,
 p2
 
 rbind(
-  operons$Oki |> as.data.frame() |> dplyr::mutate(species="Okinawa"),
-  operons$Osa |> as.data.frame() |> dplyr::mutate(species="Osaka"),
-  operons$Bar |> as.data.frame() |> dplyr::mutate(species="Barcelona")
+operons$Oki |> as.data.frame() |> dplyr::mutate(species="Okinawa"),
+operons$Osa |> as.data.frame() |> dplyr::mutate(species="Osaka"),
+operons$Bar |> as.data.frame() |> dplyr::mutate(species="Barcelona")
 ) |> ggplot() +
-  aes(y=factor(n)) +
-  geom_bar() +
-  facet_wrap(~scrambled + species) +
-  geom_text(stat='count', aes(label=..count.., hjust=-0.2)) +
-  theme_bw() +
-  scale_x_continuous("Number operons", limits = c(0,1200)) +
-  scale_y_discrete("Number of genes in operon")
-  
+aes(y=factor(n)) +
+geom_bar() +
+facet_wrap(~scrambled + species) +
+geom_text(stat='count', aes(label=..count.., hjust=-0.2)) +
+theme_bw() +
+scale_x_continuous("Number operons", limits = c(0,1200)) +
+scale_y_discrete("Number of genes in operon")
+
 p3 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
 p3
 
@@ -1278,8 +1311,8 @@ genes$Bar$scrambled |> table()
 
 exons <- sapply(annots, function(a) sort(exons(a))) |> SimpleList()
 exons <- sapply(exons, function(e) {
-  names(e) <- e$exon_id
-  e
+names(e) <- e$exon_id
+e
 }) |> SimpleList()
 
 exons$Oki$scrambled <- 'no_breakpoint_region'
@@ -1295,27 +1328,27 @@ exons$Bar$scrambled[exons$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'over
 exons$Bar$scrambled |> table()
 
 oki_feat_bp_ovl <- rbind(
-  operons$Oki$scrambled |> table(),
-  genes$Oki$scrambled |> table(),
-  exons$Oki$scrambled |> table()
+operons$Oki$scrambled |> table(),
+genes$Oki$scrambled |> table(),
+exons$Oki$scrambled |> table()
 ) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
 oki_feat_bp_ovl$pct <- oki_feat_bp_ovl[,2]/(oki_feat_bp_ovl[,1]+oki_feat_bp_ovl[,2])*100
 oki_feat_bp_ovl$type <- rownames(oki_feat_bp_ovl)
 oki_feat_bp_ovl$species <- "Okinawa"
 
 osa_feat_bp_ovl <- rbind(
-  operons$Osa$scrambled |> table(),
-  genes$Osa$scrambled |> table(),
-  exons$Osa$scrambled |> table()
+operons$Osa$scrambled |> table(),
+genes$Osa$scrambled |> table(),
+exons$Osa$scrambled |> table()
 ) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
 osa_feat_bp_ovl$pct <- osa_feat_bp_ovl[,2]/(osa_feat_bp_ovl[,1]+osa_feat_bp_ovl[,2])*100
 osa_feat_bp_ovl$type <- rownames(osa_feat_bp_ovl)
 osa_feat_bp_ovl$species <- "Osaka"
 
 bar_feat_bp_ovl <- rbind(
-  operons$Bar$scrambled |> table(),
-  genes$Bar$scrambled |> table(),
-  exons$Bar$scrambled |> table()
+operons$Bar$scrambled |> table(),
+genes$Bar$scrambled |> table(),
+exons$Bar$scrambled |> table()
 ) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
 bar_feat_bp_ovl$pct <- bar_feat_bp_ovl[,2]/(bar_feat_bp_ovl[,1]+bar_feat_bp_ovl[,2])*100
 bar_feat_bp_ovl$type <- rownames(bar_feat_bp_ovl)
@@ -1324,17 +1357,17 @@ bar_feat_bp_ovl$species <- "Barcelona"
 df <- operons$Oki
 names(df) <- NULL
 oki_feat_bp_ovl_join <- rbind(
-  as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(genes$Oki) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(exons$Oki) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
+as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
+as.data.frame(genes$Oki) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
+as.data.frame(exons$Oki) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
 ) |> dplyr::mutate(species='Oki')
 
 df <- operons$Osa
 names(df) <- NULL
 osa_feat_bp_ovl_join <- rbind(
-  as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(genes$Osa) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(exons$Osa) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
+as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
+as.data.frame(genes$Osa) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
+as.data.frame(exons$Osa) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
 ) |> dplyr::mutate(species='Osa')
 
 p1 <- ggplot(oki_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Okinawa feature plot') + ylim(c(0, 50)) + theme_bw()
@@ -1348,12 +1381,12 @@ p3 <- ggplot(bar_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='i
 
 ```{r operon_overlap_stats_plot, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
 rbind(oki_feat_bp_ovl, osa_feat_bp_ovl, bar_feat_bp_ovl) |>
-  ggplot() +
-  aes(type, pct, fill = species) +
-  geom_bar(stat = "identity", position="dodge")  +
-  scale_y_continuous("Percent features overlaping breakpoint regions") +
-  scale_x_discrete("Feature type") +
-  theme_bw()
+ggplot() +
+aes(type, pct, fill = species) +
+geom_bar(stat = "identity", position="dodge")  +
+scale_y_continuous("Percent features overlaping breakpoint regions") +
+scale_x_discrete("Feature type") +
+theme_bw()
 ```
 
 # Coverage
