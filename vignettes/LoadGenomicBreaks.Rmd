@@ -398,14 +398,25 @@ for_wgo_barplots2 <- for_wgo_barplots2 |>
 
 for_wgo_barplots2$type <- for_wgo_barplots2$type |> factor(c("isolated alignment", "bridge region", "collinear alignment", "breakpoint region"))
 
+for_wgo_barplots2
+for_wgo_barplots2$distClass <-
+  factor(for_wgo_barplots2$distClass,
+         labels=c("Same species", "Close", "Intermediate", "Distant", "Different_genus"))
+for_wgo_barplots2$name <- for_wgo_barplots2$name |> toupper() |> sub(pat="_", rep="–")
+for_wgo_barplots2$type <-
+  factor(for_wgo_barplots2$type,
+         labels = c("Isolated alignment", "Bridge region", "Collinear alignment", "Breakpoint region"))
+
 ggplot(for_wgo_barplots2 |> dplyr::filter(genus == "Oikopleura")) +
   aes(name, value, fill = type) +
   ggplot2::coord_flip() +
-  geom_bar( stat = "identity") +
+  geom_bar( stat = "identity", color = "black", linewidth = 0.2) +
   ggtitle("Proportion of the genome in aligned, bridge and breakpoint regions") +
   facet_grid(distClass ~ ., scales = "free", space = "free") +
   theme_bw() +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+  scale_y_continuous("", labels = scales::percent_format(accuracy = 5L), position = "right") +
+  scale_x_discrete("") +
+  scale_fill_manual(values = c("#f79e87", "#8dd3c7", "#80b1d3", "#f9f5b0"))
 ```
 
 Bridge regions
