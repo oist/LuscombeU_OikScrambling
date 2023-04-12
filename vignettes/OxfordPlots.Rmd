@@ -34,6 +34,7 @@ comparisons of homologous chromosomes in more than one species.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
+library('patchwork')     |> suppressPackageStartupMessages()
 genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
 ```
@@ -400,7 +401,7 @@ gbs$Osa_Aom |> makeOxfordPlots()
 # Flipped about plot
 scaffold_gbreaks_query(gbs$Osa_Aom, chr=aom_scaffolds) |> makeOxfordPlots()
 # Flipped about plot with small skinny bits removed
-scaffold_gbreaks_query(gbs$Osa_Aom, chr=aom_scaffolds) |> swap() |> plyranges::filter(!is.na(scaffold)) |> swap() |> makeOxfordPlots()
+scaffold_gbreaks_query(gbs$Osa_Aom, chr=aom_scaffolds) |> swap() |> plyranges::filter(!is.na(scaffold)) |> swap() |> makeOxfordPlots(diag=F)
 ```
 
 ### Aom scaffolding of orthogroups
@@ -410,7 +411,7 @@ Much of this code comes from the `OrthogroupSyntenies` vignette so please inspec
 
 ```{r Osa_Aom_sc_og}
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
-transcripts <- OikScrambling:::loadAllTranscriptsGR()
+transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings()
 
 orthoGroupFileNames <- SimpleList(
   AOM.5.5f      = "AOM-5-5f.prot.longest.fa_1", 
@@ -492,6 +493,32 @@ scaffold_gbreaks_query(orthoPairs$Osa_Aom, chr=aom_scaffolds) |> swap() |> plyra
 scaffold_gbreaks_query(orthoPairs$Osa_Aom, chr=aom_scaffolds) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(!is.na(scaffold)) |> swap() |> makeOxfordPlots()
 ```
 
+#### Orthopair dot plots by increasing evolutionary distance
+The following code reproduces the dot plots featured in 
+
+```{r orthopair_dist, fig.height=8, fig.width=8,  dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+# Oki-Osa
+p1 <- orthoPairs$Oki_Osa |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> makeOxfordPlots(type='point', diag = F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5"))
+# Bar-Osa
+p2 <- orthoPairs$Bar_Osa |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> makeOxfordPlots(type='point', diag=F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5"))
+
+# Another function that takes a scaffolding list and returns a fake GRanges with
+# new seqinfo reflecting the change.
+
+
+# Aom-Osa. The original plot is not quite right, because it assigns
+# a new colour to every contig. Instead, let's modify the makeOxfordPlots
+# to allow manual colour scales.
+
+# Make an object that color-codes the chromosomes, so that it can be used with
+# scale_color_manual().
+aom_scaffolds_df <- do.call(rbind, aom_scaffolds) |> tibble::rownames_to_column() |> dplyr::mutate(seqnames=lapply(rowname, function(x) unlist(strsplit(x, "\\."))[1]) |> unlist())
+(aom_scaffolds_df)
+aom_scaffolds_df$seqnames
+
+p3 <- scaffold_gbreaks_query(orthoPairs$Osa_Aom, chr=aom_scaffolds) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(!is.na(scaffold)) |> makeOxfordPlots(type='point', diag=F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")[as.numeric(as.factor(aom_scaffolds_df$seqnames))])
+(p1 + p2 + p3)
+```
 
 ## Oki vs Kum
 
