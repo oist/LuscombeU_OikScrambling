@@ -161,7 +161,6 @@ sapply(orthoPairs_core, length)
 sapply(orthoPairs_one2oneInOiks, length)
 ```
 
-
 Remove overlapping annotations
 ------------------------------
 
@@ -291,7 +290,7 @@ orthoBlocks$Oki_Kum[order(orthoBlocks$Oki_Kum$geneNumber)] |> tail(11)
 
 ```
 
-
+## Block size histograms and statistics
 ```{r synteny_block_histograms, fig.width=8, fig.height=6, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 # Let's make this more general, sometimes you just want an annotated histogram...
 # Any numeric vector to a summary statistics table
@@ -411,6 +410,74 @@ p9
 (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) # All plots
 (p7 + p4 + p2) # By increasing phylogenetic distance from Osaka
 ```
+
+That's all well and good. Unfortunately, none of these are very beautiful. How about binning the synteny blocks into a nice barplot instead?
+
+```{r synteny_block_histograms_3, fig.width=8, fig.height=6, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}}
+num_vec_to_bins <- function(num_vec, return="n", from=1, to=100, by=10){
+  starts <- seq(from=from, to=to, by=by)
+  ends <- seq(from=by, to=to, by=by)
+  bin_names <- paste0(starts, "-", ends)
+  bin_names <- c(bin_names, paste0(">", max(ends)))
+  num_vec_counts <- table(num_vec) |> as.data.frame()
+  colnames(num_vec_counts) <- c('value', 'count')
+  num_vec_counts$value <- as.numeric(as.character(num_vec_counts$value))
+  starts_stops <- data.frame(start=c(starts, max(ends)+1), end=c(ends, Inf))
+  
+  count_abundance <- lapply(1:nrow(starts_stops), function(r) {
+    start <- starts_stops$start[r]
+    end   <- starts_stops$end[r]
+    bin <- bin_names[r]
+    vec_count_slice <- num_vec_counts[num_vec_counts$value >= start & num_vec_counts$value <= end ,]
+    count <- 0
+    n <- 0
+    if(nrow(vec_count_slice) > 0){
+      # n = number of observations
+      n <- sum(vec_count_slice$count)
+      # count = number of observations times the value (e.g., 5-length blocks * 30 = 150 genes)
+      count <- sum(vec_count_slice$value * vec_count_slice$count)
+      names(counts) <- bin
+    }
+
+    data.frame(bin=NA, n=n, count=count)
+  })
+  count_abundance <- do.call(rbind, count_abundance)
+  count_abundance$bin <- factor(bin_names, levels=bin_names)
+  count_abundance
+}
+orthoBlocks$Oki_Osa$geneNumber |> num_vec_to_bins() 
+
+# Join a few together
+sb_df <- do.call(rbind, lapply(c("Osa_Oki", "Osa_Bar", "Osa_Aom"), function(pair) {
+  orthoBlocks[[pair]]$geneNumber |> num_vec_to_bins() |> dplyr::mutate(sp=pair) |> dplyr::rename(num_genes=count, block_count=n, block_size=bin)
+}))
+sb_df$sp <- factor(sb_df$sp, levels=c("Osa_Oki", "Osa_Bar", "Osa_Aom"))
+
+# Highest to lowest plots.
+ggplot(sb_df) + aes(y=block_size, x=block_count, fill=sp) + geom_bar(stat='identity') + facet_wrap(~sp) + xlab("Block count") + ylab("Block size") + ggtitle("Synteny block size distribution")
+# Small numbers hard to see, so try log transform.
+# I multiply the values by 10, then divide the labels by 10, so that 1-counts are represented in the graph.
+#   Idea from: https://stackoverflow.com/questions/64660203/ggplot2-and-log-scale-dont-show-values-1
+ggplot(sb_df) + aes(y=block_size, x=block_count*10, fill=sp) + geom_bar(stat='identity') + facet_wrap(~sp) + scale_x_log10(labels=function(x) x/10) + xlab("Block count") + ylab("Block size") + ggtitle("Synteny block size distribution")
+ggplot(sb_df) + aes(y=block_size, x=num_genes, fill=sp) + geom_bar(stat='identity') + facet_wrap(~sp) + xlab("Number of genes") + ylab("Block size") + ggtitle("Number of genes in synteny blocks")
+
+# Lowest to highest plots. Same as above, just in opposite factor order.
+sb_df$block_size <- factor(sb_df$block_size, levels=rev(levels(sb_df$block_size)))
+ggplot(sb_df) + aes(y=block_size, x=block_count, fill=sp) + geom_bar(stat='identity') + facet_wrap(~sp) + xlab("Block count") + ylab("Block size") + ggtitle("Synteny block size distribution")
+ggplot(sb_df) + aes(y=block_size, x=block_count*10, fill=sp) + geom_bar(stat='identity') + facet_wrap(~sp) + scale_x_log10(labels=function(x) x/10) + xlab("Block count") + ylab("Block size") + ggtitle("Synteny block size distribution")
+ggplot(sb_df) + aes(y=block_size, x=num_genes, fill=sp) + geom_bar(stat='identity') + facet_wrap(~sp) + xlab("Number of genes") + ylab("Block size") + ggtitle("Number of genes in synteny blocks")
+
+# Rank-abundance plot
+sb_df_ra <- do.call(rbind, lapply(c("Osa_Oki", "Osa_Bar", "Osa_Aom"), function(pair) {
+  orthoBlocks[[pair]]$geneNumber |> num_vec_to_bins() |> dplyr::rename(num_genes=count, block_count=n, block_size=bin) |> dplyr::mutate(sp=pair, rank_abundance=cumsum(num_genes)/sum(num_genes)*100 )
+}))
+sb_df_ra$sp <- factor(sb_df_ra$sp, levels=c("Osa_Oki", "Osa_Bar", "Osa_Aom"))
+
+# Rank-abundance plot of tte same data
+ggplot(sb_df_ra) + aes(x=block_size, y=rank_abundance, fill=sp, col=sp) + geom_point() + geom_line(group=1) + facet_wrap(~sp) + theme(axis.text.x = element_text(angle=45, vjust=0.7, hjust=0.5)) + xlab("Block size") + ylab("Fraction of genes in blocks") + ggtitle("Rank-abundance of synteny blocks by number of genes") + ylim(c(0,100))
+
+```
+
 
 Gene Order Conservation is smaller in short arms
 ================================================
