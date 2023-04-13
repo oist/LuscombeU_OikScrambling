@@ -374,10 +374,23 @@ library("patchwork")
 p1 / p2 / p3 / p4 / p5
 ```
 
+In the next plot, replicate pairs of genomes are merged.
+
 ```{r proportion_of_genome_region_classes_oiks, fig.width=8, fig.height=10, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 for_wgo_barplots2 <- sapply(wgo, \(gr) tapply(width(gr), gr$type, sum)) |>
   prop.table(2) |>
-  as.data.frame() |>
+  as.data.frame()
+
+for_wgo_barplots2$Osa_Oki <- rowMeans(for_wgo_barplots2[,c("Osa_Oki", "Oki_Osa")])
+for_wgo_barplots2$Oki_Osa <- NULL
+
+for_wgo_barplots2$Bar_Oki <- rowMeans(for_wgo_barplots2[,c("Bar_Oki", "Oki_Bar")])
+for_wgo_barplots2$Oki_Bar <- NULL
+
+for_wgo_barplots2$Osa_Bar <- rowMeans(for_wgo_barplots2[,c("Osa_Bar", "Bar_Osa")])
+for_wgo_barplots2$Bar_Osa <- NULL
+
+for_wgo_barplots2 <- for_wgo_barplots2 |>
   tibble::as_tibble(rownames = "type") |>
   tidyr::pivot_longer(!type) |>
   dplyr::mutate(distClass = OikScrambling:::compDistClass(name)) |>
@@ -385,14 +398,25 @@ for_wgo_barplots2 <- sapply(wgo, \(gr) tapply(width(gr), gr$type, sum)) |>
 
 for_wgo_barplots2$type <- for_wgo_barplots2$type |> factor(c("isolated alignment", "bridge region", "collinear alignment", "breakpoint region"))
 
+for_wgo_barplots2
+for_wgo_barplots2$distClass <-
+  factor(for_wgo_barplots2$distClass,
+         labels=c("Same species", "Close", "Intermediate", "Distant", "Different_genus"))
+for_wgo_barplots2$name <- for_wgo_barplots2$name |> toupper() |> sub(pat="_", rep="–")
+for_wgo_barplots2$type <-
+  factor(for_wgo_barplots2$type,
+         labels = c("Isolated alignment", "Bridge region", "Collinear alignment", "Breakpoint region"))
+
 ggplot(for_wgo_barplots2 |> dplyr::filter(genus == "Oikopleura")) +
   aes(name, value, fill = type) +
   ggplot2::coord_flip() +
-  geom_bar( stat = "identity") +
+  geom_bar( stat = "identity", color = "black", linewidth = 0.2) +
   ggtitle("Proportion of the genome in aligned, bridge and breakpoint regions") +
   facet_grid(distClass ~ ., scales = "free", space = "free") +
   theme_bw() +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+  scale_y_continuous("", labels = scales::percent_format(accuracy = 5L), position = "right") +
+  scale_x_discrete("") +
+  scale_fill_manual(values = c("#f79e87", "#8dd3c7", "#80b1d3", "#f9f5b0"))
 ```
 
 Bridge regions

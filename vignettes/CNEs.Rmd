@@ -129,3 +129,17 @@ sapply(ces, sapply, length)
 
 saveRDS(ces, "CEs.Rds")
 ```
+
+Export the results for supplemental material.
+
+```{r export_to_BED}
+dir.create("CEs_BED", showWarnings = FALSE)
+export_CEs_to_BED <- function(gr, thresholdname, genomepairname) {
+  x <- ces[[thresholdname]][[genomepairname]]
+  names(x) <- x$cigar
+  rtracklayer::export(x, paste0("CEs_BED/", thresholdname, "_", genomepairname, ".bed"))
+}
+for (thresholdname in names(ces))
+  for (genomepairname in names(ces[[thresholdname]]))
+    export_CEs_to_BED(ces, thresholdname, genomepairname)
+```
