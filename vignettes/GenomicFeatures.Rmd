@@ -290,7 +290,7 @@ of_to_list <- function(of_ids, gene_id_separator='\\.', gene_id_field=2){
       r <- lapply(hog, function(h) unlist(strsplit(h, gene_id_separator))[gene_id_field]) |> unlist()
       r
     }
-  }) #|> CharacterList()
+  }) |> CharacterList()
 }
 
 pho$Aom <- of_to_list(pho$Aom, gene_id_field = 2)
@@ -300,69 +300,6 @@ pho$Oki <- of_to_list(pho$Oki, gene_id_field = 3)
 pho$Osa <- of_to_list(pho$Osa, gene_id_field = 3)
 pho$Nor <- of_to_list(pho$Nor, gene_id_field = 2)
 ```
-
-#### Aside: The easiest-possible case of operon conservation
-The easiest case of operon conservation is when all of the genes in an operon of one species are located in one operon of the same size in species 2, and all of the genes involved are single-copy orthologues.
-
-When genes are not single-copy orthologues, it is not certain whether gene A in species 1 is A1 or A2 in species 2. When collinear single-copy orthologues between both species participate in operons of different length, it could be due to the insertion/deletion of one or more genes in the operon in one species. Or, it could be cause by any other artifact of the method used to define operons here.
-
-Anyway, how common is the easiest-possible case of operon conservation? We can assess the number of single-copy-gene-operons as a way to frame our thinking about these operon annotations.
-
-```{r easy_operon_criterion}
-# A list version of pho is easier to look at here.
-pho2 <- read.delim(system.file("extdata/OrthoFinder/N19.tsv", package="BreakpointsData"))
-pho2 <- pho2[,!apply(pho2, 2, function(d) all(is.na(d)))]
-colnames(pho2) <- c('HOG', 'OG', 'GTPC', 'Aom', 'Bar', 'Kum', 'Oki', 'Osa', 'Nor')
-of_to_list <- function(of_ids, gene_id_separator='\\.', gene_id_field=2){
-of_list <- strsplit(of_ids, ', ')
-lapply(of_list, function(hog) {
-if(length(hog)==0){
-return(NA)
-} else {
-r <- lapply(hog, function(h) unlist(strsplit(h, gene_id_separator))[gene_id_field]) |> unlist()
-r
-}
-}) #|> CharacterList()
-}
-pho2$Aom <- of_to_list(pho2$Aom, gene_id_field = 2)
-pho2$Bar <- of_to_list(pho2$Bar, gene_id_field = 2)
-pho2$Kum <- of_to_list(pho2$Kum, gene_id_field = 2)
-pho2$Oki <- of_to_list(pho2$Oki, gene_id_field = 3)
-pho2$Osa <- of_to_list(pho2$Osa, gene_id_field = 3)
-pho2$Nor <- of_to_list(pho2$Nor, gene_id_field = 2)
-
-pho2$Oki_SC <- unlist(lapply(pho2$Oki, function(x) length(na.omit(x))==1))
-pho2$Osa_SC <- unlist(lapply(pho2$Osa, function(x) length(na.omit(x))==1))
-pho2$Bar_SC <- unlist(lapply(pho2$Bar, function(x) length(na.omit(x))==1))
-pho_sco <- pho2[pho2$Oki_SC && pho2$Osa_SC && pho2$Bar_SC, ]
-
-pho2_sco$Oki_op <- lapply( pho2_sco$Oki, function(g) all(g %in% unlist(operons$Oki$gene_id))) |> unlist()
-pho2_sco$Osa_op <- lapply( pho2_sco$Osa, function(g) all(g %in% unlist(operons$Osa$gene_id))) |> unlist()
-pho2_sco$Bar_op <- lapply( pho2_sco$Bar, function(g) all(g %in% unlist(operons$Bar$gene_id))) |> unlist()
-named_operons <- SimpleList()
-named_operons$Oki <- operons$Oki
-named_operons$Osa <- operons$Osa
-named_operons$Bar <- operons$Bar
-names(named_operons$Oki) <- paste0("o", 1:length(named_operons$Oki))
-names(named_operons$Osa) <- paste0("o", 1:length(named_operons$Osa))
-names(named_operons$Bar) <- paste0("o", 1:length(named_operons$Bar))
-pho2_sco$Oki_op_names <- lapply( pho2_sco$Oki, function(g) names(operon_of_gene(g, op = named_operons$Oki)))
-pho2_sco$Osa_op_names <- lapply( pho2_sco$Osa, function(g) names(operon_of_gene(g, op = named_operons$Osa)))
-pho2_sco$Bar_op_names <- lapply( pho2_sco$Bar, function(g) names(operon_of_gene(g, op = named_operons$Bar)))
-pho2_sco$Oki_op_names_len <- lapply(pho2_sco$Oki_op_names, length) |> unlist()
-pho2_sco$Osa_op_names_len <- lapply(pho2_sco$Osa_op_names, length) |> unlist()
-pho2_sco$Bar_op_names_len <- lapply(pho2_sco$Bar_op_names, length) |> unlist()
-pho2_sco_op <- pho2_sco[apply(pho2_sco[,19:21], 1, all),]
-
-```
-
-####
-Given a `GBreaks` relating one-to-ones between species, calculate how many genes per operon are equivalent, then plot these as Venn diagrams.
-
-This section uses two key functions, `gene_equivalence` and `operon_equivalence`.
-* `gene_equivalence`: Input is the sanitised `data.frame` of the phylogenetic hierarchical orthogroups produced by OrthoFinder (named `pho` above), and one gene identifier. It checks whether this identifier has an equivalent gene within the orthogroups according to the `criterion` argument, returning `TRUE` or `FALSE`. There are two options for equivalence, `one_to_one` (strict) or `same_hierarchical_orthogroup` (slightly more permissive), or `same_orthogroup` (extremely permissive).
-* `operon_equivalence`: Input is an `orthoPair` `GBreaks` object, and two sets of operons (one for the query, one for the target). It checks every operon longer than `min_size` in `sp1` for an equivalent operon in `sp2` according to both `single_gene_criterion` and `operon_criterion`. Arguments to `operon_criterion` can be either `exact` (every gene in the operon is in an operon of the same size in the other species), `drop_1` (operon considered equivalent if there is a match minus one gene), or `drop_2` (considered equivalent if there is a match minus two genes). 
-** `drop_1` explanation: There are two ways that we can consider operons equivalent by dropping 1 gene from them. The first is `drop_location`=`"ends"`. If this is true, then all of the genes in one species' operon are equivalent to the second species' operon after removing either 1 gene from the beginning (`FALSE TRUE TRUE ...`), or 1 gene from the end (`...TRUE TRUE FALSE`). The second possibility is when a gene can be inserted in the middle of an operon. In this author's opinion, that should count as breaking an operon (`...TRUE FALSE TRUE...`). However, it is included here using `drop_location`=`"any"`.
 
 ```{r confirm_operon_size_3}
 gene_equivalence <- function(pho, target_gene, target_sp, query_sp, criterion="one_to_one"){
@@ -551,6 +488,16 @@ gene_equivalence_test(pho=pho, target_gene = "g9611", target_sp = "Oki", query_g
 
 With a good single-gene comparison function on hand, we expand this to compare operons. 
 
+
+#### Operon equivalence testing
+Given a `GBreaks` relating one-to-ones between species, calculate how many genes per operon are equivalent, then plot these as Venn diagrams.
+
+This section uses two key functions, `gene_equivalence` and `operon_equivalence`.
+* `gene_equivalence`: Input is the sanitised `data.frame` of the phylogenetic hierarchical orthogroups produced by OrthoFinder (named `pho` above), and one gene identifier. It checks whether this identifier has an equivalent gene within the orthogroups according to the `criterion` argument, returning `TRUE` or `FALSE`. There are two options for equivalence, `one_to_one` (strict) or `same_hierarchical_orthogroup` (slightly more permissive), or `same_orthogroup` (extremely permissive).
+* `operon_equivalence`: Input is an `orthoPair` `GBreaks` object, and two sets of operons (one for the query, one for the target). It checks every operon longer than `min_size` in `sp1` for an equivalent operon in `sp2` according to both `single_gene_criterion` and `operon_criterion`. Arguments to `operon_criterion` can be either `exact` (every gene in the operon is in an operon of the same size in the other species), `drop_1` (operon considered equivalent if there is a match minus one gene), or `drop_2` (considered equivalent if there is a match minus two genes). 
+** `drop_1` explanation: There are two ways that we can consider operons equivalent by dropping 1 gene from them. The first is `drop_location`=`"ends"`. If this is true, then all of the genes in one species' operon are equivalent to the second species' operon after removing either 1 gene from the beginning (`FALSE TRUE TRUE ...`), or 1 gene from the end (`...TRUE TRUE FALSE`). The second possibility is when a gene can be inserted in the middle of an operon. In this author's opinion, that should count as breaking an operon (`...TRUE FALSE TRUE...`). However, it is included here using `drop_location`=`"any"`.
+
+
 ```{r confirm_operon_size_4}
 operon_of_gene <- function(id, op) {
   # Slow method
@@ -577,6 +524,197 @@ genes_of_operon <- function(op) {
 operon_of_gene("g57", operons$Oki) |> genes_of_operon()
 ```
 
+
+
+#### Aside: The easiest-possible case of operon conservation
+The easiest case of operon conservation is when all of the genes in an operon of one species are located in one operon of the same size in species 2, and all of the genes involved are single-copy orthologues.
+
+When genes are not single-copy orthologues, it is not certain whether gene A in species 1 is A1 or A2 in species 2. When collinear single-copy orthologues between both species participate in operons of different length, it could be due to the insertion/deletion of one or more genes in the operon in one species. Or, it could be cause by any other artifact of the method used to define operons here.
+
+Anyway, how common is the easiest-possible case of operon conservation? We can assess the number of single-copy-gene-operons as a way to frame our thinking about these operon annotations.
+
+```{r easy_operon_criterion}
+# A list version of pho is easier to look at here.
+pho2 <- read.delim(system.file("extdata/OrthoFinder/N19.tsv", package="BreakpointsData"))
+pho2 <- pho2[,!apply(pho2, 2, function(d) all(is.na(d)))]
+colnames(pho2) <- c('HOG', 'OG', 'GTPC', 'Aom', 'Bar', 'Kum', 'Oki', 'Osa', 'Nor')
+of_to_list <- function(of_ids, gene_id_separator='\\.', gene_id_field=2){
+  of_list <- strsplit(of_ids, ', ')
+  lapply(of_list, function(hog) {
+    if(length(hog)==0){
+      return(NA)
+    } else {
+      r <- lapply(hog, function(h) unlist(strsplit(h, gene_id_separator))[gene_id_field]) |> unlist()
+      r
+    }
+  }) #|> CharacterList()
+}
+pho2$Aom <- of_to_list(pho2$Aom, gene_id_field = 2)
+pho2$Bar <- of_to_list(pho2$Bar, gene_id_field = 2)
+pho2$Kum <- of_to_list(pho2$Kum, gene_id_field = 2)
+pho2$Oki <- of_to_list(pho2$Oki, gene_id_field = 3)
+pho2$Osa <- of_to_list(pho2$Osa, gene_id_field = 3)
+pho2$Nor <- of_to_list(pho2$Nor, gene_id_field = 2)
+
+pho2$Oki_SC <- unlist(lapply(pho2$Oki, function(x) length(na.omit(x))==1))
+pho2$Osa_SC <- unlist(lapply(pho2$Osa, function(x) length(na.omit(x))==1))
+pho2$Bar_SC <- unlist(lapply(pho2$Bar, function(x) length(na.omit(x))==1))
+
+# All genes
+sapply(c("Oki", "Osa", "Bar"), function(s) length(genes[[s]]))
+
+# All operons
+sapply(c("Oki", "Osa", "Bar"), function(s) length(operons[[s]]))
+
+# All genes in operons
+sapply(c("Oki", "Osa", "Bar"), function(s) sum(operons[[s]]$n)  )
+
+# All genes represented in any orthogroup
+sapply(c("Oki", "Osa", "Bar"), function(s) sum(unlist(lapply(pho[[s]], function(x) length(na.omit(x))))) )
+
+# Subset to single-copy orthologues only
+pho2_sco <- pho2[apply(pho2[,10:12], 1, all),]
+sapply(c("Oki", "Osa", "Bar"), function(s) sum(unlist(lapply(pho2_sco[[s]], function(x) length(na.omit(x))))) )
+
+pho2_sco$Oki_op <- lapply( pho2_sco$Oki, function(g) all(g %in% unlist(operons$Oki$gene_id))) |> unlist()
+pho2_sco$Osa_op <- lapply( pho2_sco$Osa, function(g) all(g %in% unlist(operons$Osa$gene_id))) |> unlist()
+pho2_sco$Bar_op <- lapply( pho2_sco$Bar, function(g) all(g %in% unlist(operons$Bar$gene_id))) |> unlist()
+
+# Single-copy orthologues in ANY operon
+sapply(c("Oki", "Osa", "Bar"), function(s) length(which(pho2_sco[[paste0(s, "_op")]])) )
+
+named_operons <- SimpleList()
+named_operons$Oki <- operons$Oki
+named_operons$Osa <- operons$Osa
+named_operons$Bar <- operons$Bar
+names(named_operons$Oki) <- paste0("o", 1:length(named_operons$Oki))
+names(named_operons$Osa) <- paste0("o", 1:length(named_operons$Osa))
+names(named_operons$Bar) <- paste0("o", 1:length(named_operons$Bar))
+
+pho2_sco$Oki_op_names <- lapply( pho2_sco$Oki, function(g) names(operon_of_gene(g, op = named_operons$Oki)))
+pho2_sco$Osa_op_names <- lapply( pho2_sco$Osa, function(g) names(operon_of_gene(g, op = named_operons$Osa)))
+pho2_sco$Bar_op_names <- lapply( pho2_sco$Bar, function(g) names(operon_of_gene(g, op = named_operons$Bar)))
+
+pho2_sco$Oki_op_length <- NA
+pho2_sco$Oki_op_length[lengths(pho2_sco$Oki_op_names) > 0] <- named_operons$Oki[unlist(pho2_sco[lengths(pho2_sco$Oki_op_names)>0,]$Oki_op_names),]$n
+pho2_sco$Osa_op_length <- NA
+pho2_sco$Osa_op_length[lengths(pho2_sco$Osa_op_names) > 0] <- named_operons$Osa[unlist(pho2_sco[lengths(pho2_sco$Osa_op_names)>0,]$Osa_op_names),]$n
+pho2_sco$Bar_op_length <- NA
+pho2_sco$Bar_op_length[lengths(pho2_sco$Bar_op_names) > 0] <- named_operons$Bar[unlist(pho2_sco[lengths(pho2_sco$Bar_op_names)>0,]$Bar_op_names),]$n
+
+# Single-copy orthologues in an operon
+pho2_sco_op <- pho2_sco[apply(pho2_sco[,13:15], 1, all),]
+
+pho2_sco_op$Oki_op_gr <- lapply(pho2_sco_op$Oki_op_names, function(x) named_operons$Oki[x]) |> as("GRangesList") |> unlist()
+pho2_sco_op$Osa_op_gr <- lapply(pho2_sco_op$Osa_op_names, function(x) named_operons$Osa[x]) |> as("GRangesList") |> unlist()
+pho2_sco_op$Bar_op_gr <- lapply(pho2_sco_op$Bar_op_names, function(x) named_operons$Bar[x]) |> as("GRangesList") |> unlist()
+
+pho2_sco_op <- pho2_sco_op |> DataFrame()
+
+pho2_sco_op$Oki_op_gr_geneid <- pho2_sco_op$Oki_op_gr$gene_id
+pho2_sco_op$Osa_op_gr_geneid <- pho2_sco_op$Osa_op_gr$gene_id
+pho2_sco_op$Bar_op_gr_geneid <- pho2_sco_op$Bar_op_gr$gene_id
+
+pho2_sco_op |> nrow()
+
+# Now, genes that are only in operons of the same length
+pho2_sco_op_samelen <- subset(pho2_sco_op, Oki_op_length == Osa_op_length & Oki_op_length == Bar_op_length)
+# How many genes and operons are left?
+nrow(pho2_sco_op_samelen)
+sapply(c("Oki", "Osa", "Bar"), function(s) sum(pho2_sco_op_samelen[[paste0(s, "_op_length")]])  )
+
+
+pho2_sco_op_samelen$Oki_Osa_op_equivalence <- lapply(1:nrow(pho2_sco_op_samelen), function(o) {
+  equivalence <- FALSE
+  ge_tests <- lapply(1:length(pho2_sco_op_samelen$Oki_op_gr_geneid[o]), function(g){
+    t_g <- pho2_sco_op_samelen$Oki_op_gr_geneid[[o]][[g]] |> unlist()
+    q_g <- pho2_sco_op_samelen$Osa_op_gr_geneid[[o]][[g]] |> unlist()
+    ge <- gene_equivalence_test(pho=pho, target_gene=t_g, query_gene = q_g, target_sp = "Oki", query_sp = "Osa")
+  }) |> unlist()
+  
+  if(all(ge_tests)){
+    equivalence <- TRUE
+  }
+  equivalence
+}) |> unlist()
+pho2_sco_op_samelen$Oki_Bar_op_equivalence <- lapply(1:nrow(pho2_sco_op_samelen), function(o) {
+  equivalence <- FALSE
+  ge_tests <- lapply(1:length(pho2_sco_op_samelen$Oki_op_gr_geneid[o]), function(g){
+    t_g <- pho2_sco_op_samelen$Oki_op_gr_geneid[[o]][[g]] |> unlist()
+    q_g <- pho2_sco_op_samelen$Bar_op_gr_geneid[[o]][[g]] |> unlist()
+    ge <- gene_equivalence_test(pho=pho, target_gene=t_g, query_gene = q_g, target_sp = "Oki", query_sp = "Bar")
+  }) |> unlist()
+  
+  if(all(ge_tests)){
+    equivalence <- TRUE
+  }
+  equivalence
+}) |> unlist()
+pho2_sco_op_samelen$Osa_Bar_op_equivalence <- lapply(1:nrow(pho2_sco_op_samelen), function(o) {
+  equivalence <- FALSE
+  ge_tests <- lapply(1:length(pho2_sco_op_samelen$Osa_op_gr_geneid[o]), function(g){
+    t_g <- pho2_sco_op_samelen$Osa_op_gr_geneid[[o]][[g]] |> unlist()
+    q_g <- pho2_sco_op_samelen$Bar_op_gr_geneid[[o]][[g]] |> unlist()
+    ge <- gene_equivalence_test(pho=pho, target_gene=t_g, query_gene = q_g, target_sp = "Osa", query_sp = "Bar")
+  }) |> unlist()
+  
+  if(all(ge_tests)){
+    equivalence <- TRUE
+  }
+  equivalence
+}) |> unlist()
+
+# How many operons are EXACTLY equivalent?
+pho2_sco_op_samelen$Oki_Osa_op_equivalence |> table()
+pho2_sco_op_samelen$Oki_Bar_op_equivalence |> table()
+pho2_sco_op_samelen$Osa_Bar_op_equivalence |> table()
+
+pho2_sco_op_samelen_sameoperon <- subset(pho2_sco_op_samelen, Oki_Osa_op_equivalence==TRUE & Osa_Bar_op_equivalence==TRUE)
+nrow(pho2_sco_op_samelen_sameoperon)
+sapply(c("Oki", "Osa", "Bar"), function(s) sum(pho2_sco_op_samelen[[paste0(s, "_op_length")]])  )
+
+
+# Account for genes in their sets...
+oki_gene_accounting <- list(
+  All_genes=genes$Oki$gene_id,
+  Genes_in_operons=unlist(operons$Oki$gene_id),
+  SCOs=unlist(pho2_sco$Oki),
+  SCOs_in_operons=unlist(pho2_sco_op$Oki),
+  #SCOs_in_operon_conserved_size=unlist(pho2_sco_op_samelen$Oki),
+  SCO_operon=unlist(pho2_sco_op_samelen_sameoperon$Oki)
+)
+
+lapply(oki_gene_accounting, length) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::mutate(gene_set=rowname, count=V1) |> ggplot() + aes(x=factor(gene_set, levels=gene_set), y=count) + geom_bar(stat='identity') + xlab("Gene set") + ggtitle("Okinawa: Number of genes in operon category") 
+# If such a package were to exist we could do:
+# oki_gene_accounting |> eulerr::euler() |> plot(quantities=TRUE)
+
+osa_gene_accounting <- list(
+  All_genes=genes$Osa$gene_id,
+  Genes_in_operons=unlist(operons$Osa$gene_id),
+  SCOs=unlist(pho2_sco$Osa),
+  SCOs_in_operons=unlist(pho2_sco_op$Osa),
+  #SCOs_in_operon_conserved_size=unlist(pho2_sco_op_samelen$Osa),
+  SCO_operon=unlist(pho2_sco_op_samelen_sameoperon$Osa)
+)
+
+lapply(osa_gene_accounting, length) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::mutate(gene_set=rowname, count=V1) |> ggplot() + aes(x=factor(gene_set, levels=gene_set), y=count) + geom_bar(stat='identity') + xlab("Gene set") + ggtitle("Osaka: Number of genes in operon category") 
+
+
+bar_gene_accounting <- list(
+  All_genes=genes$Bar$gene_id,
+  Genes_in_operons=unlist(operons$Bar$gene_id),
+  SCOs=unlist(pho2_sco$Bar),
+  SCOs_in_operons=unlist(pho2_sco_op$Bar),
+  #SCOs_in_operon_conserved_size=unlist(pho2_sco_op_samelen$Bar),
+  SCO_operon=unlist(pho2_sco_op_samelen_sameoperon$Bar)
+)
+
+lapply(bar_gene_accounting, length) |> as.data.frame() |> t() |> as.data.frame() |> tibble::rownames_to_column() |> dplyr::mutate(gene_set=rowname, count=V1) |> ggplot() + aes(x=factor(gene_set, levels=gene_set), y=count) + geom_bar(stat='identity') + xlab("Gene set") + ggtitle("Barcelona: Number of genes in operon category") 
+
+
+```
+
+#### Not-easy operon set comparison
 Now to make a function that compares one operon to another operon given some gene matching and operon matching criteria.
 
 This is a bit involved, and quite slow. Basically, the function has to check all the combinations of genes to check for weird cases. These are commented below.
@@ -680,8 +818,8 @@ compare_operons <- function(op_sp1, op_sp2, operon_criterion="exact", pho, targe
   }
   equivalent
 }
-system.time( for(i in 1:1000) { operon_of_gene("g1814", operons$Oki) }  )
-stop()
+#system.time( for(i in 1:1000) { operon_of_gene("g1814", operons$Oki) }  )
+#stop()
 # A probable example of an operon with a single missing gene in Osaka.
 # This is a case where "drop_1" is helpful, as the two operons are 
 # identical except for one gene on the end.
