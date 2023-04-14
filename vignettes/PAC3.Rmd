@@ -962,7 +962,52 @@ neighbouring_genes <- function(gene_of_interest, gene_gr, upstream=1, downstream
 }
 neighbouring_genes("g8043", genes$Oki, upstream=upstream, downstream=downstream)
 
+transcriptCharacterListToGeneIDs <- function(transcriptCharacterList, geneid_separator="\\.", geneid_field=1) {
+  lapply(transcriptCharacterList, function(transcript_vector) {
+    lapply(transcript_vector, function(e) unlist(strsplit(e, geneid_separator))[geneid_field]) |> unlist()
+  }) |> CharacterList()
+}
+orthoPairs$Oki_Osa$tx_name |> transcriptCharacterListToGeneIDs()
 
+geneCharacterListToStrands <- function(geneCharacterList, gene_gr) {
+  strand_list <- lapply(geneCharacterList, function(gene_vector) {
+    strand(gene_gr[gene_vector])
+  }) |> RleList() |> strand()
+  strand_list
+}
+orthoPairs$Oki_Osa$tx_name |> transcriptCharacterListToGeneIDs() |> geneCharacterListToStrands(gene_gr=genes$Oki) |> head()
+
+strandListToMajorityRule <- function(strandList) {
+  maj <- lapply(strandList, function(s) {
+    strand_table <- s |> table()
+    majority <- which.max(strand_table) |> names()
+  })
+  unlist(maj) |> Rle() |> strand()
+}
+orthoPairs$Oki_Osa$tx_name |> transcriptCharacterListToGeneIDs() |> geneCharacterListToStrands(gene_gr=genes$Oki) |> strandListToMajorityRule() |> head()
+
+overwriteOrthopairStrandWithMajority <- function(ob, t_genes, q_genes) {
+  target_gene_strands <- ob$tx_name |> transcriptCharacterListToGeneIDs() |> geneCharacterListToStrands(gene_gr=t_genes)
+  ob$gene_strands <- target_gene_strands
+  target_gene_strands_majority <- target_gene_strands |> strandListToMajorityRule()
+  ob$gene_strands_majority <- target_gene_strands_majority
+
+  query_gene_strands <- ob$query$tx_name |> transcriptCharacterListToGeneIDs() |> geneCharacterListToStrands(gene_gr=q_genes)
+  ob$gene_strands <- query_gene_strands
+  query_gene_strands_majority <- query_gene_strands |> strandListToMajorityRule()
+  ob$gene_strands_majority <- query_gene_strands_majority
+
+  strand(ob) <- target_gene_strands_majority
+  strand(ob$query) <- query_gene_strands_majority
+
+  ob
+}
+overwriteOrthopairStrandWithMajority(orthoPairs$Oki_Osa, t_genes=genes$Oki, q_genes=genes$Osa) |> head()
+
+
+orthoPairs_gids$Oki_Osa <- overwriteOrthopairStrandWithMajority(orthoPairs_gids$Oki_Osa, genes$Oki, genes$Osa)
+orthoPairs_gids$Oki_Bar <- overwriteOrthopairStrandWithMajority(orthoPairs_gids$Oki_Bar, genes$Oki, genes$Bar)
+orthoPairs_gids$Osa_Bar <- overwriteOrthopairStrandWithMajority(orthoPairs_gids$Osa_Bar, genes$Osa, genes$Bar)
 
 # 
 # plot_hox_locus <- function(gene_oki, gene_osa, gene_bar, gene_window=10, gene_of_interest_colour='red', comp_oki_osa, comp_osa_bar, comp_oki_bar, seg_order=c("Okinawa", "Osaka", "Barcelona"), rev_oki=FALSE, rev_osa=FALSE, rev_bar=FALSE, main=NULL, dna_seg_scale=TRUE, comp_ignore_strand=TRUE) {
@@ -1134,8 +1179,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1211,8 +1256,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (raw)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1288,8 +1333,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1365,8 +1410,9 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_bar <- orthoPairs_gids$Oki_Bar |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Bar_Osa |> subsetByOverlaps(bar_gr, ignore.strand=TRUE) |> gb2comp()
+
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1442,8 +1488,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1518,8 +1564,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1602,8 +1648,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1678,8 +1724,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
@@ -1755,8 +1801,8 @@ plot_gene_map(
   main=paste0(which_hox, ": DNA alignment (coalesced)")
 )
 
-comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
-comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_oki_osa <- orthoPairs_gids$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs_gids$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
 
 dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
 
