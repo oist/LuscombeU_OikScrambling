@@ -27,14 +27,17 @@ package = "OikScrambling")` for how the different objects are prepared.
 ```{r load_packages_and_data}
 library('OikScrambling')      |> suppressPackageStartupMessages()
 library('GenomicFeatures')    |> suppressPackageStartupMessages()
-genomes     <- OikScrambling:::loadAllGenomes()
+genomes     <- OikScrambling:::loadAllGenomes(compat = F)
 transcripts <- OikScrambling:::loadAllTranscriptsGR(compat=F) |> suppressWarnings()
+# Cannot use Knitr cache as long as "annot" objects are used.
 annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
-genes       <- sapply(annots, function(x) sort(genes(x))) |> SimpleList()
-operons     <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
-#operons$Nor <- OikScrambling:::calcOperons(window = 500, transcripts(annots$Nor) |> reduce()) |> suppressWarnings()
-
+genes       <- sapply(annots, function(a) sort(genes(a))) |> SimpleList()
 load("BreakPoints.Rdata")
+operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
+operons$Nor <- OikScrambling:::calcOperons(window = 500, transcripts(annots$Nor) |> reduce()) |> suppressWarnings()
+
+library('heatmaps')        |> suppressPackageStartupMessages()
+library('patchwork')       |> suppressPackageStartupMessages()
 library("purrr")              |> suppressPackageStartupMessages()
 library("dplyr")              |> suppressPackageStartupMessages()
 library("stringr")            |> suppressPackageStartupMessages()
@@ -934,115 +937,842 @@ plot_gene_map(
 # Hox genes
 The Hox genes tend to move around between chromosomes. Do they move with their neighbours?
 
-## Hox1
-```{r hox_1, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-# Set number of up/downstream genes to check.
-# Extract all of the loci.
-plot_hox_locus <- function(gene_oki, gene_osa, gene_bar, gene_window=10, gene_of_interest_colour='red', comp_oki_osa, comp_osa_bar, comp_oki_bar, seg_order=c("Okinawa", "Osaka", "Barcelona"), rev_oki=FALSE, rev_osa=FALSE, rev_bar=FALSE, main=NULL, dna_seg_scale=TRUE, comp_ignore_strand=TRUE) {
-  gr_oki <- extract_gene_coords(sort(genes$Oki, ignore.strand=TRUE), gene_name=gene_oki, upstream=gene_window, downstream = gene_window)
-  gr_osa <- extract_gene_coords(sort(genes$Osa, ignore.strand=TRUE), gene_name=gene_osa, upstream=gene_window, downstream = gene_window)
-  gr_bar <- extract_gene_coords(sort(genes$Bar, ignore.strand=TRUE), gene_name=gene_bar, upstream=gene_window, downstream = gene_window)
-
-  if(!rev_oki) {
-    dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour)
-  } else {
-    dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
-  }
-  
-  if(!rev_oki) {
-    dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour)
-  } else {
-    dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
-  }
-  
-  if(!rev_osa) {
-    dnaseg_osa <- gr2dna_seg(gr_osa, gene_of_interest=gene_osa, gene_of_interest_colour = gene_of_interest_colour)
-  } else {
-    dnaseg_osa <- gr2dna_seg(gr_osa, gene_of_interest=gene_osa, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
-  }
-  
-  if(!rev_bar) {
-    dnaseg_bar <- gr2dna_seg(gr_bar, gene_of_interest=gene_bar, gene_of_interest_colour = gene_of_interest_colour)
-  } else {
-    dnaseg_bar <- gr2dna_seg(gr_bar, gene_of_interest=gene_bar, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
-  }
-  # Use limits to set segment names
-  seg_names <- list(
-    Okinawa=paste0( "Okinawa\n", gr_oki |> seqnames() |> as.character() |> unique(), ":", gr_oki |> start() |> min(), "-", gr_oki |> start() |> max()),
-    Osaka=paste0( "Osaka\n",  gr_osa |> seqnames() |> as.character() |> unique(), ":", gr_osa |> start() |> min(), "-", gr_osa |> start() |> max()),
-    Barcelona=paste0( "Barcelona\n", gr_bar |> seqnames() |> as.character() |> unique(), ":", gr_bar |> start() |> min(), "-", gr_bar |> start() |> max())
-  )
-  
-  # Arrange list objects used for plotting with plot_gene_map()
-  dna_segs <- list(Okinawa=dnaseg_oki, Osaka=dnaseg_osa, Barcelona=dnaseg_bar)
-  annots   <- list(Okinawa=dnaseg_oki |> dnaseg_to_annot(), Osaka=dnaseg_osa |> dnaseg_to_annot(), Barcelona=dnaseg_bar|> dnaseg_to_annot())
-  
-  # Rearrange if a different species order is needed
-  ordered_seg_names <- seg_names[seg_order]
-  ordered_dna_segs  <- dna_segs[seg_order]
-  ordered_annots    <- annots[seg_order]
-  
-  # Lastly, arrange the comparison lists. This looks complex because the reversing operations
-  # make things complicated.
-
-  if(rev_oki && rev_osa && rev_bar){
-    c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
-    c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
-    c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
-  } else if(rev_oki && rev_osa) {
-    c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
-    c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
-    c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
-  } else if(rev_oki && rev_bar) {
-    c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
-    c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
-    c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
-  } else if(rev_osa && rev_bar) {
-    c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
-    c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
-    c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
-  } else if(rev_oki) {
-    c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
-    c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
-    c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand)
-  } else if(rev_osa) {
-    c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
-    c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand)
-    c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
-  } else if(rev_bar) {
-    c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand)
-    c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
-    c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
-  }
-  comp_list <- list("Okinawa_Osaka"=c_oki_osa, "Okinawa_Barcelona"=c_oki_bar, "Osaka_Barcelona"=c_osa_bar)
-  
-  # Which comparisons need to be displayed also depends on the order of the segments.
-  # Drop ones that are not needed and make sure they occur in the proper order.
-  needed_comparisons <- c(paste0(seg_order[1], "_", seg_order[2]), paste0(seg_order[2], "_", seg_order[3]))
-  ordered_comp_list <- comp_list[needed_comparisons]
-  
-  plot_gene_map(
-    dna_segs = ordered_dna_segs,
-    dna_seg_labels = ordered_seg_names,
-    annotations = ordered_annots,
-    dna_seg_scale = dna_seg_scale,
-    comparisons = ordered_comp_list,
-    main=main
-  )
+```{r hox_helpers}
+add_geneIDs_to_orthoPair <- function(orthopair){
+  # Add gene IDs to mcols for orthopair instead of transcript names
+  orthopair$gene_id <- lapply(orthopair$tx_name, function(x) unlist(strsplit(x, "\\."))[1]) |> unlist()
+  orthopair$query$gene_id <- lapply(orthopair$query$tx_name, function(x) unlist(strsplit(x, "\\."))[1]) |> unlist()
+  orthopair$query$target_gene_id <- lapply(orthopair$tx_name, function(x) unlist(strsplit(x, "\\."))[1]) |> unlist()
+  names(orthopair) <- orthopair$gene_id
+  names(orthopair$query) <- orthopair$query$gene_id
+  orthopair$query_name <- orthopair$query$gene_id
+  orthopair
 }
-plot_hox_locus(gene_oki = 'g8043', gene_osa = 'g6520', gene_bar = 'g4409', comp_oki_osa = gbs$Oki_Osa, comp_oki_bar = gbs$Oki_Bar, comp_osa_bar = gbs$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_oki = TRUE, rev_osa=TRUE, comp_ignore_strand = FALSE, main='Hox1')
+add_geneIDs_to_orthoPair(orthoPairs$Oki_Osa)
 
-# Where did the genes in the locus end up?
-gbs$Oki_Osa |> subsetByOverlaps(hox1_gr$Okinawa) |> plotApairOfChrs(dna_seg_labels = c('Oki chr2', 'Osa chr2') )
-gbs$Oki_Bar |> subsetByOverlaps(hox1_gr$Okinawa) |> plotApairOfChrs(dna_seg_labels = c('Oki chr2', 'Bar Chr2'))
-gbs$Osa_Bar |> subsetByOverlaps(hox1_gr$Osaka)   |> plotApairOfChrs(dna_seg_labels = c('Osa Chr2', 'Bar Chr2'))
+orthoPairs_gids <- sapply(orthoPairs, add_geneIDs_to_orthoPair) |> SimpleList()
 
+neighbouring_genes <- function(gene_of_interest, gene_gr, upstream=1, downstream=1) {
+  sorted_genes <- gene_gr |> sort(ignore.strand=TRUE)
+  gene_index <- which(gene_of_interest == sorted_genes$gene_id)
+  upstream_index <- gene_index-upstream
+  downstream_index <- gene_index + downstream
+  stopifnot(upstream_index < downstream_index)
+  sorted_genes[ upstream_index : downstream_index ]
+}
+neighbouring_genes("g8043", genes$Oki, upstream=upstream, downstream=downstream)
+
+
+
+# 
+# plot_hox_locus <- function(gene_oki, gene_osa, gene_bar, gene_window=10, gene_of_interest_colour='red', comp_oki_osa, comp_osa_bar, comp_oki_bar, seg_order=c("Okinawa", "Osaka", "Barcelona"), rev_oki=FALSE, rev_osa=FALSE, rev_bar=FALSE, main=NULL, dna_seg_scale=TRUE, comp_ignore_strand=TRUE) {
+#   gr_oki <- extract_gene_coords(sort(genes$Oki, ignore.strand=TRUE), gene_name=gene_oki, upstream=gene_window, downstream = gene_window)
+#   gr_osa <- extract_gene_coords(sort(genes$Osa, ignore.strand=TRUE), gene_name=gene_osa, upstream=gene_window, downstream = gene_window)
+#   gr_bar <- extract_gene_coords(sort(genes$Bar, ignore.strand=TRUE), gene_name=gene_bar, upstream=gene_window, downstream = gene_window)
+# 
+#   if(!rev_oki) {
+#     dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour)
+#   } else {
+#     dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
+#   }
+#   
+#   if(!rev_oki) {
+#     dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour)
+#   } else {
+#     dnaseg_oki <- gr2dna_seg(gr_oki, gene_of_interest=gene_oki, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
+#   }
+#   
+#   if(!rev_osa) {
+#     dnaseg_osa <- gr2dna_seg(gr_osa, gene_of_interest=gene_osa, gene_of_interest_colour = gene_of_interest_colour)
+#   } else {
+#     dnaseg_osa <- gr2dna_seg(gr_osa, gene_of_interest=gene_osa, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
+#   }
+#   
+#   if(!rev_bar) {
+#     dnaseg_bar <- gr2dna_seg(gr_bar, gene_of_interest=gene_bar, gene_of_interest_colour = gene_of_interest_colour)
+#   } else {
+#     dnaseg_bar <- gr2dna_seg(gr_bar, gene_of_interest=gene_bar, gene_of_interest_colour = gene_of_interest_colour) |> genoPlotR::reverse()
+#   }
+#   # Use limits to set segment names
+#   seg_names <- list(
+#     Okinawa=paste0( "Okinawa\n", gr_oki |> seqnames() |> as.character() |> unique(), ":", gr_oki |> start() |> min(), "-", gr_oki |> start() |> max()),
+#     Osaka=paste0( "Osaka\n",  gr_osa |> seqnames() |> as.character() |> unique(), ":", gr_osa |> start() |> min(), "-", gr_osa |> start() |> max()),
+#     Barcelona=paste0( "Barcelona\n", gr_bar |> seqnames() |> as.character() |> unique(), ":", gr_bar |> start() |> min(), "-", gr_bar |> start() |> max())
+#   )
+#   
+#   # Arrange list objects used for plotting with plot_gene_map()
+#   dna_segs <- list(Okinawa=dnaseg_oki, Osaka=dnaseg_osa, Barcelona=dnaseg_bar)
+#   annots   <- list(Okinawa=dnaseg_oki |> dnaseg_to_annot(), Osaka=dnaseg_osa |> dnaseg_to_annot(), Barcelona=dnaseg_bar|> dnaseg_to_annot())
+#   
+#   # Rearrange if a different species order is needed
+#   ordered_seg_names <- seg_names[seg_order]
+#   ordered_dna_segs  <- dna_segs[seg_order]
+#   ordered_annots    <- annots[seg_order]
+#   
+#   # Lastly, arrange the comparison lists. This looks complex because the reversing operations
+#   # make things complicated.
+# 
+#   if(rev_oki && rev_osa && rev_bar){
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
+#   } else if(rev_oki && rev_osa) {
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
+#   } else if(rev_oki && rev_bar) {
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
+#   } else if(rev_osa && rev_bar) {
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=3)
+#   } else if(rev_oki) {
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand)
+#   } else if(rev_osa) {
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=1)
+#   } else if(rev_bar) {
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand) |> genoPlotR::reverse(side=2)
+#   } else {
+#     c_oki_osa <- comp_oki_osa |> gb2comp(ignore.strand=comp_ignore_strand)
+#     c_oki_bar <- comp_oki_bar |> gb2comp(ignore.strand=comp_ignore_strand)
+#     c_osa_bar <- comp_osa_bar |> gb2comp(ignore.strand=comp_ignore_strand)
+#   }
+#   comp_list <- list("Okinawa_Osaka"=c_oki_osa, "Okinawa_Barcelona"=c_oki_bar, "Osaka_Barcelona"=c_osa_bar)
+#   
+#   # Which comparisons need to be displayed also depends on the order of the segments.
+#   # Drop ones that are not needed and make sure they occur in the proper order.
+#   needed_comparisons <- c(paste0(seg_order[1], "_", seg_order[2]), paste0(seg_order[2], "_", seg_order[3]))
+#   ordered_comp_list <- comp_list[needed_comparisons]
+#   
+#   plot_gene_map(
+#     dna_segs = ordered_dna_segs,
+#     dna_seg_labels = ordered_seg_names,
+#     annotations = ordered_annots,
+#     dna_seg_scale = dna_seg_scale,
+#     comparisons = ordered_comp_list,
+#     main=main
+#   )
+# }
+# 
+# 
+# plot_hox_locus(gene_oki = 'g8043', gene_osa = 'g6520', gene_bar = 'g4409', comp_oki_osa = gbs$Oki_Osa, comp_oki_bar = gbs$Oki_Bar, comp_osa_bar = gbs$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_oki = FALSE, rev_osa=FALSE, comp_ignore_strand = FALSE, main='Hox1: Nucleotide alignments (raw)', gene_window=20)
+# 
+# plot_hox_locus(gene_oki = 'g8043', gene_osa = 'g6520', gene_bar = 'g4409', comp_oki_osa = coa$Oki_Osa, comp_oki_bar = coa$Oki_Bar, comp_osa_bar = coa$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_oki = FALSE, rev_osa=FALSE, comp_ignore_strand = FALSE, main='Hox1: Nucleotide alignments (coalesced)', gene_window=20)
+# 
+# plot_hox_locus(gene_oki = 'g8043', gene_osa = 'g6520', gene_bar = 'g4409', comp_oki_osa = orthoPairs$Oki_Osa, comp_oki_bar = orthoPairs$Oki_Bar, comp_osa_bar = orthoPairs$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_oki = FALSE, rev_osa=FALSE, comp_ignore_strand = FALSE, main='Hox1: One-to-one orthologues for each pair', gene_window=20)
 
 ```
 
+## Hox1
+```{r hox_1, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox1"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g8043"
+osa_goi <- "g6520"
+bar_goi <- "g4409"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
+```
+
+
 ## Hox2
 ```{r hox_2, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-plot_hox_locus(gene_oki = 'g2590', gene_osa = 'g1327', gene_bar = 'g2590', comp_oki_osa = gbs$Oki_Osa, comp_oki_bar = gbs$Oki_Bar, comp_osa_bar = gbs$Osa_Bar, seg_order = c('Okinawa', 'Osaka', 'Barcelona'), rev_osa = TRUE, rev_oki=FALSE, rev_bar=FALSE, comp_ignore_strand = FALSE, main='Hox2')
+which_hox = "Hox2"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g1772"
+osa_goi <- "g1327"
+bar_goi <- "g2590"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+```
+
+## Hox4
+```{r hox_4, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox4"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g5193"
+osa_goi <- "g3346"
+bar_goi <- "g3781"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+bar_dnaseg$fill[which(bar_dnaseg$name=="g3778")] <- "red"
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
+```
+
+## Hox9a
+```{r hox_9a, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox9a"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g7783"
+osa_goi <- "g5216"
+bar_goi <- "g4658"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+bar_dnaseg$fill[which(bar_dnaseg$name=="g3778")]
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
+```
+
+
+## Hox9b
+```{r hox_9b, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox9b"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g293"
+osa_goi <- "g711"
+bar_goi <- "g675"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+bar_dnaseg$fill[which(bar_dnaseg$name=="g3778")]
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
+```
+
+
+## Hox10
+```{r hox_10, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox10"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g16661"
+osa_goi <- "g12075"
+bar_goi <- "g12969"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+bar_dnaseg$fill[which(bar_dnaseg$name=="g3778")]
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
+```
+
+## Hox11
+```{r hox_11, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox11"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g12896"
+osa_goi <- "g11069"
+# The Barcelona gene was not detected. Use some functions to manually get genes
+# in the area.
+bar_hox11_locus <- GRanges("PAR:5221095-5223352")
+# Show this does not overlap.
+genes$Bar |> subsetByOverlaps(bar_hox11_locus, ignore.strand=TRUE)
+# Choose a bigger region, then extract relevant genes.
+genes$Bar |> subsetByOverlaps(GRanges("PAR:5215000-5270000"), ignore.strand=TRUE) |> sort(ignore.strand=TRUE)
+bar_goi <- "g7500"
+
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "#595959")
+bar_dnaseg$fill[which(bar_dnaseg$name=="g3778")]
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
+```
+
+## Hox12
+```{r hox_12, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox12"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g2652"
+osa_goi <- "g2511"
+bar_goi <- "g1071"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+bar_dnaseg$fill[which(bar_dnaseg$name=="g3778")]
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
+```
+
+
+
+## Hox13
+```{r hox_13, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+which_hox = "Hox13"
+upstream <- 15
+downstream <- 15
+oki_goi <- "g5822"
+osa_goi <- "g4769"
+bar_goi <- "g5228"
+oki_gr <- neighbouring_genes(oki_goi, genes$Oki, upstream=upstream, downstream=downstream)
+osa_gr <- neighbouring_genes(osa_goi, genes$Osa, upstream=upstream, downstream=downstream)
+bar_gr <- neighbouring_genes(bar_goi, genes$Bar, upstream=upstream, downstream=downstream)
+
+oki_dnaseg <- gr2dna_seg(oki_gr, gene_of_interest = oki_goi, gene_of_interest_colour = "red")
+osa_dnaseg <- gr2dna_seg(osa_gr, gene_of_interest = osa_goi, gene_of_interest_colour = "red")
+bar_dnaseg <- gr2dna_seg(bar_gr, gene_of_interest = bar_goi, gene_of_interest_colour = "red")
+bar_dnaseg$fill[which(bar_dnaseg$name=="g3778")]
+
+oki_chr <- unique(as.character(seqnames(oki_gr)))
+osa_chr <- unique(as.character(seqnames(osa_gr)))
+bar_chr <- unique(as.character(seqnames(bar_gr)))
+
+oki_segname <- paste0("Okinawa:\n", oki_chr, ":", min(oki_dnaseg$start), "-", max(oki_dnaseg$end))
+osa_segname <- paste0("Osaka:\n", osa_chr, ":", min(osa_dnaseg$start), "-", max(osa_dnaseg$end))
+bar_segname <- paste0("Barcelona:\n", bar_chr, ":", min(bar_dnaseg$start), "-", max(bar_dnaseg$end))
+
+# oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)] <- paste0("Hox1\n(", oki_dnaseg$name[which(oki_dnaseg$name==oki_goi)], ")")
+# osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)] <- paste0("Hox1\n(", osa_dnaseg$name[which(osa_dnaseg$name==osa_goi)], ")")
+# bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)] <- paste0("Hox1\n(", bar_dnaseg$name[which(bar_dnaseg$name==bar_goi)], ")")
+
+dna_segs <- list("Oki"=oki_dnaseg, "Osa"=osa_dnaseg, "Bar"=bar_dnaseg)
+names(dna_segs) <- c(oki_segname, osa_segname, bar_segname)
+
+dna_annots <- lapply(dna_segs, dnaseg_to_annot)
+dna_annots <- lapply(dna_annots, function(x) {
+  d <- x
+  d$rot <- 45
+  d
+})
+
+# Uncoalesced
+comp_gbs_oki_osa <- gbs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- gbs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (raw)")
+)
+
+comp_gbs_oki_osa <- coa$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- coa$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": DNA alignment (coalesced)")
+)
+
+comp_gbs_oki_osa <- orthoPairs$Oki_Osa |> subsetByOverlaps(oki_gr, ignore.strand=TRUE) |> gb2comp()
+comp_gbs_osa_bar <- orthoPairs$Osa_Bar |> subsetByOverlaps(osa_gr, ignore.strand=TRUE) |> gb2comp()
+
+dna_comps <- list(comp_gbs_oki_osa, comp_gbs_osa_bar)
+
+plot_gene_map(
+  dna_segs = dna_segs,
+  annotations = dna_annots,
+  comparisons = dna_comps, 
+  main=paste0(which_hox, ": Orthogroups")
+)
 ```
 
 # Session information
