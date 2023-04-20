@@ -25,8 +25,8 @@ library('OikScrambling')   |> suppressPackageStartupMessages()
 library('GenomicFeatures') |> suppressPackageStartupMessages()
 library('ggplot2')         |> suppressPackageStartupMessages()
 library('patchwork')       |> suppressPackageStartupMessages()
-library('eulerr')          |> suppressPackageStartupMessages() # Needed for Euler (Venn) diagrams
-library('stringdist')          |> suppressPackageStartupMessages() # Needed for inexact operon comparisons
+library('ggvenn')          |> suppressPackageStartupMessages() # Needed for Euler (Venn) diagrams
+library('stringdist')      |> suppressPackageStartupMessages() # Needed for inexact operon comparisons
 
 genomes     <- OikScrambling:::loadAllGenomes(compat = F)
 # Cannot use Knitr cache as long as "annot" objects are used.
@@ -131,25 +131,53 @@ pho <- DataFrame(pho)
 The easiest way to translate genes in one species to genes in another is with orthogroups. Computationally, I turn gene IDs into their orthogroup labels, then look for matching "words" in the two species.
 
 ```{r conserved_operons_by_hogs_2}
-annotate_genegr_with_ogs <- function(gene_grl, og, sp) {
-  sp_gr <- sort(gene_grl[[sp]], ignore.strand=TRUE)
-  sp_og <- og[[sp]]
-  sp_hog_ids <- as.data.frame(sp_og)
-  sp_hog_ids$HOG <- og$HOG[sp_hog_ids$group]
-  sp_hog_ids$OG <- og$OG[sp_hog_ids$group]
-  
-  sp_gr$HOG <- NA
-  sp_gr$OG <- NA
-  matches <- match(sp_hog_ids$value, sp_gr$gene_id)
-  sp_gr$HOG[na.omit(matches)] <- sp_hog_ids$HOG[na.omit(matches)]
-  sp_gr$OG[na.omit(matches)] <- sp_hog_ids$OG[na.omit(matches)]
-  sp_gr
+# Convenience functions to extract the PHO index based on a gene ID of one species
+pho_of_gene <- function(pho, sp, gene_id) {
+  sp_df <- as.data.frame(pho[[sp]])
+  index <- sp_df$group[which(sp_df$value == gene_id)]
+  pho[index,]
 }
+pho_of_gene(pho, "Oki", "g100")
 
-genes_hogs <- SimpleList()
-genes_hogs$Oki <- annotate_genegr_with_ogs(genes, pho, sp="Oki")
-genes_hogs$Osa <- annotate_genegr_with_ogs(genes, pho, sp="Osa")
-genes_hogs$Bar <- annotate_genegr_with_ogs(genes, pho, sp="Bar")
+hog_of_gene <- function(pho, sp, gene_id) {
+  sp_df <- as.data.frame(pho[[sp]])
+  index <- sp_df$group[which(sp_df$value == gene_id)]
+  pho$HOG[index]
+}
+hog_of_gene(pho, "Oki", "g100")
+
+pho_of_genes <- function(pho, sp, gene_ids) {
+  sp_df <- as.data.frame(pho[[sp]])
+  indices <- lapply(gene_ids, function(x) {
+    index <- sp_df$group[which(sp_df$value == x)]
+  }) |> unlist()
+  pho[indices,]
+}
+pho_of_genes(pho, "Oki", c("g100", "g101"))
+
+hog_of_genes <- function(pho, sp, gene_ids, what="HOG") {
+  sp_df <- as.data.frame(pho[[sp]])
+  indices <- lapply(gene_ids, function(x) {
+    group <- sp_df$group[which(sp_df$value == x)]
+    if(length(group)>0){
+      index <- sp_df$group[which(sp_df$value == x)]
+    } else {
+      index <- NA
+    }
+    index
+  }) |> unlist()
+  pho[[what]][indices]
+}
+hog_of_genes(pho, "Oki", c("g654654654", "g100", "g101"), what="HOG")
+hog_of_genes(pho, "Oki", c("g654654654", "g100", "g101"), what="OG")
+
+genes_hogs <- sapply(c("Oki", "Osa", "Bar"), function(sp) {
+  g <- genes[[sp]]
+  g$HOG <- hog_of_genes(pho, sp, g$gene_id, what = "HOG")
+  g$OG  <- hog_of_genes(pho, sp, g$gene_id, what = "OG")
+  g <- sort(g, ignore.strand=TRUE)
+  g
+}) |> SimpleList()
 
 # Annotate operons GR with HOG names
 annotate_operons_with_hogs <- function(op_gr, hog_gr) {
@@ -175,22 +203,31 @@ operons_hogs$Bar <- annotate_operons_with_hogs(operons$Bar, genes_hogs$Bar)
 # Note that NA values for HOG are unique case. An operon of NA__NA should not
 # match a second NA__NA in that same species, or in any other species.
 # So, NA-only operons need to be given unique names for each species.
-hog_characterlist_to_hog_id <- function(cl, sep="__", sp=NULL) {
+hog_characterlist_to_hog_id <- function(op_gr, cl_name="HOGs", sep="__", sp=NULL) {
+  op_strands <- as.character(strand(op_gr))
+  cl <- mcols(op_gr)[[cl_name]]
   sp_specific_operon_count <- 0
   hog_id_vector <- c()
+  
   for(i in 1:length(cl)) {
+    op_strand <- op_strands[i]
     x <- cl[[i]]
     if(all(is.na(x))){
       sp_specific_operon_count <- sp_specific_operon_count + 1
       hog_id <- paste0(paste0(x, collapse=sep), sep, sp, sp_specific_operon_count, collapse=sep )
     } else {
-      hog_id <- paste0(x, collapse=sep)
+      if(op_strand == "+") {
+        hog_id <- paste0(x, collapse=sep)
+      } else {
+        hog_id <- paste0(rev(x), collapse=sep)
+      }
     }
     hog_id_vector[i] <- hog_id
   }
   return(hog_id_vector)
 }
-hog_characterlist_to_hog_id(operons_hogs$Oki$HOGs, sp="Oki")
+hog_characterlist_to_hog_id(operons_hogs$Oki, sp="Oki")
+
 ```
 
 #### Compare exact-matching operons with HOGs and OGs
@@ -199,23 +236,23 @@ hog_characterlist_to_hog_id(operons_hogs$Oki$HOGs, sp="Oki")
 compare_exact_operons_by_HOGs <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Oki", "Osa", "Bar")) {
   # Don't let the function be run on an un-annotated operons() GRanges
   stopifnot(length(op_sp1$HOGs)>0)
-  operon_sets <- list(hog_characterlist_to_hog_id(op_sp1$HOGs, sp=sp_names[[1]]),
-                      hog_characterlist_to_hog_id(op_sp2$HOGs, sp=sp_names[[2]]),
-                      hog_characterlist_to_hog_id(op_sp3$HOGs, sp=sp_names[[3]])
+  operon_sets <- list(hog_characterlist_to_hog_id(op_sp1, cl_name = "HOGs", sp=sp_names[[1]]),
+                      hog_characterlist_to_hog_id(op_sp2, cl_name = "HOGs", sp=sp_names[[2]]),
+                      hog_characterlist_to_hog_id(op_sp3, cl_name = "HOGs", sp=sp_names[[3]])
   )
   names(operon_sets) <- sp_names
 
   # Make a list of unique operon IDs combining all species' operons.
   operon_ids <- paste0("o", 1:length(unique(unlist(operon_sets))))
-    
-  all_operons <- unique(unlist(operon_sets))
-  names(all_operons) <- operon_ids
   
+  all_operons <- sort(unique(unlist(operon_sets)))
+  names(all_operons) <- operon_ids
+
   # Rename operons by shared coordinates
   renamed_operons <- lapply(operon_sets, function(o) {
     names(o) <- names(all_operons[match(o, all_operons)])
     # Remove duplicate operons, also
-    unique(names(o))
+    names(o) #|> unique()
   })
 
   renamed_operons
@@ -227,9 +264,9 @@ lapply(compare_exact_operons_by_HOGs(operons_hogs$Oki, operons_hogs$Osa, operons
 compare_exact_operons_by_OGs <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Oki", "Osa", "Bar")) {
   # Don't let the function be run on an un-annotated operons() GRanges
   stopifnot(length(op_sp1$OGs)>0)
-  operon_sets <- list(hog_characterlist_to_hog_id(op_sp1$OGs, sp=sp_names[[1]]),
-                      hog_characterlist_to_hog_id(op_sp2$OGs, sp=sp_names[[2]]),
-                      hog_characterlist_to_hog_id(op_sp3$OGs, sp=sp_names[[3]])
+  operon_sets <- list(hog_characterlist_to_hog_id(op_sp1, cl_name = "OGs", sp=sp_names[[1]]),
+                      hog_characterlist_to_hog_id(op_sp2, cl_name = "OGs", sp=sp_names[[2]]),
+                      hog_characterlist_to_hog_id(op_sp3, cl_name = "OGs", sp=sp_names[[3]])
   )
   names(operon_sets) <- sp_names
 
@@ -251,6 +288,7 @@ compare_exact_operons_by_OGs <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Oki
   })
   renamed_operons
 }
+lapply(compare_exact_operons_by_OGs(operons_hogs$Oki, operons_hogs$Osa, operons_hogs$Bar, sp_names=c("Oki", "Osa", "Bar")), head)
 
 ```
 
@@ -261,7 +299,7 @@ sp_fills <- c("Oki"="#e08d84", "Osa"="#4885c5", "Bar"="#9cdb8d")
 sp_cols <- c("Oki"="#aa6d68", "Osa"="#396b99", "Bar"="#87b779")
 
 # All operons at 500
-compare_exact_operons_by_HOGs(operons_hogs$Oki, operons_hogs$Osa, operons_hogs$Bar, sp_names=c("Oki", "Osa", "Bar")) |> euler() |> plot(quantities=TRUE, fills=sp_fills, col=sp_cols, main="Conservation of all operons by HOGs\n(calcOperons window = 500)")
+compare_exact_operons_by_HOGs(operons_hogs$Oki, operons_hogs$Osa, operons_hogs$Bar, sp_names=c("Oki", "Osa", "Bar")) |> ggvenn::ggvenn(fill_color = unname(sp_fills)) + ggtitle("Conservation of all operons by HOGs\n(calcOperons window = 500)")
 
 # Only operons above length 2
 compare_exact_operons_by_HOGs(
@@ -269,8 +307,25 @@ compare_exact_operons_by_HOGs(
   operons_hogs$Osa |> plyranges::filter(n>2),
   operons_hogs$Bar |> plyranges::filter(n>2),
   sp_names=c("Oki", "Osa", "Bar")
-) |> euler() |> plot(quantities=TRUE, fills=sp_fills, col=sp_cols, main="Conservation of operons with >2 genes by HOGs\n(calcOperons window = 500)")
+) |> ggvenn::ggvenn(fill_color = unname(sp_fills)) + ggtitle("Conservation of operons with >2 genes by HOGs\n(calcOperons window = 500)")
 
+```
+
+### Exact-matching operons, by OGs
+```{r conserved_operons_by_hogs_5, fig.width=11, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+sp_fills <- c("Oki"="#e08d84", "Osa"="#4885c5", "Bar"="#9cdb8d")
+sp_cols <- c("Oki"="#aa6d68", "Osa"="#396b99", "Bar"="#87b779")
+
+# All operons at 500
+compare_exact_operons_by_OGs(operons_hogs$Oki, operons_hogs$Osa, operons_hogs$Bar, sp_names=c("Oki", "Osa", "Bar")) |> ggvenn::ggvenn(fill_color = unname(sp_fills)) + ggtitle("Conservation of all operons by OGs\n(calcOperons window = 500)")
+
+# Only operons above length 2
+compare_exact_operons_by_OGs(
+  operons_hogs$Oki |> plyranges::filter(n>2),
+  operons_hogs$Osa |> plyranges::filter(n>2),
+  operons_hogs$Bar |> plyranges::filter(n>2),
+  sp_names=c("Oki", "Osa", "Bar")
+) |> ggvenn::ggvenn(fill_color = unname(sp_fills)) + ggtitle("Conservation of operons with >2 genes by OGs\n(calcOperons window = 500)")
 ```
 
 #### Operons calculated with different intergenic distances
@@ -291,32 +346,16 @@ operons_hogs_diff_sizes$Bar <- sapply(operons_diff_sizes$Bar, function(op_set) {
 
 ```
 
-### Exact-matching operons, by OGs
 ```{r diff_size_operons_2, fig.width=11, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
-sp_fills <- c("Oki"="#e08d84", "Osa"="#4885c5", "Bar"="#9cdb8d")
-sp_cols <- c("Oki"="#aa6d68", "Osa"="#396b99", "Bar"="#87b779")
-
-# All operons at 500
-compare_exact_operons_by_OGs(operons_hogs$Oki, operons_hogs$Osa, operons_hogs$Bar, sp_names=c("Oki", "Osa", "Bar")) |> euler() |> plot(quantities=TRUE, fills=sp_fills, col=sp_cols, main="Conservation of all operons by OGs\n(calcOperons window = 500)")
-# Only operons above length 2
-compare_exact_operons_by_OGs(
-  operons_hogs$Oki |> plyranges::filter(n>2),
-  operons_hogs$Osa |> plyranges::filter(n>2),
-  operons_hogs$Bar |> plyranges::filter(n>2),
-  sp_names=c("Oki", "Osa", "Bar")
-) |> euler() |> plot(quantities=TRUE, fills=sp_fills, col=sp_cols, main="Conservation of operons with >2 genes by OGs\n(calcOperons window = 500)")
-```
-
-```{r diff_size_operons_3, fig.width=11, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 # Operons with different window_sizes
 op_plots <- lapply(1:length(operons_hogs_diff_sizes$Oki), function(i) {
   cutoff <- operon_windows[i]
-  compare_exact_operons_by_OGs(
+  compare_exact_operons_by_HOGs(
     operons_hogs_diff_sizes$Oki[[i]],
     operons_hogs_diff_sizes$Osa[[i]],
     operons_hogs_diff_sizes$Bar[[i]],
     sp_names=c("Oki", "Osa", "Bar")
-  ) |> euler() |> plot(quantities=TRUE, fills=sp_fills, col=sp_cols, main=paste0("Conservation of all operons by OGs\n(calcOperons window = ", cutoff, ")") )
+  ) |> ggvenn::ggvenn(fill_color=unname(sp_fills)) + ggtitle(paste0("Conservation of all operons by OGs\n(calcOperons window = ", cutoff, ")") )
 })
 
 op_plots[[1]]
@@ -333,7 +372,49 @@ op_plots[[11]]
 op_plots[[12]]
 ```
 
+```{r diff_size_operons_3, fig.width=11, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+# Operons with different window_sizes
+op_plots <- lapply(1:length(operons_hogs_diff_sizes$Oki), function(i) {
+  cutoff <- operon_windows[i]
+  compare_exact_operons_by_OGs(
+    operons_hogs_diff_sizes$Oki[[i]],
+    operons_hogs_diff_sizes$Osa[[i]],
+    operons_hogs_diff_sizes$Bar[[i]],
+    sp_names=c("Oki", "Osa", "Bar")
+  ) |> ggvenn::ggvenn(fill_color=unname(sp_fills)) + ggtitle(paste0("Conservation of all operons by OGs\n(calcOperons window = ", cutoff, ")") )
+})
+
+op_plots[[1]]
+op_plots[[2]]
+op_plots[[3]]
+op_plots[[4]]
+op_plots[[5]]
+op_plots[[6]]
+op_plots[[7]]
+op_plots[[8]]
+op_plots[[9]]
+op_plots[[10]]
+op_plots[[11]]
+op_plots[[12]]
+```
+
+#### Verifying that the HOG annotation functions work
+```{r verify_hog_functions}
+# Use 9-gene operon to check
+hog_of_genes(pho, "Oki", unlist(subsetByOverlaps(operons$Oki, GRanges("PAR:9771465-9794560"))$gene_id))
+hog_of_genes(pho, "Osa", unlist(subsetByOverlaps(operons$Osa, GRanges("PAR:9478171-9497279"))$gene_id))
+hog_of_genes(pho, "Bar", unlist(subsetByOverlaps(operons$Bar, GRanges("PAR:8766290-8785222"))$gene_id)) # Notice that it is reversed.
+hog_of_genes(pho, "Bar", unlist(subsetByOverlaps(operons$Bar, GRanges("PAR:8766290-8785222"))$gene_id)) |> rev()
+
+hog_of_genes(pho, "Oki", unlist(subsetByOverlaps(operons_hogs$Oki, GRanges("PAR:9771465-9794560"))$gene_id))
+hog_of_genes(pho, "Osa", unlist(subsetByOverlaps(operons_hogs$Osa, GRanges("PAR:9478171-9497279"))$gene_id))
+hog_of_genes(pho, "Bar", unlist(subsetByOverlaps(operons_hogs$Bar, GRanges("PAR:8766290-8785222"))$gene_id)) |> rev()
+
+hog_characterlist_to_hog_id(subsetByOverlaps(operons_hogs$Oki, GRanges("PAR:9771465-9794560")), cl_name = "HOGs", sp = "Oki")
+```
+
 ### Conclusion: Operons, as defined by reasonable criteria, are not conserved
+
 
 ## Inexact-matching operons
 In order to do inexact matching between operons, one can imagine genes as "words" and operons as "phrases", then measure the edit distance between phrases.
@@ -367,8 +448,6 @@ hog_ids_to_utf8 <- function(og, sp1, sp2, sp3, sp_names=c("Oki", "Osa", "Bar")) 
 }
 genes_hogs_utf <- hog_ids_to_utf8(pho, genes_hogs$Oki, genes_hogs$Osa, genes_hogs$Bar)
 
-#stringdist::stringdist(genes_hogs_utf$Oki$utf_word[[1]], genes_hogs_utf$Osa$utf_word[[3]],  method="lv")
-
 # Annotate operons GR with UTF-8 words
 annotate_operons_with_hogs_utf <- function(op_gr, hog_utf_gr) {
   if(is.null(names(op_gr))){
@@ -396,11 +475,59 @@ operons_hogs_utf <- SimpleList()
 operons_hogs_utf$Oki <- annotate_operons_with_hogs_utf(operons$Oki, genes_hogs_utf$Oki)
 operons_hogs_utf$Osa <- annotate_operons_with_hogs_utf(operons$Osa, genes_hogs_utf$Osa)
 operons_hogs_utf$Bar <- annotate_operons_with_hogs_utf(operons$Bar, genes_hogs_utf$Bar)
+# sd_sp1_sp2 <- lapply(names(renamed_operons[[sp_names[1]]]), function(n_os1) {
+#     # Extract operon contents of name.
+#     os1 <- renamed_operons[[sp_names[1]]][n_os1]
+#     # Calculate string distances against all other operons of sp2 and
+#     # make a big dataframe.
+#     all_distances <- lapply(renamed_operons[[sp_names[2]]], function(os2){
+#       stringdist::stringdist(os1, os2, method=method, nthread = nthread)
+#     })
+#     all_distances <- do.call(rbind, lapply(all_distances, summary)) |> as.data.frame()
+#     # If any distances are less than the maximum distance, then return the operon name.
+#     if(any(all_distances[["Min."]] <= max_distance)) {
+#       return(n_os1)
+#     }
+#   }) |> unlist()
+stringdist_of_operon_against_all <- function(op_sp1, opl_sp2, nthread=1, method="lv") {
+  all_distances <- lapply(opl_sp2, function(o) {
+    stringdist::stringdist(op_sp1, o, method=method, nthread = nthread)
+  }) |> unlist()
+  all_distances
+}
+stringdist_of_operon_against_all(hog_characterlist_to_hog_id(operons_hogs_utf$Oki$utf_words[1]), hog_characterlist_to_hog_id(operons_hogs_utf$Osa$utf_words)) |> head()
+
+stringdist_all_by_all <- function(opl_sp1, opl_sp2, nthread=1, method="lv", mc.cores=1) {
+  all_by_all <- parallel::mclapply(mc.cores=mc.cores, opl_sp1, function(o) {
+    stringdist_of_operon_against_all(o, opl_sp2, nthread=nthread, method=method)
+  })
+  all_by_all
+}
+lapply(stringdist_all_by_all(hog_characterlist_to_hog_id(operons_hogs_utf$Oki$utf_words[1:3]), hog_characterlist_to_hog_id(operons_hogs_utf$Osa$utf_words)), head)
+
+stringdist_all_by_all_test <- function(stringdists, max_distance=0){
+  sds <- lapply(1:length(stringdists), function(s) {
+    if(min(s) <= max_distance){
+      return(s)
+    }
+  })
+  unlist(sds)
+}
+stringdist_all_by_all(hog_characterlist_to_hog_id(operons_hogs_utf$Oki$utf_words[1:1000]), hog_characterlist_to_hog_id(operons_hogs_utf$Osa$utf_words), mc.cores = 8) |> stringdist_all_by_all_test()
 
 # Use UTF-8-encoded operons as phrases, then compare inexact matches with string distances
-compare_inexact_operons_by_stringdist <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Oki", "Osa", "Bar"), method="lv", max_distance=0, nthread = 1) {
+compare_inexact_operons_by_stringdist <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Oki", "Osa", "Bar"), method="lv", max_distance=0, nthread = 1, min_size=2) {
   # Don't let the function be run on an un-annotated operons() GRanges
   stopifnot(length(op_sp1$utf_words)>0)
+  # Dropping X genes from a comparison of one operon to another and treating them
+  # as equal does not make much sense for operons that are too small.
+  # So, only look at operons of an appropriate size when max_distance is 
+  # >0.
+  stopifnot(min_size-max_distance>=2)
+
+  op_sp1 <- op_sp1[op_sp1$n >= min_size]
+  op_sp2 <- op_sp2[op_sp2$n >= min_size]
+  op_sp3 <- op_sp3[op_sp3$n >= min_size]
   
   operon_sets <- list(
     hog_characterlist_to_hog_id(op_sp1$utf_words, sp=sp_names[[1]]),
@@ -435,7 +562,7 @@ compare_inexact_operons_by_stringdist <- function(op_sp1, op_sp2, op_sp3, sp_nam
     if(any(all_distances[["Min."]] <= max_distance)) {
       return(n_os1)
     }
-  })
+  }) |> unlist()
   
   sd_sp2_sp3 <- lapply(names(renamed_operons[[sp_names[2]]]), function(n_os2) {
     # Extract operon contents of name.
@@ -450,7 +577,7 @@ compare_inexact_operons_by_stringdist <- function(op_sp1, op_sp2, op_sp3, sp_nam
     if(any(all_distances[["Min."]] <= max_distance)) {
       return(n_os2)
     }
-  })
+  }) |> unlist()
   
   sd_sp1_sp3 <- lapply(names(renamed_operons[[sp_names[1]]]), function(n_os1) {
     # Extract operon contents of name.
@@ -465,32 +592,25 @@ compare_inexact_operons_by_stringdist <- function(op_sp1, op_sp2, op_sp3, sp_nam
     if(any(all_distances[["Min."]] <= max_distance)) {
       return(n_os1)
     }
-  })
+  }) |> unlist()
   
-  result <- renamed_operons
-  result$tmp <- sd_sp1_sp2
-  names(result)[which(names(result=="tmp"))] <- paste0(sp_names[1], "&", sp_names[2])
-  result$tmp <- sd_sp1_sp3
-  names(result)[which(names(result=="tmp"))] <- paste0(sp_names[1], "&", sp_names[3])
-  result$tmp <- sd_sp2_sp3
-  names(result)[which(names(result=="tmp"))] <- paste0(sp_names[2], "&", sp_names[3])
-  result$tmp <- unique(c(names(sd_sp1_sp2), names(sd_sp1_sp3), names(sd_sp2_sp3)))
-  names(result)[which(names(result=="tmp"))] <- paste0(sp_names[1], "&", sp_names[2], "&", sp_names[3])
+  result <- list()
+  result[[sp_names[1]]] <- names(renamed_operons[[sp_names[1]]]) |> unique()
+  result[[sp_names[2]]] <- names(renamed_operons[[sp_names[2]]]) |> unique()
+  result[[sp_names[3]]] <- names(renamed_operons[[sp_names[3]]]) |> unique()
   
+  result$sd_sp1_sp2 <- sd_sp1_sp2
+  result$sd_sp2_sp3 <- sd_sp2_sp3
+  result$sd_sp1_sp3 <- sd_sp1_sp3
+  result$sd_sp1_sp2_sp3 <- intersect(intersect(sd_sp1_sp2, sd_sp2_sp3), sd_sp1_sp3)
   result
-
-  #renamed_operons
 }
 
-inexact_operons <- compare_inexact_operons_by_stringdist(operons_hogs_utf$Oki, operons_hogs_utf$Osa, operons_hogs_utf$Bar, sp_names=c("Oki", "Osa", "Bar"))
+inexact_operons <- compare_inexact_operons_by_stringdist(operons_hogs_utf$Oki, operons_hogs_utf$Osa, operons_hogs_utf$Bar, sp_names=c("Oki", "Osa", "Bar"), max_distance = 1, min_size=3, nthread=8)
+names(inexact_operons) <- c("Oki", "Osa", "Bar", "Oki&Osa", "Osa&Bar", "Oki&Bar", "Oki&Osa&Bar")
 
 inexact_operons |> euler() |> plot(quantities=TRUE, fills=sp_fills, col=sp_cols, main="Conservation of all operons by HOGs\n(calcOperons window = 500)")
 ```
-
-### Compare inexact operon matches by string distances
-
-```
-
 
 
 # Session information
