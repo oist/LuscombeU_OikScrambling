@@ -233,12 +233,13 @@ hog_characterlist_to_hog_id(operons_hogs$Oki, sp="Oki")
 #### Compare exact-matching operons with HOGs and OGs
 
 ```{r conserved_operons_by_hogs_3}
-compare_exact_operons_by_HOGs <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Oki", "Osa", "Bar")) {
+compare_exact_operons_by_HOGs <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Oki", "Osa", "Bar"), return_what="renamed_operons") {
   # Don't let the function be run on an un-annotated operons() GRanges
   stopifnot(length(op_sp1$HOGs)>0)
-  operon_sets <- list(hog_characterlist_to_hog_id(op_sp1, cl_name = "HOGs", sp=sp_names[[1]]),
-                      hog_characterlist_to_hog_id(op_sp2, cl_name = "HOGs", sp=sp_names[[2]]),
-                      hog_characterlist_to_hog_id(op_sp3, cl_name = "HOGs", sp=sp_names[[3]])
+  operon_sets <- list(
+    hog_characterlist_to_hog_id(op_sp1, cl_name = "HOGs", sp=sp_names[[1]]),
+    hog_characterlist_to_hog_id(op_sp2, cl_name = "HOGs", sp=sp_names[[2]]),
+    hog_characterlist_to_hog_id(op_sp3, cl_name = "HOGs", sp=sp_names[[3]])
   )
   names(operon_sets) <- sp_names
 
@@ -254,8 +255,20 @@ compare_exact_operons_by_HOGs <- function(op_sp1, op_sp2, op_sp3, sp_names=c("Ok
     # Remove duplicate operons, also
     names(o) #|> unique()
   })
-
-  renamed_operons
+  
+  # Extract GRanges if necessary
+  if(return_what=="renamed_operons"){
+    return(renamed_operons)
+  } else if (return_what == "GRanges") {
+    gr_sl <- SimpleList()
+    gr_sl[[sp_names[1]]] <- op_sp1
+    gr_sl[[sp_names[2]]] <- op_sp2
+    gr_sl[[sp_names[3]]] <- op_sp3
+    gr_sl[[paste0(sp_names[1], "_", sp_names[2])]] <- op_sp1[which(operon_sets[[1]] %in% operon_sets[[2]] )]
+    gr_sl[[paste0(sp_names[1], "_", sp_names[3])]] <- op_sp1[which(operon_sets[[1]] %in% operon_sets[[3]] )]
+    gr_sl[[paste0(sp_names[2], "_", sp_names[3])]] <- op_sp1[which(operon_sets[[2]] %in% operon_sets[[3]] )]
+    return(gr_sl)
+  }
 }
 
 # Preview for what the function does:
@@ -410,7 +423,7 @@ hog_of_genes(pho, "Oki", unlist(subsetByOverlaps(operons_hogs$Oki, GRanges("PAR:
 hog_of_genes(pho, "Osa", unlist(subsetByOverlaps(operons_hogs$Osa, GRanges("PAR:9478171-9497279"))$gene_id))
 hog_of_genes(pho, "Bar", unlist(subsetByOverlaps(operons_hogs$Bar, GRanges("PAR:8766290-8785222"))$gene_id)) |> rev()
 
-hog_characterlist_to_hog_id(subsetByOverlaps(operons_hogs$Oki, GRanges("PAR:9771465-9794560")), cl_name = "HOGs", sp = "Oki")
+
 ```
 
 ### Conclusion: Operons, as defined by reasonable criteria, are not conserved
