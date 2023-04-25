@@ -648,7 +648,91 @@ inexact_operons_tibble_ggvenn$Oki_Osa_Bar <- inexact_operons_tibble_ggvenn$opero
 apply(inexact_operons_tibble_ggvenn[,2:8], 2, table)
 apply(apply(inexact_operons_tibble_ggvenn[,2:8], 2, table), 2, sum)
 
-eulerr::euler(c("Oki"=1178, "Osa"=1025, "Bar"=928, "Oki&Osa"=107, "Oki&Bar"=119, "Osa&Bar"=168, "Oki&Osa&Bar"=38)) |> plot(quantities=TRUE, main="Number of conserved operons >= 3 genes, with >=1 gene different\n", fills=sp_fills, col=sp_cols)
+eulerr::euler(c("Oki"=1178, "Osa"=1025, "Bar"=928, "Oki&Osa"=107, "Oki&Bar"=119, "Osa&Bar"=168, "Oki&Osa&Bar"=38)) |> plot(quantities=TRUE, main="Number of operons >= 3 genes, with >=1 gene different\ncalcOperons window=500bp", fills=sp_fills, col=sp_cols)
+
+```
+
+# Operon swapping
+Are genes in operons more or less likely to end up in another operon?
+
+```{r operon_swapping_1}
+# Number of genes 
+n_genes <- length(genes_hogs$Oki)
+# Number of operons
+n_operons <- length(operons_hogs$Oki)
+# Number of genes in operons
+n_genes_in_operons <- length(unlist(operons_hogs$Oki$gene_id))
+# Number of genes in HOGs
+n_genes_in_hogs <- length(na.omit(genes_hogs$Oki$HOG))
+# Number of genes in operons in HOGs
+n_genes_in_operons_in_hogs <- length(na.omit(unlist(operons_hogs$Oki$HOGs)))
+# Fraction of genes with HOGs
+n_genes_in_hogs/n_genes
+# Fraction of genes in operons with HOGs
+n_genes_in_operons_in_hogs/n_genes_in_operons
+# This is not substantially different. The number of genes assigned to HOGs is not very different in vs. out of operons.
+
+# Subset to genes with shared HOGs
+oki_hogs <- genes_hogs_utf$Oki[genes_hogs_utf$Oki$HOG %in% genes_hogs_utf$Osa$HOG]
+oki_hogs <- oki_hogs[oki_hogs$HOG %in% genes_hogs_utf$Bar$HOG]
+in_operon_oki  <- oki_hogs[ oki_hogs$gene_id %in%  unlist(operons_hogs_utf$Oki$gene_id)]
+out_operon_oki <- oki_hogs[!oki_hogs$gene_id %in%  unlist(operons_hogs_utf$Oki$gene_id)]
+
+osa_hogs <- genes_hogs_utf$Osa[genes_hogs_utf$Osa$HOG %in% genes_hogs_utf$Oki$HOG]
+osa_hogs <- osa_hogs[osa_hogs$HOG %in% genes_hogs_utf$Bar$HOG]
+in_operon_osa  <- osa_hogs[ osa_hogs$gene_id %in%  unlist(operons_hogs_utf$Osa$gene_id)]
+out_operon_osa <- osa_hogs[!osa_hogs$gene_id %in%  unlist(operons_hogs_utf$Osa$gene_id)]
+
+bar_hogs <- genes_hogs_utf$Bar[genes_hogs_utf$Bar$HOG %in% genes_hogs_utf$Oki$HOG]
+bar_hogs <- bar_hogs[bar_hogs$HOG %in% genes_hogs_utf$Oki$HOG]
+in_operon_bar  <- bar_hogs[ bar_hogs$gene_id %in%  unlist(operons_hogs_utf$Bar$gene_id)]
+out_operon_bar <- bar_hogs[!bar_hogs$gene_id %in%  unlist(operons_hogs_utf$Bar$gene_id)]
+
+
+# Then evaluate whether genes in operons are more likely to be in operons in another species.
+
+# How many genes are in an operon in one species but not the other species?
+chisq_oki_osa <- rbind(
+  na.omit(in_operon_oki$utf_word) %in% unlist(in_operon_osa$utf_word) |> table(),
+  na.omit(in_operon_oki$utf_word) %in% unlist(out_operon_osa$utf_word) |> table(),
+  na.omit(out_operon_oki$utf_word) %in% unlist(in_operon_osa$utf_word) |> table(),
+  na.omit(out_operon_oki$utf_word) %in% unlist(out_operon_osa$utf_word) |> table()
+) |> as.data.frame()
+rownames(chisq_oki_osa) <- c("inOki_inOsa", "inOki_outOsa", "outOki_inOsa", "outOki_outOsa")
+chisq_oki_osa
+
+chisq_oki_osa_test <- chisq.test(chisq_oki_osa)
+lapply(chisq_oki_osa_test, \(x) x)
+chisq_oki_osa_test <- AMR::g.test(chisq_oki_osa)
+lapply(chisq_oki_osa_test, \(x) x)
+
+chisq_oki_bar <- rbind(
+  na.omit(in_operon_oki$utf_word) %in% unlist(in_operon_bar$utf_word) |> table(),
+  na.omit(in_operon_oki$utf_word) %in% unlist(out_operon_bar$utf_word) |> table(),
+  na.omit(out_operon_oki$utf_word) %in% unlist(in_operon_bar$utf_word) |> table(),
+  na.omit(out_operon_oki$utf_word) %in% unlist(out_operon_bar$utf_word) |> table()
+) |> as.data.frame()
+rownames(chisq_oki_bar) <- c("inOki_inBar", "inOki_outBar", "outOki_inBar", "outOki_outBar")
+chisq_oki_bar
+
+chisq_oki_bar_test <- chisq.test(chisq_oki_bar)
+lapply(chisq_oki_bar_test, \(x) x)
+chisq_oki_osa_test <- AMR::g.test(chisq_oki_bar)
+lapply(chisq_oki_osa_test, \(x) x)
+
+chisq_osa_bar <- rbind(
+  na.omit(in_operon_osa$utf_word) %in% unlist(in_operon_bar$utf_word) |> table(),
+  na.omit(in_operon_osa$utf_word) %in% unlist(out_operon_bar$utf_word) |> table(),
+  na.omit(out_operon_osa$utf_word) %in% unlist(in_operon_bar$utf_word) |> table(),
+  na.omit(out_operon_osa$utf_word) %in% unlist(out_operon_bar$utf_word) |> table()
+) |> as.data.frame()
+rownames(chisq_osa_bar) <- c("inOsa_inBar", "inOsa_outBar", "outOsa_inBar", "outOsa_outBar")
+chisq_osa_bar
+
+chisq_osa_bar_test <- chisq.test(chisq_osa_bar)
+lapply(chisq_osa_bar_test, \(x) x)
+chisq_osa_bar_test <- AMR::g.test(chisq_osa_bar)
+lapply(chisq_osa_bar_test, \(x) x)
 
 ```
 
