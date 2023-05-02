@@ -19,6 +19,17 @@ knitr::opts_chunk$set(echo = TRUE)
 We skip all computations if `pwmMatchesOki.Rds`, because it is heavy.
 
 ```{r setup2}
+searchSeq2GB <- function(pwm, genomeseqs, mc.cores=1L) {
+  siteSet <- TFBSTools::searchSeq(pwm, genomeseqs, mc.cores = mc.cores) |> suppressWarnings()
+  gr <- as(siteSet, "GRanges")
+  # Slim the result object
+  gr$siteSeqs <- NULL
+  # Most PWMs are palindromic, so strand information has little relevance but
+  # bloats the object with redundant copies
+  strand(gr) <- '*'
+  unique(sort(gr, ignore.strand=TRUE))
+}
+
 if (! file.exists("pwmMatchesOki.Rds")) {
 library("GenomicBreaks")
 genomes     <- OikScrambling:::loadAllGenomes()
@@ -45,17 +56,6 @@ if (! file.exists("pwmMatchesOki.Rds")) {
 
 Oki_DNAStringSet <- lapply(seqnames(genomes$Oki), \(name) genomes$Oki[[name]]) |> as("DNAStringSet")
 names(Oki_DNAStringSet) <- seqnames(genomes$Oki)
-
-searchSeq2GB <- function(pwm, genomeseqs, mc.cores=1L) {
-  siteSet <- TFBSTools::searchSeq(pwm, genomeseqs, mc.cores = mc.cores) |> suppressWarnings()
-  gr <- as(siteSet, "GRanges")
-  # Slim the result object
-  gr$siteSeqs <- NULL
-  # Most PWMs are palindromic, so strand information has little relevance but
-  # bloats the object with redundant copies
-  strand(gr) <- '*'
-  unique(sort(gr, ignore.strand=TRUE))
-}
 
 pwmMatchesOnOki <- lapply(PWMatrixList |> as.list(), searchSeq2GB, Oki_DNAStringSet)
 # x_15_98 <- lapply(pwmMatchesOnOki, \(gr) gr[gr$relScore > 0.98 & gr$absScore > 15]) |> as("GRangesList") |> unlist() |> reduce()
