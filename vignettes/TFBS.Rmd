@@ -19,6 +19,9 @@ knitr::opts_chunk$set(echo = TRUE)
 We skip all computations if `pwmMatchesOki.Rds`, because it is heavy.
 
 ```{r setup2}
+library("GenomicBreaks")
+library(TFBSTools)
+library(JASPAR2020)
 searchSeq2GB <- function(pwm, genomeseqs, mc.cores=1L) {
   siteSet <- TFBSTools::searchSeq(pwm, genomeseqs, mc.cores = mc.cores) |> suppressWarnings()
   gr <- as(siteSet, "GRanges")
@@ -31,7 +34,6 @@ searchSeq2GB <- function(pwm, genomeseqs, mc.cores=1L) {
 }
 
 if (! file.exists("pwmMatchesOki.Rds")) {
-library("GenomicBreaks")
 genomes     <- OikScrambling:::loadAllGenomes()
 }
 ```
@@ -40,8 +42,6 @@ Select all vertebrate entries; convert to a list of position-weight matrices.
 
 ```{r load_TFBS}
 if (! file.exists("pwmMatchesOki.Rds")) {
-library(TFBSTools)
-library(JASPAR2020)
 PFMatrixList <- getMatrixSet(JASPAR2020, list(tax_group="vertebrates"))
 PFMatrixList
 PWMatrixList <- toPWM(PFMatrixList)
@@ -75,11 +75,6 @@ saveRDS(pwmMatchesOnOki_12_95, "pwmMatchesOki_12_95.Rds")
 
 ```{r scan_TFBS_osa}
 if (! file.exists("pwmMatchesOsa.Rds")) {
-library("GenomicBreaks")
-genomes <- OikScrambling:::loadAllGenomes()
-library(TFBSTools)
-library(JASPAR2020)
-
 Osa_DNAStringSet <- lapply(seqnames(genomes$Osa), \(name) genomes$Osa[[name]]) |> as("DNAStringSet")
 names(Osa_DNAStringSet) <- seqnames(genomes$Osa)
 
