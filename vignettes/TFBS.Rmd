@@ -75,6 +75,10 @@ saveRDS(pwmMatchesOnOki_12_95, "pwmMatchesOki_12_95.Rds")
 
 ```{r scan_TFBS_osa}
 if (! file.exists("pwmMatchesOsa.Rds")) {
+library("GenomicBreaks")
+genomes <- OikScrambling:::loadAllGenomes()
+library(TFBSTools)
+library(JASPAR2020)
 
 Osa_DNAStringSet <- lapply(seqnames(genomes$Osa), \(name) genomes$Osa[[name]]) |> as("DNAStringSet")
 names(Osa_DNAStringSet) <- seqnames(genomes$Osa)
