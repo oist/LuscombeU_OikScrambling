@@ -22,6 +22,8 @@ We skip all computations if `pwmMatchesOki.Rds`, because it is heavy.
 library("GenomicBreaks")
 library(TFBSTools)
 library(JASPAR2020)
+genomes <- OikScrambling:::loadAllGenomes()
+
 searchSeq2GB <- function(pwm, genomeseqs, mc.cores=1L) {
   siteSet <- TFBSTools::searchSeq(pwm, genomeseqs, mc.cores = mc.cores) |> suppressWarnings()
   gr <- as(siteSet, "GRanges")
@@ -31,10 +33,6 @@ searchSeq2GB <- function(pwm, genomeseqs, mc.cores=1L) {
   # bloats the object with redundant copies
   strand(gr) <- '*'
   unique(sort(gr, ignore.strand=TRUE))
-}
-
-if (! file.exists("pwmMatchesOki.Rds")) {
-genomes     <- OikScrambling:::loadAllGenomes()
 }
 ```
 
