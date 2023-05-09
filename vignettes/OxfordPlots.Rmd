@@ -28,6 +28,7 @@ Figure 1 panel A was generated in this vignette.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
+ggplot2::theme_set(theme_bw())
 genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
 ```
@@ -54,42 +55,34 @@ Same, colored by strand.
 makeOxfordPlots(gbs$Oki_Osa, diag = FALSE, col = "strand") + theme_bw() + theme(legend.position="none")
 ```
 
-Same, using collinear regions from the `coa` object (we used to call these
-regions 'coalesced' in a earlier phase of the project).  Visually, the two
-line plots are very similar.
-
-```{r Oki_Osa_strand_coa, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-makeOxfordPlots(coa$Oki_Osa, diag = FALSE, col = "strand") + theme_bw() + theme(legend.position="none")
-```
-
 ## Oki vs Bar
 
 ```{r Oki_Bar_all}
-makeOxfordPlots(coa$Oki_Bar, diag = FALSE)
+makeOxfordPlots(gbs$Oki_Bar, diag = FALSE)
 ```
 
 ## Osa vs Bar
 
 ```{r Osa_bar}
-makeOxfordPlots(coa$Osa_Bar, diag = FALSE)
+makeOxfordPlots(gbs$Osa_Bar, diag = FALSE)
 ```
 
 ## Osa vs Oki
 
 ```{r Osa_Oki}
-makeOxfordPlots(coa$Osa_Oki, diag = FALSE)
+makeOxfordPlots(gbs$Osa_Oki, diag = FALSE)
 ```
 
 ## Osa vs Aom
 
 ```{r Osa_Aom}
-makeOxfordPlots(coa$Osa_Aom, diag = FALSE)
+makeOxfordPlots(gbs$Osa_Aom, diag = FALSE)
 ```
 
 ## Oki vs Kum
 
 ```{r Oki_Kum}
-makeOxfordPlots(coa$Oki_Kum)
+makeOxfordPlots(gbs$Oki_Kum)
 ```
 
 
@@ -98,13 +91,13 @@ makeOxfordPlots(coa$Oki_Kum)
 ## _Ciona intestinalis_ (Plymouth vs Roscoff)
 
 ```{r Ply_Ros}
-makeOxfordPlots(coa$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+makeOxfordPlots(gbs$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
 ```
 
 ## _Ciona intestinalis_ (Plymouth) vs _Ciona robusta_
 
 ```{r Ply_Rob}
-makeOxfordPlots(coa$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+makeOxfordPlots(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
 ```
 
 ## Troubleshoot of grid pattern
@@ -113,7 +106,7 @@ We see horizontal patterns what are they?  I think they may be pericentromeric
 regions.
 
 ```{r Ply_Rob_point_plot}
-makeOxfordPlots(coa$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+makeOxfordPlots(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
 ```
 
 ```{r Ply_Rob_subset}
@@ -147,7 +140,7 @@ coa$Ply_Rob |>
 ## _Ciona intestinalis_ (Plymouth) vs _Ciona savignyi_
 
 ```{r Ply_Sav}
-makeOxfordPlots(coa$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+makeOxfordPlots(gbs$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
 ```
 
 # Drosophila
@@ -155,25 +148,25 @@ makeOxfordPlots(coa$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona sav
 ## vs Drosophila mauritania
 
 ```{r Dmel_Dmau}
-makeOxfordPlots(coa$Dme_Dma) + ggtitle("Dmel vs Dmau")
+makeOxfordPlots(gbs$Dme_Dma) + ggtitle("Dmel vs Dmau")
 ```
 
 ## vs Drosophila yakuba
 
 ```{r Dmel_Dyak}
-makeOxfordPlots(coa$Dme_Dya) + ggtitle("Dmel vs Dyak")
+makeOxfordPlots(gbs$Dme_Dya) + ggtitle("Dmel vs Dyak")
 ```
 
 ## vs Drosophila subpulchrella
 
 ```{r Dmel_Dsub}
-makeOxfordPlots(coa$Dme_Dsu) + ggtitle("Dmel vs Dsub")
+makeOxfordPlots(gbs$Dme_Dsu) + ggtitle("Dmel vs Dsub")
 ```
 
 ## vs Drosophila buskii
 
 ```{r Dmel_Dbus}
-makeOxfordPlots(coa$Dme_Dbu) + ggtitle("Dmel vs Dbus")
+makeOxfordPlots(gbs$Dme_Dbu) + ggtitle("Dmel vs Dbus")
 ```
 
 # Mammals
