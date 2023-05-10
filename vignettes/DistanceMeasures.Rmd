@@ -20,6 +20,9 @@ We want to put numbers on visual impressions such as:
  - Aligned regions stay on their chromosome arm.
  - Aligned regions are more "off the diagonal" on short arms than on long arms.
  - …
+ 
+The _strand randomisation indexes_ computed below are called _scrambling index_
+in the manuscript and displayed in its Table 1.
 
 # Load R pacakges and data
 
@@ -47,6 +50,41 @@ pairs2table6x3 <- function (x) {
 }
 
 pairs2Kable6x3 <- function (df) df |> pairs2table6x3() |> round(2) |> knitr::kable()
+```
+
+# Strand randomisation index
+
+See `?GenomicBreaks::strand_randomisation_index` for details.
+
+```{r strand_randomisation_index_def}
+strand_randomisation_index
+```
+
+The computation of strand randomisation indices is not symmetric: the results
+differ a bit when the roles of _target_ and _query_ genomes are swapped.
+
+```{r strand_randomisation_index_run}
+SRIs         <- BiocParallel::bplapply(gbs,                 strand_randomisation_index  )
+SRIS_swapped <- BiocParallel::bplapply(gbs, \(g) swap(g) |> strand_randomisation_index())
+```
+
+## Table 1
+
+We averaged the numbers computed with and without swapping _target_ and _query_
+genomes.
+
+```{r strand_randomisation_index_table_1}
+as.list(1 / 2 * (unlist(SRIs) + unlist(SRIS_swapped))) |> pairs2Kable6x3()
+```
+
+## Unidirectional computation
+
+The raw data is shown here to prove that the differences do not affect general
+conclusions.
+
+```{r strand_randomisation_index_run_unidir}
+SRIs         |> pairs2Kable6x3()
+SRIS_swapped |> pairs2Kable6x3()
 ```
 
 # Synteny index
@@ -94,19 +132,6 @@ GOC
 ```{r goc_index_run}
 BiocParallel::bplapply(gbs,                 GOC  ) |> pairs2Kable6x3()
 BiocParallel::bplapply(gbs, \(g) swap(g) |> GOC()) |> pairs2Kable6x3()
-```
-
-# Strand randomisation index
-
-See `?GenomicBreaks::strand_randomisation_index` for details.
-
-```{r strand_randomisation_index_def}
-strand_randomisation_index
-```
-
-```{r strand_randomisation_index_run}
-BiocParallel::bplapply(gbs,                 strand_randomisation_index  ) |> pairs2Kable6x3()
-BiocParallel::bplapply(gbs, \(g) swap(g) |> strand_randomisation_index()) |> pairs2Kable6x3()
 ```
 
 # Strand proportion index

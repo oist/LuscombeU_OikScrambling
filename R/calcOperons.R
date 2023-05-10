@@ -24,7 +24,7 @@
 #' genes <- GRanges(c("chr1:100-199:+", "chr1:300-400:+",
 #'                    "chr1:500-600:+", "chr1:700-800:-"))
 #' genes$gene_id <- LETTERS[seq_along(genes)]
-#' calcOperons(genes, window = 100)
+#' OikScrambling:::calcOperons(genes, window = 100)
 
 calcOperons <- function(genes, window = 100) {
   # Calculating operons on each strand separately so that nested genes do not
