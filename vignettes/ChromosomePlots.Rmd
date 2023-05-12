@@ -994,6 +994,62 @@ lapply(plots$Bar$boxplots, \(x) x)
 detach('package:ggpubr')
 ```
 
+### Statistics: Relationship between arms, genes, and alignment categories
+Are genes on short arms more likely to overlap a breakpoint region than those on long arms?
+
+```{r stats_arm_category}
+# Simple function to tabulate the table needed for a chi-squared test.
+genes_vs_arm_by_category <- function(wgo, transcript_gr, category="breakpoint region", arms) {
+  # Subset to only chromosomal scaffolds
+  wgo_gr <- wgo |> plyranges::filter(seqnames %in% c("chr1", "Chr1", "chr2", "Chr2", "XSR", "PAR") ) |> flagLongShort(arms)
+  transcript_gr <- transcript_gr |> plyranges::filter(seqnames %in% c("chr1", "Chr1", "chr2", "Chr2", "XSR", "PAR") ) |> flagLongShort(arms)
+  in_region <- transcript_gr |> subsetByOverlaps(wgo_gr[wgo_gr$type == category])
+  category_name <- gsub(" ", "_", category)
+  transcript_gr$ovl <- FALSE
+  transcript_gr$ovl[which(names(transcript_gr) %in% names(in_region))] <- TRUE
+
+  # Now transmute the GRanges to make a table suitable for statistical tests.
+  df <- transcript_gr |> as.data.frame() |> dplyr::group_by(Arm, ovl) |> dplyr::summarise(n=n()) |> suppressMessages()
+  df <- df |> tidyr::pivot_wider(names_from=ovl, values_from=n)
+  df <- as.data.frame(df)
+  rownames(df) <- df$Arm
+  df <- df[,-1]
+  colnames(df) <- c(paste0("no_overlap_", category_name), paste0("overlap_", category_name))
+  df
+}
+
+# See the table the function produces
+( genes_vs_arm_by_category(wgo$Oki_Osa, transcripts$Oki, category="breakpoint region", longShort$OKI2018.I69) )
+
+# Do statistical tests on the previous table
+( genes_vs_arm_by_category(wgo$Oki_Osa, transcripts$Oki, category="breakpoint region", longShort$OKI2018.I69) |> chisq.test() )
+( genes_vs_arm_by_category(wgo$Oki_Bar, transcripts$Oki, category="breakpoint region", longShort$OKI2018.I69) |> chisq.test() )
+( genes_vs_arm_by_category(wgo$Oki_Kum, transcripts$Oki, category="breakpoint region", longShort$OKI2018.I69) |> chisq.test() )
+
+( genes_vs_arm_by_category(wgo$Osa_Bar, transcripts$Osa, category="breakpoint region", longShort$OSKA2016v1.9) |> chisq.test() )
+( genes_vs_arm_by_category(wgo$Osa_Aom, transcripts$Osa, category="breakpoint region", longShort$OSKA2016v1.9) |> chisq.test() )
+
+( genes_vs_arm_by_category(wgo$Bar_Nor, transcripts$Bar, category="breakpoint region", longShort$Bar2.p4) |> chisq.test() )
+```
+
+A more robust alternative to the Chi-squared test is the [G-test](https://search.r-project.org/CRAN/refmans/AMR/html/g.test.html). 
+
+```{r stats_arm_category_2}
+library(AMR)
+
+# Do statistical tests on the previous table
+( genes_vs_arm_by_category(wgo$Oki_Osa, transcripts$Oki, category="breakpoint region", longShort$OKI2018.I69) |> g.test() )
+( genes_vs_arm_by_category(wgo$Oki_Bar, transcripts$Oki, category="breakpoint region", longShort$OKI2018.I69) |> g.test() )
+( genes_vs_arm_by_category(wgo$Oki_Kum, transcripts$Oki, category="breakpoint region", longShort$OKI2018.I69) |> g.test() )
+
+( genes_vs_arm_by_category(wgo$Osa_Bar, transcripts$Osa, category="breakpoint region", longShort$OSKA2016v1.9) |> g.test() )
+( genes_vs_arm_by_category(wgo$Osa_Aom, transcripts$Osa, category="breakpoint region", longShort$OSKA2016v1.9) |> g.test() )
+
+( genes_vs_arm_by_category(wgo$Bar_Nor, transcripts$Bar, category="breakpoint region", longShort$Bar2.p4) |> g.test() )
+
+detach('package:AMR')
+```
+
 ## Transforming to a single coordinate system
 In this section, I create some utility functions to scale genomic ranges to the same coordinate system, then calculate averages of some statistics over the windows in these regions.
 
