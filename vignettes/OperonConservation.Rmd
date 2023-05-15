@@ -1,13 +1,13 @@
 ---
-title: "Genomic features of the breakpoints"
+title: "Operon conservation analysis"
 author: 
- - "Charlotte West"
+ - "Michael Mansfield"
  - "Charles Plessy"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{Genomic features of the breakpoints}
+  %\VignetteIndexEntry{Operon conservation analysis}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
@@ -700,11 +700,15 @@ chisq_oki_osa <- rbind(
 ) |> as.data.frame()
 rownames(chisq_oki_osa) <- c("inOki_inOsa", "inOki_outOsa", "outOki_inOsa", "outOki_outOsa")
 chisq_oki_osa
-
+# Plot
+p1 <- chisq_oki_osa  |> tibble::rownames_to_column("operon_status") |> tidyr::pivot_longer(cols=2:3) |> dplyr::rename(n_genes=value, value=name) |> ggplot() + aes(y=operon_status, x=n_genes, fill=value) + geom_bar(stat='identity') + ggtitle("Oki-Osa: Homologous genes by operon membership")
+p1
+# Stats
 chisq_oki_osa_test <- chisq.test(chisq_oki_osa)
 lapply(chisq_oki_osa_test, \(x) x)
 chisq_oki_osa_test <- AMR::g.test(chisq_oki_osa)
 lapply(chisq_oki_osa_test, \(x) x)
+
 
 chisq_oki_bar <- rbind(
   na.omit(in_operon_oki$utf_word) %in% unlist(in_operon_bar$utf_word) |> table(),
@@ -714,7 +718,10 @@ chisq_oki_bar <- rbind(
 ) |> as.data.frame()
 rownames(chisq_oki_bar) <- c("inOki_inBar", "inOki_outBar", "outOki_inBar", "outOki_outBar")
 chisq_oki_bar
-
+# Plot
+p2 <- chisq_oki_bar  |> tibble::rownames_to_column("operon_status") |> tidyr::pivot_longer(cols=2:3) |> dplyr::rename(n_genes=value, value=name) |> ggplot() + aes(y=operon_status, x=n_genes, fill=value) + geom_bar(stat='identity') + ggtitle("Oki-Bar: Homologous genes by operon membership")
+p2
+# Stats
 chisq_oki_bar_test <- chisq.test(chisq_oki_bar)
 lapply(chisq_oki_bar_test, \(x) x)
 chisq_oki_osa_test <- AMR::g.test(chisq_oki_bar)
@@ -728,12 +735,15 @@ chisq_osa_bar <- rbind(
 ) |> as.data.frame()
 rownames(chisq_osa_bar) <- c("inOsa_inBar", "inOsa_outBar", "outOsa_inBar", "outOsa_outBar")
 chisq_osa_bar
-
+p3 <- chisq_osa_bar  |> tibble::rownames_to_column("operon_status") |> tidyr::pivot_longer(cols=2:3) |> dplyr::rename(n_genes=value, value=name) |> ggplot() + aes(y=operon_status, x=n_genes, fill=value) + geom_bar(stat='identity') + ggtitle("Osa-Bar: Homologous genes by operon membership")
+p3
+# Stats
 chisq_osa_bar_test <- chisq.test(chisq_osa_bar)
 lapply(chisq_osa_bar_test, \(x) x)
 chisq_osa_bar_test <- AMR::g.test(chisq_osa_bar)
 lapply(chisq_osa_bar_test, \(x) x)
 
+( p1 + p2 + p3 )
 ```
 
 
