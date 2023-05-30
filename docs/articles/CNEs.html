@@ -144,7 +144,7 @@
       <h1 data-toc-skip>Conserved non-coding elements</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">06 January, 2023</h4>
+            <h4 data-toc-skip class="date">27 April, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/CNEs.Rmd" class="external-link"><code>vignettes/CNEs.Rmd</code></a></small>
       <div class="hidden name"><code>CNEs.Rmd</code></div>
@@ -365,6 +365,17 @@
 <span class="co">## Bar_Oki      18321      30044</span></code></pre>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">ces</span>, <span class="st">"CEs.Rds"</span><span class="op">)</span></code></pre></div>
+<p>Export the results for supplemental material.</p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"CEs_BED"</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="va">export_CEs_to_BED</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gr</span>, <span class="va">thresholdname</span>, <span class="va">genomepairname</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">x</span> <span class="op">&lt;-</span> <span class="va">ces</span><span class="op">[[</span><span class="va">thresholdname</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">genomepairname</span><span class="op">]</span><span class="op">]</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">$</span><span class="va">cigar</span>
+  <span class="fu">rtracklayer</span><span class="fu">::</span><span class="fu">export</span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"CEs_BED/"</span>, <span class="va">thresholdname</span>, <span class="st">"_"</span>, <span class="va">genomepairname</span>, <span class="st">".bed"</span><span class="op">)</span><span class="op">)</span>
+<span class="op">}</span>
+<span class="kw">for</span> <span class="op">(</span><span class="va">thresholdname</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ces</span><span class="op">)</span><span class="op">)</span>
+  <span class="kw">for</span> <span class="op">(</span><span class="va">genomepairname</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ces</span><span class="op">[[</span><span class="va">thresholdname</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+    <span class="fu">export_CEs_to_BED</span><span class="op">(</span><span class="va">ces</span>, <span class="va">thresholdname</span>, <span class="va">genomepairname</span><span class="op">)</span></code></pre></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -17,10 +17,12 @@ knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
 knitr::opts_knit$set(verbose = TRUE)
 ```
 
-# Purpose
+# Introduction
 
 Pairwise alignments between whole chromosomes are plotted in parallel in order
 to reflect synteny and the difference of scrambling between short and long arms.
+
+Figure 1 panel B was generated in this vignette.
 
 # Load R pacakges and data
 
@@ -74,29 +76,14 @@ tree <-
 plot(ade4::newick2phylog(tree))
 ```
 
-# Genome plots with genoPlotR
+# Scaffolding of Kume chromosomes
 
-## Pairs of chromosome 1s.
+The Kume draft assembly contains long contigs that can be scaffolded into
+chromosomes.  Some sequences may be missing between these contigs, but the
+absence of large gaps in the plots at the junction between contigs suggest that
+this is not a problem for the use we make of this scaffolding.
 
-```{r Oki_Bar_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Oki_Bar, "chr1", main = "Oki vs Bar")
-```
-```{r Oki_Osa_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Oki_Osa, "chr1", main = "Oki vs Osa")
-```
-```{r Osa_Oki_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Osa_Oki, "Chr1", main = "Osa vs Oki")
-```
-```{r Osa_Bar_chr1, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa$Osa_Bar, "Chr1", main = "Osa vs Bar")
-```
-```{r Oki_Bar_chr1_coa2, cache=TRUE, fig.width=15}
-plotApairOfChrs(coa2$Osa_Bar, "Chr1", main = "Osa vs Bar (double-collapsed")
-```
-
-## Scaffolding of Kume chromosomes
-
-### Chromosome 1
+## Chromosome 1
 
 Construction of a `GRanges` object representing the contigs to merge and whether
 they have to be reverse-complemented or not.
@@ -111,33 +98,20 @@ strand(contigsToMerge_oldPos) <- c('+', '-', '+', '-', '+', '+')
 contigsToMerge_oldPos
 ```
 
-#### Plot with coalesced objects
+Construction of the scaffold and control plot.
 
 ```{r Kum_chr1_coa, fig.width=15}
-x <- coa$Oki_Kum
-x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
-x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
+KumChr1 <- coa$Oki_Kum
+KumChr1[seqnames(KumChr1$query) == "contig_90_1"] <- reverse(query = TRUE, KumChr1[seqnames(KumChr1$query) == "contig_90_1"])
+KumChr1[seqnames(KumChr1$query) == "contig_88_1"] <- reverse(query = TRUE, KumChr1[seqnames(KumChr1$query) == "contig_88_1"])
 
-x$query <- mergeSeqLevels(x$query, contigsToMerge, "chr1")
+KumChr1$query <- mergeSeqLevels(KumChr1$query, contigsToMerge, "chr1")
 annot <- genoPlotR::annotation(x1=start(contigsToMerge_oldPos), x2=end(contigsToMerge_oldPos), text=names(contigsToMerge_oldPos), rot=30)
 
-plotApairOfChrs(x |> swap(), "chr1", dna_seg_scale=TRUE, main = "Kum vs Oki", annotations = annot)
+plotApairOfChrs(KumChr1 |> swap(), "chr1", dna_seg_scale=TRUE, main = "Kum vs Oki", annotations = annot)
 ```
 
-#### Plot with double-coalesced objects
-
-```{r Kum_chr1_coa2, fig.width=15}
-x <- coa2$Oki_Kum
-x[seqnames(x$query) == "contig_90_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_90_1"])
-x[seqnames(x$query) == "contig_88_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_88_1"])
-
-x$query <- mergeSeqLevels(x$query, contigsToMerge, "chr1")
-annot <- genoPlotR::annotation(x1=start(contigsToMerge_oldPos), x2=end(contigsToMerge_oldPos), text=names(contigsToMerge_oldPos), rot=30)
-
-plotApairOfChrs(x |> swap(), "chr1", dna_seg_scale=TRUE, main = "Kum vs Oki (double-coalesced)", annotations = annot)
-```
-
-### Chromosome 2
+## Chromosome 2
 
 Construction of a `GRanges` object representing the contigs to merge and whether
 they have to be reverse-complemented or not.
@@ -152,25 +126,10 @@ strand(contigsToMerge_oldPos) <- c('-', '+', '+', '-', '-', '-')
 contigsToMerge_oldPos
 ```
 
-#### Plot with coalesced objects
+Construction of the scaffold and control plot.
 
 ```{r Kum_chr2_coa, fig.width=15}
-x <- coa$Oki_Kum
-x[seqnames(x$query) == "contig_36_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_36_1"])
-x[seqnames(x$query) == "contig_81_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_81_1"])
-x[seqnames(x$query) == "contig_79_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_79_1"])
-x[seqnames(x$query) == "contig_37_1"] <- reverse(query = TRUE, x[seqnames(x$query) == "contig_37_1"])
-
-x$query <- mergeSeqLevels(x$query, contigsToMerge, "chr2")
-annot <- genoPlotR::annotation(x1=start(contigsToMerge_oldPos), x2=end(contigsToMerge_oldPos), text=names(contigsToMerge_oldPos), rot=30)
-
-plotApairOfChrs(x |> swap(), "chr2", dna_seg_scale=TRUE, main = "Kum vs Oki", annotations = annot)
-```
-
-#### Plot with double-coalesced objects
-
-```{r Kum_chr2_coa2, fig.width=15}
-KumChr2 <- coa2$Oki_Kum
+KumChr2 <- coa$Oki_Kum
 KumChr2[seqnames(KumChr2$query) == "contig_36_1"] <- reverse(query = TRUE, KumChr2[seqnames(KumChr2$query) == "contig_36_1"])
 KumChr2[seqnames(KumChr2$query) == "contig_81_1"] <- reverse(query = TRUE, KumChr2[seqnames(KumChr2$query) == "contig_81_1"])
 KumChr2[seqnames(KumChr2$query) == "contig_79_1"] <- reverse(query = TRUE, KumChr2[seqnames(KumChr2$query) == "contig_79_1"])
@@ -179,46 +138,27 @@ KumChr2[seqnames(KumChr2$query) == "contig_37_1"] <- reverse(query = TRUE, KumCh
 KumChr2$query <- mergeSeqLevels(KumChr2$query, contigsToMerge, "chr2")
 annot <- genoPlotR::annotation(x1=start(contigsToMerge_oldPos), x2=end(contigsToMerge_oldPos), text=names(contigsToMerge_oldPos), rot=30)
 
-plotApairOfChrs(KumChr2 |> swap(), "chr2", dna_seg_scale=TRUE, main = "Kum vs Oki (double-collapsed)", annotations = annot)
+plotApairOfChrs(KumChr2 |> swap(), "chr2", dna_seg_scale=TRUE, main = "Kum vs Oki", annotations = annot)
 ```
 
+# Plot chr2 in four species
 
-## Plot chr2 in three species
+We chose chromosome 2 because it has _Hox4_.
 
-We chose chr2 because it has _Hox4_.
-
-```{r plot_intersect_GBs_with_tree, fig.width=15}
-dsList <-   list(
-    OKI = coa$Oki_Osa |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
-    OSA = coa$Osa_Bar |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
-    BAR = coa$Bar_Osa |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg()
-)
-
-compList <- list(
-    coa$Oki_Osa |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> gb2comp(),
-    Osa_Bar = coa$Osa_Bar |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gb2comp()
-  )
-
-genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE, tree=ade4::newick2phylog(addRoot(treeNode("OKI", treeNode("OSA", "BAR")))),
-                         main = "Chromosome 2 in three Oikopleura genome assemblies")
-```
-
-## Plot chr2 in four species (double-collapsed)
-
-### Parallel plot
+## Parallel plot
 
 ```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=7, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 dsList4 <- list(
     KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
     OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
-    OSA = dsList[["OSA"]],
-    BAR = dsList[["BAR"]]
+    OSA = coa$Osa_Bar |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
+    BAR = coa$Bar_Osa |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg()
 )
 
 compList4 <- list(
     Oki_Kum = KumChr2 |> swap() |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'chr2') |> gb2comp(),
-    Oki_Osa = compList[[1]],
-    Osa_Bar = compList[["Osa_Bar"]]
+    Oki_Osa = coa$Oki_Osa |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> gb2comp(),
+    Osa_Bar = coa$Osa_Bar |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gb2comp()
   )
 
 dsList4$KUM$col <- dsList4$KUM$fill <- dsList4$OKI$col <- dsList4$OKI$fill <-
@@ -237,9 +177,9 @@ genoPlotR::plot_gene_map(dsList4, compList4, dna_seg_scale = FALSE,
                          main = "Chromosome 2 in four Oikopleura genome assemblies")
 ```
 
-### Strand randomisation indexes
+## Strand randomisation indexes
 
-This is to enhance the figure in the paper.
+These numbers were added to the plot in Figure 1B.
 
 ```{r SR_index_for_tree_with_Kume}
 chr2Long <-  \(gb) plyranges::filter(gb, seqnames %in% c("chr2", "Chr2"), seqnames(query) %in% c("chr2", "Chr2"), Arm == "long",  query$Arm == "long")
@@ -252,33 +192,63 @@ KumChr2$query$Arm[end(KumChr2) <= end(contigsToMerge_oldPos["contig_16_1"]) & se
 SRI_Both_Strands <- \(gb) mean(c(strand_randomisation_index(gb)
                                 ,strand_randomisation_index(swap(gb))))
 
-KumChr2 |> chr2Long()  |> SRI_Both_Strands()
-KumChr2 |> chr2short() |> SRI_Both_Strands()
-KumChr2 |> chr2both()  |> SRI_Both_Strands()
+(SRIs <- c(
+  Kum_Chr2_long  = KumChr2 |> chr2Long()  |> SRI_Both_Strands(),
+  Kum_Chr2_short = KumChr2 |> chr2short() |> SRI_Both_Strands(),
+  Kum_Chr2_both  = KumChr2 |> chr2both()  |> SRI_Both_Strands(),
 
-coa$Oki_Osa |> chr2Long() |> SRI_Both_Strands()
-coa$Osa_Oki |> chr2Long() |> SRI_Both_Strands()
+  Oki_Osa_long   = coa$Oki_Osa |> chr2Long() |> SRI_Both_Strands(),
+  Osa_Oki_long   = coa$Osa_Oki |> chr2Long() |> SRI_Both_Strands(),
 
-coa$Oki_Osa |> chr2short() |> SRI_Both_Strands()
-coa$Osa_Oki |> chr2short() |> SRI_Both_Strands()
+  Oki_Osa_short  = coa$Oki_Osa |> chr2short() |> SRI_Both_Strands(),
+  Osa_Oki_short  = coa$Osa_Oki |> chr2short() |> SRI_Both_Strands(),
 
-coa$Oki_Osa |> chr2both() |> SRI_Both_Strands()
-coa$Osa_Oki |> chr2both() |> SRI_Both_Strands()
+  Oki_Osa_both   = coa$Oki_Osa |> chr2both() |> SRI_Both_Strands(),
+  Osa_Oki_both   = coa$Osa_Oki |> chr2both() |> SRI_Both_Strands(),
 
-coa$Osa_Bar |> chr2Long() |> SRI_Both_Strands()
-coa$Bar_Osa |> chr2Long() |> SRI_Both_Strands()
+  Osa_Bar_long   = coa$Osa_Bar |> chr2Long() |> SRI_Both_Strands(),
+  Bar_Osa_long   = coa$Bar_Osa |> chr2Long() |> SRI_Both_Strands(),
 
-coa$Osa_Bar |> chr2short() |> SRI_Both_Strands()
-coa$Bar_Osa |> chr2short() |> SRI_Both_Strands()
+  Osa_Bar_short  = coa$Osa_Bar |> chr2short() |> SRI_Both_Strands(),
+  Bar_Osa_short  = coa$Bar_Osa |> chr2short() |> SRI_Both_Strands(),
 
-coa$Osa_Bar |> chr2both() |> SRI_Both_Strands()
-coa$Bar_Osa |> chr2both() |> SRI_Both_Strands()
+  Osa_Bar_both   = coa$Osa_Bar |> chr2both() |> SRI_Both_Strands(),
+  Bar_Osa_both   = coa$Bar_Osa |> chr2both() |> SRI_Both_Strands()
+))
+
+roundMean <- \(x) round(mean(SRIs[x]), 2)
+c(Kum_Chr2_long  = roundMean(c("Kum_Chr2_long")),
+  Kum_Chr2_short = roundMean(c("Kum_Chr2_short")),
+  Oki_Osa_long   = roundMean(c("Oki_Osa_long",  "Osa_Oki_long")),
+  Oki_Osa_short  = roundMean(c("Oki_Osa_short", "Osa_Oki_short")),
+  Osa_Bar_long   = roundMean(c("Osa_Bar_long",  "Bar_Osa_long")),
+  Osa_Bar_short  = roundMean(c("Osa_Bar_short", "Bar_Osa_short"))
+)
 ```
 
-## Region that is conserved between Osaka and Barcelona
+# Plot pairs of chromosome 1s.
 
-Since Okinawa is the outgroup, let's look for regions of it that are aligned
-on both the Osaka and the Barcelona genomes.
+```{r Oki_Bar_chr1, cache=TRUE, fig.width=15}
+plotApairOfChrs(coa$Oki_Bar, "chr1", main = "Oki vs Bar")
+```
+
+```{r Oki_Osa_chr1, cache=TRUE, fig.width=15}
+plotApairOfChrs(coa$Oki_Osa, "chr1", main = "Oki vs Osa")
+```
+
+```{r Osa_Oki_chr1, cache=TRUE, fig.width=15}
+plotApairOfChrs(coa$Osa_Oki, "Chr1", main = "Osa vs Oki")
+```
+
+```{r Osa_Bar_chr1, cache=TRUE, fig.width=15}
+plotApairOfChrs(coa$Osa_Bar, "Chr1", main = "Osa vs Bar")
+```
+
+```{r Oki_Bar_chr1_coa2, cache=TRUE, fig.width=15}
+plotApairOfChrs(coa2$Osa_Bar, "Chr1", main = "Osa vs Bar (double-collapsed")
+```
+
+# Scrambling of a 1-megabase region.
 
 ```{r combine_GBs}
 x <- subsetByOverlaps(coa2$Oki_Osa, granges(coa2$Oki_Bar)) |> subset(width > 1e5)
@@ -286,8 +256,6 @@ y <- subsetByOverlaps(coa2$Oki_Bar, granges(coa2$Oki_Osa)) |> subset(width > 1e5
 findOverlapPairs(x,y)
 subsetByOverlaps(coa2$Oki_Osa, gaps(coa2$Oki_Bar)) |> subset(width > 1e5)
 
-ROI <- GRanges("chr2:4686018-4687168")   + 1e4 # Hox4
-ROI <- GRanges("chr2:14331701-14339427") + 1e4 #Hox1
 ROI <- GRanges("chr2:10000000-11000000")
 
 a <- coa$Oki_Osa |> subsetByOverlaps(ROI) |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2')
@@ -311,9 +279,7 @@ genoPlotR::plot_gene_map(dsList, compList, dna_seg_scale=TRUE)
 
 ```
 
-# Other species
-
-## Ciona
+# _Ciona_ species
 
 ```{r Ciona_Ply_Ros_chr1}
 plotApairOfChrs(coa2$Ply_Ros, "BNJZ01000001.1", main = "Ciona intestinalis Plymouth vs Roscoff")
@@ -334,4 +300,3 @@ plotApairOfChrs(coa2$Ply_Sav, "BNJZ01000001.1", main = "Ciona intestinalis Plymo
 ```{r sessionInfo}
 sessionInfo()
 ```
-
