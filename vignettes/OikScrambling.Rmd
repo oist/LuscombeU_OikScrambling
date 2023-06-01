@@ -57,6 +57,13 @@ Command to recompute the `BreakPoints.Rdata` file
 srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_article('LoadGenomicBreaks')"
 ```
 
+Commands to rebuild the whole site.
+
+```
+srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"
+srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_site()"
+```
+
 ## Data packages
 
 ### BSgenome packages
