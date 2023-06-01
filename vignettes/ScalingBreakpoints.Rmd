@@ -19,16 +19,18 @@ knitr::opts_chunk$set(cache = TRUE)
 
 # Introduction
 
-In this vignette I attempt to contextualize the observed number of breakpoints for a given species pair by a few key metrics: 
+In this vignette computes the observed number of breakpoints for a given species
+pair by a few key metrics: 
 
 * Millions of years since divergence
 * Branch length (i.e., a kind of substitution rate)
 * dN/dS
 
+Panel D of Figure 7 was generated with this vignette (colors were edited by
+hand).
+
 The core functions used here are maintained in our _GenomicBreaks_ R package,
 which is fully documented at: <https://oist.github.io/GenomicBreaks>.
-
-## Load packages
 
 # Load R packages and data
 
@@ -42,8 +44,7 @@ library('phangorn') |> suppressPackageStartupMessages()
 load("BreakPoints.Rdata")
 ```
 
-
-## Inputting distance metrics
+# Inputting distance metrics
 
 ```{r species_trees, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 species <- SimpleList()
@@ -119,7 +120,7 @@ species_dist$mya <- lapply(species_dist$mya, function(x) {
 }) |> SimpleList()
 ```
 
-## Normalised breakpoint accumulation
+# Normalised breakpoint accumulation
 
 ```{r breakpoints_mya}
 bp_vs_dist <- function(query, target, wgo, dist_type="mya", species, extra = FALSE) {
