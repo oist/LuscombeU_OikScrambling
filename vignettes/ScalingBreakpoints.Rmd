@@ -129,8 +129,10 @@ bp_vs_dist <- function(query, target, wgo, dist_type="mya", species, extra = FAL
   breakpoints <- wgo[wgo$type == "breakpoint region"]
   wgo_size <- wgo |> width() |> sum()
   wgo_size_mbp <- wgo_size / 1000000
+  aln_length <- wgo[wgo$type %in% c("collinear alignment", "isolated alignment")] |> width() |> sum()
   breakpoints_per_scale = length(breakpoints)/relevant_dist
   breakpoints_per_mbp = length(breakpoints)/wgo_size_mbp
+  breakpoints_per_aln_mbp <- length(breakpoints) / aln_length * 1e6
   data.frame(
     species                    = species,
     query                      = query,
@@ -142,6 +144,8 @@ bp_vs_dist <- function(query, target, wgo, dist_type="mya", species, extra = FAL
     breakpoints_per_scale      = breakpoints_per_scale,
     breakpoints_per_mbp        = breakpoints_per_mbp,
     breakpoints_per_mbp_scaled = breakpoints_per_mbp / relevant_dist,
+    breakpoints_per_aln_mbp        = breakpoints_per_aln_mbp,
+    breakpoints_per_aln_mbp_scaled = breakpoints_per_aln_mbp / relevant_dist,
     extra                      = extra)
 }
 
@@ -221,10 +225,14 @@ customPlot <- function(df, what, title, extra = "drop") {
 
 customPlot(mya_df, 'breakpoints', 'Number of breakpoints')
 customPlot(mya_df, 'breakpoints_per_scale', 'Number of breakpoints per million years')
-customPlot(mya_df, 'breakpoints_per_mbp', 'Number of breakpoints per megabase aligned')
-customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged')
-customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged', extra = TRUE)
-customPlot(sub_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per substitution distance')
+customPlot(mya_df, 'breakpoints_per_mbp', 'Number of breakpoints per megabase')
+customPlot(mya_df, 'breakpoints_per_aln_mbp', 'Number of breakpoints per megabase aligned')
+customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per million years diverged')
+customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per million years diverged', extra = TRUE)
+customPlot(mya_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged')
+customPlot(mya_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged', extra = TRUE)
+customPlot(sub_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per substitution distance')
+customPlot(sub_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per substitution distance')
 ```
 
 # Session information
