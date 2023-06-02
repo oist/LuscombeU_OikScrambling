@@ -43,7 +43,31 @@
   <a href="../articles/OikScrambling.html">Get started</a>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../articles/LoadGenomicBreaks.html">Data load</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Supplemental material
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/OxfordPlots.html">Figure 1A DNA line plots</a>
+    </li>
+    <li>
+      <a href="../articles/ParallelPlots.html">Figure 1B chromosome parallel plots</a>
+    </li>
+    <li>
+      <a href="../articles/DistanceMeasures.html">Table 1 scrambling index</a>
+    </li>
+    <li>
+      <a href="../articles/SquareWindowPlots.html">Figure 7 DNA line plots</a>
+    </li>
+    <li>
+      <a href="../articles/ScalingBreakpoints.html">Figure 7 breakpoint number barplots</a>
+    </li>
+  </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -77,10 +101,13 @@
       <a href="../articles/LoadGenomicBreaks.html">Load genomic break data</a>
     </li>
     <li>
+      <a href="../articles/OperonConservation.html">Operon conservation analysis</a>
+    </li>
+    <li>
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
-      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+      <a href="../articles/OxfordPlots.html">Alignment line plots, whole genomes</a>
     </li>
     <li>
       <a href="../articles/PAC3.html">Region of interest: PAC3</a>
@@ -107,6 +134,9 @@
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
     </li>
     <li>
+      <a href="../articles/SquareWindowPlots.html">Alignment line plots, 10×10 Mbp windows</a>
+    </li>
+    <li>
       <a href="../articles/TFBS.html">Transcription factor binding sites</a>
     </li>
     <li>
@@ -119,6 +149,9 @@
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -144,7 +177,7 @@
       <h1 data-toc-skip>Introduction to the OikScrambling package</h1>
                         <h4 data-toc-skip class="author">Charles Plessy</h4>
             
-            <h4 data-toc-skip class="date">06 January, 2023</h4>
+            <h4 data-toc-skip class="date">02 June, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/OikScrambling.Rmd" class="external-link"><code>vignettes/OikScrambling.Rmd</code></a></small>
       <div class="hidden name"><code>OikScrambling.Rmd</code></div>
@@ -179,6 +212,9 @@
 <p>The trick is that the <code>GenomicBreaks</code> singularity images are hardcoded to install new packages in <code>R/library/GBreaks_singularity</code>, which bypasses the the problem that the images are read-only.</p>
 <p>Command to recompute the <code>BreakPoints.Rdata</code> file</p>
 <pre><code>srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_article('LoadGenomicBreaks')"</code></pre>
+<p>Commands to rebuild the whole site.</p>
+<pre><code>srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_site(devel=TRUE, lazy=TRUE)"
+srun -pcompute -c8 --mem 300G --pty /bucket/LuscombeU/common/Singularity/GenomicBreaks-0.12.2.sif Rscript -e "pkgdown::build_site()"</code></pre>
 </div>
 <div class="section level3">
 <h3 id="data-packages">Data packages<a class="anchor" aria-label="anchor" href="#data-packages"></a>
