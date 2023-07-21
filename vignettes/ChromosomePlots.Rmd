@@ -286,7 +286,7 @@ plots$Osa$repeats$density <- chrw$Osa |> per_chrom_plot(Y=TRUE) + aes(y=repeats.
 plots$Bar$repeats$density <- chrw$Bar |> per_chrom_plot(Y=TRUE) + aes(y=repeats.Class.count.total) +  ggtitle(paste("Barcelona: repeats per window (size = ", windowSize/1000, " kbp)", sep=""))
 ```
 
-### Supplemental figure 5
+### Supplemental figure S5
 
 ```{r chromosome_plots_repeats_joined, dependson="chromosome_plots_repeats", fig.height=6, fig.width=8, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 ### Repeat-related chromosome plots, windows: Joined plots
@@ -1090,7 +1090,7 @@ p12 <- ggboxplot(tb, x='Arm', y='transcripts.dNdS.mean', color='Oki.Arm', add='j
 
 ## Figure S5
 
-See the Figure S5 subsection of the Repeats section above.
+See the [Figure S5 subsection of the Repeats section above](#supplemental-figure-S5).
 
 # Extra
 
@@ -1648,8 +1648,6 @@ p5 <- tb |> customCorrelationPlot('Oki.bp.Oki_Kum.breaks.count', 'Oki.transcript
 ( p1 / p4 / p2 / p3 / p5 )
 ```
 
-# Extra
-
 ## Classes of repeats
 
 We can use the `[mcol].counts.tables` metadata columns to calculate statistics between different genomic regions.
@@ -1833,7 +1831,7 @@ lapply(plots$Oki$categories, \(x) x)
 
 ## Extra Okinawa Oik plots for a presentation
 
-```{r all_oki_oik_feats, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+```{r all_oki_oik_feats, fig.height=12, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 (
   (chrw$Oki |>
      per_chrom_plot(Y=TRUE) + aes(y=transcripts.tx_name.count) +
