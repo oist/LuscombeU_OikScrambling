@@ -191,10 +191,10 @@ species_dist$mya$Drosophila <- data.frame(
 
 ```{r published_distances_Caeno}
 species_dist$mya$Caenorhabditis <- data.frame(
-  'Ino'=c(0,        30, 30, 30),
-  'Rem'=c(30, 0,        25, 25),
-  'Bri'=c(30, 25,  0, 3.7),
-  'Nig'=c(30, 25,  3.7, 0))
+  'Cin'=c(0,        30, 30, 30),
+  'Cre'=c(30, 0,        25, 25),
+  'Cbr'=c(30, 25,  0, 3.7),
+  'Cni'=c(30, 25,  3.7, 0))
 ```
 
 ```{r distances_colnames}
@@ -251,13 +251,13 @@ mya_df <- rbind(
   bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="mya", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="mya", "Drosophila"),
   
-  bp_vs_dist(query="Nig", target="Bri", wgo$Nig_Bri, dist_type="mya", "Caenorhabditis"),
-  bp_vs_dist(query="Nig", target="Rem", wgo$Nig_Rem, dist_type="mya", "Caenorhabditis"),
-  bp_vs_dist(query="Nig", target="Ino", wgo$Nig_Ino, dist_type="mya", "Caenorhabditis")
+  bp_vs_dist(query="Cni", target="Cbr", wgo$Cni_Cbr, dist_type="mya", "Caenorhabditis"),
+  bp_vs_dist(query="Cni", target="Cre", wgo$Cni_Cre, dist_type="mya", "Caenorhabditis"),
+  bp_vs_dist(query="Cni", target="Cin", wgo$Cni_Cin, dist_type="mya", "Caenorhabditis")
 )
 mya_df$species <- factor(mya_df$species, levels=c("Caenorhabditis","Drosophila", "Ciona", "Oikopleura"))
 mya_df$pair <- factor(mya_df$pair,
-                      levels=c("Nig_Ino", "Nig_Rem", "Nig_Bri",
+                      levels=c("Cni_Cin", "Cni_Cre", "Cni_Cbr",
                                "Dme_Dbu", "Dme_Dsu", "Dme_Dya",
                                "Ply_Sav", "Rob_Sav", "Ply_Rob", "Rob_Ros", "Ply_Ros",
                                "Osa_Oki", "Oki_Bar", "Osa_Bar", "Bar_Aom", "Osa_Aom", "Oki_Kum"))
@@ -291,9 +291,9 @@ sub_df <- rbind(
   bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="cophenetic", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="cophenetic", "Drosophila"),
   
-  bp_vs_dist(query="Nig", target="Ino", wgo$Nig_Ino, dist_type="cophenetic", "Caenorhabditis"),
-  bp_vs_dist(query="Nig", target="Rem", wgo$Nig_Rem, dist_type="cophenetic", "Caenorhabditis"),
-  bp_vs_dist(query="Nig", target="Bri", wgo$Nig_Bri, dist_type="cophenetic", "Caenorhabditis")
+  bp_vs_dist(query="Cni", target="Cin", wgo$Cni_Cin, dist_type="cophenetic", "Caenorhabditis"),
+  bp_vs_dist(query="Cni", target="Cre", wgo$Cni_Cre, dist_type="cophenetic", "Caenorhabditis"),
+  bp_vs_dist(query="Cni", target="Cbr", wgo$Cni_Cbr, dist_type="cophenetic", "Caenorhabditis")
 )
 sub_df$species <- factor(sub_df$species, levels=c("Caenorhabditis", "Drosophila", "Ciona", "Oikopleura"))
 sub_df <- sub_df[order(sub_df$species, sub_df$breakpoints_per_mbp_scaled),]
