@@ -312,22 +312,24 @@ But _C. briggsae_ is closest to _C. nigoni_ so we need it once as a query genome
 
 ## _C. nigoni_ vs _C. briggsae_
 
+_C. nigoni_ genome assembly `GCA_027920645.1` length: 128508886.  It has no
+unplaced contigs nor mitochondrial genome.
+
 ```{r Cnig_Cbri_win, dev='svg', fig.ext='svg'}
-Cnig_Cbri <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/ScramblingInTheTreeOfLife/Nematoda/results_Caenorhabditis_nigoni_GCA_027920645.1/last/Caenorhabditis_nigoni_GCA_027920645.1___Caenorhabditis_briggsae_GCA_022453885.1.07.postmasked.maf.gz")
-# Removing CP115869.1 as it has a large nigni-specific region at the middle and it is the only one like that.
-mkOxPlotWindow(Cnig_Cbri |> plyranges::filter(seqnames != "CP115869.1"), centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. briggsae (61% aligned, 81% identity)")
+mkOxPlotWindow(gbs$Nig_Bri |> plyranges::filter(seqnames != "CP115869.1"), centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. briggsae (61% aligned, 85% identity)")
 ```
 
 ## _C. nigoni_ vs _C. remanei_
 
+Unplaced contigs and mitochondrial genome were removed from _C. remanei_'s
+assembly `GCA_001643735.4`.
+
 ```{r Cnig_Crem_win, dev='svg', fig.ext='svg'}
-Cnig_Crem <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/ScramblingInTheTreeOfLife/Nematoda/results_Caenorhabditis_nigoni_GCA_027920645.1/last/Caenorhabditis_nigoni_GCA_027920645.1___Caenorhabditis_remanei_GCA_001643735.4.07.postmasked.maf.gz")
-mkOxPlotWindow(Cnig_Crem, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. remanei (27% aligned, 67% identity)")
+mkOxPlotWindow(gbs$Nig_Rem, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. remanei (25% aligned, 73% identity)")
 ```
 
 ## _C. nigoni_ vs _C. inopinata_
 
 ```{r Cnig_Cino_win, dev='svg', fig.ext='svg'}
-Cnig_Cino <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/ScramblingInTheTreeOfLife/Nematoda/results_Caenorhabditis_nigoni_GCA_027920645.1/last/Caenorhabditis_nigoni_GCA_027920645.1___Caenorhabditis_inopinata_GCA_003052745.1.07.postmasked.maf.gz")
-mkOxPlotWindow(Cnig_Cino, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. inopinata (18% aligned, 68% identity)")
+mkOxPlotWindow(gbs$Nig_Ino, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. inopinata (16% aligned, 85% identity)")
 ```
