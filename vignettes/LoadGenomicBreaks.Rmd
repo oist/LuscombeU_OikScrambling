@@ -169,7 +169,9 @@ Mapped alignments
 Let's load data from genome alignments, using the copy distributed in the
 `BreakpointsData` package.
 
-```{r GBreaks_object, cache=TRUE}
+### _Oikopleura_
+
+```{r GBreaks_object_oik, cache=TRUE}
 # Local function to add extra annotation on long/short arms while loading data
 load_genomic_breaks_ <- function(file, genomeT, genomeQ, longShort=NULL) {
   file <- system.file(paste0("extdata/Oidioi_pairwise_v3/", file), package = "BreakpointsData")
@@ -198,7 +200,11 @@ gbs$Bar_Aom <- load_genomic_breaks_("Bar2_p4__AOM-5-5f.gff.gz",             "Bar
 gbs$Bar_Nor <- load_genomic_breaks_("Bar2_p4__OdB3.gff.gz",                 "Bar2.p4",     "OdB3",          longShort)
 
 Oik_Oik <- names(gbs)
+```
 
+### _Ciona_
+
+```{r GBreaks_object_Ciona, dependson=GBreaks_object_Oik, cache=TRUE}
 gbs$Ply_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_int_R.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
 gbs$Ply_Rob <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_rob_HT.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
 gbs$Ply_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_sav.gff.gz",            package = "BreakpointsData"),    NULL,     NULL)
@@ -208,12 +214,28 @@ gbs$Rob_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_
 gbs$Rob_Ply <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_int_P.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
 gbs$Rob_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__C_sav.gff.gz",           package = "BreakpointsData"),    NULL,     NULL)
 gbs$Rob_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_HT__OKI2018_I69_1.0.gff.gz", package = "BreakpointsData"),    NULL,  genomes$OKI2018.I69)
+```
 
+### _Drosophila_
+
+```{r GBreaks_object_Droso, dependson=GBreaks_object_Ciona, cache=TRUE}
 gbs$Dme_Dbu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Dbus_ASM1175060v1.gff.gz",     package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dsu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__RU_Dsub_v1.1.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dya <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Prin_Dyak_Tai18E2_2.0.gff.gz", package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dma <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Dmau_ASM438214v1.gff.gz",      package = "BreakpointsData"),    NULL,     NULL)
+```
 
+### _Caenorhabditis_
+
+```{r GBreaks_object_Caeno, dependson=GBreaks_object_Droso, cache=TRUE}
+gbs$Nig_Bri <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/nigoni_briggsae/results/last/query.07.postmasked.maf.gz")
+gbs$Nig_Rem <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/nigoni_remanei/results/last/query.07.postmasked.maf.gz")
+gbs$Nig_Ino <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/nigoni_inopinata/results/last/query.07.postmasked.maf.gz")
+```
+
+### Annotate Oikopleura
+
+```{r GBreaks_object_final, dependson=GBreaks_object_Caeno, cache=TRUE}
 gbs[Oik_Oik] <-        annotateWithReps(gbs[Oik_Oik], reps)
 gbs[Oik_Oik] <- annotateWithTranscripts(gbs[Oik_Oik], transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
