@@ -18,11 +18,18 @@ knitr::opts_knit$set(cache = TRUE)
 
 # Introduction
 
-This vignette produces alignment line plots of pairs of genomes to illustrate
-differences in the extent of scrambling in _Oikopleura_ compared to equivalent
-pairs in other genera.
+This vignette produces alignment line plots of 10 × 10 Mbp windows in pairs of
+genomes to illustrate differences in the extent of scrambling in _Oikopleura_
+compared to equivalent pairs in other genera.  The size of the windows is fixed
+to allow comparison at the same scale.  To avoid arbitrary choices, the windows
+are placed at the centre of the largest pair of homologous chromosomes (or
+arms, in case of _Drosophila_).
 
-Figure 7 alignment panels were generated in this vignette.
+**Figure 7 alignment panels were generated in this vignette.**  They are
+presented on white background.
+
+Extra alignments on grey background show how the non-chromosomal assemblies were
+scaffolded by hand in the region selected for the window plot.
 
 # Setup
 
@@ -73,32 +80,32 @@ mkOxPlotWindow <- function(gb, win = 5e6, size = 2, centre = c('midpoint', 'maxw
 
 # Oikopleura
 
-## Oki vs Osa
+## Okinawa vs Osaka
 
 ```{r Oki_Osa_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
 mkOxPlotWindow(gbs$Oki_Osa)
 ```
 
-## Oki vs Bar
+## Okinawa vs Barcelona
 
 ```{r Oki_Bar_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(gbs$Oki_Bar)
 ```
 
-## Osa vs Bar
+## Osaka vs Barcelona
 
 ```{r Osa_Bar_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(gbs$Osa_Bar)
 ```
 
-## Osa vs Oki
+## Osaka vs Okinawa
 
 
 ```{r Osa_Oki_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
 mkOxPlotWindow(gbs$Osa_Oki)
 ```
 
-## Osa vs Aom
+## Osaka vs Aomori
 
 The Aomori genome needs some custom scaffolding to make a contiguous 10 × 10
 region.
@@ -143,7 +150,7 @@ Osa_Aom_PAR$query <- mergeSeqLevels(Osa_Aom_PAR$query, seqlevels(Osa_Aom_PAR$que
 mkOxPlotWindow(Osa_Aom_PAR)
 ```
 
-## Oki vs Kum
+## Okinawa vs Kume
 
 Same for the Kume genome…
 
@@ -242,6 +249,9 @@ mkOxPlotWindow(Ply_Sav_chr1) + ggtitle("Ciona intestinalis Plymouth vs Ciona sav
 
 # _Drosophila_
 
+_Note that in some genomes, each chromosome arm is represented in a separate
+sequence_.
+
 ## _D. melanogaster_ vs _D. mauritania_
 
 ```{r Dmel_Dmau_win, dev='svg', fig.ext='svg'}
@@ -257,7 +267,7 @@ mkOxPlotWindow(gbs$Dme_Dya) + ggtitle("Drosophila melanogaster vs Drosophila yak
 
 ## _D. melanogaster_ vs _D. subpulchrella_
 
-On chromosome 3R there is a large unaligned region that causes the plot to not
+On arm 3R there is a large unaligned region that causes the plot to not
 be squared.  I think that the problem may be related to the presence of large
 centromere regions in the best assemblies.
 
