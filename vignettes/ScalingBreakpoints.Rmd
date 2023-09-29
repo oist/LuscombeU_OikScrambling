@@ -98,7 +98,39 @@ plotTree(species$Drosophila)
 TBD: replace values by real ones.
 
 ```{r species_trees_Caeno, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-species$Caenorhabditis <-  "(Rem:1,(Bri:1,Nig:1)100:1,Ino:1);" |> toTreedata()
+# Tree topologies taken from:
+# https://zenodo.org/record/1402254
+#     - https://zenodo.org/record/1402254/files/RAxML_species_tree.nwk
+# The Zenodo link also has trees calculated using ASTRAL and PhyloBayes. However,
+# since the other trees here are ML trees, I elected for the RAxML tree for maximum
+# comparability.
+#
+# In text, in case the zenodo link 404's in the future:
+#     ML:
+#     "(CGUAD:0.10367478589587060533,(((CSP43:0.12383810371576783882,CVIRI:0.15037624074929095697)100:0.01497242793907414826,((CPLIC:0.26149908669946614337,((DCORO:0.59783158562631621979,CMONO:0.24005751591713977988)100:0.04780411675113813846,CSP21:0.36368990218252150726)100:0.10208494374306537056)100:0.03524817284922288768,((CCAST:0.01140212554998711741,CANGA:0.01414003367272922800)100:0.05852891527717005854,CSP38:0.05923127343611131468)100:0.11896541306229711787)98:0.01073075219687256478)100:0.02583935505413810507,((CKAMA:0.05811607292620620674,((CELEG:0.04500887872372311138,CSP34:0.07438201522663016874)100:0.00705149839556874856,(((CLATE:0.00465806789922303816,CREMA:0.00437786777324163708)100:0.02881157060040358958,((CNIGO:0.00418426739023885358,CBRIG:0.00712154940320354219)100:0.02811281384583694601,(CSINI:0.01686763323477479329,(CSP26:0.01529017647605383778,CSP40:0.02038338447129417474)100:0.00329577341321305025)100:0.01374371022227172112)100:0.01161394824780575923)100:0.00600824892975430989,((CDOUG:0.02983523068133404899,CBREN:0.03506566315430653669)80:0.00382524869406435401,(CWALL:0.01854144710471255370,CTROP:0.02398428150833109909)100:0.01471009970302557951)100:0.00927549430957550110)100:0.00763851852828213371)100:0.00805135107229970441)100:0.01328077288786689257,((((CNOUR:0.00956145701022028879,CSP29:0.00805739385901662990)100:0.01930453335852322372,(CSP39:0.03253018121281636005,CSP28:0.02417332848702777315)100:0.00890124689939411802)100:0.00884911431899864341,CMACR:0.03525690105425406673)100:0.02033464491626665177,(CJAPO:0.08234400443891473631,(CAFRA:0.02943481705945342336,CSP32:0.02434121084253646969)100:0.04055371130568757865)79:0.00548050967800332942)100:0.00698694826746024816)100:0.06205429593773054836)100:0.02963813048003952413,CSP31:0.12329044085858320567);"
+#
+# This tree has too many species and the labels are not what we need. So, do some manipulations to make it easier.
+# stevens_caenorhabditis_ml <- curl::curl("https://zenodo.org/record/1402254/files/RAxML_species_tree.nwk") |> ape::read.tree()
+# root at outgroup (D. coronatus) and arrange in phylogenetic order
+# stevens_caenorhabditis_ml <- root(stevens_caenorhabditis_ml, "DCORO") |> reorder.phylo(order='cladewise')
+
+# ggtree(stevens_caenorhabditis_ml) +
+#   geom_tiplab(align=T) + hexpand(0.5) +
+#   geom_text(aes(x=branch, label=round(branch.length,2)), nudge_y=0.1) +
+#   geom_treescale() + geom_rootedge()
+
+# subset to just the tips of interest
+# stevens_caenorhabditis_ml_sub <- drop.tip(stevens_caenorhabditis_ml, which(!stevens_caenorhabditis_ml$tip.label %in% c('CSP34', 'CREMA', 'CNIGO', 'CBRIG')))
+
+# stevens_caenorhabditis_ml_sub |> ggtree() +
+#   geom_tiplab(align=T) + hexpand(0.5) +
+#   geom_text(aes(x=branch, label=round(branch.length,2)), nudge_y=0.1) +
+#   geom_treescale() + geom_rootedge()
+# 
+# stevens_caenorhabditis_ml_sub$tip.label <- c('Cin', 'Cre', 'Cni', 'Cbr')
+# write.tree(stevens_caenorhabditis_ml_sub, file='../../2023-09-29-worms.newick')
+
+species$Caenorhabditis <- "(Cin:0.08143351362,(Cre:0.03318943837,(Cni:0.00418426739,Cbr:0.007121549403)100:0.03972676209)100:0.01364676746)100;" |> toTreedata()
 plotTree(species$Caenorhabditis)
 ```
 
