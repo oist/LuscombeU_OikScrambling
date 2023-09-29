@@ -1,3 +1,7 @@
+# OikScrambling 5.0.0
+
+* Add nematode comparisons.
+
 # OikScrambling 4.1.0
 
 * A lot of exploratory changes not documented about inversions (sorry), plus:

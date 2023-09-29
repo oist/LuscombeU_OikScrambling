@@ -299,7 +299,7 @@ Still, most of the region is not aligned.  The syntenic regions only look
 contiguous because the dots need to be thick to be easy to see.
 
 ```{r hg38_mm10, dev='svg', fig.ext='svg'}
-hgmm <- load_genomic_breaks(system.file(("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3"), package = "BreakpointsData"))
+hgmm <- load_genomic_breaks(system.file("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3", package = "BreakpointsData"))
 mkOxPlotWindow(hgmm, centre = 'maxwidth') + ggtitle("Homo sapiens vs Mus musculus")
 ```
 
@@ -312,14 +312,21 @@ But _C. briggsae_ is closest to _C. nigoni_ so we need it once as a query genome
 
 ## _C. nigoni_ vs _C. briggsae_
 
-_C. nigoni_ genome assembly `GCA_027920645.1` length: 128508886.  It has no
+_C. nigoni_ genome assembly `GCA_027920645.1` length: 128,508,886.  It has no
 unplaced contigs nor mitochondrial genome.
 
+_C. briggsae_'s genome assmebly `GCA_022453885.1` length is 106,953,292, with
+mitochondrial genome as I forgot to remove it.
+
 ```{r Cnig_Cbri_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Nig_Bri |> plyranges::filter(seqnames != "CP115869.1"), centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. briggsae (61% aligned, 85% identity)")
+mkOxPlotWindow(gbs$Nig_Bri, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. briggsae (61% aligned, 85% identity)")
 ```
 
-## _C. nigoni_ vs _C. remanei_
+```{r Cbri_Cnig_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Nig_Bri, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. nigoni (69% aligned, 85% identity)")
+```
+
+## _C. nigoni_ or _briggsae_ vs _C. remanei_
 
 Unplaced contigs and mitochondrial genome were removed from _C. remanei_'s
 assembly `GCA_001643735.4`.
@@ -328,8 +335,18 @@ assembly `GCA_001643735.4`.
 mkOxPlotWindow(gbs$Nig_Rem, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. remanei (25% aligned, 73% identity)")
 ```
 
+```{r Cbri_Crem_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Bri_Rem, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. remanei (30% aligned, 72% identity)")
+```
+
 ## _C. nigoni_ vs _C. inopinata_
 
 ```{r Cnig_Cino_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Nig_Ino, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. inopinata (16% aligned, 85% identity)")
+mkOxPlotWindow(gbs$Nig_Ino, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. inopinata (16% aligned, 72% identity)")
+```
+
+## _C. briggsae vs _C. elegans_
+
+```{r Cbri_Cino_ele, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Bri_Ele, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. elegans (23% aligned, 72% identity)")
 ```

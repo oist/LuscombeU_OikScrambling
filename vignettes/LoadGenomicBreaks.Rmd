@@ -228,15 +228,18 @@ gbs$Dme_Dma <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel
 ### _Caenorhabditis_
 
 ```{r GBreaks_object_Caeno, dependson=GBreaks_object_Droso, cache=TRUE}
-gbs$Nig_Bri <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/nigoni_briggsae/results/last/query.07.postmasked.maf.gz")
-gbs$Nig_Rem <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/nigoni_remanei/results/last/query.07.postmasked.maf.gz")
-gbs$Nig_Ino <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/nigoni_inopinata/results/last/query.07.postmasked.maf.gz")
+gbs$Nig_Bri <- load_genomic_breaks(system.file("extdata/Nematodes_pairwise/nigoni_briggsae.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
+gbs$Nig_Rem <- load_genomic_breaks(system.file("extdata/Nematodes_pairwise/nigoni_remanei.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
+gbs$Nig_Ino <- load_genomic_breaks(system.file("extdata/Nematodes_pairwise/nigoni_inopinata.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
+gbs$Bri_Nig <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/briggsae_nigoni/results/last/query.07.postmasked.maf.gz", type = "match")
+gbs$Bri_Rem <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/briggsae_remanei/results/last/query.07.postmasked.maf.gz")
+gbs$Bri_Ele <- load_genomic_breaks("/bucket/LuscombeU/live/CharlesPlessy/GenomesToCompare/Caenorhabditis/briggsae_elegans/results/last/query.07.postmasked.maf.gz")
 ```
 
 ### Annotate Oikopleura
 
 ```{r GBreaks_object_final, dependson=GBreaks_object_Caeno, cache=TRUE}
-gbs[Oik_Oik] <-        annotateWithReps(gbs[Oik_Oik], reps)
+gbs[Oik_Oik] <-  annotateWithReps(gbs[Oik_Oik], reps)
 gbs[Oik_Oik] <- annotateWithTranscripts(gbs[Oik_Oik], transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
 ```
@@ -379,6 +382,12 @@ p5 <- ggplot(for_wgo_barplots |> dplyr::filter(genus == "Ciona")) +
   ggplot2::coord_flip() +
   geom_bar( stat = "identity") +
   ggtitle("Ciona (various evol. distances)")
+
+p6 <- ggplot(for_wgo_barplots |> dplyr::filter(genus == "Caenorhabditis")) +
+  aes(name, value, fill = type) +
+  ggplot2::coord_flip() +
+  geom_bar( stat = "identity") +
+  ggtitle("Caenorhabditis (various evol. distances)")
 ```
 
 We can see that:
@@ -393,7 +402,7 @@ We can see that:
 
 ```{r proportion_of_genome_region_classes, fig.width=6, fig.height=18, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 library("patchwork")
-p1 / p2 / p3 / p4 / p5
+p1 / p2 / p3 / p4 / p5 / p6
 ```
 
 In the next plot, replicate pairs of genomes are merged.
