@@ -82,11 +82,15 @@ mkOxPlotWindow <- function(gb, win = 5e6, size = 2, centre = c('midpoint', 'maxw
 
 ## Okinawa vs Osaka
 
+66.12972 % (matches / alignment widths)
+
 ```{r Oki_Osa_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
 mkOxPlotWindow(gbs$Oki_Osa)
 ```
 
 ## Okinawa vs Barcelona
+
+66.99999 %
 
 ```{r Oki_Bar_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(gbs$Oki_Bar)
@@ -106,6 +110,8 @@ mkOxPlotWindow(gbs$Osa_Oki)
 ```
 
 ## Osaka vs Aomori
+
+94.45642 % matches / alignment length
 
 The Aomori genome needs some custom scaffolding to make a contiguous 10 × 10
 region.
@@ -152,6 +158,8 @@ mkOxPlotWindow(Osa_Aom_PAR)
 
 ## Okinawa vs Kume
 
+94.23956 % matches / alignment length
+
 Same for the Kume genome…
 
 ```{r Oki_Kum_win_prepare}
@@ -193,6 +201,10 @@ Oki_Kum_PAR$query <- mergeSeqLevels(Oki_Kum_PAR$query, seqlevels(Oki_Kum_PAR$que
 ```{r Oki_Kum_win, dev='svg', fig.ext='svg'}
 mkOxPlotWindow(Oki_Kum_PAR)
 ```
+
+## Barcelona vs Norway
+
+No plot, but 95.91132 % matches / alignment length
 
 # Ciona
 
@@ -301,6 +313,13 @@ contiguous because the dots need to be thick to be easy to see.
 ```{r hg38_mm10, dev='svg', fig.ext='svg'}
 hgmm <- load_genomic_breaks(system.file("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3", package = "BreakpointsData"))
 mkOxPlotWindow(hgmm, centre = 'maxwidth') + ggtitle("Homo sapiens vs Mus musculus")
+```
+
+## Muntjaks
+
+```{r hg38_mm10, dev='svg', fig.ext='svg'}
+Mmun_Mree <- load_genomic_breaks(system.file("extdata/Muntjaks/Rrev_Rmun.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
+mkOxPlotWindow(Mmun_Mree, centre = 'maxwidth') + ggtitle("Muntiacus muntjak vs M. reevesi (95% aligned, 98% identical).")
 ```
 
 # Nematodes
