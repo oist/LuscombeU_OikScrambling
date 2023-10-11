@@ -204,7 +204,7 @@ Oik_Oik <- names(gbs)
 
 ### _Ciona_
 
-```{r GBreaks_object_Ciona, dependson=GBreaks_object_Oik, cache=TRUE}
+```{r GBreaks_object_Ciona, dependson="GBreaks_object_Oik", cache=TRUE}
 gbs$Ply_Ros <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_int_R.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
 gbs$Ply_Rob <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_rob_HT.gff.gz",         package = "BreakpointsData"),    NULL,     NULL)
 gbs$Ply_Sav <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_int_P__C_sav.gff.gz",            package = "BreakpointsData"),    NULL,     NULL)
@@ -218,7 +218,7 @@ gbs$Rob_Oki <- load_genomic_breaks(system.file("extdata/Ciona_pairwise_v3/C_rob_
 
 ### _Drosophila_
 
-```{r GBreaks_object_Droso, dependson=GBreaks_object_Ciona, cache=TRUE}
+```{r GBreaks_object_Droso, dependson="GBreaks_object_Ciona", cache=TRUE}
 gbs$Dme_Dbu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Dbus_ASM1175060v1.gff.gz",     package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dsu <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__RU_Dsub_v1.1.gff.gz",          package = "BreakpointsData"),    NULL,     NULL)
 gbs$Dme_Dya <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel__Prin_Dyak_Tai18E2_2.0.gff.gz", package = "BreakpointsData"),    NULL,     NULL)
@@ -227,7 +227,7 @@ gbs$Dme_Dma <- load_genomic_breaks(system.file("extdata/Insects_pairwise_v3/Dmel
 
 ### _Caenorhabditis_
 
-```{r GBreaks_object_Caeno, dependson=GBreaks_object_Droso, cache=TRUE}
+```{r GBreaks_object_Caeno, dependson="GBreaks_object_Droso", cache=TRUE}
 gbs$Cni_Cbr <- load_genomic_breaks(system.file("extdata/Nematodes_pairwise/nigoni_briggsae.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
 gbs$Cni_Cre <- load_genomic_breaks(system.file("extdata/Nematodes_pairwise/nigoni_remanei.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
 gbs$Cni_Cin <- load_genomic_breaks(system.file("extdata/Nematodes_pairwise/nigoni_inopinata.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
@@ -238,7 +238,7 @@ gbs$Cbr_Cel <- load_genomic_breaks(system.file("extdata/Nematodes_pairwise/brigg
 
 ### Annotate Oikopleura
 
-```{r GBreaks_object_final, dependson=GBreaks_object_Caeno, cache=TRUE}
+```{r GBreaks_object_final, dependson="GBreaks_object_Caeno", cache=TRUE}
 gbs[Oik_Oik] <-  annotateWithReps(gbs[Oik_Oik], reps)
 gbs[Oik_Oik] <- annotateWithTranscripts(gbs[Oik_Oik], transcripts)
 gbs <- sapply(gbs, flagAll) |> SimpleList()
