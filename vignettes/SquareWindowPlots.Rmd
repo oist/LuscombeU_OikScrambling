@@ -317,9 +317,12 @@ mkOxPlotWindow(hgmm, centre = 'maxwidth') + ggtitle("Homo sapiens vs Mus musculu
 
 ## Muntjaks
 
-```{r hg38_mm10, dev='svg', fig.ext='svg'}
+```{r muntjaks, dev='svg', fig.ext='svg'}
 Mmun_Mree <- load_genomic_breaks(system.file("extdata/Muntjaks/Rrev_Rmun.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
-mkOxPlotWindow(Mmun_Mree, centre = 'maxwidth') + ggtitle("Muntiacus muntjak vs M. reevesi (95% aligned, 98% identical).")
+# Given the enormous differences of karyotype, the M. reevesi chromosomes need to be trimmed for # 
+# the window centering alorithm to function.
+Mmun_Mree.trim <- Mmun_Mree |> plyranges::filter(seqnames == "CM018478.1", seqnames(query) == "CM018501.1", end(query) < 273507479)
+mkOxPlotWindow(Mmun_Mree.trim, centre = 'maxwidth') + ggtitle("Muntiacus muntjak vs M. reevesi (95% aligned, 98% identical).")
 ```
 
 # Nematodes
@@ -337,12 +340,12 @@ unplaced contigs nor mitochondrial genome.
 _C. briggsae_'s genome assmebly `GCA_022453885.1` length is 106,953,292, with
 mitochondrial genome as I forgot to remove it.
 
-```{r Cnig_Cbri_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Nig_Bri, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. briggsae (61% aligned, 85% identity)")
+```{r Cni_Cbr_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cni_Cbr, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. briggsae (61% aligned, 85% identity)")
 ```
 
-```{r Cbri_Cnig_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Nig_Bri, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. nigoni (69% aligned, 85% identity)")
+```{r Cbr_Cni_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cbr_Cni, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. nigoni (69% aligned, 85% identity)")
 ```
 
 ## _C. nigoni_ or _briggsae_ vs _C. remanei_
@@ -350,22 +353,22 @@ mkOxPlotWindow(gbs$Nig_Bri, centre = 'maxwidth') + ggtitle("Caenorhabditis brigg
 Unplaced contigs and mitochondrial genome were removed from _C. remanei_'s
 assembly `GCA_001643735.4`.
 
-```{r Cnig_Crem_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Nig_Rem, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. remanei (25% aligned, 73% identity)")
+```{r Cni_Cre_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cni_Cre, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. remanei (25% aligned, 73% identity)")
 ```
 
-```{r Cbri_Crem_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Bri_Rem, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. remanei (30% aligned, 72% identity)")
+```{r Cbr_Cre_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cbr_Cre, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. remanei (30% aligned, 72% identity)")
 ```
 
 ## _C. nigoni_ vs _C. inopinata_
 
-```{r Cnig_Cino_win, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Nig_Ino, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. inopinata (16% aligned, 72% identity)")
+```{r Cni_Cin_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cni_Cin, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. inopinata (16% aligned, 72% identity)")
 ```
 
 ## _C. briggsae vs _C. elegans_
 
-```{r Cbri_Cino_ele, dev='svg', fig.ext='svg'}
-mkOxPlotWindow(gbs$Bri_Ele, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. elegans (23% aligned, 72% identity)")
+```{r Cbr_Cel_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cbr_Cel, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. elegans (23% aligned, 72% identity)")
 ```
