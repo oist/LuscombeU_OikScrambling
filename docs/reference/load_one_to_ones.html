@@ -19,7 +19,7 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">5.0.0</span>
       </span>
     </div>
 
@@ -28,10 +28,35 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
   <a href="../articles/OikScrambling.html">Get started</a>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../articles/LoadGenomicBreaks.html">Data load</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Supplemental material
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/OxfordPlots.html">Figure 1A DNA line plots</a>
+    </li>
+    <li>
+      <a href="../articles/ParallelPlots.html">Figure 1B chromosome parallel plots</a>
+    </li>
+    <li>
+      <a href="../articles/DistanceMeasures.html">Table 1 scrambling index</a>
+    </li>
+    <li>
+      <a href="../articles/ChromosomePlots.html">Figure 5 genome-wide feature patterns</a>
+    </li>
+    <li>
+      <a href="../articles/SquareWindowPlots.html">Figure 7 DNA line plots</a>
+    </li>
+    <li>
+      <a href="../articles/ScalingBreakpoints.html">Figure 7 breakpoint number barplots</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -55,16 +80,22 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
       <a href="../articles/GenomicFeatures.html">Genomic features of the breakpoints</a>
     </li>
     <li>
+      <a href="../articles/GenomicHeatmaps.html">Genomic features of the breakpoints (heatmaps)</a>
+    </li>
+    <li>
       <a href="../articles/Inversions.html">Inversions</a>
     </li>
     <li>
       <a href="../articles/LoadGenomicBreaks.html">Load genomic break data</a>
     </li>
     <li>
+      <a href="../articles/OperonConservation.html">Operon conservation analysis</a>
+    </li>
+    <li>
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
-      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+      <a href="../articles/OxfordPlots.html">Alignment line plots, whole genomes</a>
     </li>
     <li>
       <a href="../articles/PAC3.html">Region of interest: PAC3</a>
@@ -91,6 +122,9 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
     </li>
     <li>
+      <a href="../articles/SquareWindowPlots.html">Alignment line plots, 10×10 Mbp windows</a>
+    </li>
+    <li>
       <a href="../articles/TFBS.html">Transcription factor binding sites</a>
     </li>
     <li>
@@ -102,6 +136,9 @@ table containing one-to-one orthogroups."><!-- mathjax --><script src="https://c
   </ul></li>
 <li>
   <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/oist/LuscombeU_OikScrambling/" class="external-link">
@@ -130,20 +167,25 @@ table containing one-to-one orthogroups.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">load_one_to_ones</span><span class="op">(</span><span class="va">file</span>, species <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">load_one_to_ones</span><span class="op">(</span><span class="va">file</span>, species <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>file</dt>
 <dd><p>Path to the <em>OrthoFinder</em> table.</p></dd>
+
+
 <dt>species</dt>
 <dd><p>A character vector of species annotation names matching
 exactly the names of the columns in the <em>OrthoFinder</em> table.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns a <code>DataFrame</code> with one column per species, containing
+    
+
+<p>Returns a <code>DataFrame</code> with one column per species, containing
 protein identifiers, and the columns <code>HOG</code>, <code>OG</code> and <code>Gene.Tree.Parent.Clade</code>.</p>
     </div>
     <div id="details">
@@ -156,8 +198,8 @@ the table have <code>NA</code> in every row.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># Example for loading all orthogroups:</span></span>
-<span class="r-in"><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu">load_one_to_ones</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example for loading all orthogroups:</span></span></span>
+<span class="r-in"><span><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu">load_one_to_ones</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 5162 rows and 9 columns</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 HOG          OG Gene Tree Parent Clade</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;character&gt; &lt;character&gt;            &lt;character&gt;</span>
@@ -211,10 +253,10 @@ the table have <code>NA</code> in every row.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5160         OSKA2016v1.9.g12790.t1      OdB3.GSOIDT00006489001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5161         OSKA2016v1.9.g12773.t1      OdB3.GSOIDT00006508001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5162         OSKA2016v1.9.g12766.t1      OdB3.GSOIDT00006515001</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Example for loading a pair</span></span>
-<span class="r-in"><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu">load_one_to_ones</span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span></span>
-<span class="r-in">                                  , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Example for loading a pair</span></span></span>
+<span class="r-in"><span><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu">load_one_to_ones</span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/OrthoFinder/N19.tsv"</span>, package <span class="op">=</span> <span class="st">"BreakpointsData"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                                  , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bar2_p4.Flye.prot.longest.fa_1"</span>, <span class="st">"OSKA2016v1.9.prot.longest.fa_1"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 9172 rows and 5 columns</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 HOG          OG Gene Tree Parent Clade</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;character&gt; &lt;character&gt;            &lt;character&gt;</span>
@@ -242,7 +284,7 @@ the table have <code>NA</code> in every row.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9170          Bar2_p4_Flye.g8448.t1          OSKA2016v1.9.g9813.t1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9171          Bar2_p4_Flye.g9382.t1         OSKA2016v1.9.g10500.t1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9172          Bar2_p4_Flye.g9616.t1          OSKA2016v1.9.g9098.t1</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -257,7 +299,7 @@ the table have <code>NA</code> in every row.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
