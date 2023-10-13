@@ -295,7 +295,7 @@ In these examples, the inversions happened on the _target_ genome, therefore
 only in this genome the names of the ranges were changed.
 
 ```{r ROI8.T}
-exampleDoubleInversion |> plotApairOfChrs()
+exampleDoubleInversion1 |> plotApairOfChrs()
 
 x0 <- GBreaks(target = GRanges(c("T:1:+", "T:2:+", "T:3:+")),
               query  = GRanges(c("Q:1",   "Q:2",   "Q:3")))
@@ -331,7 +331,7 @@ Let's start with a simpler example, where the inversions happen on the
 _query_ genome.
 
 ```{r ROI8.Q}
-exampleDoubleInversion |> plotApairOfChrs()
+exampleDoubleInversion1 |> plotApairOfChrs()
 
 # Start colinear
 z0 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:+", C="T:30-35:+")),
@@ -346,7 +346,7 @@ z2 <- GBreaks(target = GRanges(c(A="T:10-15:+", B="T:20-25:-", C="T:30-35:-")),
               query  = GRanges(c(A="Q:30-35",   B="Q:10-15",   C="Q:20-25")))
 
 # We have the same configuration, plus flanking regions, in exampleDoubleInversion
-exampleDoubleInversion
+exampleDoubleInversion1
 
 ROI8 <- coa2$Oki_Osa[1420:1430]
 ROI8 |> flagAll()
