@@ -13,7 +13,9 @@ editor_options:
 ---
 
 ```{r setup}
-knitr::opts_knit$set(cache = TRUE)
+knitr::opts_knit$set(cache = TRUE,
+                     dev=c('png', 'svg', 'pdf'),
+                     fig.ext=c('png', 'svg', 'pdf'))
 ```
 
 # Introduction
@@ -35,145 +37,170 @@ load("BreakPoints.Rdata")
 
 # Oikopleura
 
-## Oki vs Osa
+## Fig 1A
 
 Line plot used for panel A of Figure 1.  Is based on aligned regions
 (before coalescing), stored in the `gbs` object.  The manually set colors are
 used throughout the manuscript to represent chromosomes 1 and 2, the PAR, the
 XSR and the YSR.
 
-```{r Oki_Osa_gbs, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+```{r Oki_Osa_gbs}
 makeOxfordPlots(gbs$Oki_Osa, diag = FALSE) +
   scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) +
   theme_bw() +
   theme(legend.position="none")
 ```
 
-Same, colored by strand.
+## Okinawa vs others
 
-```{r Oki_Osa_strand, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-makeOxfordPlots(gbs$Oki_Osa, diag = FALSE, col = "strand") + theme_bw() + theme(legend.position="none")
+### Oki vs Osa (distant)
+
+Same as above, but colored by strand.
+
+```{r Oki_Osa_strand, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Oki_Osa, diag = FALSE, col = "strand") + theme(legend.position="none")
 ```
 
-The other plots use default _ggplot2_ colors.
+### Oki vs Bar (distant)
 
-## Oki vs Bar
-
-```{r Oki_Bar_all}
-makeOxfordPlots(gbs$Oki_Bar, diag = FALSE)
+```{r Oki_Bar_all, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Oki_Bar, diag = FALSE, col = "strand") + theme(legend.position="none")
 ```
 
-## Osa vs Bar
+### Oki vs Kum (near)
 
-```{r Osa_bar}
-makeOxfordPlots(gbs$Osa_Bar, diag = FALSE)
+```{r Oki_Kum, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Oki_Kum, col = "strand") + theme(legend.position="none")
 ```
 
-## Osa vs Oki
+## Osaka vs others
 
-```{r Osa_Oki}
-makeOxfordPlots(gbs$Osa_Oki, diag = FALSE)
+### Osa vs Oki (distant)
+
+```{r Osa_Oki, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Osa_Oki, diag = FALSE, col = "strand") + theme(legend.position="none")
 ```
 
-## Osa vs Aom
+### Osa vs Bar (intermediate)
 
-```{r Osa_Aom}
-makeOxfordPlots(gbs$Osa_Aom, diag = FALSE)
+```{r Osa_bar, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Osa_Bar, diag = FALSE, col = "strand") + theme(legend.position="none")
 ```
 
-## Oki vs Kum
+### Osa vs Aom (near)
 
-```{r Oki_Kum}
-makeOxfordPlots(gbs$Oki_Kum)
+```{r Osa_Aom, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Osa_Aom, col = "strand") + theme(legend.position="none")
 ```
 
+## Barcelona vs others
+
+### Bar vs Oki (distant)
+
+```{r Bar_Oki, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Bar_Oki, diag = FALSE, col = "strand") + theme(legend.position="none")
+```
+
+### Bar vs Osa (intermediate)
+
+```{r Bar_Osa, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Bar_Osa, diag = FALSE, col = "strand") + theme(legend.position="none")
+```
+
+### Bar vs Nor (near)
+
+In these vignettes, the manuscript's "Bergen" genome is called "Norway".
+
+**Note this plot does not demonstrate, nor rule out, collinearity between the
+two genomes, because most contigs of the Bergen assembly are too short.
+Alignment on the diagonal only demonstrates collinearity _within_ a contig,
+not _between_.**
+
+```{r Bar_Nor, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Bar_Nor, col = "strand") + theme(legend.position="none")
+```
 
 # Ciona
 
-## _Ciona intestinalis_ (Plymouth vs Roscoff)
+## _Ciona intestinalis_ Plymouth vs Roscoff (near)
 
-```{r Ply_Ros}
-makeOxfordPlots(gbs$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+```{r Ply_Ros, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Ply_Ros, col = "strand") + theme(legend.position="none") + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
 ```
 
-## _Ciona intestinalis_ (Plymouth) vs _Ciona robusta_
+## _Ciona intestinalis_ Plymouth vs _Ciona robusta_ (intermediate)
 
-```{r Ply_Rob}
-makeOxfordPlots(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+```{r Ply_Rob, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Ply_Rob, col = "strand") + theme(legend.position="none") + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
 ```
 
-## Troubleshoot of grid pattern
+## _Ciona intestinalis_ Plymouth vs _Ciona savignyi_ (distant)
 
-We see horizontal patterns what are they?  I think they may be pericentromeric
-regions.
-
-```{r Ply_Rob_point_plot}
-makeOxfordPlots(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
-```
-
-```{r Ply_Rob_subset}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000010.1", "BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1", "BJTB01000014.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000005.1", "BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1", "BNJZ01000009.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000012.1 and BNJZ01000007.1")
-```
-
-```{r Ply_Rob_subset2}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000012.1 and BNJZ01000007.1")
-```
-
-```{r Ply_Rob_subset3}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000002.1", "BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1", "BJTB01000006.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000010.1", "BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1", "BNJZ01000014.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000004.1 and BNJZ01000012.1")
-```
-
-```{r Ply_Rob_subset4}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000004.1 and BNJZ01000012.1")
-```
-
-## _Ciona intestinalis_ (Plymouth) vs _Ciona savignyi_
-
-```{r Ply_Sav}
-makeOxfordPlots(gbs$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+```{r Ply_Sav, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Ply_Sav, col = "strand") + theme(legend.position="none") + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
 ```
 
 # Drosophila
 
-## vs Drosophila mauritania
+## vs Drosophila mauritania (near)
 
-```{r Dmel_Dmau}
-makeOxfordPlots(gbs$Dme_Dma) + ggtitle("Dmel vs Dmau")
+```{r Dmel_Dmau, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Dme_Dma, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dmau")
 ```
 
-## vs Drosophila yakuba
+## vs Drosophila yakuba (intermediate)
 
-```{r Dmel_Dyak}
-makeOxfordPlots(gbs$Dme_Dya) + ggtitle("Dmel vs Dyak")
+```{r Dmel_Dyak, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Dme_Dya, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dyak")
 ```
 
-## vs Drosophila subpulchrella
+## vs Drosophila subpulchrella (intermediate)
 
-```{r Dmel_Dsub}
-makeOxfordPlots(gbs$Dme_Dsu) + ggtitle("Dmel vs Dsub")
+```{r Dmel_Dsub, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Dme_Dsu, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dsub")
 ```
 
-## vs Drosophila buskii
+## vs Drosophila buskii (distant)
 
-```{r Dmel_Dbus}
-makeOxfordPlots(gbs$Dme_Dbu) + ggtitle("Dmel vs Dbus")
+```{r Dmel_Dbus, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Dme_Dbu, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dbus")
+```
+
+# Nematodes
+
+## C. briggsae vs C. nigoni (near)
+
+```{r Cbr_Cni, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Cbr_Cni, col = "strand") + theme(legend.position="none") + ggtitle("C. briggsae vs C. nigoni")
+```
+
+## C. briggsae vs C. remanei (intermediate)
+
+```{r Cbr_Cre, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Cbr_Cre, col = "strand") + theme(legend.position="none") + ggtitle("C. briggsae vs C. remanei")
+```
+
+## C. nigoni vs C. remanei (intermediate)
+
+```{r Cni_Cre, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Cni_Cre, col = "strand") + theme(legend.position="none") + ggtitle("C. nigoni vs C. remanei")
+```
+
+## C. briggsae vs C. elegans (distant)
+
+```{r Cbr_Cel, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Cbr_Cel, col = "strand") + theme(legend.position="none") + ggtitle("C. briggsae vs C. elegans")
+```
+
+## C. nigoni vs C. inopinata (distant)
+
+```{r Cni_Cin, fig.height=15, fig.width=15}
+makeOxfordPlots(gbs$Cni_Cin, col = "strand") + theme(legend.position="none") + ggtitle("C. nigoni vs C. inopinata")
 ```
 
 # Mammals
 
-## Human versus mouse
+## Human versus mouse chromosome 18
 
 Chromosome 18 was chosen because it is small and it has the same name in both
 species.  Region was centered on the alignment with the longest width, as
@@ -182,7 +209,14 @@ otherwise the window out of target.
 Note that each of these chromosomes is longer than any _Oikopleura dioica_
 genome.
 
-```{r hg38_mm10, dev='svg', fig.ext='svg'}
+```{r hg38_mm10, fig.height=15, fig.width=15}
 hgmm <- load_genomic_breaks(system.file(("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3"), package = "BreakpointsData"))
 makeOxfordPlots(hgmm, col = "strand") + ggtitle("Homo sapiens vs Mus musculus")
+```
+
+## Muntjaks
+
+```{r Mmun_Mree, fig.height=15, fig.width=15}
+Mmun_Mree <- load_genomic_breaks(system.file("extdata/Muntjaks/Rrev_Rmun.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
+makeOxfordPlots(Mmun_Mree |> swap(), col = "strand") + ggtitle("Muntiacus reevesi vs Muntiacus muntjak")
 ```
