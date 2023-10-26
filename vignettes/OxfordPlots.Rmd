@@ -2,7 +2,6 @@
 title: "Alignment line plots, whole genomes"
 author: 
  - "Charles Plessy"
- - "Michael Mansfield"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -14,7 +13,11 @@ editor_options:
 ---
 
 ```{r setup}
-knitr::opts_knit$set(cache = TRUE)
+knitr::opts_chunk$set(cache = TRUE,
+                      dev    = c('png', 'svg', 'pdf'),
+                      fig.ext= c('png', 'svg', 'pdf'),
+                      fig.width  = 15,
+                      fig.height = 15)
 ```
 
 # Introduction
@@ -29,7 +32,6 @@ Figure 1 panel A was generated in this vignette.
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
-library('patchwork')     |> suppressPackageStartupMessages()
 ggplot2::theme_set(theme_bw())
 genomes <- OikScrambling:::loadAllGenomes()
 load("BreakPoints.Rdata")
@@ -37,519 +39,170 @@ load("BreakPoints.Rdata")
 
 # Oikopleura
 
-## Oki vs Osa
+## Fig 1A
 
 Line plot used for panel A of Figure 1.  Is based on aligned regions
 (before coalescing), stored in the `gbs` object.  The manually set colors are
 used throughout the manuscript to represent chromosomes 1 and 2, the PAR, the
 XSR and the YSR.
 
-```{r Oki_Osa_gbs, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+```{r Oki_Osa_gbs}
 makeOxfordPlots(gbs$Oki_Osa, diag = FALSE) +
   scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) +
   theme_bw() +
   theme(legend.position="none")
 ```
 
-Same, colored by strand.
+## Okinawa vs others
 
-```{r Oki_Osa_strand, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-makeOxfordPlots(gbs$Oki_Osa, diag = FALSE, col = "strand") + theme_bw() + theme(legend.position="none")
+### Oki vs Osa (distant)
+
+Same as above, but colored by strand.
+
+```{r Oki_Osa_strand}
+makeOxfordPlots(gbs$Oki_Osa, diag = FALSE, col = "strand") + theme(legend.position="none")
 ```
 
-The other plots use default _ggplot2_ colors.
-
-## Oki vs Bar
+### Oki vs Bar (distant)
 
 ```{r Oki_Bar_all}
-makeOxfordPlots(gbs$Oki_Bar, diag = FALSE)
+makeOxfordPlots(gbs$Oki_Bar, diag = FALSE, col = "strand") + theme(legend.position="none")
 ```
 
-## Osa vs Bar
-
-```{r Osa_bar}
-makeOxfordPlots(gbs$Osa_Bar, diag = FALSE)
-```
-
-## Osa vs Oki
-
-```{r Osa_Oki}
-makeOxfordPlots(gbs$Osa_Oki, diag = FALSE)
-```
-
-## Osa vs Aom
-
-```{r Osa_Aom}
-makeOxfordPlots(coa$Osa_Aom, diag = FALSE)
-```
-
-```{r Osa_Aom_win_prepare}
-Osa_Aom_PAR <- gbs$Osa_Aom |> plyranges::filter(seqnames == "PAR")
-seqlevels(Osa_Aom_PAR)       <- seqlevelsInUse(Osa_Aom_PAR)
-seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
-
-makeOxfordPlots(Osa_Aom_PAR)
-
-# Let's remove the contigs that have their main match elsewhere.
-QTcoverage <- function(gb) {
-  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
-  stopifnot (!any(is.na(seqlengths(gb$query))))
-  grl <- split(gb, seqnames(gb$query))
-  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
-}
-Osa_Aom_PAR[seqnames(Osa_Aom_PAR$query) %in% seqlevels(Osa_Aom_PAR$query)[QTcoverage(Osa_Aom_PAR) < 0.5]] <- NULL
-seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
-makeOxfordPlots(Osa_Aom_PAR)
-
-# Let's remove the smallest ones that barely display on one pixel
-seqlengths(Osa_Aom_PAR$query)
-Osa_Aom_PAR[seqnames(Osa_Aom_PAR$query) %in% seqlevels(Osa_Aom_PAR$query)[seqlengths(Osa_Aom_PAR$query) < 2e4]] <- NULL
-seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
-makeOxfordPlots(Osa_Aom_PAR, col = "strand")
-
-# And now let's flip by hand the ones that need
-grl <- split(Osa_Aom_PAR, seqnames(Osa_Aom_PAR$query))
-grl[["contig_38_1"]] <- reverse(grl[["contig_38_1"]], query = TRUE)
-grl[["contig_49_1"]] <- reverse(grl[["contig_49_1"]], query = TRUE)
-Osa_Aom_PAR <- unlist(grl)
-makeOxfordPlots(Osa_Aom_PAR, col = "strand")
-
-# Finally, let's reorder and merge remaining seqlevels
-seqlevels(Osa_Aom_PAR$query) <- seqlevels(Osa_Aom_PAR$query)[orderQuerySeqLevels(Osa_Aom_PAR)]
-Osa_Aom_PAR$query <- mergeSeqLevels(Osa_Aom_PAR$query, seqlevels(Osa_Aom_PAR$query), "PAR")
-```
-
-```{r Osa_Aom_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-mkOxPlotWindow(Osa_Aom_PAR)
-makeOxfordPlots(gbs$Osa_Aom, diag = FALSE)
-```
-
-### Aom whole genome scaffolding using Oxford plots
-Let's try to scaffold Aomori a little bit more. Hopefully, we can recover most of a chromosome-scale genome assembly using the Oxford plots alone.
-
-```{r Osa_Aom_sc_helpers}
-# Helper function to flip many contigs at once.
-flipContigsForOxfordPlot <- function(gb, flip_which=NULL) {
-  grl <- split(gb, seqnames(gb$query))
-  grl <- endoapply(grl, function(s) {
-    if( ! identical(unique(as.character(seqnames(s$query))), character(0)) ) {
-      if(unique(seqnames(s$query)) %in% flip_which ) {
-        s <- GenomicBreaks::reverse(s, query=TRUE)
-        s
-      }
-    }
-    s
-  })
-  ogb <- unlist(grl) |> unname()
-  ogb
-}
-
-# This is what the function does, for visual confirmation.
-gbs$Oki_Osa |> makeOxfordPlots()
-flipContigsForOxfordPlot(gbs$Oki_Osa, flip_which=c('Chr1', 'Chr2')) |> makeOxfordPlots()
-```
-
-#### Chr1
-
-```{r Osa_Aom_sc_chr1, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-# Let's dig in to each chromosome and try to flip Aomori appropriately.
-# Chr1
-Osa_Aom_Chr1 <- gbs$Osa_Aom |> plyranges::filter(seqnames == "Chr1")
-seqlevels(Osa_Aom_Chr1)       <- seqlevelsInUse(Osa_Aom_Chr1)
-seqlevels(Osa_Aom_Chr1$query) <- seqlevelsInUse(Osa_Aom_Chr1$query)
-
-makeOxfordPlots(Osa_Aom_Chr1, col='strand')
-
-# Let's remove the contigs that have their main match elsewhere.
-Osa_Aom_Chr1[seqnames(Osa_Aom_Chr1$query) %in% seqlevels(Osa_Aom_Chr1$query)[QTcoverage(Osa_Aom_Chr1) < 0.5]] <- NULL
-seqlevels(Osa_Aom_Chr1$query) <- seqlevelsInUse(Osa_Aom_Chr1$query)
-# Some of the remaining bits are not very helpful either, so let's drop them.
-Osa_Aom_Chr1 <- Osa_Aom_Chr1[seqnames(Osa_Aom_Chr1$query)!='contig_31_1']
-seqlevels(Osa_Aom_Chr1$query) <- seqlevelsInUse(Osa_Aom_Chr1$query)
-makeOxfordPlots(Osa_Aom_Chr1, col='strand')
-
-
-# Let's flip things around a little to get things as linear as they can be:
-makeOxfordPlots( flipContigsForOxfordPlot(Osa_Aom_Chr1, flip_which = c('contig_48_1', 'contig_1_1', 'contig_39_1', 'contig_32_1')), col='strand')
-
-# So Chr1 is, I guess:
-# c('contig_46_1', 'contig_2_1',      rev('contig_48_1'), 
-#   'contig_5_1',  rev('contig_1_1'), 'contig_3_1',
-#   rev('contig_39_1'), rev('contig_32_1'))
-
-```
-
-
-#### Chr2
-
-```{r Osa_Aom_sc_chr2, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-Osa_Aom_Chr2 <- gbs$Osa_Aom |> plyranges::filter(seqnames == "Chr2")
-seqlevels(Osa_Aom_Chr2)       <- seqlevelsInUse(Osa_Aom_Chr2)
-seqlevels(Osa_Aom_Chr2$query) <- seqlevelsInUse(Osa_Aom_Chr2$query)
-
-makeOxfordPlots(Osa_Aom_Chr2, col='strand')
-
-# Let's remove the contigs that have their main match elsewhere.
-Osa_Aom_Chr2[seqnames(Osa_Aom_Chr2$query) %in% seqlevels(Osa_Aom_Chr2$query)[QTcoverage(Osa_Aom_Chr2) < 0.5]] <- NULL
-seqlevels(Osa_Aom_Chr2$query) <- seqlevelsInUse(Osa_Aom_Chr2$query)
-makeOxfordPlots(Osa_Aom_Chr2, col='strand')
-
-# Let's flip things around a little to get things as linear as they can be:
-makeOxfordPlots( flipContigsForOxfordPlot(Osa_Aom_Chr2, flip_which = c('contig_44_1', 'contig_42_1', 'contig_23_1', 'contig_45_1')), col='strand')
-
-# Chr2 is:
-# c(rev('contig_44_1'), rev('contig_42_1'), rev('contig_23_1'), 'contig_22_1', rev('contig_45_1'))
-
-```
-
-#### PAR
-This has been done above, but just to make it consistent with the approach for Chr1/Chr2, let's repeat it here:
-```{r Osa_Aom_sc_PAR, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-Osa_Aom_PAR <- gbs$Osa_Aom |> plyranges::filter(seqnames == "PAR")
-seqlevels(Osa_Aom_PAR)       <- seqlevelsInUse(Osa_Aom_PAR)
-seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
-
-makeOxfordPlots(Osa_Aom_PAR, col='strand')
-
-# Let's remove the contigs that have their main match elsewhere.
-Osa_Aom_PAR[seqnames(Osa_Aom_PAR$query) %in% seqlevels(Osa_Aom_PAR$query)[QTcoverage(Osa_Aom_PAR) < 0.5]] <- NULL
-seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
-makeOxfordPlots(Osa_Aom_PAR, col='strand')
-
-# Let's flip things around a little to get things as linear as they can be:
-makeOxfordPlots( flipContigsForOxfordPlot(Osa_Aom_PAR, flip_which = c('contig_49_1', 'contig_38_1')), col='strand')
-
-# PAR is:
-# c('contig_12_1', rev('contig_38_1'), rev('contig_49_1'), 'contig_15_1', 'contig_34_1'))
-
-```
-
-#### XSR
-
-```{r Osa_Aom_sc_xsr, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-Osa_Aom_XSR <- gbs$Osa_Aom |> plyranges::filter(seqnames == "XSR")
-seqlevels(Osa_Aom_XSR)       <- seqlevelsInUse(Osa_Aom_XSR)
-seqlevels(Osa_Aom_XSR$query) <- seqlevelsInUse(Osa_Aom_XSR$query)
-
-makeOxfordPlots(Osa_Aom_XSR, col='strand')
-
-# Let's remove the contigs that have their main match elsewhere.
-Osa_Aom_XSR[seqnames(Osa_Aom_XSR$query) %in% seqlevels(Osa_Aom_XSR$query)[QTcoverage(Osa_Aom_XSR) < 0.5]] <- NULL
-seqlevels(Osa_Aom_XSR$query) <- seqlevelsInUse(Osa_Aom_XSR$query)
-makeOxfordPlots(Osa_Aom_XSR, col='strand')
-
-# Let's flip things around a little to get things as linear as they can be:
-makeOxfordPlots( flipContigsForOxfordPlot(Osa_Aom_XSR, flip_which = c('contig_4_1')), col='strand')
-
-# XSR is:
-# c(rev('contig_4_1'))
-```
-
-
-#### YSR
-
-```{r Osa_Aom_sc_ysr, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-Osa_Aom_YSR <- gbs$Osa_Aom |> plyranges::filter(seqnames == "YSR")
-seqlevels(Osa_Aom_YSR)       <- seqlevelsInUse(Osa_Aom_YSR)
-seqlevels(Osa_Aom_YSR$query) <- seqlevelsInUse(Osa_Aom_YSR$query)
-
-makeOxfordPlots(Osa_Aom_YSR, col='strand')
-
-# Let's remove the contigs that have their main match elsewhere.
-Osa_Aom_YSR[seqnames(Osa_Aom_YSR$query) %in% seqlevels(Osa_Aom_YSR$query)[QTcoverage(Osa_Aom_YSR) < 0.30]] <- NULL
-seqlevels(Osa_Aom_YSR$query) <- seqlevelsInUse(Osa_Aom_YSR$query)
-makeOxfordPlots(Osa_Aom_YSR, col='strand')
-
-# Let's flip things around a little to get things as linear as they can be:
-makeOxfordPlots( flipContigsForOxfordPlot(Osa_Aom_YSR, flip_which = c('contig_27_1', 'contig_20_1')), col='strand')
-
-# YSR is:
-# c(rev('contig_27_1'), rev('contig_20_1'))
-
-```
-
-#### Bringing it together
-
-```{r Osa_Aom_sc_all_1, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
-# scaffolding function to return a chromosome-scale GRange based on a list of contigs and a set of orientations
-#  inputs: a Gbreaks object, and a named list of chromosomes containing contigs to scaffold
-#    The "chr" object should look like this:
-#    list(Chr1=data.frame(contig=c('contig_1_1', 'contig_2_2'), orientation=c(1, -1)) )
-scaffold_gbreaks_query <- function(gb, chr=NULL) {
-  if(is.null(chr)){
-    print("Error, no scaffolding information provided. Check inputs.")
-  } else {
-    # Some checks and balances.
-    stopifnot(!all(names(chr) %in% seqnames(gb$query)))
-    chr_df <- chr |> dplyr::bind_rows(.id='chromosome')
-    which.flip <- chr_df$contig[chr_df$orientation=='-1']
-    o_gb <- flipContigsForOxfordPlot(gb, which.flip)
-    o_gb$query$scaffold <- NA
-    o_gb$query$scaffold <- chr_df$chromosome[match(as.character(seqnames(o_gb$query)), chr_df$contig)]
-    
-    # Reorder the seqlevels to match the scaffolding.
-    sql_orig <- as.character(seqlevels(gb$query))
-    sql_new <- chr_df$contig
-    sql_new <- c(sql_new, sql_orig[! sql_orig %in% sql_new])
-    seqlevels(o_gb$query) <- sql_new
-
-    o_gb
-  }
-}
-# Chr1
-# c('contig_46_1', 'contig_2_1',      rev('contig_48_1'), 'contig_5_1',  rev('contig_1_1'), 'contig_3_1', rev('contig_39_1'), rev('contig_32_1'))
-# Chr2
-# c(rev('contig_44_1'), rev('contig_42_1'), rev('contig_23_1'), 'contig_22_1', rev('contig_45_1'))
-# PAR
-# c('contig_12_1', rev('contig_38_1'), rev('contig_49_1'), 'contig_15_1', 'contig_34_1'))
-# XSR
-# c(rev('contig_4_1'))
-# YSR is:
-# c(rev('contig_27_1'), rev('contig_20_1'))
-
-aom_scaffolds <- list(
-  'Chr1'=data.frame(
-    contig=c('contig_46_1', 'contig_2_1', 'contig_48_1',
-             'contig_5_1',  'contig_1_1', 'contig_3_1',
-             'contig_39_1', 'contig_32_1'),
-    orientation=c(1, 1, -1,
-                  1, -1, 1,
-                  1, -1)),
-  'Chr2'=data.frame(
-    contig=c('contig_44_1', 'contig_42_1', 'contig_23_1',
-             'contig_22_1', 'contig_45_1'),
-    orientation=c(-1, -1, -1,
-                  1, -1)),
-  'PAR'=data.frame(
-    contig=c('contig_12_1', 'contig_38_1', 'contig_49_1',
-             'contig_15_1', 'contig_34_1'),
-    orientation=c(1, -1, -1,
-                  1, 1)),
-  'XSR'=data.frame(
-    contig='contig_4_1',
-    orientation=-1),
-  'YSR'=data.frame(
-    contig=c('contig_27_1', 'contig_20_1'),
-    orientation=c(-1, -1))
-)
-
-# Original plot for comparison
-gbs$Osa_Aom |> makeOxfordPlots()
-# Flipped about plot
-scaffold_gbreaks_query(gbs$Osa_Aom, chr=aom_scaffolds) |> makeOxfordPlots()
-# Flipped about plot with small skinny bits removed
-scaffold_gbreaks_query(gbs$Osa_Aom, chr=aom_scaffolds) |> swap() |> plyranges::filter(!is.na(scaffold)) |> swap() |> makeOxfordPlots(diag=F)
-```
-
-### Aom scaffolding of orthogroups
-By identifying the contigs that need to flip, we can repeat this process for the orthogroup-based `GBreaks` objects (based on 1-to-1 orthologues).
-
-Much of this code comes from the `OrthogroupSyntenies` vignette so please inspect this.
-
-```{r Osa_Aom_sc_og}
-annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
-transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings()
-
-orthoGroupFileNames <- SimpleList(
-  AOM.5.5f      = "AOM-5-5f.prot.longest.fa_1", 
-  Bar2.p4       = "Bar2_p4.Flye.prot.longest.fa_1", 
-  Ply           = "C_int_P.prot.longest.fa_1",
-  Ros           = "C_int_R.prot.longest.fa_1",
-  Int           = "Ciona_intestinalis.Uniprot.rn.fa_1",
-  Sav           = "Ciona_savignyi.Uniprot.rn.fa_1",
-  KUM.M3.7f     = "KUM-M3-7f.prot.longest.fa_1",
-  OKI2018.I69   = "OKI2018_I69.v2.prot.longest.fa_1",
-  OSKA2016v1.9  = "OSKA2016v1.9.prot.longest.fa_1",
-  OdB3          = "OdB3.v1.0.prot.fa_1.nohaplo"
-)
-orthoPairToGBreaks <- function(genome1, genome2, transcripts, treeName="N19", HOGs=NULL) {
-  if(is.null(HOGs))
-    HOGs <- OikScrambling:::load_one_to_ones(
-      system.file(paste0("extdata/OrthoFinder/",treeName,".tsv"), package = "BreakpointsData"),
-      c(orthoGroupFileNames[[genome1]], orthoGroupFileNames[[genome2]]))
-  IDs2GRanges <- function (IDs, annot) {
-    prefix <- Biobase::lcPrefix(IDs)                  # Guess prefix in transcript IDs from HOG files
-    not_prefix <- Biobase::lcPrefix(annot$tx_name)    # Remove trailing characters that are part of the name
-    not_prefix <- paste0(not_prefix,"$")              # Anchor to end of the string
-    prefix <- sub(not_prefix, "", prefix)             # Finalise prefix
-    IDs <- sub(prefix, "", IDs)                       # Remove prefix from IDS
-    names(annot) <- annot$tx_name                     # Store transcript name in names slot
-    gr <- annot[IDs]                                  # Sort by ID
-    strand(gr) <- "*"                                 # Make strandless
-    gr                                                # Return the object
-  }
-  
-  gb       <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome1]]], transcripts[[genome1]])
-  if (!is.null(genomes[[genome1]]))
-    seqinfo(gb) <- seqinfo(genomes[[genome1]])
-  gb$query <- IDs2GRanges(HOGs[,orthoGroupFileNames[[genome2]]], transcripts[[genome2]])
-  if (!is.null(genomes[[genome2]]))
-   seqinfo(gb$query) <- seqinfo(genomes[[genome2]])
-  gb <- GenomicBreaks:::GBreaks(gb)
-  gb$HOG <- HOGs$HOG
-  gb$OG  <- HOGs$OG
-  sort(gb)
-}
-flagLongShort_ <- function(gr, transcripts) {
-  genome <- unique(genome(gr))
-  flagLongShort(gr, transcripts[[genome]])
-}
-orthoPairToGBreaks_all_Oiks <- function(treeName=NULL, HOGs=NULL) {
-  orthoPairs <- SimpleList()
-  orthoPairs$Oki_Osa <- orthoPairToGBreaks("OKI2018.I69", "OSKA2016v1.9",   transcripts, treeName, HOGs)
-  orthoPairs$Oki_Bar <- orthoPairToGBreaks("OKI2018.I69", "Bar2.p4",        transcripts, treeName, HOGs)
-  orthoPairs$Oki_Kum <- orthoPairToGBreaks("OKI2018.I69", "KUM.M3.7f",      transcripts, treeName, HOGs)
-  orthoPairs$Oki_Aom <- orthoPairToGBreaks("OKI2018.I69", "AOM.5.5f",       transcripts, treeName, HOGs)
-  orthoPairs$Oki_Nor <- orthoPairToGBreaks("OKI2018.I69", "OdB3",           transcripts, treeName, HOGs)
-  
-  orthoPairs$Osa_Bar <- orthoPairToGBreaks("OSKA2016v1.9",   "Bar2.p4",     transcripts, treeName, HOGs)
-  orthoPairs$Osa_Oki <- orthoPairToGBreaks("OSKA2016v1.9",   "OKI2018.I69", transcripts, treeName, HOGs)
-  orthoPairs$Osa_Kum <- orthoPairToGBreaks("OSKA2016v1.9",   "KUM.M3.7f",   transcripts, treeName, HOGs)
-  orthoPairs$Osa_Aom <- orthoPairToGBreaks("OSKA2016v1.9",   "AOM.5.5f",    transcripts, treeName, HOGs)
-  orthoPairs$Osa_Nor <- orthoPairToGBreaks("OSKA2016v1.9",   "OdB3",        transcripts, treeName, HOGs)
-  
-  orthoPairs$Bar_Osa <- orthoPairToGBreaks("Bar2.p4",   "OSKA2016v1.9",     transcripts, treeName, HOGs)
-  orthoPairs$Bar_Oki <- orthoPairToGBreaks("Bar2.p4",   "OKI2018.I69",      transcripts, treeName, HOGs)
-  orthoPairs$Bar_Kum <- orthoPairToGBreaks("Bar2.p4",   "KUM.M3.7f",        transcripts, treeName, HOGs)
-  orthoPairs$Bar_Aom <- orthoPairToGBreaks("Bar2.p4",   "AOM.5.5f",         transcripts, treeName, HOGs)
-  orthoPairs$Bar_Nor <- orthoPairToGBreaks("Bar2.p4",   "OdB3",             transcripts, treeName, HOGs)
-  
-  orthoPairs <- sapply(orthoPairs,  flagLongShort_, longShort)
-  
-  SimpleList(orthoPairs)
-}
-orthoPairs         <- orthoPairToGBreaks_all_Oiks("N19")
-orthoPairs$Ply_Ros <- orthoPairToGBreaks("Ply", "Ros", transcripts, treeName="N20")
-```
-
-```{r Osa_Aom_sc_all_2}
-orthoPairs$Osa_Aom |> makeOxfordPlots()
-scaffold_gbreaks_query(orthoPairs$Osa_Aom, chr=aom_scaffolds) |> makeOxfordPlots()
-scaffold_gbreaks_query(orthoPairs$Osa_Aom, chr=aom_scaffolds) |> swap() |> plyranges::filter(!is.na(scaffold)) |> swap() |> makeOxfordPlots()
-# Still a bit ugly. Let's remove small Osaka contigs.
-scaffold_gbreaks_query(orthoPairs$Osa_Aom, chr=aom_scaffolds) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(!is.na(scaffold)) |> swap() |> makeOxfordPlots()
-```
-
-#### Orthopair dot plots by increasing evolutionary distance
-The following code reproduces the dot plots featured in 
-
-```{r orthopair_dist, fig.height=8, fig.width=8,  dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
-# Oki-Osa
-p1 <- orthoPairs$Oki_Osa |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> makeOxfordPlots(type='point', diag = F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5"))
-# Bar-Osa
-p2 <- orthoPairs$Bar_Osa |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> makeOxfordPlots(type='point', diag=F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5"))
-
-# Another function that takes a scaffolding list and returns a fake GRanges with
-# new seqinfo reflecting the change.
-
-
-# Aom-Osa. The original plot is not quite right, because it assigns
-# a new colour to every contig. Instead, let's modify the makeOxfordPlots
-# to allow manual colour scales.
-
-# Make an object that color-codes the chromosomes, so that it can be used with
-# scale_color_manual().
-aom_scaffolds_df <- do.call(rbind, aom_scaffolds) |> tibble::rownames_to_column() |> dplyr::mutate(seqnames=lapply(rowname, function(x) unlist(strsplit(x, "\\."))[1]) |> unlist())
-(aom_scaffolds_df)
-aom_scaffolds_df$seqnames
-
-p3 <- scaffold_gbreaks_query(orthoPairs$Osa_Aom, chr=aom_scaffolds) |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(!is.na(scaffold)) |> makeOxfordPlots(type='point', diag=F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")[as.numeric(as.factor(aom_scaffolds_df$seqnames))])
-(p1 + p2 + p3)
-```
-
-## Oki vs Kum
+### Oki vs Kum (near)
 
 ```{r Oki_Kum}
-makeOxfordPlots(gbs$Oki_Kum)
+makeOxfordPlots(gbs$Oki_Kum, col = "strand") + theme(legend.position="none")
 ```
 
+## Osaka vs others
+
+### Osa vs Oki (distant)
+
+```{r Osa_Oki}
+makeOxfordPlots(gbs$Osa_Oki, diag = FALSE, col = "strand") + theme(legend.position="none")
+```
+
+### Osa vs Bar (intermediate)
+
+```{r Osa_bar}
+makeOxfordPlots(gbs$Osa_Bar, diag = FALSE, col = "strand") + theme(legend.position="none")
+```
+
+### Osa vs Aom (near)
+
+```{r Osa_Aom}
+makeOxfordPlots(gbs$Osa_Aom, col = "strand") + theme(legend.position="none")
+```
+
+## Barcelona vs others
+
+### Bar vs Oki (distant)
+
+```{r Bar_Oki}
+makeOxfordPlots(gbs$Bar_Oki, diag = FALSE, col = "strand") + theme(legend.position="none")
+```
+
+### Bar vs Osa (intermediate)
+
+```{r Bar_Osa}
+makeOxfordPlots(gbs$Bar_Osa, diag = FALSE, col = "strand") + theme(legend.position="none")
+```
+
+### Bar vs Nor (near)
+
+In these vignettes, the manuscript's "Bergen" genome is called "Norway".
+
+**Note this plot does not demonstrate, nor rule out, collinearity between the
+two genomes, because most contigs of the Bergen assembly are too short.
+Alignment on the diagonal only demonstrates collinearity _within_ a contig,
+not _between_.**
+
+```{r Bar_Nor}
+makeOxfordPlots(gbs$Bar_Nor, col = "strand") + theme(legend.position="none")
+```
 
 # Ciona
 
-## _Ciona intestinalis_ (Plymouth vs Roscoff)
+## _Ciona intestinalis_ Plymouth vs Roscoff (near)
 
 ```{r Ply_Ros}
-makeOxfordPlots(gbs$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+makeOxfordPlots(gbs$Ply_Ros, col = "strand") + theme(legend.position="none") + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
 ```
 
-## _Ciona intestinalis_ (Plymouth) vs _Ciona robusta_
+## _Ciona intestinalis_ Plymouth vs _Ciona robusta_ (intermediate)
 
 ```{r Ply_Rob}
-makeOxfordPlots(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+makeOxfordPlots(gbs$Ply_Rob, col = "strand") + theme(legend.position="none") + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
 ```
 
-## Troubleshoot of grid pattern
-
-We see horizontal patterns what are they?  I think they may be pericentromeric
-regions.
-
-```{r Ply_Rob_point_plot}
-makeOxfordPlots(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
-```
-
-```{r Ply_Rob_subset}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000010.1", "BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1", "BJTB01000014.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000005.1", "BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1", "BNJZ01000009.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000012.1 and BNJZ01000007.1")
-```
-
-```{r Ply_Rob_subset2}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000011.1", "BJTB01000012.1", "BJTB01000013.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000006.1", "BNJZ01000007.1", "BNJZ01000008.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000012.1 and BNJZ01000007.1")
-```
-
-```{r Ply_Rob_subset3}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000002.1", "BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1", "BJTB01000006.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000010.1", "BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1", "BNJZ01000014.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near BJTB01000004.1 and BNJZ01000012.1")
-```
-
-```{r Ply_Rob_subset4}
-coa$Ply_Rob |>
-  plyranges::filter(seqnames(query) %in% c("BJTB01000003.1", "BJTB01000004.1", "BJTB01000005.1")) |>
-  plyranges::filter(seqnames        %in% c("BNJZ01000011.1", "BNJZ01000012.1", "BNJZ01000013.1")) |>
-  makeOxfordPlots() + ggtitle("C. int. P vs C. rob., subset near (closer) BJTB01000004.1 and BNJZ01000012.1")
-```
-
-## _Ciona intestinalis_ (Plymouth) vs _Ciona savignyi_
+## _Ciona intestinalis_ Plymouth vs _Ciona savignyi_ (distant)
 
 ```{r Ply_Sav}
-makeOxfordPlots(gbs$Ply_Sav) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+makeOxfordPlots(gbs$Ply_Sav, col = "strand") + theme(legend.position="none") + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
 ```
 
 # Drosophila
 
-## vs Drosophila mauritania
+## vs Drosophila mauritania (near)
 
 ```{r Dmel_Dmau}
-makeOxfordPlots(gbs$Dme_Dma) + ggtitle("Dmel vs Dmau")
+makeOxfordPlots(gbs$Dme_Dma, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dmau")
 ```
 
-## vs Drosophila yakuba
+## vs Drosophila yakuba (intermediate)
 
 ```{r Dmel_Dyak}
-makeOxfordPlots(gbs$Dme_Dya) + ggtitle("Dmel vs Dyak")
+makeOxfordPlots(gbs$Dme_Dya, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dyak")
 ```
 
-## vs Drosophila subpulchrella
+## vs Drosophila subpulchrella (intermediate)
 
 ```{r Dmel_Dsub}
-makeOxfordPlots(gbs$Dme_Dsu) + ggtitle("Dmel vs Dsub")
+makeOxfordPlots(gbs$Dme_Dsu, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dsub")
 ```
 
-## vs Drosophila buskii
+## vs Drosophila buskii (distant)
 
 ```{r Dmel_Dbus}
-makeOxfordPlots(gbs$Dme_Dbu) + ggtitle("Dmel vs Dbus")
+makeOxfordPlots(gbs$Dme_Dbu, col = "strand") + theme(legend.position="none") + ggtitle("Dmel vs Dbus")
+```
+
+# Nematodes
+
+## C. briggsae vs C. nigoni (near)
+
+```{r Cbr_Cni}
+makeOxfordPlots(gbs$Cbr_Cni, col = "strand") + theme(legend.position="none") + ggtitle("C. briggsae vs C. nigoni")
+```
+
+## C. briggsae vs C. remanei (intermediate)
+
+```{r Cbr_Cre}
+makeOxfordPlots(gbs$Cbr_Cre, col = "strand") + theme(legend.position="none") + ggtitle("C. briggsae vs C. remanei")
+```
+
+## C. nigoni vs C. remanei (intermediate)
+
+```{r Cni_Cre}
+makeOxfordPlots(gbs$Cni_Cre, col = "strand") + theme(legend.position="none") + ggtitle("C. nigoni vs C. remanei")
+```
+
+## C. briggsae vs C. elegans (distant)
+
+```{r Cbr_Cel}
+makeOxfordPlots(gbs$Cbr_Cel, col = "strand") + theme(legend.position="none") + ggtitle("C. briggsae vs C. elegans")
+```
+
+## C. nigoni vs C. inopinata (distant)
+
+```{r Cni_Cin}
+makeOxfordPlots(gbs$Cni_Cin, col = "strand") + theme(legend.position="none") + ggtitle("C. nigoni vs C. inopinata")
 ```
 
 # Mammals
 
-## Human versus mouse
+## Human versus mouse chromosome 18
 
 Chromosome 18 was chosen because it is small and it has the same name in both
 species.  Region was centered on the alignment with the longest width, as
@@ -558,7 +211,14 @@ otherwise the window out of target.
 Note that each of these chromosomes is longer than any _Oikopleura dioica_
 genome.
 
-```{r hg38_mm10, dev='svg', fig.ext='svg'}
+```{r hg38_mm10}
 hgmm <- load_genomic_breaks(system.file(("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3"), package = "BreakpointsData"))
 makeOxfordPlots(hgmm, col = "strand") + ggtitle("Homo sapiens vs Mus musculus")
+```
+
+## Muntjaks
+
+```{r Mmun_Mree}
+Mmun_Mree <- load_genomic_breaks(system.file("extdata/Muntjaks/Rrev_Rmun.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
+makeOxfordPlots(Mmun_Mree |> swap(), col = "strand") + ggtitle("Muntiacus reevesi vs Muntiacus muntjak")
 ```

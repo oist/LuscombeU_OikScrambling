@@ -66,34 +66,28 @@ syntenic regions are, and so on.
 ```{r coa_cutoffs_2}
 # You can then make a simple table that tabulates the number of segments at a number of cutoffs.
 cutoff_coas_tables = SimpleList()
-
+cutoff_coas_tables_map <- function(f)
+  purrr::map_dfr(cutoff_coas,
+    \(cutoff) purrr::map(cutoff, f)
+  )
 # Count number of segments. We make 0-count cells to NA to make them more obvious in the heatmap later.
-cutoff_coas_tables$NumSegments <-
-  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
-  purrr::map(cutoff |> as("list"), length)
-  ) |> dplyr::mutate_all(na_if, 0)
+cutoff_coas_tables$NumSegments <- cutoff_coas_tables_map(length)
 
 # Show how many total bases are left after coalescing.
 # Divide by 1,000,000 to convert it to Mbp. 0-counts are converted to NA.
-cutoff_coas_tables$TotalAligned <-
-  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
-  purrr::map(cutoff |> as("list"), \(gr) sum(width(gr)/1000000))
-  ) |> dplyr::mutate_all(na_if, 0)
+cutoff_coas_tables$TotalAligned <- cutoff_coas_tables_map(\(gr) sum(width(gr)/1000000))
   
 # Show largest segment. Combine it with the query name to see which chromosome segment is biggest.
-cutoff_coas_tables$LargestSegment <-
-  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
-  purrr::map(cutoff |> as("list"), \(gr) max(width(gr)))
-  ) |> dplyr::mutate_all(na_if, -Inf)  |> suppressWarnings()
+cutoff_coas_tables$LargestSegment <- cutoff_coas_tables_map(\(gr) {
+    if (length(gr) == 0) return(NA)
+    max(width(gr))
+  })
 
 # Get name of largest segment, which can change based on the cutoffs.
-cutoff_coas_tables$LargestSegmentName <-
-  purrr::map_dfr(cutoff_coas |> as("list"), \(cutoff)
-  purrr::map(cutoff |> as("list"), \(gb) {
+cutoff_coas_tables$LargestSegmentName <- cutoff_coas_tables_map(\(gb) {
     if (length(gb) == 0) return(NA)
     as.character(seqnames(gb)[which.max(width(gb))])
   })
-)
 
 # Write a little function to relate a pair of species (A_B) to their genome size.
 # named list of genome sizes (name=species, content=genome size).
@@ -101,7 +95,12 @@ genome_sizes=list(Aom=sum(seqlengths(genomes$Aom)), Bar=sum(seqlengths(genomes$B
                   Oki=sum(seqlengths(genomes$Oki)), Osa=sum(seqlengths(genomes$Osa)),
                   Kum=sum(seqlengths(genomes$Kum)), Nor=sum(seqlengths(genomes$Nor)),
                   Ply=128639392, Ros=134327879, Sav=177003750, Rob=117529544,
-                  Dme=137547960, Dbu=110837441, Dsu=130045071, Dya=136883712
+                  Dme=137547960, Dbu=110837441, Dsu=130045071, Dya=136883712,
+                  Cin=sum(guessSeqLengths(gbs$Cni_Cin)),
+                  Cel=sum(guessSeqLengths(gbs$Cbr_Cel$query)),
+                  Cre=sum(guessSeqLengths(gbs$Cni_Cre$query)),
+                  Cbr=sum(guessSeqLengths(gbs$Cbr_Cni)),
+                  Cni=sum(guessSeqLengths(gbs$Cni_Cbr))
                   )
 match_pair_with_sizes = function(pair, genome_sizes) {
   spp = unlist(strsplit(pair, "_"))
@@ -140,31 +139,38 @@ Note the names of the largest segments.
 
 
 ### Plotting features at different cutoffs
+
+```{r custom_pheatmap}
+pheatmap_ <- function(x, main)
+  pheatmap(x, col=magma(100), cluster_cols=F, cluster_row=F, gaps_col=c(15,23,27), angle_col = 90, main=main, display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
+```
+
 ##### Number of segments
 ```{r coa_cutoff_numSegs, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
 # Number of segments
-pheatmap(cutoff_coas_tables$NumSegments, col=magma(100), cluster_cols=F, cluster_row=F, gaps_col=c(15,23), angle_col = 90, main='Number of alignments (uncoalesced) or syntenic regions (coalesced)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
+pheatmap_(cutoff_coas_tables$NumSegments, main='Number of alignments (uncoalesced) or syntenic regions (coalesced)')
 ```
+
 ##### Total aligned
 ```{r coa_cutoff_totAli, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
-pheatmap(cutoff_coas_tables$TotalAligned, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Sum of all alignment widths (Mbp)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
+pheatmap_(cutoff_coas_tables$TotalAligned, main='Sum of all alignment widths (Mbp)')
 ```
 
 ##### Largest segment
 ```{r coa_cutoff_lrgstSeg, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
-pheatmap(cutoff_coas_tables$LargestSegment, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Size of largest segment (Mbp)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
+pheatmap_(cutoff_coas_tables$LargestSegment, main='Size of largest segment (Mbp)')
 ```
 
 ##### Percent of genome covered by alignments
 Note the denominator here is the mean of the query and target genome sizes.
 ```{r coa_cutoff_pctGen, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
-pheatmap(cutoff_coas_tables$PercentGenomeCovered, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Percentage of query/target genomes covered (%)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
+pheatmap_(cutoff_coas_tables$PercentGenomeCovered, main='Percentage of query/target genomes covered (%)')
 ```
 
 ##### Percent of total aligned positions represented in alignments
 Note the denominator here is the mean of the query and target genome sizes.
 ```{r coa_cutoff_pctOrig, fig.height=6, fig.width=8, dev="svg", fig.ext="svg"}
-pheatmap(cutoff_coas_tables$PercentOriginalAlignment, col=magma(100), cluster_cols=F, gaps_col=c(15,23), cluster_row=F, angle_col = 90, main='Percentage of originally-aligned positions covered (%)', display_numbers=T, number_color='#d9d9d9', number_format="%.0f", fontsize_number=6)
+pheatmap_(cutoff_coas_tables$PercentOriginalAlignment, main='Percentage of originally-aligned positions covered (%)')
 ```
 
 

@@ -22,11 +22,11 @@ different objects are prepared.
 
 ```{r load_packages_and_data}
 library('OikScrambling')   |> suppressPackageStartupMessages()
+library('patchwork')
 genomes <- OikScrambling:::loadAllGenomes(compat = F)
 transcripts <- OikScrambling:::loadAllTranscriptsGR(compat = F) |> suppressWarnings()
 load("BreakPoints.Rdata")
 ```
-
 
 Prepare GBreaks objects
 =======================
@@ -160,6 +160,48 @@ sapply(orthoPairs_core, length)
 sapply(orthoPairs_one2oneInOiks, length)
 ```
 
+Oxford plots
+============
+
+Versus Osa
+----------
+
+```{r orthopair_plot_Oki_Osa}
+p1 <- orthoPairs$Oki_Osa |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> makeOxfordPlots(type='point', diag = F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL)
+```
+
+```{r orthopair_plot_Bar_Osa}
+p2 <- orthoPairs$Bar_Osa |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> makeOxfordPlots(type='point', diag=F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL)
+```
+
+```{r orthopair_plot_Aom_Osa}
+p3 <- orthoPairs$Osa_Aom |>
+  plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |>
+  swap() |>
+  scaffoldByFlipAndMerge(scafs$Aom_Osa, drop = TRUE) |>
+  makeOxfordPlots(type='point', diag=F) +
+    theme_bw() +
+    theme(legend.position='none') + ggtitle(NULL) +
+    scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5"))
+```
+
+```{r orthopair_plots, fig.height=8, fig.width=8,  dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+(p1 + p2 + p3)
+```
+
+Versus Oki
+----------
+
+```{r orthopair_plot_Oki_Bar}
+(p4 <- orthoPairs$Bar_Oki |> plyranges::filter(seqnames %in% c('Chr1', 'Chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) |> swap() |> makeOxfordPlots(type='point', diag = F) + theme_bw() + theme(legend.position='none') + scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL))
+```
+
+```{r orthopair_plot_Oki_Kum, fig.height=8, fig.width=8,  dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+(p5 <- orthoPairs$Oki_Kum |> plyranges::filter(seqnames %in% c('chr1', 'chr2', 'PAR', 'XSR', 'YSR')) |> swap()  |> makeOxfordPlots(type='point', diag=T) + theme_bw() + theme(legend.position='none')  + ggtitle(NULL))
+```
+
+Collinear regions
+=================
 
 Remove overlapping annotations
 ------------------------------

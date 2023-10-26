@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">5.0.0</span>
       </span>
     </div>
 
@@ -48,7 +48,7 @@
   <a href="articles/LoadGenomicBreaks.html">Data load</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Supplemental material
      
     <span class="caret"></span>
@@ -64,12 +64,18 @@
       <a href="articles/DistanceMeasures.html">Table 1 scrambling index</a>
     </li>
     <li>
+      <a href="articles/ChromosomePlots.html">Figure 5 genome-wide feature patterns</a>
+    </li>
+    <li>
       <a href="articles/SquareWindowPlots.html">Figure 7 DNA line plots</a>
+    </li>
+    <li>
+      <a href="articles/ScalingBreakpoints.html">Figure 7 breakpoint number barplots</a>
     </li>
   </ul>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -94,10 +100,16 @@
       <a href="articles/GenomicFeatures.html">Genomic features of the breakpoints</a>
     </li>
     <li>
+      <a href="articles/GenomicHeatmaps.html">Genomic features of the breakpoints (heatmaps)</a>
+    </li>
+    <li>
       <a href="articles/Inversions.html">Inversions</a>
     </li>
     <li>
       <a href="articles/LoadGenomicBreaks.html">Load genomic break data</a>
+    </li>
+    <li>
+      <a href="articles/OperonConservation.html">Operon conservation analysis</a>
     </li>
     <li>
       <a href="articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
@@ -173,19 +185,9 @@
 <div class="page-header"><h1 id="oikscrambling">OikScrambling<a class="anchor" aria-label="anchor" href="#oikscrambling"></a>
 </h1></div>
 <p>This package contains a collection of vignettes to perform the analysis of pairwise genome alignments between <em>Oikopleura</em> genomes.</p>
+<p>The vignettes in the <em>Supplemental Material</em> section of the header menu are related to our preprint “<a href="https://www.biorxiv.org/content/10.1101/2023.05.09.539028v1" class="external-link">Extreme genome scrambling in cryptic <em>Oikopleura dioica</em> species</a>”.</p>
 <p>The core functions used here are maintained in our <em>GenomicBreaks</em> R package, which is fully documented at: <a href="https://oist.github.io/GenomicBreaks" class="external-link uri">https://oist.github.io/GenomicBreaks</a>.</p>
-<div class="section level2">
-<h2 id="how-to-build-this-site">How to build this site<a class="anchor" aria-label="anchor" href="#how-to-build-this-site"></a>
-</h2>
-<p>See the main vignette for details</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"remotes::install_github('oist/GenomicBreaks', repos=BiocManager::repositories())"</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"install.packages('BreakpointsData', repos='https://oist.github.io/plessy_oikgenomes_drat/')"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="co"># And so on for the BSgenome packages.</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif R CMD INSTALL .</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>srun <span class="op">-</span>pcompute <span class="op">-</span>c8 <span class="op">--</span>mem 300G <span class="op">--</span>pty <span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"pkgdown::build_article('LoadGenomicBreaks')"</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>srun <span class="op">-</span>pcompute <span class="op">-</span>c8 <span class="op">--</span>mem 300G <span class="op">--</span>pty <span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"pkgdown::build_site(devel=TRUE, lazy=TRUE)"</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>srun <span class="op">-</span>pcompute <span class="op">-</span>c8 <span class="op">--</span>mem 300G <span class="op">--</span>pty <span class="op">/</span>bucket<span class="op">/</span>LuscombeU<span class="op">/</span>common<span class="op">/</span>Singularity<span class="op">/</span>GenomicBreaks<span class="dv">-0</span>.<span class="dv">12</span>.<span class="fl">2.</span>sif Rscript <span class="op">-</span>e <span class="st">"pkgdown::build_site()"</span></span></code></pre></div>
-</div>
+<p>See the “Get Started“ vignette for details on how to run the computations.</p>
 </div>
   </div>
 
@@ -236,7 +238,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
