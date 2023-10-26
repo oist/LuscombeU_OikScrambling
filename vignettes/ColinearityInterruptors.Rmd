@@ -50,27 +50,6 @@ which analysis to prioritise elsewhere.
 See `vignette("RegionsOfInterest", package = "OikScrambling")` for other regions
 of interest.
 
-# Aproximate assembly of Kume's chromosome 1.
-
-The best match for chr1 in the Kume assembly is `contig_3_1`.  It maps roughly
-in the 8,000,000 – 13,000,000 region.
-
-```{r Kum_chr1_assembly_1}
-bestMatch <- function(gb)
-  tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
-
-coa$Oki_Kum |> plyranges::filter(seqnames == "chr1") |> bestMatch()
-```
-
-The next best match, `contig_27_1` is most of chr1's short arm.
-
-```{r Kum_chr1_assembly_2}
-coa$Oki_Kum |> plyranges::filter(seqnames == "chr1", seqnames(query)!="contig_3_1") |> bestMatch()
-coa$Oki_Kum |> plotApairOfChrs(chrQ = "contig_27_1")
-```
-
-The assembly is continued in details in `vignette("ParallelPlots", package = "OikScrambling")`
-
 # Alignments are real (Region of Interest 1)
 
 When an alignment interrupts colinearity, is it trustable ?
