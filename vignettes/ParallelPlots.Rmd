@@ -76,6 +76,58 @@ tree <-
 plot(ade4::newick2phylog(tree))
 ```
 
+# Plot chr2 in six species
+
+We chose chromosome 2 because it has _Hox4_.
+
+## Parallel plot
+
+```{r plot_intersect_GBs_with_tree_with_valid, fig.width=15, fig.height=7, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+KumChr2 <- scaffoldByFlipAndMerge(gbs$Oki_Kum |> swap(), scafs$Kum_Oki, drop = TRUE) |> swap() |> coalesce_contigs()
+Aom_Osa <- scaffoldByFlipAndMerge(gbs$Osa_Aom |> swap(), scafs$Aom_Osa, drop = TRUE) |> swap() |> coalesce_contigs()
+Aom_Oki <- scaffoldByFlipAndMerge(gbs$Oki_Aom |> swap(), scafs$Aom_Osa, drop = TRUE) |> swap() |> coalesce_contigs()
+Bar_Nor <- gbs$Bar_Nor |> swap() |>
+  splitSeqLevel("scaffold_3", 700924) |>
+  splitSeqLevel("scaffold_8", 1110680) |>
+  scaffoldByFlipAndMerge(scafs$Nor_Bar) |>
+  coalesce_contigs() |> swap()
+
+dsList6 <- list(
+    KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
+    OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
+    AOM = Aom_Oki |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
+    OSA = coa$Osa_Bar       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
+    BAR = coa$Bar_Osa       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
+    NOR = Bar_Nor |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg()
+)
+
+compList6 <- list(
+    Oki_Kum = KumChr2 |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gb2comp(),
+    Aom_Oki = Aom_Oki           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> gb2comp(),
+    Osa_Aom = Aom_Osa |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gb2comp(),
+    Osa_Bar = coa$Osa_Bar       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gb2comp(),
+    Bar_Nor = Bar_Nor           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gb2comp()
+)
+
+dsList6$KUM$col <- dsList6$KUM$fill <- dsList6$OKI$col <- dsList6$OKI$fill <-
+  dsList6$AOM$col <- dsList6$AOM$fill <-
+  dsList6$OSA$col <- dsList6$OSA$fill <- dsList6$BAR$col <- dsList6$BAR$fill <-
+  dsList6$NOR$col <- dsList6$NOR$fill <- "#A6D854"
+
+compList6$Oki_Kum$color <- compList6$Aom_Oki$color <- compList6$Osa_Aom$color <-
+  compList6$Osa_Bar$color <- compList6$Bar_Nor$color <- "#D4EACC"
+
+compList6$Oki_Kum$col <- ifelse(compList6$Oki_Kum$col == "darksalmon", "#D4EACC", "#00A08E")
+compList6$Aom_Oki$col <- ifelse(compList6$Aom_Oki$col == "darksalmon", "#D4EACC", "#00A08E")
+compList6$Osa_Aom$col <- ifelse(compList6$Osa_Aom$col == "darksalmon", "#D4EACC", "#00A08E")
+compList6$Osa_Bar$col <- ifelse(compList6$Osa_Bar$col == "darksalmon", "#D4EACC", "#00A08E")
+compList6$Bar_Nor$col <- ifelse(compList6$Bar_Nor$col == "darksalmon", "#D4EACC", "#00A08E")
+
+genoPlotR::plot_gene_map(dsList6, compList6, dna_seg_scale = FALSE,
+                         tree = ade4::newick2phylog("((KUM:1,OKI:1):2,((AOM:1,OSA:1):1,(BAR:1,NOR:1):1):1);"),
+                         main = "Chromosome 2 in six Oikopleura genome assemblies")
+```
+
 # Plot chr2 in four species
 
 We chose chromosome 2 because it has _Hox4_.
@@ -83,9 +135,6 @@ We chose chromosome 2 because it has _Hox4_.
 ## Parallel plot
 
 ```{r plot_intersect_GBs_with_tree_with_Kume, fig.width=15, fig.height=7, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
-
-KumChr2 <- scaffoldByFlipAndMerge(gbs$Oki_Kum |> swap(), scafs$Kum_Oki, drop = TRUE) |> swap() |> coalesce_contigs()
-
 dsList4 <- list(
     KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
     OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),

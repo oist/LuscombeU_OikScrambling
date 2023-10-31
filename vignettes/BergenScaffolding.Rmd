@@ -1,0 +1,143 @@
+---
+title: "Scaffolding of the OdB3 genome"
+author: 
+ - "Charles Plessy"
+ - "Michael Mansfield"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Scaffolding of the OdB3 genome}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache = TRUE,
+                      dev    = c('png', 'svg'),
+                      fig.ext= c('png', 'svg'),
+                      fig.width  = 10,
+                      fig.height = 10)
+```
+
+# Introduction
+
+This vignette attempts to produce a scaffolding guide to be used with the OdB3
+(Nor) genome for plotting purposes.
+
+## Load R pacakges and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+library('patchwork')     |> suppressPackageStartupMessages()
+ggplot2::theme_set(theme_bw())
+genomes <- OikScrambling:::loadAllGenomes()
+load("BreakPoints.Rdata")
+```
+
+# Scaffolding
+
+## Helper functions
+
+```{r Bar_Nor_sc_helpers}
+# Let's remove the contigs that have their main match elsewhere.
+QTcoverage <- function(gb) {
+  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
+  stopifnot (!any(is.na(seqlengths(gb$query))))
+  grl <- split(gb, seqnames(gb$query))
+  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
+}
+
+scafs <- OikScrambling::scafs
+scafs$Nor_Bar <- list()
+```
+
+# Chr2
+
+## Visual inspection
+
+### All contigs
+
+```{r Bar_Nor_sc_chr2_1}
+Bar_Nor <- gbs$Bar_Nor # Copy as we will modify it later.
+Bar_Nor_Chr2 <- Bar_Nor |> plyranges::filter(seqnames == "Chr2")
+seqlevels(Bar_Nor_Chr2)       <- seqlevelsInUse(Bar_Nor_Chr2)
+seqlevels(Bar_Nor_Chr2$query) <- seqlevelsInUse(Bar_Nor_Chr2$query)
+
+makeOxfordPlots(Bar_Nor_Chr2, col='strand') + ggtitle("Everything from OdB3 that matches Barcelona's Chr2")
+```
+
+We will need a pieces of scaffold_3 between scaffolds 5 and 1, and scaffold_8
+between scaffolds 60 and 15.
+
+### Split scaffold 3
+
+```{r split_scaffold_3}
+Bar_Nor |> plyranges::filter(seqnames(query) == "scaffold_3") |> makeOxfordPlots()
+Bar_Nor_Chr2 |> plyranges::filter(seqnames(query) == "scaffold_3") |> coalesce_contigs(minwidth = 1e3) |> swap(s=T)
+Bar_Nor.1 <- splitSeqLevel(Bar_Nor |> swap(), "scaffold_3", 700924) |> swap()
+```
+
+### Split scaffold 8
+
+```{r split_scaffold_8}
+Bar_Nor |> plyranges::filter(seqnames(query) == "scaffold_8") |> makeOxfordPlots()
+Bar_Nor_Chr2 |> plyranges::filter(seqnames(query) == "scaffold_8") |> coalesce_contigs(minwidth = 1e3) |> swap(s=T)
+Bar_Nor.2 <- splitSeqLevel(Bar_Nor.1 |> swap(), "scaffold_8", 1110680) |> swap()
+```
+
+### Best contigs
+
+Let's visualise without the contigs that have their main match elsewhere.
+
+```{r Bar_Nor_sc_chr2_2}
+Bar_Nor_Chr2 <- Bar_Nor.2 |> plyranges::filter(seqnames == "Chr2")
+seqlevels(Bar_Nor_Chr2)       <- seqlevelsInUse(Bar_Nor_Chr2)
+seqlevels(Bar_Nor_Chr2$query) <- seqlevelsInUse(Bar_Nor_Chr2$query)
+Bar_Nor_Chr2[seqnames(Bar_Nor_Chr2$query) %in% seqlevels(Bar_Nor_Chr2$query)[QTcoverage(Bar_Nor_Chr2) < 0.5]] <- NULL
+seqlevels(Bar_Nor_Chr2$query) <- seqlevelsInUse(Bar_Nor_Chr2$query)
+makeOxfordPlots(Bar_Nor_Chr2, col='strand') + ggtitle("Main hits from OdB3 to Barcelona's Chr2")
+```
+
+### Assembly
+
+```{r Bar_Nor_sc_chr1_3}
+scafs$Nor_Bar[["Chr2"]] <- data.frame(
+  contig = c('scaffold_60'
+             , 'scaffold_8_2'
+             , 'scaffold_15', 'scaffold_39', 'scaffold_27', 'scaffold_7', 'scaffold_109', 'scaffold_98', 'scaffold_43'
+             , 'scaffold_81', 'scaffold_102', 'scaffold_72', 'scaffold_71', 'scaffold_9', 'scaffold_59', 'scaffold_5'
+             , 'scaffold_3_1'
+             , 'scaffold_1', 'scaffold_110', 'scaffold_53', 'scaffold_132', 'scaffold_225', 'scaffold_131', 'scaffold_70'),
+  orientation = c(1,
+                  1,
+                  1,1, -1,-1,-1,1,1,
+                  1,1,-1, 1,-1,1,1,
+                  -1,
+                  1,1, 1, 1, 1, -1, -1)
+)
+
+Bar_Nor.2 |> swap() |> scaffoldByFlipAndMerge(scafs$Nor_Bar) |> coalesce_contigs() |> plotApairOfChrs(chrT = 'Chr2')
+```
+
+
+# Bringing it together
+
+```{r Bar_Nor_sc_all_1}
+# Store the results in the package for re-use in other vignettes
+# usethis::use_data(scafs, overwrite = TRUE)
+identical(scafs$Nor_Bar, OikScrambling::scafs$Nor_Bar)
+
+Bar_Nor.1 <- splitSeqLevel(Bar_Nor |> swap(), "scaffold_3", 700924) |> swap()
+Bar_Nor.2 <- splitSeqLevel(Bar_Nor.1 |> swap(), "scaffold_8", 1110680) |> swap()
+
+gbs$Bar_Nor |> swap() |>
+  splitSeqLevel("scaffold_3", 700924) |>
+  splitSeqLevel("scaffold_8", 1110680) |>
+  scaffoldByFlipAndMerge(scafs$Nor_Bar) |>
+  makeOxfordPlots()
+
+# Original plot for comparison
+gbs$Bar_Nor |> makeOxfordPlots()
+```
