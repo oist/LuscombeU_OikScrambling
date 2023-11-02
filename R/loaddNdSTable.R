@@ -17,7 +17,7 @@ loaddNdSTable <- function(file, alignment_type='GUIDANCE2') {
     df <- subset(df, df$Alignment == alignment_type)
     df
   }
-  df <- get_dnds_df("v2.0.0/genewise_oikopleura.extended.txt", alignment_type=alignment_type)
+  df <- get_dnds_df("v3.0.0/genewise_oikopleura.extended.txt", alignment_type=alignment_type)
   # Remove NAs just in case.
   df <- df[!is.na(df$dNdS),]
 
