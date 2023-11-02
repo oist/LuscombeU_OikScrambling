@@ -21,7 +21,7 @@ colinearity as they do not interrupt transcription."><!-- mathjax --><script src
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">5.0.0</span>
       </span>
     </div>
 
@@ -30,10 +30,35 @@ colinearity as they do not interrupt transcription."><!-- mathjax --><script src
   <a href="../articles/OikScrambling.html">Get started</a>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../articles/LoadGenomicBreaks.html">Data load</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Supplemental material
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/OxfordPlots.html">Figure 1A DNA line plots</a>
+    </li>
+    <li>
+      <a href="../articles/ParallelPlots.html">Figure 1B chromosome parallel plots</a>
+    </li>
+    <li>
+      <a href="../articles/DistanceMeasures.html">Table 1 scrambling index</a>
+    </li>
+    <li>
+      <a href="../articles/ChromosomePlots.html">Figure 5 genome-wide feature patterns</a>
+    </li>
+    <li>
+      <a href="../articles/SquareWindowPlots.html">Figure 7 DNA line plots</a>
+    </li>
+    <li>
+      <a href="../articles/ScalingBreakpoints.html">Figure 7 breakpoint number barplots</a>
+    </li>
+  </ul></li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -57,16 +82,22 @@ colinearity as they do not interrupt transcription."><!-- mathjax --><script src
       <a href="../articles/GenomicFeatures.html">Genomic features of the breakpoints</a>
     </li>
     <li>
+      <a href="../articles/GenomicHeatmaps.html">Genomic features of the breakpoints (heatmaps)</a>
+    </li>
+    <li>
       <a href="../articles/Inversions.html">Inversions</a>
     </li>
     <li>
       <a href="../articles/LoadGenomicBreaks.html">Load genomic break data</a>
     </li>
     <li>
+      <a href="../articles/OperonConservation.html">Operon conservation analysis</a>
+    </li>
+    <li>
       <a href="../articles/OrthogroupSyntenies.html">Orthogroup syntenies</a>
     </li>
     <li>
-      <a href="../articles/OxfordPlots.html">Whole-genome dot-plots</a>
+      <a href="../articles/OxfordPlots.html">Alignment line plots, whole genomes</a>
     </li>
     <li>
       <a href="../articles/PAC3.html">Region of interest: PAC3</a>
@@ -93,6 +124,9 @@ colinearity as they do not interrupt transcription."><!-- mathjax --><script src
       <a href="../articles/SegmentMovements.html">Segment movement distances</a>
     </li>
     <li>
+      <a href="../articles/SquareWindowPlots.html">Alignment line plots, 10×10 Mbp windows</a>
+    </li>
+    <li>
       <a href="../articles/TFBS.html">Transcription factor binding sites</a>
     </li>
     <li>
@@ -104,6 +138,9 @@ colinearity as they do not interrupt transcription."><!-- mathjax --><script src
   </ul></li>
 <li>
   <a href="../news/index.html">Changelog</a>
+</li>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/oist/LuscombeU_OikScrambling/" class="external-link">
@@ -134,20 +171,28 @@ colinearity as they do not interrupt transcription.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">calcOperons</span><span class="op">(</span><span class="va">genes</span>, window <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calcOperons</span><span class="op">(</span><span class="va">genes</span>, window <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>genes</dt>
 <dd><p>A <code>GRanges</code> object representing gene annotations.</p></dd>
+
+
 <dt>window</dt>
 <dd><p>The maximum distance separating two genes of the same operon.
 It has to be an even number.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>GRanges</code> object representing operons, with a metadata column <code>n</code>reporting the number of genes in each operon.  If the input object had a
+    
+
+<p>A <code>GRanges</code> object representing operons, with a metadata column <code>n</code></p>
+
+
+<p>reporting the number of genes in each operon.  If the input object had a
 <code>gene_id</code> column, then the gene identifiers will be reported as a
 <code><a href="https://rdrr.io/pkg/IRanges/man/AtomicList-class.html" class="external-link">IRanges::CharacterList()</a></code> in a <code>gene_id</code> column in the operons object.</p>
     </div>
@@ -161,11 +206,16 @@ the same as if the window were 1 base greater.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1:100-199:+"</span>, <span class="st">"chr1:300-400:+"</span>,</span>
-<span class="r-in">                   <span class="st">"chr1:500-600:+"</span>, <span class="st">"chr1:700-800:-"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">genes</span><span class="op">$</span><span class="va">gene_id</span> <span class="op">&lt;-</span> <span class="va">LETTERS</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">genes</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu">calcOperons</span><span class="op">(</span><span class="va">genes</span>, window <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in calcOperons(genes, window = 100):</span> could not find function "calcOperons"</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu">GRanges</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chr1:100-199:+"</span>, <span class="st">"chr1:300-400:+"</span>,</span></span>
+<span class="r-in"><span>                   <span class="st">"chr1:500-600:+"</span>, <span class="st">"chr1:700-800:-"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">genes</span><span class="op">$</span><span class="va">gene_id</span> <span class="op">&lt;-</span> <span class="va">LETTERS</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">genes</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu">calcOperons</span><span class="op">(</span><span class="va">genes</span>, window <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GRanges object with 1 range and 2 metadata columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       seqnames    ranges strand |         n         gene_id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;integer&gt; &lt;CharacterList&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1]     chr1   300-600      + |         2             B,C</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   seqinfo: 1 sequence from an unspecified genome; no seqlengths</span>
 </code></pre></div>
     </div>
   </div>
@@ -180,7 +230,7 @@ the same as if the window were 1 base greater.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

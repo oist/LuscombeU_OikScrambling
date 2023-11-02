@@ -19,18 +19,22 @@ knitr::opts_chunk$set(cache = TRUE)
 
 # Introduction
 
-In this vignette I attempt to contextualize the observed number of breakpoints for a given species pair by a few key metrics: 
+In this vignette computes the observed number of breakpoints for a given species
+pair by a few key metrics: 
 
 * Millions of years since divergence
 * Branch length (i.e., a kind of substitution rate)
 * dN/dS
 
+**Panel D of Figure 7 was generated with this vignette (colors were edited by
+hand).**
+
 The core functions used here are maintained in our _GenomicBreaks_ R package,
 which is fully documented at: <https://oist.github.io/GenomicBreaks>.
 
-## Load packages
+# Setup
 
-# Load R packages and data
+## Load R packages and data
 
 ```{r load_packages_and_data}
 library('OikScrambling') |> suppressPackageStartupMessages()
@@ -42,30 +46,75 @@ library('phangorn') |> suppressPackageStartupMessages()
 load("BreakPoints.Rdata")
 ```
 
+## Service functions
 
-## Inputting distance metrics
+```{r local_functions}
+toTreedata <- function(tree) as.treedata(midpoint(read.tree(text=tree)))
+plotTree <- function(sp) {
+  ggtree(sp, ladderize=T) +
+    geom_tiplab(align=T) + hexpand(0.5) +
+    geom_text(aes(x=branch, label=round(branch.length,2)), nudge_y=0.1) +
+    geom_treescale() + geom_rootedge()
+}
+```
 
-```{r species_trees, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+# Inputting distance metrics
+
+The resulting trees are displayed to help proofchecking.
+
+## _Oikopleura_
+
+```{r species_trees_Oiks, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
 species <- SimpleList()
-species$Oikopleura <- "(Kum:0.01136111178249175555,((Osa:0.00925951950869623869,Aom:0.00920798155370218530)100:0.05729289951873162146,(Bar:0.00721724152898447612,Nor:0.00688754343189192098)100:0.05951986243208125943)100:0.31437914450027298896,Oki:0.01142149265410641150);"
-species$Ciona <- "(Rob:0.03128841990749874763,(Ros:0.01304087257513942937,Ply:0.01288782021364278871)100:0.02128682526879402057,Sav:0.55033545948338902232);"
+species$Oikopleura <- "(Kum:0.01136111178249175555,((Osa:0.00925951950869623869,Aom:0.00920798155370218530)100:0.05729289951873162146,(Bar:0.00721724152898447612,Nor:0.00688754343189192098)100:0.05951986243208125943)100:0.31437914450027298896,Oki:0.01142149265410641150);" |> toTreedata()
+plotTree(species$Oikopleura)
+```
 
-## I nabbed this tree from the following:
-#     git clone https://github.com/SchriderLab/Drosophila_phylogeny
-## To extract the relevant clades, I used:
-#     tree <- read.tree('Drosophila_phylogeny/tree/iqtree.tre')
-#     tree <- drop.tip(tree, which(!tmp$tip.label %in% c('D_melanogaster', 'D_busckii', 'D_yakuba', 'D_subpulchrella', 'D_mauritiana')))
-#     write.tree(tree, 'drosophila_4spp.newick')
+## _Ciona_
 
-species$Drosophila <- "(Dbu:0.3372973403,(Dsu:0.0947791254,(Dya:0.0703231461,(Dma:0.0280994984,Dme:0.0264284139)100_1_100:0.0267889071)100_1_100:0.0834632289)100_1_100:0.3712228549)100_1_100;"
+```{r species_trees_Ciona, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+species$Ciona <- "(Rob:0.03128841990749874763,(Ros:0.01304087257513942937,Ply:0.01288782021364278871)100:0.02128682526879402057,Sav:0.55033545948338902232);" |> toTreedata()
+plotTree(species$Ciona)
+```
 
-species <- lapply(species, function(tree) as.treedata(midpoint(read.tree(text=tree)))) |> SimpleList()
+## _Drosophila_
 
-nothing_special <- lapply(species, function(sp){
-  ggtree(sp, ladderize=T) + geom_tiplab(align=T) + hexpand(0.5) + geom_text(aes(x=branch, label=round(branch.length,2)), nudge_y=0.1) + geom_treescale() + geom_rootedge()
-})
+The tree originates from <https://github.com/SchriderLab/Drosophila_phylogeny>,
+and the relevant clades were extracted with:
 
 ```
+tree <- read.tree('Drosophila_phylogeny/tree/iqtree.tre')
+tree <- drop.tip(tree, which(!tmp$tip.label %in% c('D_melanogaster', 'D_busckii', 'D_yakuba', 'D_subpulchrella', 'D_mauritiana')))
+write.tree(tree, 'drosophila_4spp.newick')
+```
+
+```{r species_trees_Droso, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+species$Drosophila <- "(Dbu:0.3372973403,(Dsu:0.0947791254,(Dya:0.0703231461,(Dma:0.0280994984,Dme:0.0264284139)100_1_100:0.0267889071)100_1_100:0.0834632289)100_1_100:0.3712228549)100_1_100;" |> toTreedata()
+plotTree(species$Drosophila)
+```
+
+## _Caenorhabditis_
+
+Tree topologies taken from <https://zenodo.org/record/1402254/files/RAxML_species_tree.nwk>
+
+The Zenodo link also has trees calculated using ASTRAL and PhyloBayes. However,
+since the other trees here are ML trees, the RAxML tree was elected for maximum
+comparability.
+
+```{r species_trees_Caeno, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+species$Caenorhabditis <- ape::read.tree(text="(CGUAD:0.10367478589587060533,(((CSP43:0.12383810371576783882,CVIRI:0.15037624074929095697)100:0.01497242793907414826,((CPLIC:0.26149908669946614337,((DCORO:0.59783158562631621979,CMONO:0.24005751591713977988)100:0.04780411675113813846,CSP21:0.36368990218252150726)100:0.10208494374306537056)100:0.03524817284922288768,((CCAST:0.01140212554998711741,CANGA:0.01414003367272922800)100:0.05852891527717005854,CSP38:0.05923127343611131468)100:0.11896541306229711787)98:0.01073075219687256478)100:0.02583935505413810507,((CKAMA:0.05811607292620620674,((CELEG:0.04500887872372311138,CSP34:0.07438201522663016874)100:0.00705149839556874856,(((CLATE:0.00465806789922303816,CREMA:0.00437786777324163708)100:0.02881157060040358958,((CNIGO:0.00418426739023885358,CBRIG:0.00712154940320354219)100:0.02811281384583694601,(CSINI:0.01686763323477479329,(CSP26:0.01529017647605383778,CSP40:0.02038338447129417474)100:0.00329577341321305025)100:0.01374371022227172112)100:0.01161394824780575923)100:0.00600824892975430989,((CDOUG:0.02983523068133404899,CBREN:0.03506566315430653669)80:0.00382524869406435401,(CWALL:0.01854144710471255370,CTROP:0.02398428150833109909)100:0.01471009970302557951)100:0.00927549430957550110)100:0.00763851852828213371)100:0.00805135107229970441)100:0.01328077288786689257,((((CNOUR:0.00956145701022028879,CSP29:0.00805739385901662990)100:0.01930453335852322372,(CSP39:0.03253018121281636005,CSP28:0.02417332848702777315)100:0.00890124689939411802)100:0.00884911431899864341,CMACR:0.03525690105425406673)100:0.02033464491626665177,(CJAPO:0.08234400443891473631,(CAFRA:0.02943481705945342336,CSP32:0.02434121084253646969)100:0.04055371130568757865)79:0.00548050967800332942)100:0.00698694826746024816)100:0.06205429593773054836)100:0.02963813048003952413,CSP31:0.12329044085858320567);") |>
+  root("DCORO") |>
+  reorder.phylo(order='cladewise')
+
+species$Caenorhabditis <- drop.tip(species$Caenorhabditis, which(!species$Caenorhabditis$tip.label %in% c('CELEG', 'CSP34', 'CREMA', 'CNIGO', 'CBRIG')))
+
+species$Caenorhabditis$tip.label <- c('Cel', 'Cin', 'Cre', 'Cni', 'Cbr')
+write.tree(species$Caenorhabditis)
+species$Caenorhabditis <- as.treedata(species$Caenorhabditis)
+plotTree(species$Caenorhabditis)
+```
+
+## Distances
 
 With the species trees loaded, we can calculate per-pair branch length distances using `ape::cophenetic()`.
 
@@ -73,6 +122,8 @@ With the species trees loaded, we can calculate per-pair branch length distances
 species_dist <- SimpleList()
 species_dist$cophenetic <- lapply(species, function(sp) cophenetic.phylo(sp@phylo)) |> SimpleList()
 ```
+
+### Tunicates
 
 For tunicates, the distances expressed in million years are taken from the
 molecular clock analysis **except** for the same-species pairs where they are
@@ -99,12 +150,14 @@ species_dist$mya$Ciona <- data.frame(
 )
 ```
 
+### Drosophila
+
 For Drosophila, the numbers are taken from https://www.sciencedirect.com/science/article/pii/S0960982221014962
 which links to <https://github.com/SchriderLab/Drosophila_phylogeny>.  Note that
 the smallest distance here is 3.6 million years, close to our upper-bound
 estimate for same-species tunicate populations.
 
-```{r published_distances}
+```{r published_distances_Droso}
 species_dist$mya$Drosophila <- data.frame(
   'Dbu'=c(0,      46.836,  46.836,  46.836,  46.836),
   'Dsu'=c(46.836, 0,       13.1873, 13.1873, 13.1873),
@@ -112,14 +165,32 @@ species_dist$mya$Drosophila <- data.frame(
   'Dme'=c(46.836, 13.1873, 6.7256,  0,       3.6217),
   'Dma'=c(46.836, 13.1873, 6.7256,  3.6217,  0)
 )
+```
 
+### Caenorhabditis
+
+See <https://academic.oup.com/nar/article/46/3/1295/4793371> Figure S2 for all
+distances.
+
+
+```{r published_distances_Caeno}
+species_dist$mya$Caenorhabditis <- data.frame(
+  'Cin'=c(0,        30, 30, 30, NA),
+  'Cre'=c(30, 0,        25, 25, 30),
+  'Cbr'=c(30, 25,  0, 3.7, 30),
+  'Cni'=c(30, 25,  3.7, 0, 30),
+  'Cel'=c(NA, 30,  30, 30, 0)
+)
+```
+
+```{r distances_colnames}
 species_dist$mya <- lapply(species_dist$mya, function(x) {
   rownames(x) <- colnames(x)
   x
 }) |> SimpleList()
 ```
 
-## Normalised breakpoint accumulation
+# Normalised breakpoint accumulation
 
 ```{r breakpoints_mya}
 bp_vs_dist <- function(query, target, wgo, dist_type="mya", species, extra = FALSE) {
@@ -128,8 +199,10 @@ bp_vs_dist <- function(query, target, wgo, dist_type="mya", species, extra = FAL
   breakpoints <- wgo[wgo$type == "breakpoint region"]
   wgo_size <- wgo |> width() |> sum()
   wgo_size_mbp <- wgo_size / 1000000
+  aln_length <- wgo[wgo$type %in% c("collinear alignment", "isolated alignment")] |> width() |> sum()
   breakpoints_per_scale = length(breakpoints)/relevant_dist
   breakpoints_per_mbp = length(breakpoints)/wgo_size_mbp
+  breakpoints_per_aln_mbp <- length(breakpoints) / aln_length * 1e6
   data.frame(
     species                    = species,
     query                      = query,
@@ -141,6 +214,8 @@ bp_vs_dist <- function(query, target, wgo, dist_type="mya", species, extra = FAL
     breakpoints_per_scale      = breakpoints_per_scale,
     breakpoints_per_mbp        = breakpoints_per_mbp,
     breakpoints_per_mbp_scaled = breakpoints_per_mbp / relevant_dist,
+    breakpoints_per_aln_mbp        = breakpoints_per_aln_mbp,
+    breakpoints_per_aln_mbp_scaled = breakpoints_per_aln_mbp / relevant_dist,
     extra                      = extra)
 }
 
@@ -160,17 +235,27 @@ mya_df <- rbind(
 
   bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="mya", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="mya", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="mya", "Drosophila")
+  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="mya", "Drosophila"),
+  
+  bp_vs_dist(query="Cni", target="Cbr", wgo$Cni_Cbr, dist_type="mya", "Caenorhabditis", extra = TRUE),
+  bp_vs_dist(query="Cni", target="Cre", wgo$Cni_Cre, dist_type="mya", "Caenorhabditis", extra = TRUE),
+  bp_vs_dist(query="Cni", target="Cin", wgo$Cni_Cin, dist_type="mya", "Caenorhabditis", extra = TRUE),
+  bp_vs_dist(query="Cbr", target="Cni", wgo$Cbr_Cni, dist_type="mya", "Caenorhabditis"),
+  bp_vs_dist(query="Cbr", target="Cre", wgo$Cbr_Cre, dist_type="mya", "Caenorhabditis"),
+  bp_vs_dist(query="Cbr", target="Cel", wgo$Cbr_Cel, dist_type="mya", "Caenorhabditis")
+  
 )
-mya_df$species <- factor(mya_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
+mya_df$species <- factor(mya_df$species, levels=c("Caenorhabditis","Drosophila", "Ciona", "Oikopleura"))
 mya_df$pair <- factor(mya_df$pair,
-                      levels=c("Dme_Dbu", "Dme_Dsu", "Dme_Dya",
+                      levels=c("Cni_Cin", "Cbr_Cel", "Cni_Cre", "Cbr_Cre", "Cni_Cbr", "Cbr_Cni",
+                               "Dme_Dbu", "Dme_Dsu", "Dme_Dya",
                                "Ply_Sav", "Rob_Sav", "Ply_Rob", "Rob_Ros", "Ply_Ros",
                                "Osa_Oki", "Oki_Bar", "Osa_Bar", "Bar_Aom", "Osa_Aom", "Oki_Kum"))
 rownames(mya_df) <- NULL
 mya_df$comp <- factor(c("far", "far", "mid", "mid", "close", "close",
                         "far", "far", "mid", "mid", "close",
-                        "far", "mid", "close"),
+                        "far", "mid", "close",
+                        "close", "mid", "far", "close", "mid", "far"),
                       levels=c("close", "mid", "far"))
 (mya_df)
 ```
@@ -194,9 +279,13 @@ sub_df <- rbind(
 
   bp_vs_dist(query="Dme", target="Dbu", wgo$Dme_Dbu, dist_type="cophenetic", "Drosophila"),
   bp_vs_dist(query="Dme", target="Dsu", wgo$Dme_Dsu, dist_type="cophenetic", "Drosophila"),
-  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="cophenetic", "Drosophila")
+  bp_vs_dist(query="Dme", target="Dya", wgo$Dme_Dya, dist_type="cophenetic", "Drosophila"),
+  
+  bp_vs_dist(query="Cni", target="Cin", wgo$Cni_Cin, dist_type="cophenetic", "Caenorhabditis"),
+  bp_vs_dist(query="Cni", target="Cre", wgo$Cni_Cre, dist_type="cophenetic", "Caenorhabditis"),
+  bp_vs_dist(query="Cni", target="Cbr", wgo$Cni_Cbr, dist_type="cophenetic", "Caenorhabditis")
 )
-sub_df$species <- factor(sub_df$species, levels=c("Drosophila", "Ciona", "Oikopleura"))
+sub_df$species <- factor(sub_df$species, levels=c("Caenorhabditis", "Drosophila", "Ciona", "Oikopleura"))
 sub_df <- sub_df[order(sub_df$species, sub_df$breakpoints_per_mbp_scaled),]
 rownames(sub_df) <- NULL
 sub_df$pair <- factor(sub_df$pair, levels=sub_df$pair)
@@ -220,10 +309,14 @@ customPlot <- function(df, what, title, extra = "drop") {
 
 customPlot(mya_df, 'breakpoints', 'Number of breakpoints')
 customPlot(mya_df, 'breakpoints_per_scale', 'Number of breakpoints per million years')
-customPlot(mya_df, 'breakpoints_per_mbp', 'Number of breakpoints per megabase aligned')
-customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged')
-customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged', extra = TRUE)
-customPlot(sub_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase aligned per substitution distance')
+customPlot(mya_df, 'breakpoints_per_mbp', 'Number of breakpoints per megabase')
+customPlot(mya_df, 'breakpoints_per_aln_mbp', 'Number of breakpoints per megabase aligned')
+customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per million years diverged')
+customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per million years diverged', extra = TRUE)
+customPlot(mya_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged')
+customPlot(mya_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged', extra = TRUE)
+customPlot(sub_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per substitution distance')
+customPlot(sub_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per substitution distance')
 ```
 
 # Session information

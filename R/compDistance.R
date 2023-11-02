@@ -23,6 +23,8 @@ compDistance <- function(x, short = FALSE) {
   if (isTRUE(short)) {
     x[x %in% c("Int/Rob – Sav", "Int/Rob – Oki", "Int – Int", "Int – Rob")] <- "Ciona"
     x[x %in% c("Dme_Dya", "Dme_Dma", "Dme_Dsu", "Dme_Dbu")] <-                 "Drosophila"
+    x[x %in% c("Cni_Cni", "Cni_Cbr", "Cni_Cre", "Cni_Cin",
+               "Cbr_Cbr", "Cbr_Cni", "Cbr_Cre", "Cbr_Cel")] <-                 "Caenorhabditis"
   }
   x
 }
@@ -50,7 +52,10 @@ compGenus <- function(x) {
              "Rob_Sav", "Rob_Ros", "Rob_Ply")]                       <- "Ciona"
   x[x %in% c("Rob_Oki", "Ply_Oki")]                                  <- NA
   x[x %in% c("Dme_Dya", "Dme_Dma", "Dme_Dsu", "Dme_Dbu")]            <- "Drosophila"
-  factor(x, levels = c("Drosophila", "Ciona", "Oikopleura"))
+  x[x %in% c("Cni_Cni", "Cni_Cbr", "Cni_Cre", "Cni_Cin",
+             "Cbr_Cbr", "Cbr_Cni", "Cbr_Cre", "Cbr_Cel")]            <- "Caenorhabditis"
+
+  factor(x, levels = c("Caenorhabditis", "Drosophila", "Ciona", "Oikopleura"))
 }
 
 #' Transform pair name into distance class.
@@ -73,9 +78,9 @@ compDistClass <- function(x) {
   x[x %in% c("Ply_Rob", "Rob_Ros", "Rob_Ply")]                       <- "close"
   x[x %in% c("Rob_Oki", "Ply_Oki")]                                  <- "different_genus"
   x[x %in% c("Ply_Ros")]                                             <- "same_or_sister"
-  x[x %in% c("Dme_Dma")]                                             <- "same_or_sister"
-  x[x %in% c("Dme_Dya")]                                             <- "close"
-  x[x %in% c("Dme_Dsu")]                                             <- "intermediate"
-  x[x %in% c("Dme_Dbu")]                                             <- "distant"
+  x[x %in% c("Dme_Dma", "Cni_Cni", "Cbr_Cbr")]                       <- "same_or_sister"
+  x[x %in% c("Dme_Dya", "Cni_Cbr", "Cbr_Cni")]                       <- "close"
+  x[x %in% c("Dme_Dsu", "Cni_Cre", "Cbr_Cre")]                       <- "intermediate"
+  x[x %in% c("Dme_Dbu", "Cni_Cin", "Cbr_Cel")]                       <- "distant"
   factor(x, levels = c("same_or_sister", "close", "intermediate", "distant", "different_genus"))
 }

@@ -1,0 +1,374 @@
+---
+title: "Alignment line plots, 10×10 Mbp windows"
+author: 
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Alignment line plots, 10×10 Mbp windows}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_knit$set(cache = TRUE)
+```
+
+# Introduction
+
+This vignette produces alignment line plots of 10 × 10 Mbp windows in pairs of
+genomes to illustrate differences in the extent of scrambling in _Oikopleura_
+compared to equivalent pairs in other genera.  The size of the windows is fixed
+to allow comparison at the same scale.  To avoid arbitrary choices, the windows
+are placed at the centre of the largest pair of homologous chromosomes (or
+arms, in case of _Drosophila_).
+
+**Figure 7 alignment panels were generated in this vignette.**  They are
+presented on white background.
+
+Extra alignments on grey background show how the non-chromosomal assemblies were
+scaffolded by hand in the region selected for the window plot.
+
+# Setup
+
+## Load R pacakges and data
+
+```{r load_packages_and_data}
+library('OikScrambling') |> suppressPackageStartupMessages()
+genomes <- OikScrambling:::loadAllGenomes()
+load("BreakPoints.Rdata")
+```
+
+## Define custom function
+
+The `mkOxPlotWindow` function searches for the longest _sequence features_
+(chromosomes, scaffolds, …) in each genome and selects a 10 × 10 window centered
+at their midpoints.
+
+```{r mkOxPlotWindow_function}
+mkOxPlotWindow <- function(gb, win = 5e6, size = 2, centre = c('midpoint', 'maxwidth'), ...) {
+  centre <- match.arg(centre)
+  seqlevels(gb) <- seqlevelsInUse(gb)
+  gb <- forceSeqLengths(gb)
+  longest_target_seq <- seqlengths(gb) |> sort() |> tail(1) |> names()
+  best_query_match   <- gb[seqnames(gb) == longest_target_seq]$query |> seqnames() |> table() |> sort() |> tail(1) |> names()
+  if (centre == 'midpoint') {
+    target_centre <- round(seqlengths(gb)[longest_target_seq]     / 2)
+    query_centre  <- round(seqlengths(gb$query)[best_query_match] / 2)
+  } else {
+    gb_coa <- coalesce_contigs(gb)
+    maxwidth <- which.max(width(gb_coa))
+    target_centre <- gb_coa[maxwidth]       |> resize(1, fix = "center") |> start()
+    query_centre  <- gb_coa$query[maxwidth] |> resize(1, fix = "center") |> start()
+  }
+  gb <- gb |> plyranges::filter(
+    seqnames == longest_target_seq,
+    seqnames(query) == best_query_match,
+    start > target_centre - win,
+    end < target_centre + win,
+    start(query) > query_centre - win,
+    end(query) < query_centre + win
+  )
+  # score(gb) <- stringDist_GBreaks(gb) / width(gb)
+  makeOxfordPlots(gb, col = "strand", size = size, ...) +
+    theme_bw() +
+    theme(legend.position="none")
+}
+```
+
+# Oikopleura
+
+## Okinawa vs Osaka
+
+66.12972 % (matches / alignment widths)
+
+```{r Oki_Osa_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+mkOxPlotWindow(gbs$Oki_Osa)
+```
+
+## Okinawa vs Barcelona
+
+66.99999 %
+
+```{r Oki_Bar_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Oki_Bar)
+```
+
+## Osaka vs Barcelona
+
+```{r Osa_Bar_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Osa_Bar)
+```
+
+## Osaka vs Okinawa
+
+
+```{r Osa_Oki_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+mkOxPlotWindow(gbs$Osa_Oki)
+```
+
+## Osaka vs Aomori
+
+94.45642 % matches / alignment length
+
+The Aomori genome needs some custom scaffolding to make a contiguous 10 × 10
+region.
+
+```{r Osa_Aom_win_prepare}
+Osa_Aom_PAR <- gbs$Osa_Aom |> plyranges::filter(seqnames == "PAR")
+seqlevels(Osa_Aom_PAR)       <- seqlevelsInUse(Osa_Aom_PAR)
+seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
+
+makeOxfordPlots(Osa_Aom_PAR)
+
+# Let's remove the contigs that have their main match elsewhere.
+QTcoverage <- function(gb) {
+  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
+  stopifnot (!any(is.na(seqlengths(gb$query))))
+  grl <- split(gb, seqnames(gb$query))
+  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
+}
+Osa_Aom_PAR[seqnames(Osa_Aom_PAR$query) %in% seqlevels(Osa_Aom_PAR$query)[QTcoverage(Osa_Aom_PAR) < 0.5]] <- NULL
+seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
+makeOxfordPlots(Osa_Aom_PAR)
+
+# Let's remove the smallest ones that barely display on one pixel
+seqlengths(Osa_Aom_PAR$query)
+Osa_Aom_PAR[seqnames(Osa_Aom_PAR$query) %in% seqlevels(Osa_Aom_PAR$query)[seqlengths(Osa_Aom_PAR$query) < 2e4]] <- NULL
+seqlevels(Osa_Aom_PAR$query) <- seqlevelsInUse(Osa_Aom_PAR$query)
+makeOxfordPlots(Osa_Aom_PAR, col = "strand")
+
+# And now let's flip by hand the ones that need
+grl <- split(Osa_Aom_PAR, seqnames(Osa_Aom_PAR$query))
+grl[["contig_38_1"]] <- reverse(grl[["contig_38_1"]], query = TRUE)
+grl[["contig_49_1"]] <- reverse(grl[["contig_49_1"]], query = TRUE)
+Osa_Aom_PAR <- unlist(grl)
+makeOxfordPlots(Osa_Aom_PAR, col = "strand")
+
+# Finally, let's reorder and merge remaining seqlevels
+seqlevels(Osa_Aom_PAR$query) <- seqlevels(Osa_Aom_PAR$query)[orderQuerySeqLevels(Osa_Aom_PAR)]
+Osa_Aom_PAR$query <- mergeSeqLevels(Osa_Aom_PAR$query, seqlevels(Osa_Aom_PAR$query), "PAR")
+```
+
+```{r Osa_Aom_win, dev=c('png', 'svg', 'pdf'), fig.ext=c('png', 'svg', 'pdf')}
+mkOxPlotWindow(Osa_Aom_PAR)
+```
+
+## Okinawa vs Kume
+
+94.23956 % matches / alignment length
+
+Same for the Kume genome…
+
+```{r Oki_Kum_win_prepare}
+Oki_Kum_PAR <- gbs$Oki_Kum |> plyranges::filter(seqnames == "PAR")
+seqlevels(Oki_Kum_PAR)       <- seqlevelsInUse(Oki_Kum_PAR)
+seqlevels(Oki_Kum_PAR$query) <- seqlevelsInUse(Oki_Kum_PAR$query)
+
+makeOxfordPlots(Oki_Kum_PAR)
+
+# Let's remove the contigs that have their main match elsewhere.
+QTcoverage <- function(gb) {
+  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
+  stopifnot (!any(is.na(seqlengths(gb$query))))
+  grl <- split(gb, seqnames(gb$query))
+  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
+}
+Oki_Kum_PAR[seqnames(Oki_Kum_PAR$query) %in% seqlevels(Oki_Kum_PAR$query)[QTcoverage(Oki_Kum_PAR) < 0.5]] <- NULL
+seqlevels(Oki_Kum_PAR$query) <- seqlevelsInUse(Oki_Kum_PAR$query)
+makeOxfordPlots(Oki_Kum_PAR)
+
+# Let's remove the smallest ones that barely display on one pixel
+seqlengths(Oki_Kum_PAR$query)
+Oki_Kum_PAR[seqnames(Oki_Kum_PAR$query) %in% seqlevels(Oki_Kum_PAR$query)[seqlengths(Oki_Kum_PAR$query) < 2e4]] <- NULL
+seqlevels(Oki_Kum_PAR$query) <- seqlevelsInUse(Oki_Kum_PAR$query)
+makeOxfordPlots(Oki_Kum_PAR)
+
+# And now let's flip by hand the ones that need
+grl <- split(Oki_Kum_PAR, seqnames(Oki_Kum_PAR$query))
+grl[["contig_12_1"]] <- reverse(grl[["contig_12_1"]], query = TRUE)
+grl[["contig_43_1"]] <- reverse(grl[["contig_43_1"]], query = TRUE)
+Oki_Kum_PAR <- unlist(grl)
+makeOxfordPlots(Oki_Kum_PAR)
+
+# Finally, let's reorder and merge remaining seqlevels
+seqlevels(Oki_Kum_PAR$query) <- seqlevels(Oki_Kum_PAR$query)[orderQuerySeqLevels(Oki_Kum_PAR)]
+Oki_Kum_PAR$query <- mergeSeqLevels(Oki_Kum_PAR$query, seqlevels(Oki_Kum_PAR$query), "PAR")
+```
+
+```{r Oki_Kum_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(Oki_Kum_PAR)
+```
+
+## Barcelona vs Norway
+
+No plot, but 95.91132 % matches / alignment length
+
+# Ciona
+
+## _Ciona intestinalis_ (Plymouth vs Roscoff)
+
+```{r Ply_Ros_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Ply_Ros) + ggtitle("Ciona intestinalis Plymouth vs Roscoff")
+```
+
+## _Ciona intestinalis_ (Plymouth) vs _Ciona robusta_
+
+```{r Ply_Rob_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Ply_Rob) + ggtitle("Ciona intestinalis Plymouth vs Ciona robusta")
+```
+
+## _Ciona intestinalis_ (Plymouth) vs _Ciona savignyi_
+
+Here again we need some custom scaffolding.
+
+```{r Ply_Sav_win_prepare}
+Ply_Sav_chr1 <- gbs$Ply_Sav |> plyranges::filter(seqnames == "BNJZ01000001.1")
+seqlevels(Ply_Sav_chr1)       <- seqlevelsInUse(Ply_Sav_chr1)
+seqlevels(Ply_Sav_chr1$query) <- seqlevelsInUse(Ply_Sav_chr1$query)
+Ply_Sav_chr1$query <- forceSeqLengths(Ply_Sav_chr1$query)
+
+makeOxfordPlots(Ply_Sav_chr1)
+
+# Let's remove the contigs that have their main match elsewhere.
+QTcoverage <- function(gb) {
+  stopifnot (length(seqlevels(gb)) == 1) # Not ready for full objects
+  stopifnot (!any(is.na(seqlengths(gb$query))))
+  grl <- split(gb, seqnames(gb$query))
+  lapply(grl, \(gb) sum(width(gb$query))) |> unlist() / seqlengths(gb$query)
+}
+Ply_Sav_chr1[seqnames(Ply_Sav_chr1$query) %in% seqlevels(Ply_Sav_chr1$query)[QTcoverage(Ply_Sav_chr1) < 0.05]] <- NULL
+seqlevels(Ply_Sav_chr1$query) <- seqlevelsInUse(Ply_Sav_chr1$query)
+makeOxfordPlots(Ply_Sav_chr1)
+
+# Let's remove the smallest ones that barely display on one pixel
+seqlengths(Ply_Sav_chr1$query)
+Ply_Sav_chr1[seqnames(Ply_Sav_chr1$query) %in% seqlevels(Ply_Sav_chr1$query)[seqlengths(Ply_Sav_chr1$query) < 2e4]] <- NULL
+seqlevels(Ply_Sav_chr1$query) <- seqlevelsInUse(Ply_Sav_chr1$query)
+makeOxfordPlots(Ply_Sav_chr1)
+
+# Finally, let's reorder and merge remaining seqlevels
+seqlevels(Ply_Sav_chr1$query) <- seqlevels(Ply_Sav_chr1$query)[orderQuerySeqLevels(Ply_Sav_chr1)]
+Ply_Sav_chr1$query <- mergeSeqLevels(Ply_Sav_chr1$query, seqlevels(Ply_Sav_chr1$query), "Merged matching contigs")
+makeOxfordPlots(Ply_Sav_chr1)
+```
+
+```{r Ply_Sav_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(Ply_Sav_chr1) + ggtitle("Ciona intestinalis Plymouth vs Ciona savignyi")
+```
+
+# _Drosophila_
+
+_Note that in some genomes, each chromosome arm is represented in a separate
+sequence_.
+
+## _D. melanogaster_ vs _D. mauritania_
+
+```{r Dmel_Dmau_win, dev='svg', fig.ext='svg'}
+# Force strand flipping for aesthetic purpose
+mkOxPlotWindow(gbs$Dme_Dma |> forceSeqLengths() |> reverse()) + ggtitle("Drosophila melanogaster vs Drosophila mauritania")
+```
+
+## _D. melanogaster_ vs _D. yakuba_
+
+```{r Dmel_Dyak_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dya) + ggtitle("Drosophila melanogaster vs Drosophila yakuba")
+```
+
+## _D. melanogaster_ vs _D. subpulchrella_
+
+On arm 3R there is a large unaligned region that causes the plot to not
+be squared.  I think that the problem may be related to the presence of large
+centromere regions in the best assemblies.
+
+```{r Dmel_Dsub_win_3R, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dsu) + ggtitle("Drosophila melanogaster vs Drosophila subpulchrella")
+```
+
+Blacklist 3R as the algorithm does not find an nicely square window on it.
+
+```{r Dmel_Dsub_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dsu |> plyranges::filter(seqnames != "3R")) + ggtitle("Drosophila melanogaster vs Drosophila subpulchrella")
+```
+
+## _D. melanogaster_ vs _D. buskii_
+
+```{r Dmel_Dbus_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Dme_Dbu) + ggtitle("Drosophila melanogaster vs Drosophila buskii")
+```
+
+# Mammals
+
+## Human versus mouse
+
+Chromosome 18 was chosen because it is small and it has the same name in both
+species.  Region was centered on the alignment with the longest width, as
+otherwise the window is out of target.
+
+Still, most of the region is not aligned.  The syntenic regions only look
+contiguous because the dots need to be thick to be easy to see.
+
+```{r hg38_mm10, dev='svg', fig.ext='svg'}
+hgmm <- load_genomic_breaks(system.file("extdata/hg38_mm10/hg38_chr18__mm10_chr18.gff3", package = "BreakpointsData"))
+mkOxPlotWindow(hgmm, centre = 'maxwidth') + ggtitle("Homo sapiens vs Mus musculus")
+```
+
+## Muntjaks
+
+```{r muntjaks, dev='svg', fig.ext='svg'}
+Mmun_Mree <- load_genomic_breaks(system.file("extdata/Muntjaks/Rrev_Rmun.07.postmasked.gff.gz", package = "BreakpointsData"), type = "match")
+# Given the enormous differences of karyotype, the M. reevesi chromosomes need to be trimmed for # 
+# the window centering alorithm to function.
+Mmun_Mree.trim <- Mmun_Mree |> plyranges::filter(seqnames == "CM018478.1", seqnames(query) == "CM018501.1", end(query) < 273507479)
+mkOxPlotWindow(Mmun_Mree.trim, centre = 'maxwidth') + ggtitle("Muntiacus muntjak vs M. reevesi (95% aligned, 98% identical).")
+```
+
+# Nematodes
+
+_Caenorhabditis briggsae_ and _C. elegans_ are hermaphrodites, so let's avoid using them as
+target genomes.
+
+But _C. briggsae_ is closest to _C. nigoni_ so we need it once as a query genome.
+
+## _C. nigoni_ vs _C. briggsae_
+
+_C. nigoni_ genome assembly `GCA_027920645.1` length: 128,508,886.  It has no
+unplaced contigs nor mitochondrial genome.
+
+_C. briggsae_'s genome assmebly `GCA_022453885.1` length is 106,953,292, with
+mitochondrial genome as I forgot to remove it.
+
+```{r Cni_Cbr_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cni_Cbr, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. briggsae (61% aligned, 85% identity)")
+```
+
+```{r Cbr_Cni_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cbr_Cni, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. nigoni (69% aligned, 85% identity)")
+```
+
+## _C. nigoni_ or _briggsae_ vs _C. remanei_
+
+Unplaced contigs and mitochondrial genome were removed from _C. remanei_'s
+assembly `GCA_001643735.4`.
+
+```{r Cni_Cre_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cni_Cre, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. remanei (25% aligned, 73% identity)")
+```
+
+```{r Cbr_Cre_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cbr_Cre, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. remanei (30% aligned, 72% identity)")
+```
+
+## _C. nigoni_ vs _C. inopinata_
+
+```{r Cni_Cin_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cni_Cin, centre = 'maxwidth') + ggtitle("Caenorhabditis nigoni vs C. inopinata (16% aligned, 72% identity)")
+```
+
+## _C. briggsae vs _C. elegans_
+
+```{r Cbr_Cel_win, dev='svg', fig.ext='svg'}
+mkOxPlotWindow(gbs$Cbr_Cel, centre = 'maxwidth') + ggtitle("Caenorhabditis briggsae vs C. elegans (23% aligned, 72% identity)")
+```
