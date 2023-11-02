@@ -85,7 +85,7 @@ binApply <- function(f, bins, data, index, ...) {
   res[as.numeric(names(vals))] <- unname(vals)
   res
 }
-(binApply(mean, tmp, transcripts$Oki$dNdS_GUIDANCE2, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE)) |> head(100)
+(binApply(mean, tmp, transcripts$Oki$dNdS_PRANK, matchToOneBin(transcripts$Oki, tmp), na.rm = TRUE)) |> head(100)
 
 # Intersect each genome window with some other GRange (meta, as in metadata)
 metaPerWindow <- function(genomeWindows, meta, meta_prefix=NULL) {
@@ -600,7 +600,7 @@ p1 <- ggplot(tmp, aes(x=start)) +
   facet_wrap(~seqnames, nrow=1)
 
 # And a correlation plot
-p1_c <- ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Okinawa: Breakpoints vs. dN/dS') + ylab('dN/dS')
+p1_c <- ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_PRANK.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Okinawa: Breakpoints vs. dN/dS') + ylab('dN/dS')
 ```
 
 
@@ -619,7 +619,7 @@ p2 <- ggplot(tmp, aes(x=start)) +
   ggtitle("Osaka: Breakpoints, genes, and dN/dS per window") + 
   facet_wrap(~seqnames, nrow=1)
 
-p2_c <- ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Osaka: Breakpoints vs. dN/dS') + ylab('dN/dS')
+p2_c <- ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_PRANK.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Osaka: Breakpoints vs. dN/dS') + ylab('dN/dS')
 ```
 
 ```{r chromosome_plots_bp_bar_2, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
@@ -637,7 +637,7 @@ p3 <- ggplot(tmp, aes(x=start)) +
   ggtitle("Barcelona: Breakpoints, genes, and dN/dS per window") + 
   facet_wrap(~seqnames, nrow=1)
 
-p3_c <- ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_GUIDANCE2.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Barcelona: Breakpoints vs. dN/dS') + ylab('dN/dS')
+p3_c <- ggplot(tmp) + aes(x=bp.mean.breaks, y=transcripts.dNdS_PRANK.median) + geom_point() + geom_smooth(method='lm', col='red') + ggpubr::stat_cor() + facet_wrap(seqnames~Arm, ncol=2, scales = 'free') + ggtitle('Barcelona: Breakpoints vs. dN/dS') + ylab('dN/dS')
 ```
 
 ```{r chromosome_plots_bp_joined_2, dependson=c("chromosome_plots_bp_oki", "chromosome_plots_bp_osa", "chromosome_plots_bp_bar"), fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
@@ -728,7 +728,7 @@ plots$Oki$boxplots$transcript_size <- ggboxplot(tb, x='seqnames_arm', y='transcr
   stat_compare_means(comparison=list(c('chr1_short', 'chr1_long'), c('chr2_short', 'chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'YSR_YSR'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
   ggtitle('Okinawa: transcript size by chr+arm')
 
-plots$Oki$boxplots$dnds <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS_GUIDANCE2.median', color='seqnames', add='jitter') +
+plots$Oki$boxplots$dnds <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS_PRANK.median', color='seqnames', add='jitter') +
   theme(axis.text.x=element_text(angle=90)) +
   ylab('median dN/dS per window') +
   stat_compare_means(comparison=list(c('chr1_short', 'chr1_long'), c('chr2_short', 'chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
@@ -765,7 +765,7 @@ plots$Osa$boxplots$transcript_size <- ggboxplot(tb, x='seqnames_arm', y='transcr
   stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'YSR_YSR'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
   ggtitle('Osaka: transcript size by chr+arm')
 
-plots$Osa$boxplots$dnds <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS_GUIDANCE2.median', color='seqnames', add='jitter') +
+plots$Osa$boxplots$dnds <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS_PRANK.median', color='seqnames', add='jitter') +
   theme(axis.text.x=element_text(angle=90)) +
   ylab('median dN/dS per window') +
   stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
@@ -802,7 +802,7 @@ plots$Bar$boxplots$transcript_size <- ggboxplot(tb, x='seqnames_arm', y='transcr
   stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'YSR_YSR'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
   ggtitle('Barcelona: transcript size by chr+arm')
 
-plots$Bar$boxplots$dnds <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS_GUIDANCE2.median', color='seqnames', add='jitter') +
+plots$Bar$boxplots$dnds <- ggboxplot(tb, x='seqnames_arm', y='transcripts.dNdS_PRANK.median', color='seqnames', add='jitter') +
   theme(axis.text.x=element_text(angle=90)) +
   ylab('median dN/dS per window') +
   stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'YSR_YSR'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long'))) +
@@ -958,7 +958,7 @@ chrt_unified$transcripts.length.mean <- data.frame(chrt_unified$Oki.transcripts.
 chrt_unified$operons.count.mean <- data.frame(chrt_unified$Oki.operons.n.count, chrt_unified$Osa.operons.n.count, chrt_unified$Bar.operons.n.count) |> rowMeans()
 chrt_unified$operons.length.mean <- data.frame(chrt_unified$Oki.operons.n.mean, chrt_unified$Osa.operons.n.mean, chrt_unified$Bar.operons.n.mean) |> rowMeans()
 
-chrt_unified$transcripts.dNdS.mean <- data.frame(chrt_unified$Oki.transcripts.dNdS_GUIDANCE2.median, chrt_unified$Osa.transcripts.dNdS_GUIDANCE2.median, chrt_unified$Bar.transcripts.dNdS_GUIDANCE2.median) |> rowMeans()
+chrt_unified$transcripts.dNdS.mean <- data.frame(chrt_unified$Oki.transcripts.dNdS_PRANK.median, chrt_unified$Osa.transcripts.dNdS_PRANK.median, chrt_unified$Bar.transcripts.dNdS_PRANK.median) |> rowMeans()
 
 chrt_unified$repeats.count.mean <- data.frame(chrt_unified$Oki.repeats.type.count.total, chrt_unified$Osa.repeats.type.count.total, chrt_unified$Bar.repeats.type.count.total) |> rowMeans()
 
@@ -1031,6 +1031,8 @@ p4 <- ggplot(tb) + aes(x=breakpoints.count.mean, y=categories.bridge.mean) + geo
 ### Gene size and density vs. operon size and density.
 
 ```{r chromosome_plots_tiles_5_2, dependson="chromosome_plots_tiles_calcs", fig.height=5, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+library(ggpubr)
+
 tb <- chrt_unified |> as.data.frame()
 tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Oki.Arm)
 tb$Arm <- tb$Oki.Arm
@@ -1068,6 +1070,8 @@ p10 <- ggboxplot(tb, x='Arm', y='operons.length.mean', color='Oki.Arm', add='jit
 p11 <- ggboxplot(tb, x='Arm', y='breakpoints.count.mean', color='Oki.Arm', add='jitter') + theme(axis.text.x=element_text(angle=90)) + ylab('breakpoints') + stat_compare_means(comparison=list(c('short', 'long'), c('short', 'XSR'), c('long', 'XSR')), paired = FALSE, na.rm = TRUE, method='t.test', size=2.8) + theme_bw()
 
 p12 <- ggboxplot(tb, x='Arm', y='transcripts.dNdS.mean', color='Oki.Arm', add='jitter') + theme(axis.text.x=element_text(angle=90)) + ylab('dN/dS') + stat_compare_means(comparison=list(c('short', 'long'), c('short', 'XSR'), c('long', 'XSR')), paired = FALSE, na.rm = TRUE, method='t.test', size=2.8) + theme_bw()
+detach('package:ggpubr')
+
 ```
 
 ```{r chromosome_plots_tiles_5_2_all, dependson="chromosome_plots_tiles_calcs_fig4", fig.height=10, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png")}
@@ -1087,6 +1091,24 @@ p12 <- ggboxplot(tb, x='Arm', y='transcripts.dNdS.mean', color='Oki.Arm', add='j
 ```{r chromosome_plots_tiles_5_2_Fig4B, dependson="chromosome_plots_tiles_calcs_fig4", fig.height=4, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
 (p10 + p11 + p12) + plot_layout(guides = 'collect') # Figure 4B
 ```
+
+## Figure 5 - outliers excluded
+```{r chromosome_plots_tiles_5_3_Fig4A, dependson="chromosome_plots_tiles_calcs_fig4", fig.height=6, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+p6o <- tb |> per_chrom_plot() + aes(y=transcripts.dNdS.mean)   + ylab('dN/dS') + ylim(c(min(tb$transcripts.dNdS.mean), 0.10))
+
+(p5 / p7 / p6o) # Figure 4A
+```
+
+## Figure 5B - outliers excluded
+```{r chromosome_plots_tiles_5_3_Fig4B, dependson="chromosome_plots_tiles_calcs_fig4", fig.height=4, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+library(ggpubr)
+p12o <- ggboxplot(tb |> filter(transcripts.dNdS.mean < 0.10), x='Arm', y='transcripts.dNdS.mean', color='Oki.Arm', add='jitter') + theme(axis.text.x=element_text(angle=90)) + ylab('dN/dS') + stat_compare_means(comparison=list(c('short', 'long'), c('short', 'XSR'), c('long', 'XSR')), paired = FALSE, na.rm = TRUE, method='t.test', size=2.8) + theme_bw() 
+
+(p10 + p11 + p12o) + plot_layout(guides = 'collect') # Figure 4B
+detach('package:ggpubr')
+
+```
+
 
 ## Figure S5
 
@@ -1140,6 +1162,8 @@ p7 <- ggboxplot(tb, x='seqnames_arm', y='breakpoints.count.mean', color='Oki.Arm
 p8 <- ggboxplot(tb, x='seqnames_arm', y='repeats.count.mean', color='Oki.Arm', add='jitter') + theme(axis.text.x=element_text(angle=90)) + ylab('repeats') + stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long')), paired = FALSE, na.rm = TRUE, method='t.test') + theme_classic() + theme(axis.title.x=element_blank())
 
 (p2 / p3 / p4 / p5 / p6 / p7 / p8 )
+detach('package:ggpubr')
+
 ```
 
 ```{r chromosome_plots_tiles_6, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
@@ -1474,9 +1498,9 @@ p3 <- chrt_unified |> as.data.frame() |> subset(select=c("seqnames", "start", "e
 Same with dN/dS.
 
 ```{r chromosome_plots_tiles_8_dnds_symmetric, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-p1 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Oki.transcripts.dNdS_GUIDANCE2.median, col=Oki.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T, method.args=list(family="symmetric"))
-p2 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Osa.transcripts.dNdS_GUIDANCE2.median, col=Osa.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T, method.args=list(family="symmetric"))
-p3 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Bar.transcripts.dNdS_GUIDANCE2.median, col=Bar.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T, method.args=list(family="symmetric"))
+p1 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Oki.transcripts.dNdS_PRANK.median, col=Oki.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T, method.args=list(family="symmetric"))
+p2 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Osa.transcripts.dNdS_PRANK.median, col=Osa.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T, method.args=list(family="symmetric"))
+p3 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Bar.transcripts.dNdS_PRANK.median, col=Bar.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T, method.args=list(family="symmetric"))
 (p1 / p2 / p3)
 ```
 
@@ -1493,11 +1517,11 @@ p3 <- chrt_unified |> as.data.frame() |> subset(select=c("seqnames", "start", "e
 ```
 
 ```{r chromosome_plots_tiles_8_dnds_nonsymmetric, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-p1 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Oki.transcripts.dNdS_GUIDANCE2.median, col=Oki.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T)
+p1 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Oki.transcripts.dNdS_PRANK.median, col=Oki.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T)
 
-p2 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Osa.transcripts.dNdS_GUIDANCE2.median, col=Osa.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T)
+p2 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Osa.transcripts.dNdS_PRANK.median, col=Osa.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T)
 
-p3 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Bar.transcripts.dNdS_GUIDANCE2.median, col=Bar.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T)
+p3 <- chrt_unified |> as.data.frame() |> ggplot() + aes(start, Bar.transcripts.dNdS_PRANK.median, col=Bar.Arm) + facet_wrap(~seqnames, nrow=1) + geom_point() + geom_smooth(method='loess', formula=y~x, span=0.25, se=T)
 
 (p1 / p2 / p3)
 ```
@@ -1543,7 +1567,7 @@ Finally, double check the look of the figure with different pairs of species.
 Start with Okinawa-Osaka.
 
 ```{r chromosome_plots_tiles_9_oki_osa, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-p1 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=Oki.transcripts.dNdS_GUIDANCE2.median, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess') + ylab('dN/dS')
+p1 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=Oki.transcripts.dNdS_PRANK.median, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess') + ylab('dN/dS')
 
 p2 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=Oki.bp.Oki_Osa.breaks.count , col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess') + ylab('breakpoints')
 
@@ -1556,12 +1580,12 @@ p3 <- ggboxplot(tb, x='seqnames_arm', y='Oki.bp.Oki_Osa.breaks.count', color='Ok
   ylab('breakpoints') +
   stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long')), paired = FALSE, na.rm = TRUE, method='t.test') + theme_classic()
 
-p4 <- ggboxplot(tb, x='seqnames_arm', y='Oki.transcripts.dNdS_GUIDANCE2.median', color='Oki.Arm', add='jitter') +
+p4 <- ggboxplot(tb, x='seqnames_arm', y='Oki.transcripts.dNdS_PRANK.median', color='Oki.Arm', add='jitter') +
   theme(axis.text.x=element_text(angle=90)) +
   ylab('dN/dS') +
   stat_compare_means(comparison=list(c('Chr1_short', 'Chr1_long'), c('Chr2_short', 'Chr2_long'), c('PAR_short', 'PAR_long'), c('XSR_XSR', 'PAR_short'), c('XSR_XSR', 'PAR_long')), paired = FALSE, na.rm = TRUE, method='t.test') + theme_classic()
 
-p5 <- ggplot(tb) + aes(x=Oki.bp.Oki_Osa.breaks.count, y=Oki.transcripts.dNdS_GUIDANCE2.median) + geom_point() + geom_smooth(method='lm', col='red', formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('dN/dS')
+p5 <- ggplot(tb) + aes(x=Oki.bp.Oki_Osa.breaks.count, y=Oki.transcripts.dNdS_PRANK.median) + geom_point() + geom_smooth(method='lm', col='red', formula=y~x) + ggpubr::stat_cor() + facet_wrap(seqnames~Oki.Arm, nrow=1, scales = 'free') + ylab('dN/dS')
 
 layout <- "
 A
@@ -1577,7 +1601,7 @@ E
 ### Then Okinawa-Barcelona...
 
 ```{r chromosome_plots_tiles_9_oki_bar, dependson="chromosome_plots_tiles_calcs", fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-p1 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=Oki.transcripts.dNdS_GUIDANCE2.median, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess') + ylab('dN/dS')
+p1 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=Oki.transcripts.dNdS_PRANK.median, col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess') + ylab('dN/dS')
 
 p2 <- ggplot( chrt_unified |> as.data.frame() ) + aes(x=start, y=Oki.bp.Oki_Bar.breaks.count , col = Oki.Arm) + geom_point() + facet_wrap(~seqnames, nrow = 1) + geom_smooth(formula=y~x, method = 'loess') + ylab('breakpoints')
 
@@ -1606,9 +1630,9 @@ customCorrelationPlot <- function(tb, x, y, xlab, ylab)
     theme_bw()
 
 p3 <- tb |> customGGboxplot('Oki.bp.Oki_Bar.breaks.count', 'breakpoints')
-p4 <- tb |> customGGboxplot('Oki.transcripts.dNdS_GUIDANCE2.median', 'dN/dS')
+p4 <- tb |> customGGboxplot('Oki.transcripts.dNdS_PRANK.median', 'dN/dS')
 
-p5 <- tb |> customCorrelationPlot('Oki.bp.Oki_Bar.breaks.count', 'Oki.transcripts.dNdS_GUIDANCE2.median',  'breakpoints', 'dN/dS')
+p5 <- tb |> customCorrelationPlot('Oki.bp.Oki_Bar.breaks.count', 'Oki.transcripts.dNdS_PRANK.median',  'breakpoints', 'dN/dS')
 
 ( p1 / p4 / p2 / p3 / p5 ) 
 ```
@@ -1620,13 +1644,13 @@ tb <- chrt_unified |> as.data.frame()
 tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Osa.Arm)
 tb$Arm <- tb$Osa.Arm
 
-p1 <- tb |> per_chrom_plot() + aes(y=Osa.transcripts.dNdS_GUIDANCE2.median, col = Arm) + ylab('dN/dS')
+p1 <- tb |> per_chrom_plot() + aes(y=Osa.transcripts.dNdS_PRANK.median, col = Arm) + ylab('dN/dS')
 p2 <- tb |> per_chrom_plot() + aes(y=Osa.bp.Osa_Bar.breaks.count, col = Arm)           + ylab('breakpoints')
 
 p3 <- tb |> customGGboxplot('Osa.bp.Osa_Bar.breaks.count', 'breakpoints')
-p4 <- tb |> customGGboxplot('Osa.transcripts.dNdS_GUIDANCE2.median', 'dN/dS')
+p4 <- tb |> customGGboxplot('Osa.transcripts.dNdS_PRANK.median', 'dN/dS')
 
-p5 <- tb |> customCorrelationPlot('Osa.bp.Osa_Bar.breaks.count', 'Osa.transcripts.dNdS_GUIDANCE2.median',  'breakpoints', 'dN/dS')
+p5 <- tb |> customCorrelationPlot('Osa.bp.Osa_Bar.breaks.count', 'Osa.transcripts.dNdS_PRANK.median',  'breakpoints', 'dN/dS')
 
 ( p1 / p4 / p2 / p3 / p5 )
 ```
@@ -1637,13 +1661,13 @@ p5 <- tb |> customCorrelationPlot('Osa.bp.Osa_Bar.breaks.count', 'Osa.transcript
 tb$seqnames_arm <- paste0(tb$seqnames, "_", tb$Oki.Arm)
 tb$Arm <- tb$Oki.Arm
 
-p1 <- tb |> per_chrom_plot() + aes(y=Oki.transcripts.dNdS_GUIDANCE2.median, col = Arm) + ylab('dN/dS')
+p1 <- tb |> per_chrom_plot() + aes(y=Oki.transcripts.dNdS_PRANK.median, col = Arm) + ylab('dN/dS')
 p2 <- tb |> per_chrom_plot() + aes(y=Oki.bp.Oki_Kum.breaks.count, col = Arm)           + ylab('breakpoints')
 
 p3 <- tb |> customGGboxplot('Oki.bp.Oki_Kum.breaks.count', 'breakpoints')
-p4 <- tb |> customGGboxplot('Oki.transcripts.dNdS_GUIDANCE2.median', 'dN/dS')
+p4 <- tb |> customGGboxplot('Oki.transcripts.dNdS_PRANK.median', 'dN/dS')
 
-p5 <- tb |> customCorrelationPlot('Oki.bp.Oki_Kum.breaks.count', 'Oki.transcripts.dNdS_GUIDANCE2.median',  'breakpoints', 'dN/dS')
+p5 <- tb |> customCorrelationPlot('Oki.bp.Oki_Kum.breaks.count', 'Oki.transcripts.dNdS_PRANK.median',  'breakpoints', 'dN/dS')
 
 ( p1 / p4 / p2 / p3 / p5 )
 ```
