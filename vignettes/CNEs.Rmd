@@ -66,11 +66,23 @@ axt$Oki_Oal <- readAxt_("OKI2018_I69_1.0__O_alb.axt.gz",        "BSgenome.Oidioi
 axt$Osa_Oki <- readAxt_("OSKA2016v1.9__OKI2018_I69_1.0.axt.gz", "BSgenome.Oidioi.OIST.OSKA2016v1.9", "BSgenome.Oidioi.OIST.OKI2018.I69")
 axt$Osa_Bar <- readAxt_("OSKA2016v1.9__Bar2_p4.axt.gz",         "BSgenome.Oidioi.OIST.OSKA2016v1.9", "BSgenome.Oidioi.OIST.Bar2.p4")
 axt$Osa_Aom <- readAxt_("OSKA2016v1.9__AOM-5-5f.axt.gz",        "BSgenome.Oidioi.OIST.OSKA2016v1.9", "BSgenome.Oidioi.OIST.AOM.5.5f")
+axt$Osa_Nor <- readAxt_("OSKA2016v1.9__OdB3.axt.gz",         "BSgenome.Oidioi.OIST.OSKA2016v1.9", "BSgenome.Oidioi.genoscope.OdB3")
+axt$Osa_Kum <- readAxt_("OSKA2016v1.9__KUM-M3-7f.axt.gz", "BSgenome.Oidioi.OIST.OSKA2016v1.9", "BSgenome.Oidioi.OIST.KUM.M3.7f")
+axt$Oki_Olo <- readAxt_("OSKA2016v1.9__O_lon.axt.gz",        "BSgenome.Oidioi.OIST.OSKA2016v1.9")
+axt$Oki_Ova <- readAxt_("OSKA2016v1.9__O_van.axt.gz",        "BSgenome.Oidioi.OIST.OSKA2016v1.9")
+axt$Oki_Oal <- readAxt_("OSKA2016v1.9__O_alb.axt.gz",        "BSgenome.Oidioi.OIST.OSKA2016v1.9")
 
 axt$Bar_Oki <- readAxt_("Bar2_p4__OKI2018_I69_1.0.axt.gz",      "BSgenome.Oidioi.OIST.Bar2.p4",      "BSgenome.Oidioi.OIST.OKI2018.I69")
+axt$Bar_Osa <- readAxt_("Bar2_p4__OSKA2016v1.9.axt.gz",      "BSgenome.Oidioi.OIST.Bar2.p4",      "BSgenome.Oidioi.OIST.OSKA2016v1.9")
+axt$Bar_Nor <- readAxt_("Bar2_p4__OdB3.axt.gz",      "BSgenome.Oidioi.OIST.Bar2.p4",      "BSgenome.Oidioi.genoscope.OdB3")
+axt$Bar_Kum <- readAxt_("Bar2_p4__KUM-M3-7f.axt.gz", "BSgenome.Oidioi.OIST.Bar2.p4", "BSgenome.Oidioi.OIST.KUM.M3.7f")
+axt$Bar_Aom <- readAxt_("Bar2_p4__AOM-5-5f.axt.gz", "BSgenome.Oidioi.OIST.Bar2.p4", "BSgenome.Oidioi.OIST.AOM.5.5f")
+axt$Bar_Olo <- readAxt_("Bar2_p4__O_lon.axt.gz",        "BSgenome.Oidioi.OIST.Bar2.p4")
+axt$Bar_Ova <- readAxt_("Bar2_p4__O_van.axt.gz",        "BSgenome.Oidioi.OIST.Bar2.p4")
+axt$Bar_Oal <- readAxt_("Bar2_p4__O_alb.axt.gz",        "BSgenome.Oidioi.OIST.Bar2.p4")
 ```
 
-```{r compute_CNEs}
+```{r service_functions}
 GPairs2GBreaks <- function(GPairs, fix = TRUE) {
   if(isTRUE(fix))
     GPairs <- fixCoordinates(GPairs)
@@ -86,29 +98,19 @@ ceScan_to_GB <- function (axt, tFilter = NULL, qFilter = NULL, window, identity)
   cne <- ceScan(axt, tFilter = tFilter, qFilter = qFilter, window = window, identity = identity)
   GPairs2GBreaks(cne[[1]], fix = FALSE)
 }
+```
 
+```{r compute_CEs}
 ## CNEs are filtered against coding sequences
 cne <- SimpleList()
 cne$Oki_Osa <- ceScan_to_GB(axt$Oki_Osa, window = 50L, identity = 50L,
                             tFilter = exons(annots$Oki), qFilter = exons(annots$Osa))
+```
 
+```{r compute_CNEs}
 # CE are not filtered against coding sequences
-calculateCEs <- function(window, identity) {
-  ce <- SimpleList()
-  ce$Oki_Osa <- ceScan_to_GB(axt$Oki_Osa, window = window, identity = identity)
-  ce$Oki_Bar <- ceScan_to_GB(axt$Oki_Bar, window = window, identity = identity)
-  ce$Oki_Kum <- ceScan_to_GB(axt$Oki_Kum, window = window, identity = identity)
-  ce$Oki_Aom <- ceScan_to_GB(axt$Oki_Aom, window = window, identity = identity)
-  ce$Oki_Nor <- ceScan_to_GB(axt$Oki_Nor, window = window, identity = identity)
-  ce$Oki_Olo <- ceScan_to_GB(axt$Oki_Olo, window = window, identity = identity)
-  ce$Oki_Ova <- ceScan_to_GB(axt$Oki_Ova, window = window, identity = identity)
-  ce$Oki_Oal <- ceScan_to_GB(axt$Oki_Oal, window = window, identity = identity)
-  ce$Osa_Oki <- ceScan_to_GB(axt$Osa_Oki, window = window, identity = identity)
-  ce$Osa_Bar <- ceScan_to_GB(axt$Osa_Bar, window = window, identity = identity)
-  ce$Osa_Aom <- ceScan_to_GB(axt$Osa_Aom, window = window, identity = identity)
-  ce$Bar_Oki <- ceScan_to_GB(axt$Bar_Oki, window = window, identity = identity)
-  ce
-}
+calculateCEs <- function(window, identity)
+  ce <- lapply(axt, ceScan_to_GB, window = window, identity = identity) |> SimpleList()
 
 ces <- SimpleList()
 ces$ce_200_200 <- calculateCEs(200L, 200L)
