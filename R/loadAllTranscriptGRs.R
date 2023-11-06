@@ -21,9 +21,9 @@ loadAllTranscriptsGR <- function(compat = TRUE) {
   transcripts$Nor$tx_name <- transcripts$Nor$tx_name |> sub(pat = ".t1", rep = "")
   # Load dNdS values
   dnds <- SimpleList()
-  dnds$dnds_guidance   <- OikScrambling:::loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'GUIDANCE2')
-  dnds$dnds_hmmcleaner <- OikScrambling:::loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'HmmCleaner')
-  dnds$dnds_prank      <- OikScrambling:::loaddNdSTable("v2.0.0/genewise_oikopleura.extended.txt", alignment_type = 'Alignment')
+  dnds$dnds_guidance   <- OikScrambling:::loaddNdSTable("v3.0.0/genewise_oikopleura.extended.txt", alignment_type = 'GUIDANCE2')
+  dnds$dnds_hmmcleaner <- OikScrambling:::loaddNdSTable("v3.0.0/genewise_oikopleura.extended.txt", alignment_type = 'HmmCleaner')
+  dnds$dnds_prank      <- OikScrambling:::loaddNdSTable("v3.0.0/genewise_oikopleura.extended.txt", alignment_type = 'Alignment')
   # Stitch them in the objects
   transcripts[1:6] <- sapply(names(transcripts[1:6]), function(sp){
     sp_dnds = OikScrambling:::addMetadataToGRanges(gr=transcripts[[sp]], df=dnds$dnds_guidance[[sp]], gr_key='tx_name', df_key='transcript_id_simple', df_col_name = 'dNdS', rename_meta = 'dNdS_GUIDANCE2')
