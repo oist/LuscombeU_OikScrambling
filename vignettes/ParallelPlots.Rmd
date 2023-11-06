@@ -82,7 +82,7 @@ We chose chromosome 2 because it has _Hox4_.
 
 ## Parallel plot
 
-```{r plot_intersect_GBs_with_tree_with_valid, fig.width=15, fig.height=7, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+```{r six_genome_parallel_plot, fig.width=15, fig.height=7, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 KumChr2 <- scaffoldByFlipAndMerge(gbs$Oki_Kum |> swap(), scafs$Kum_Oki, drop = TRUE) |> swap() |> coalesce_contigs()
 Aom_Osa <- scaffoldByFlipAndMerge(gbs$Osa_Aom |> swap(), scafs$Aom_Osa, drop = TRUE) |> swap() |> coalesce_contigs()
 Aom_Oki <- scaffoldByFlipAndMerge(gbs$Oki_Aom |> swap(), scafs$Aom_Osa, drop = TRUE) |> swap() |> coalesce_contigs()
@@ -94,10 +94,22 @@ Bar_Nor <- gbs$Bar_Nor |> swap() |>
 
 dsList6 <- list(
     KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
-    OKI = KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
-    AOM = Aom_Oki |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
-    OSA = coa$Osa_Bar       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
-    BAR = coa$Bar_Osa       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg(),
+    OKI = c(
+      KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> granges(),
+      Aom_Oki           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> granges()
+      ) |> reduce() |> gr2dna_seg(),
+    AOM = c(
+      Aom_Oki |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> granges(),
+      Aom_Osa |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges()
+      ) |> reduce() |> gr2dna_seg(),
+    OSA = c(
+      Aom_Osa           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges(),
+      coa$Osa_Bar       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges()
+      ) |> reduce() |> gr2dna_seg(),
+    BAR = c(
+      coa$Bar_Osa       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges(),
+      Bar_Nor           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges()
+      ) |> reduce() |> gr2dna_seg(),
     NOR = Bar_Nor |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg()
 )
 
