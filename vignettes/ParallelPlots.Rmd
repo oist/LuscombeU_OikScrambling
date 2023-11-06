@@ -93,24 +93,24 @@ Bar_Nor <- gbs$Bar_Nor |> swap() |>
   coalesce_contigs() |> swap()
 
 dsList6 <- list(
-    KUM = KumChr2 |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
-    OKI = c(
+    Kume = KumChr2 |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
+    Okinawa = c(
       KumChr2           |> plyranges::filter(seqnames == 'chr2', seqnames(query) == 'Chr2') |> granges(),
       Aom_Oki           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> granges()
       ) |> reduce() |> gr2dna_seg(),
-    AOM = c(
+    Aomori = c(
       Aom_Oki |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> granges(),
       Aom_Osa |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges()
       ) |> reduce() |> gr2dna_seg(),
-    OSA = c(
+    Osaka = c(
       Aom_Osa           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges(),
       coa$Osa_Bar       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges()
       ) |> reduce() |> gr2dna_seg(),
-    BAR = c(
+    Barcelona = c(
       coa$Bar_Osa       |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges(),
       Bar_Nor           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> granges()
       ) |> reduce() |> gr2dna_seg(),
-    NOR = Bar_Nor |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg()
+    Bergen = Bar_Nor |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gr2dna_seg()
 )
 
 compList6 <- list(
@@ -121,10 +121,10 @@ compList6 <- list(
     Bar_Nor = Bar_Nor           |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'Chr2') |> gb2comp()
 )
 
-dsList6$KUM$col <- dsList6$KUM$fill <- dsList6$OKI$col <- dsList6$OKI$fill <-
-  dsList6$AOM$col <- dsList6$AOM$fill <-
-  dsList6$OSA$col <- dsList6$OSA$fill <- dsList6$BAR$col <- dsList6$BAR$fill <-
-  dsList6$NOR$col <- dsList6$NOR$fill <- "#A6D854"
+dsList6$Kume$col <- dsList6$Kume$fill <- dsList6$Okinawa$col <- dsList6$Okinawa$fill <-
+  dsList6$Aomori$col <- dsList6$Aomori$fill <-
+  dsList6$Osaka$col <- dsList6$Osaka$fill <- dsList6$Barcelona$col <- dsList6$Barcelona$fill <-
+  dsList6$Bergen$col <- dsList6$Bergen$fill <- "#A6D854"
 
 compList6$Oki_Kum$color <- compList6$Aom_Oki$color <- compList6$Osa_Aom$color <-
   compList6$Osa_Bar$color <- compList6$Bar_Nor$color <- "#D4EACC"
@@ -136,7 +136,7 @@ compList6$Osa_Bar$col <- ifelse(compList6$Osa_Bar$col == "darksalmon", "#D4EACC"
 compList6$Bar_Nor$col <- ifelse(compList6$Bar_Nor$col == "darksalmon", "#D4EACC", "#00A08E")
 
 genoPlotR::plot_gene_map(dsList6, compList6, dna_seg_scale = FALSE,
-                         tree = ade4::newick2phylog("((KUM:1,OKI:1):2,((AOM:1,OSA:1):1,(BAR:1,NOR:1):1):1);"),
+                         tree = ade4::newick2phylog("((Kume:1,Okinawa:1):2,((Aomori:1,Osaka:1):1,(Barcelona:1,Bergen:1):1):1);"),
                          main = "Chromosome 2 in six Oikopleura genome assemblies")
 ```
 
