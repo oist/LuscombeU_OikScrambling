@@ -90,7 +90,7 @@ Bar_Nor <- gbs$Bar_Nor |> swap() |>
   splitSeqLevel("scaffold_3", 700924) |>
   splitSeqLevel("scaffold_8", 1110680) |>
   scaffoldByFlipAndMerge(scafs$Nor_Bar) |>
-  coalesce_contigs() |> swap()
+  coalesce_contigs() |> swap(sort = TRUE)
 
 dsList6 <- list(
     Kume = KumChr2 |> swap() |> plyranges::filter(seqnames == 'Chr2', seqnames(query) == 'chr2') |> gr2dna_seg(),
@@ -238,6 +238,22 @@ KumChr2$query$Arm[
     seqnames(KumChr2$query) == "Chr2"
   ] <- "short"
 
+Aom_Osa <- GenomicBreaks::flagLongShort(Aom_Osa, longShort$OSKA2016v1.9)
+Aom_Osa$query <- GenomicBreaks::flagLongShort(
+  Aom_Osa$query,
+  GRanges(c("Chr2:1-5523357", "Chr2:5523357-12906126"), Type = c("short", "long")))
+
+Aom_Oki <- GenomicBreaks::flagLongShort(Aom_Oki, longShort$OKI2018.I69)
+Aom_Oki$query <- GenomicBreaks::flagLongShort(
+  Aom_Oki$query,
+  GRanges(c("Chr2:1-5523357", "Chr2:5523357-12906126"), Type = c("short", "long")))
+
+
+Bar_Nor <- GenomicBreaks::flagLongShort(Bar_Nor, longShort$Bar2.p4)
+Bar_Nor$query <- GenomicBreaks::flagLongShort(
+  Bar_Nor$query,
+  GRanges(c("Chr2:1-4525974", "Chr2:4525975-12906790"), Type = c("short", "long")))
+
 SRI_Both_Strands <- \(gb) mean(c(strand_randomisation_index(gb)
                                 ,strand_randomisation_index(swap(gb))))
 
@@ -245,6 +261,14 @@ SRI_Both_Strands <- \(gb) mean(c(strand_randomisation_index(gb)
   Kum_Chr2_long  = KumChr2 |> chr2Long()  |> SRI_Both_Strands(),
   Kum_Chr2_short = KumChr2 |> chr2short() |> SRI_Both_Strands(),
   Kum_Chr2_both  = KumChr2 |> chr2both()  |> SRI_Both_Strands(),
+  
+  Oki_Aom_long   = Aom_Oki |> chr2Long()  |> SRI_Both_Strands(),
+  Oki_Aom_short  = Aom_Oki |> chr2short() |> SRI_Both_Strands(),
+  Oki_Aom_both   = Aom_Oki |> chr2both()  |> SRI_Both_Strands(),
+  
+  Osa_Aom_long   = Aom_Osa |> chr2Long()  |> SRI_Both_Strands(),
+  Osa_Aom_short  = Aom_Osa |> chr2short() |> SRI_Both_Strands(),
+  Osa_Aom_both   = Aom_Osa |> chr2both()  |> SRI_Both_Strands(),
 
   Oki_Osa_long   = coa$Oki_Osa |> chr2Long() |> SRI_Both_Strands(),
   Osa_Oki_long   = coa$Osa_Oki |> chr2Long() |> SRI_Both_Strands(),
@@ -262,16 +286,28 @@ SRI_Both_Strands <- \(gb) mean(c(strand_randomisation_index(gb)
   Bar_Osa_short  = coa$Bar_Osa |> chr2short() |> SRI_Both_Strands(),
 
   Osa_Bar_both   = coa$Osa_Bar |> chr2both() |> SRI_Both_Strands(),
-  Bar_Osa_both   = coa$Bar_Osa |> chr2both() |> SRI_Both_Strands()
+  Bar_Osa_both   = coa$Bar_Osa |> chr2both() |> SRI_Both_Strands(),
+  
+  Bar_Nor_short  = Bar_Nor     |> chr2short() |> SRI_Both_Strands(),
+  Bar_Nor_long   = Bar_Nor     |> chr2Long()  |> SRI_Both_Strands()
 ))
 
 roundMean <- \(x) round(mean(SRIs[x]), 2)
-c(Kum_Chr2_long  = roundMean(c("Kum_Chr2_long")),
-  Kum_Chr2_short = roundMean(c("Kum_Chr2_short")),
-  Oki_Osa_long   = roundMean(c("Oki_Osa_long",  "Osa_Oki_long")),
-  Oki_Osa_short  = roundMean(c("Oki_Osa_short", "Osa_Oki_short")),
-  Osa_Bar_long   = roundMean(c("Osa_Bar_long",  "Bar_Osa_long")),
-  Osa_Bar_short  = roundMean(c("Osa_Bar_short", "Bar_Osa_short"))
+data.frame(
+  short = c(
+    Kum_Oki = roundMean(c("Kum_Chr2_short")),
+    Oki_Aom = roundMean(c("Oki_Aom_short")),
+    Aom_Osa = roundMean(c("Osa_Aom_short")),
+    Osa_Bar = roundMean(c("Osa_Bar_short", "Bar_Osa_short")),
+    Bar_Nor = roundMean(c("Bar_Nor_short"))
+  ),
+  long = c(
+    Kum_Oki = roundMean(c("Kum_Chr2_long")),
+    Oki_Aom = roundMean(c("Oki_Aom_long")),
+    Aom_Osa = roundMean(c("Osa_Aom_long")),
+    Osa_Bar = roundMean(c("Osa_Bar_long",  "Bar_Osa_long")),
+    Bar_Nor = roundMean(c("Bar_Nor_long"))
+  )
 )
 ```
 
