@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">5.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">5.1.0</span>
       </span>
     </div>
 
@@ -80,6 +80,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/AomScaffolding.html">Scaffolding of the AOM-5 genome</a>
+    </li>
+    <li>
+      <a href="../articles/BergenScaffolding.html">Scaffolding of the OdB3 genome</a>
+    </li>
+    <li>
       <a href="../articles/CNEs.html">Conserved non-coding elements</a>
     </li>
     <li>
@@ -102,6 +108,9 @@
     </li>
     <li>
       <a href="../articles/Inversions.html">Inversions</a>
+    </li>
+    <li>
+      <a href="../articles/KumeScaffolding.html">Scaffolding of the KUM-M3 genome</a>
     </li>
     <li>
       <a href="../articles/LoadGenomicBreaks.html">Load genomic break data</a>
@@ -186,7 +195,7 @@ Mansfield</h4>
                         <h4 data-toc-skip class="author">Charles
 Plessy</h4>
             
-            <h4 data-toc-skip class="date">13 October, 2023</h4>
+            <h4 data-toc-skip class="date">10 November, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/ScalingBreakpoints.Rmd" class="external-link"><code>vignettes/ScalingBreakpoints.Rmd</code></a></small>
       <div class="hidden name"><code>ScalingBreakpoints.Rmd</code></div>
@@ -207,8 +216,9 @@ given species pair by a few key metrics:</p>
 <li>Branch length (i.e., a kind of substitution rate)</li>
 <li>dN/dS</li>
 </ul>
-<p><strong>Panel D of Figure 7 was generated with this vignette (colors
+<p><strong>Panel E of Figure 7 was generated with this vignette (colors
 were edited by hand).</strong></p>
+<p><strong>The vignette also produce trees for panels 7A–D.</strong></p>
 <p>The core functions used here are maintained in our
 <em>GenomicBreaks</em> R package, which is fully documented at: <a href="https://oist.github.io/GenomicBreaks" class="external-link uri">https://oist.github.io/GenomicBreaks</a>.</p>
 </div>
@@ -244,7 +254,7 @@ were edited by hand).</strong></p>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/ggtree.html" class="external-link">ggtree</a></span><span class="op">(</span><span class="va">sp</span>, ladderize<span class="op">=</span><span class="cn">T</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tiplab.html" class="external-link">geom_tiplab</a></span><span class="op">(</span>align<span class="op">=</span><span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/ggexpand.html" class="external-link">hexpand</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">branch</span>, label<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">branch.length</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span>, nudge_y<span class="op">=</span><span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_treescale.html" class="external-link">geom_treescale</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_rootedge.html" class="external-link">geom_rootedge</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_treescale.html" class="external-link">geom_treescale</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.02</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_rootedge.html" class="external-link">geom_rootedge</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 </div>
@@ -257,7 +267,7 @@ were edited by hand).</strong></p>
 <em>Oikopleura</em><a class="anchor" aria-label="anchor" href="#oikopleura"></a>
 </h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">species</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">species</span> <span class="op">&lt;-</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">species</span><span class="op">$</span><span class="va">Oikopleura</span> <span class="op">&lt;-</span> <span class="st">"(Kum:0.01136111178249175555,((Osa:0.00925951950869623869,Aom:0.00920798155370218530)100:0.05729289951873162146,(Bar:0.00721724152898447612,Nor:0.00688754343189192098)100:0.05951986243208125943)100:0.31437914450027298896,Oki:0.01142149265410641150);"</span> <span class="op">|&gt;</span> <span class="fu">toTreedata</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">plotTree</span><span class="op">(</span><span class="va">species</span><span class="op">$</span><span class="va">Oikopleura</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ScalingBreakpoints_files/figure-html/species_trees_Oiks-1.png" width="576"></p>
@@ -278,7 +288,7 @@ were edited by hand).</strong></p>
 <p>The tree originates from <a href="https://github.com/SchriderLab/Drosophila_phylogeny" class="external-link uri">https://github.com/SchriderLab/Drosophila_phylogeny</a>, and
 the relevant clades were extracted with:</p>
 <pre><code><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span><span class="st">'Drosophila_phylogeny/tree/iqtree.tre'</span><span class="op">)</span></span>
-<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://docs.ropensci.org/treeio/reference/drop.tip-methods.html" class="external-link">drop.tip</a></span><span class="op">(</span><span class="va">tree</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="op">!</span><span class="va">tmp</span><span class="op">$</span><span class="va">tip.label</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'D_melanogaster'</span>, <span class="st">'D_busckii'</span>, <span class="st">'D_yakuba'</span>, <span class="st">'D_subpulchrella'</span>, <span class="st">'D_mauritiana'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://docs.ropensci.org/treeio/reference/drop.tip-methods.html" class="external-link">drop.tip</a></span><span class="op">(</span><span class="va">tree</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="op">!</span><span class="va">tmp</span><span class="op">$</span><span class="va">tip.label</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'D_melanogaster'</span>, <span class="st">'D_busckii'</span>, <span class="st">'D_yakuba'</span>, <span class="st">'D_subpulchrella'</span>, <span class="st">'D_mauritiana'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/write.tree.html" class="external-link">write.tree</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">'drosophila_4spp.newick'</span><span class="op">)</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">species</span><span class="op">$</span><span class="va">Drosophila</span> <span class="op">&lt;-</span> <span class="st">"(Dbu:0.3372973403,(Dsu:0.0947791254,(Dya:0.0703231461,(Dma:0.0280994984,Dme:0.0264284139)100_1_100:0.0267889071)100_1_100:0.0834632289)100_1_100:0.3712228549)100_1_100;"</span> <span class="op">|&gt;</span> <span class="fu">toTreedata</span><span class="op">(</span><span class="op">)</span></span>
@@ -298,24 +308,31 @@ tree was elected for maximum comparability.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">root</a></span><span class="op">(</span><span class="st">"DCORO"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/ape/man/reorder.phylo.html" class="external-link">reorder.phylo</a></span><span class="op">(</span>order<span class="op">=</span><span class="st">'cladewise'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://docs.ropensci.org/treeio/reference/drop.tip-methods.html" class="external-link">drop.tip</a></span><span class="op">(</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="op">!</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">$</span><span class="va">tip.label</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'CELEG'</span>, <span class="st">'CSP34'</span>, <span class="st">'CREMA'</span>, <span class="st">'CNIGO'</span>, <span class="st">'CBRIG'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://docs.ropensci.org/treeio/reference/drop.tip-methods.html" class="external-link">drop.tip</a></span><span class="op">(</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="op">!</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">$</span><span class="va">tip.label</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'CELEG'</span>, <span class="st">'CSP34'</span>, <span class="st">'CREMA'</span>, <span class="st">'CNIGO'</span>, <span class="st">'CBRIG'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">Caeno4</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://docs.ropensci.org/treeio/reference/drop.tip-methods.html" class="external-link">drop.tip</a></span><span class="op">(</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="op">!</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">$</span><span class="va">tip.label</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'CELEG'</span>, <span class="st">'CREMA'</span>, <span class="st">'CNIGO'</span>, <span class="st">'CBRIG'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">$</span><span class="va">tip.label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Cel'</span>, <span class="st">'Cin'</span>, <span class="st">'Cre'</span>, <span class="st">'Cni'</span>, <span class="st">'Cbr'</span><span class="op">)</span></span>
+<span><span class="va">Caeno4</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">$</span><span class="va">tip.label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Cel'</span>, <span class="st">'Cre'</span>, <span class="st">'Cni'</span>, <span class="st">'Cbr'</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/write.tree.html" class="external-link">write.tree</a></span><span class="op">(</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "((Cel:0.04500887872,Cin:0.07438201523)100:0.007051498396,(Cre:0.03318943837,(Cni:0.00418426739,Cbr:0.007121549403)100:0.03972676209)100:0.01364676746)100;"</span></span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tidytree/man/as.treedata.html" class="external-link">as.treedata</a></span><span class="op">(</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">)</span></span>
+<span><span class="va">Caeno4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tidytree/man/as.treedata.html" class="external-link">as.treedata</a></span><span class="op">(</span><span class="va">Caeno4</span><span class="op">)</span></span>
 <span><span class="fu">plotTree</span><span class="op">(</span><span class="va">species</span><span class="op">$</span><span class="va">Caenorhabditis</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ScalingBreakpoints_files/figure-html/species_trees_Caeno-1.png" width="576"></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plotTree</span><span class="op">(</span><span class="va">Caeno4</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ScalingBreakpoints_files/figure-html/species_trees_Caeno4-1.svg" width="576"></p>
 </div>
 <div class="section level3">
 <h3 id="distances">Distances<a class="anchor" aria-label="anchor" href="#distances"></a>
 </h3>
 <p>With the species trees loaded, we can calculate per-pair branch
 length distances using <code>ape::cophenetic()</code>.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">species_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">species_dist</span><span class="op">$</span><span class="va">cophenetic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">species</span>, <span class="kw">function</span><span class="op">(</span><span class="va">sp</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/cophenetic.phylo.html" class="external-link">cophenetic.phylo</a></span><span class="op">(</span><span class="va">sp</span><span class="op">@</span><span class="va">phylo</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">species_dist</span> <span class="op">&lt;-</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">species_dist</span><span class="op">$</span><span class="va">cophenetic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">species</span>, <span class="kw">function</span><span class="op">(</span><span class="va">sp</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/cophenetic.phylo.html" class="external-link">cophenetic.phylo</a></span><span class="op">(</span><span class="va">sp</span><span class="op">@</span><span class="va">phylo</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="tunicates">Tunicates<a class="anchor" aria-label="anchor" href="#tunicates"></a>
 </h4>
@@ -325,9 +342,9 @@ same-species pairs where they are arbitrarily set to 3, as an
 upper-bound estimate. The rationale is that as we are testing for speed,
 using the maximally conceivable distance prevents us from overestimating
 that speed.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># These are taken from the molecular clock analysis.</span></span>
-<span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span> <span class="op">&lt;-</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span><span class="op">$</span><span class="va">Oikopleura</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="st">'Oki'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,       <span class="fl">3</span>,       <span class="fl">24.5347</span>, <span class="fl">24.5347</span>, <span class="fl">24.5347</span><span class="op">)</span>,</span>
 <span>  <span class="st">'Kum'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,       <span class="fl">0</span>,       <span class="fl">24.5347</span>, <span class="fl">24.5347</span>, <span class="fl">24.5347</span><span class="op">)</span>,</span>
@@ -350,7 +367,7 @@ that speed.</p>
 which links to <a href="https://github.com/SchriderLab/Drosophila_phylogeny" class="external-link uri">https://github.com/SchriderLab/Drosophila_phylogeny</a>.
 Note that the smallest distance here is 3.6 million years, close to our
 upper-bound estimate for same-species tunicate populations.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span><span class="op">$</span><span class="va">Drosophila</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="st">'Dbu'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,      <span class="fl">46.836</span>,  <span class="fl">46.836</span>,  <span class="fl">46.836</span>,  <span class="fl">46.836</span><span class="op">)</span>,</span>
 <span>  <span class="st">'Dsu'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">46.836</span>, <span class="fl">0</span>,       <span class="fl">13.1873</span>, <span class="fl">13.1873</span>, <span class="fl">13.1873</span><span class="op">)</span>,</span>
@@ -364,7 +381,7 @@ upper-bound estimate for same-species tunicate populations.</p>
 </h4>
 <p>See <a href="https://academic.oup.com/nar/article/46/3/1295/4793371" class="external-link uri">https://academic.oup.com/nar/article/46/3/1295/4793371</a>
 Figure S2 for all distances.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span><span class="op">$</span><span class="va">Caenorhabditis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  <span class="st">'Cin'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,        <span class="fl">30</span>, <span class="fl">30</span>, <span class="fl">30</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
 <span>  <span class="st">'Cre'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">0</span>,        <span class="fl">25</span>, <span class="fl">25</span>, <span class="fl">30</span><span class="op">)</span>,</span>
@@ -372,25 +389,25 @@ Figure S2 for all distances.</p>
 <span>  <span class="st">'Cni'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">25</span>,  <span class="fl">3.7</span>, <span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span>,</span>
 <span>  <span class="st">'Cel'</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">30</span>,  <span class="fl">30</span>, <span class="fl">30</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">species_dist</span><span class="op">$</span><span class="va">mya</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span>  <span class="va">x</span></span>
-<span><span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="normalised-breakpoint-accumulation">Normalised breakpoint accumulation<a class="anchor" aria-label="anchor" href="#normalised-breakpoint-accumulation"></a>
 </h2>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bp_vs_dist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">query</span>, <span class="va">target</span>, <span class="va">wgo</span>, <span class="va">dist_type</span><span class="op">=</span><span class="st">"mya"</span>, <span class="va">species</span>, <span class="va">extra</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">dist_df</span> <span class="op">&lt;-</span> <span class="va">species_dist</span><span class="op">[[</span><span class="va">dist_type</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">species</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="va">relevant_dist</span> <span class="op">&lt;-</span> <span class="va">dist_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">dist_df</span><span class="op">)</span><span class="op">==</span><span class="va">query</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">dist_df</span><span class="op">)</span><span class="op">==</span><span class="va">target</span><span class="op">]</span></span>
+<span>  <span class="va">relevant_dist</span> <span class="op">&lt;-</span> <span class="va">dist_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">dist_df</span><span class="op">)</span><span class="op">==</span><span class="va">query</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">dist_df</span><span class="op">)</span><span class="op">==</span><span class="va">target</span><span class="op">]</span></span>
 <span>  <span class="va">breakpoints</span> <span class="op">&lt;-</span> <span class="va">wgo</span><span class="op">[</span><span class="va">wgo</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"breakpoint region"</span><span class="op">]</span></span>
-<span>  <span class="va">wgo_size</span> <span class="op">&lt;-</span> <span class="va">wgo</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">wgo_size</span> <span class="op">&lt;-</span> <span class="va">wgo</span> <span class="op">|&gt;</span> <span class="fu">width</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">wgo_size_mbp</span> <span class="op">&lt;-</span> <span class="va">wgo_size</span> <span class="op">/</span> <span class="fl">1000000</span></span>
-<span>  <span class="va">aln_length</span> <span class="op">&lt;-</span> <span class="va">wgo</span><span class="op">[</span><span class="va">wgo</span><span class="op">$</span><span class="va">type</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"collinear alignment"</span>, <span class="st">"isolated alignment"</span><span class="op">)</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">aln_length</span> <span class="op">&lt;-</span> <span class="va">wgo</span><span class="op">[</span><span class="va">wgo</span><span class="op">$</span><span class="va">type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"collinear alignment"</span>, <span class="st">"isolated alignment"</span><span class="op">)</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu">width</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">breakpoints_per_scale</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">breakpoints</span><span class="op">)</span><span class="op">/</span><span class="va">relevant_dist</span></span>
 <span>  <span class="va">breakpoints_per_mbp</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">breakpoints</span><span class="op">)</span><span class="op">/</span><span class="va">wgo_size_mbp</span></span>
 <span>  <span class="va">breakpoints_per_aln_mbp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">breakpoints</span><span class="op">)</span> <span class="op">/</span> <span class="va">aln_length</span> <span class="op">*</span> <span class="fl">1e6</span></span>
@@ -410,7 +427,7 @@ Figure S2 for all distances.</p>
 <span>    extra                      <span class="op">=</span> <span class="va">extra</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">mya_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span><span class="va">mya_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  <span class="fu">bp_vs_dist</span><span class="op">(</span>query<span class="op">=</span><span class="st">"Osa"</span>, target<span class="op">=</span><span class="st">"Oki"</span>, <span class="va">wgo</span><span class="op">$</span><span class="va">Osa_Oki</span>, dist_type<span class="op">=</span><span class="st">"mya"</span>, <span class="st">"Oikopleura"</span><span class="op">)</span>,</span>
 <span>  <span class="fu">bp_vs_dist</span><span class="op">(</span>query<span class="op">=</span><span class="st">"Oki"</span>, target<span class="op">=</span><span class="st">"Bar"</span>, <span class="va">wgo</span><span class="op">$</span><span class="va">Oki_Bar</span>, dist_type<span class="op">=</span><span class="st">"mya"</span>, <span class="st">"Oikopleura"</span>, extra <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>  <span class="fu">bp_vs_dist</span><span class="op">(</span>query<span class="op">=</span><span class="st">"Osa"</span>, target<span class="op">=</span><span class="st">"Bar"</span>, <span class="va">wgo</span><span class="op">$</span><span class="va">Osa_Bar</span>, dist_type<span class="op">=</span><span class="st">"mya"</span>, <span class="st">"Oikopleura"</span><span class="op">)</span>,</span>
@@ -442,7 +459,7 @@ Figure S2 for all distances.</p>
 <span>                               <span class="st">"Dme_Dbu"</span>, <span class="st">"Dme_Dsu"</span>, <span class="st">"Dme_Dya"</span>,</span>
 <span>                               <span class="st">"Ply_Sav"</span>, <span class="st">"Rob_Sav"</span>, <span class="st">"Ply_Rob"</span>, <span class="st">"Rob_Ros"</span>, <span class="st">"Ply_Ros"</span>,</span>
 <span>                               <span class="st">"Osa_Oki"</span>, <span class="st">"Oki_Bar"</span>, <span class="st">"Osa_Bar"</span>, <span class="st">"Bar_Aom"</span>, <span class="st">"Osa_Aom"</span>, <span class="st">"Oki_Kum"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mya_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mya_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span><span class="va">mya_df</span><span class="op">$</span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"far"</span>, <span class="st">"far"</span>, <span class="st">"mid"</span>, <span class="st">"mid"</span>, <span class="st">"close"</span>, <span class="st">"close"</span>,</span>
 <span>                        <span class="st">"far"</span>, <span class="st">"far"</span>, <span class="st">"mid"</span>, <span class="st">"mid"</span>, <span class="st">"close"</span>,</span>
 <span>                        <span class="st">"far"</span>, <span class="st">"mid"</span>, <span class="st">"close"</span>,</span>
@@ -519,8 +536,8 @@ breakpoints but are better detected in closely related genomes. Also the
 Drosophila centromeres may need to be masked. But at this level of
 manual curation it may be better to find a more robust metric
 instead.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sub_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sub_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  <span class="fu">bp_vs_dist</span><span class="op">(</span>query<span class="op">=</span><span class="st">"Osa"</span>, target<span class="op">=</span><span class="st">"Oki"</span>, <span class="va">wgo</span><span class="op">$</span><span class="va">Osa_Oki</span>, dist_type<span class="op">=</span><span class="st">"cophenetic"</span>, <span class="st">"Oikopleura"</span><span class="op">)</span>,</span>
 <span>  <span class="fu">bp_vs_dist</span><span class="op">(</span>query<span class="op">=</span><span class="st">"Osa"</span>, target<span class="op">=</span><span class="st">"Bar"</span>, <span class="va">wgo</span><span class="op">$</span><span class="va">Osa_Bar</span>, dist_type<span class="op">=</span><span class="st">"cophenetic"</span>, <span class="st">"Oikopleura"</span><span class="op">)</span>,</span>
 <span>  <span class="fu">bp_vs_dist</span><span class="op">(</span>query<span class="op">=</span><span class="st">"Osa"</span>, target<span class="op">=</span><span class="st">"Aom"</span>, <span class="va">wgo</span><span class="op">$</span><span class="va">Osa_Aom</span>, dist_type<span class="op">=</span><span class="st">"cophenetic"</span>, <span class="st">"Oikopleura"</span><span class="op">)</span>,</span>
@@ -538,8 +555,8 @@ instead.</p>
 <span>  <span class="fu">bp_vs_dist</span><span class="op">(</span>query<span class="op">=</span><span class="st">"Cni"</span>, target<span class="op">=</span><span class="st">"Cbr"</span>, <span class="va">wgo</span><span class="op">$</span><span class="va">Cni_Cbr</span>, dist_type<span class="op">=</span><span class="st">"cophenetic"</span>, <span class="st">"Caenorhabditis"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sub_df</span><span class="op">$</span><span class="va">species</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sub_df</span><span class="op">$</span><span class="va">species</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Caenorhabditis"</span>, <span class="st">"Drosophila"</span>, <span class="st">"Ciona"</span>, <span class="st">"Oikopleura"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">sub_df</span> <span class="op">&lt;-</span> <span class="va">sub_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">sub_df</span><span class="op">$</span><span class="va">species</span>, <span class="va">sub_df</span><span class="op">$</span><span class="va">breakpoints_per_mbp_scaled</span><span class="op">)</span>,<span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sub_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span><span class="va">sub_df</span> <span class="op">&lt;-</span> <span class="va">sub_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">sub_df</span><span class="op">$</span><span class="va">species</span>, <span class="va">sub_df</span><span class="op">$</span><span class="va">breakpoints_per_mbp_scaled</span><span class="op">)</span>,<span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sub_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span><span class="va">sub_df</span><span class="op">$</span><span class="va">pair</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sub_df</span><span class="op">$</span><span class="va">pair</span>, levels<span class="op">=</span><span class="va">sub_df</span><span class="op">$</span><span class="va">pair</span><span class="op">)</span></span>
 <span><span class="va">sub_df</span><span class="op">$</span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"far"</span>, <span class="st">"mid"</span>, <span class="st">"close"</span><span class="op">)</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"close"</span>, <span class="st">"mid"</span>, <span class="st">"far"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">(</span><span class="va">sub_df</span><span class="op">)</span></span></code></pre></div>
@@ -584,7 +601,7 @@ instead.</p>
 <span><span class="co">## 12                85.95773                     4654.54017 FALSE close</span></span></code></pre>
 <p>This said, O. dioica is always ahead of other species pairs after
 normalising by sequence length and evolutionary distance.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">customPlot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">what</span>, <span class="va">title</span>, <span class="va">extra</span> <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">extra</span> <span class="op">==</span> <span class="st">"drop"</span> <span class="op">&amp;</span> <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">extra</span><span class="op">)</span><span class="op">)</span> <span class="va">df</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">[</span><span class="op">!</span> <span class="va">df</span><span class="op">$</span><span class="va">extra</span>,<span class="op">]</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">+</span></span>
@@ -593,42 +610,57 @@ normalising by sequence length and evolutionary distance.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">comp</span>, scales<span class="op">=</span><span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="va">title</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="panel-used-for-figure-7">Panel used for Figure 7<a class="anchor" aria-label="anchor" href="#panel-used-for-figure-7"></a>
+</h3>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Show the nematodes between Oiks and ascidians.</span></span>
 <span></span>
-<span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints'</span>, <span class="st">'Number of breakpoints'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">mya_df</span><span class="op">$</span><span class="va">pair</span> <span class="op">&lt;-</span> <span class="va">mya_df</span><span class="op">$</span><span class="va">pair</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Dme_Dbu"</span>, <span class="st">"Dme_Dsu"</span>, <span class="st">"Dme_Dya"</span>,</span>
+<span>  <span class="st">"Ply_Sav"</span>, <span class="st">"Rob_Sav"</span>, <span class="st">"Ply_Rob"</span>, <span class="st">"Rob_Ros"</span>, <span class="st">"Ply_Ros"</span>,</span>
+<span>  <span class="st">"Cni_Cin"</span>, <span class="st">"Cbr_Cel"</span>, <span class="st">"Cni_Cre"</span>, <span class="st">"Cbr_Cre"</span>, <span class="st">"Cni_Cbr"</span>, <span class="st">"Cbr_Cni"</span>,</span>
+<span>  <span class="st">"Osa_Oki"</span>, <span class="st">"Oki_Bar"</span>, <span class="st">"Osa_Bar"</span>, <span class="st">"Bar_Aom"</span>, <span class="st">"Osa_Aom"</span>, <span class="st">"Oki_Kum"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase per million years diverged'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_main_figure-1.svg" width="960"></p>
+</div>
+<div class="section level3">
+<h3 id="supplemental-panels-for-figure-7">Supplemental panels for figure 7<a class="anchor" aria-label="anchor" href="#supplemental-panels-for-figure-7"></a>
+</h3>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints'</span>, <span class="st">'Number of breakpoints'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-1.svg" width="960"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_scale'</span>, <span class="st">'Number of breakpoints per million years'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-2.svg" width="960"></p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_mbp'</span>, <span class="st">'Number of breakpoints per megabase'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-3.svg" width="960"></p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_aln_mbp'</span>, <span class="st">'Number of breakpoints per megabase aligned'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-4.svg" width="960"></p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase per million years diverged'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-5.svg" width="960"></p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase per million years diverged'</span>, extra <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-6.svg" width="960"></p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_aln_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase aligned per million years diverged'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-7.svg" width="960"></p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_aln_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase aligned per million years diverged'</span>, extra <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-8.svg" width="960"></p>
+<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase per million years diverged'</span>, extra <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-5.svg" width="960"></p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">sub_df</span>, <span class="st">'breakpoints_per_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase per substitution distance'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-9.svg" width="960"></p>
+<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_aln_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase aligned per million years diverged'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-6.svg" width="960"></p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">mya_df</span>, <span class="st">'breakpoints_per_aln_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase aligned per million years diverged'</span>, extra <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-7.svg" width="960"></p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">sub_df</span>, <span class="st">'breakpoints_per_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase per substitution distance'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-8.svg" width="960"></p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">customPlot</span><span class="op">(</span><span class="va">sub_df</span>, <span class="st">'breakpoints_per_aln_mbp_scaled'</span>, <span class="st">'Number of breakpoints per megabase aligned per substitution distance'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-10.svg" width="960"></p>
+<p><img src="ScalingBreakpoints_files/figure-html/breakpoints_2-9.svg" width="960"></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.3.1 (2023-06-16)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>

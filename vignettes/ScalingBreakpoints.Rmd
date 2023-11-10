@@ -26,8 +26,10 @@ pair by a few key metrics:
 * Branch length (i.e., a kind of substitution rate)
 * dN/dS
 
-**Panel D of Figure 7 was generated with this vignette (colors were edited by
+**Panel E of Figure 7 was generated with this vignette (colors were edited by
 hand).**
+
+**The vignette also produce trees for panels 7A–D.**
 
 The core functions used here are maintained in our _GenomicBreaks_ R package,
 which is fully documented at: <https://oist.github.io/GenomicBreaks>.
@@ -54,7 +56,7 @@ plotTree <- function(sp) {
   ggtree(sp, ladderize=T) +
     geom_tiplab(align=T) + hexpand(0.5) +
     geom_text(aes(x=branch, label=round(branch.length,2)), nudge_y=0.1) +
-    geom_treescale() + geom_rootedge()
+    geom_treescale(width = 0.02) + geom_rootedge()
 }
 ```
 
@@ -107,11 +109,19 @@ species$Caenorhabditis <- ape::read.tree(text="(CGUAD:0.10367478589587060533,(((
   reorder.phylo(order='cladewise')
 
 species$Caenorhabditis <- drop.tip(species$Caenorhabditis, which(!species$Caenorhabditis$tip.label %in% c('CELEG', 'CSP34', 'CREMA', 'CNIGO', 'CBRIG')))
+Caeno4 <-  drop.tip(species$Caenorhabditis, which(!species$Caenorhabditis$tip.label %in% c('CELEG', 'CREMA', 'CNIGO', 'CBRIG')))
 
 species$Caenorhabditis$tip.label <- c('Cel', 'Cin', 'Cre', 'Cni', 'Cbr')
+Caeno4$Caenorhabditis$tip.label <- c('Cel', 'Cre', 'Cni', 'Cbr')
+
 write.tree(species$Caenorhabditis)
 species$Caenorhabditis <- as.treedata(species$Caenorhabditis)
+Caeno4 <- as.treedata(Caeno4)
 plotTree(species$Caenorhabditis)
+```
+
+```{r species_trees_Caeno4, fig.height=6, fig.width=6, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+plotTree(Caeno4)
 ```
 
 ## Distances
@@ -296,7 +306,7 @@ sub_df$comp <- factor(c("far", "mid", "close"), levels=c("close", "mid", "far"))
 This said, O. dioica is always ahead of other species pairs after normalising by
 sequence length and evolutionary distance.
 
-```{r breakpoints_2, dependson="breakpoints_1", fig.height=3, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+```{r breakpoints_fun, dependson="breakpoints_1", fig.height=3, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
 customPlot <- function(df, what, title, extra = "drop") {
   if (extra == "drop" & ! is.null(df$extra)) df <- df[! df$extra,]
   ggplot(df) +
@@ -306,12 +316,29 @@ customPlot <- function(df, what, title, extra = "drop") {
     theme_bw() +
     ggtitle(title)
 }
+```
 
+## Panel used for Figure 7
+
+```{r breakpoints_main_figure, dependson="breakpoints_fun", fig.height=3, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+
+# Show the nematodes between Oiks and ascidians.
+
+mya_df$pair <- mya_df$pair |> factor(c("Dme_Dbu", "Dme_Dsu", "Dme_Dya",
+  "Ply_Sav", "Rob_Sav", "Ply_Rob", "Rob_Ros", "Ply_Ros",
+  "Cni_Cin", "Cbr_Cel", "Cni_Cre", "Cbr_Cre", "Cni_Cbr", "Cbr_Cni",
+  "Osa_Oki", "Oki_Bar", "Osa_Bar", "Bar_Aom", "Osa_Aom", "Oki_Kum"))
+
+customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per million years diverged')
+```
+
+## Supplemental panels for figure 7
+
+```{r breakpoints_2, dependson="breakpoints_fun", fig.height=3, fig.width=10, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
 customPlot(mya_df, 'breakpoints', 'Number of breakpoints')
 customPlot(mya_df, 'breakpoints_per_scale', 'Number of breakpoints per million years')
 customPlot(mya_df, 'breakpoints_per_mbp', 'Number of breakpoints per megabase')
 customPlot(mya_df, 'breakpoints_per_aln_mbp', 'Number of breakpoints per megabase aligned')
-customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per million years diverged')
 customPlot(mya_df, 'breakpoints_per_mbp_scaled', 'Number of breakpoints per megabase per million years diverged', extra = TRUE)
 customPlot(mya_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged')
 customPlot(mya_df, 'breakpoints_per_aln_mbp_scaled', 'Number of breakpoints per megabase aligned per million years diverged', extra = TRUE)
