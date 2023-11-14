@@ -17,7 +17,7 @@ knitr::opts_knit$set(cache = TRUE)
 
 Gene-centric synteny analyses.
 
-Figure 2 panel A and Supplemental figure 2 were partially generated in this
+Figure 2 panel A and Supplemental figure 2 were generated in this
 vignette.
 
 The vignette also contains extra material that is not entirely relevant to
@@ -173,7 +173,6 @@ sapply(orthoPairs_core, length)
 sapply(orthoPairs_one2oneInOiks, length)
 ```
 
-============
 Oxford plots
 ============
 
@@ -367,11 +366,11 @@ orthoBlocks$Oki_Kum[order(orthoBlocks$Oki_Kum$geneNumber)] |> tail(11)
 ```
 
 ## Block size histograms and statistics
-```{r synteny_block_histograms, fig.width=8, fig.height=6, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+```{r synteny_block_histogram_functions}
 # Let's make this more general, sometimes you just want an annotated histogram...
 # Any numeric vector to a summary statistics table
 numeric_vector_to_summary_df <- function(vec, name=NULL, digits=2) {
-  summary_df <- summary(as.numeric(vec)) |> unclass() |>  as.data.frame() |> tibble::rownames_to_column("stat") |> dplyr::rename(value=2)
+  summary_df <- vec |> summary() |> cbind() |>  as.data.frame() |> tibble::rownames_to_column("stat") |> dplyr::rename(value=2)
   # Replace names with nicer names
   summary_df$stat <- c("min", "1st_q", "median", "mean", "3rd_q", "max")
   summary_df$value <- round(summary_df$value, digits=digits)
@@ -380,7 +379,12 @@ numeric_vector_to_summary_df <- function(vec, name=NULL, digits=2) {
 numeric_vector_to_summary_df(orthoBlocks$Oki_Osa$geneNumber)
 
 # Summary statistics to data.frame for use with ggplot
-summary_df_to_geom_data <- function(summary_df, size=c(0.4, 0.2, 0.4, 0.4, 0.2, 0.4), lty=c(1, 3, 1, 1, 3, 1), col=c("#595959", "darkgray", "darkred", "darkred", "darkgray", "#595959")) {
+summary_df_to_geom_data <-
+  function( summary_df
+          , size=c(0.4, 0.2, 0.4, 0.4, 0.2, 0.4)
+          , lty=c(1, 3, 1, 1, 3, 1)
+          , col=c("#595959", "darkgray", "darkred", "darkred", "darkgray", "#595959"))
+{
   summary_df$size <- size
   summary_df$lty <- lty
   summary_df$col <- col
@@ -390,8 +394,20 @@ summary_df_to_geom_data <- function(summary_df, size=c(0.4, 0.2, 0.4, 0.4, 0.2, 
 numeric_vector_to_summary_df(orthoBlocks$Oki_Osa$geneNumber) |> summary_df_to_geom_data()
 
 # Plot a histogram with lines and labels of statistics
-gg_stat_hist <- function(df, plot.what=NULL, include_stats=c("median", "max"), size=c(0.5, 0.3, 0.5, 0.4, 0.3, 0.5), lty=c(1, 3, 1, 1, 3, 1), col=c("#595959", "darkgray", "darkred", "darkred", "darkgray", "#595959"), bins=30, include_lines = TRUE, include_text=TRUE, digits=2, ...) {
+gg_stat_hist <-
+  function( df
+          , plot.what="geneNumber"
+          , include_stats=c("median", "max")
+          , size=c(0.5, 0.3, 0.5, 0.4, 0.3, 0.5)
+          , lty=c(1, 3, 1, 1, 3, 1)
+          , col=c("#595959", "darkgray", "darkred", "darkred", "darkgray", "#595959")
+          , bins=30
+          , include_lines = TRUE, include_text=TRUE
+          , digits=2, ...)
+{
   if(!is.null(plot.what)) {
+    if (inherits(df, "GBreaks"))
+      df <- as.data.frame(df)
     # Extract the numeric vector and put it in convenient format
     numbers <- df[[plot.what]]
     numbers <- numbers |> as.data.frame() |> dplyr::as_tibble() |> dplyr::rename(value=1)
@@ -414,77 +430,51 @@ gg_stat_hist <- function(df, plot.what=NULL, include_stats=c("median", "max"), s
       label_y <- 0.75*max(p_build[["data"]][[1]][["count"]])
       p <- p + annotate(geom = 'label', x=numbers_stats$xintercept, y = label_y, label=label_vec, col=numbers_stats$col)
     }
-    p
+    p 
   }
-}
-# Close
-p1 <- orthoBlocks$Oki_Kum |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Kum: synteny block size distribution")
-p2 <- orthoBlocks$Osa_Aom |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Aom: synteny block size distribution")
-p3 <- orthoBlocks$Bar_Nor |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Bar-Nor: synteny block size distribution")
-# Intermediate
-p4 <- orthoBlocks$Osa_Bar |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Bar: synteny block size distribution")
-p5 <- orthoBlocks$Osa_Nor |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Nor: synteny block size distribution")
-p6 <- orthoBlocks$Bar_Aom |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Bar-Aom: synteny block size distribution")
-# Distant
-p7 <- orthoBlocks$Oki_Osa |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Osa: synteny block size distribution")
-p8 <- orthoBlocks$Oki_Bar |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Bar: synteny block size distribution")
-p9 <- orthoBlocks$Osa_Kum |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Kum: synteny block size distribution")
+  }
 
-p1
-p2
-p3
-p4
-p5
-p6
-p7
-p8
-p9
-(p1 + p2 + p3) # Only close
-(p4 + p5 + p6) # Only intermediate
-(p7 + p8 + p9) # Only distant
-(p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) # All plots
-(p7 + p4 + p2) # By increasing phylogenetic distance from Osaka
+gg_stat_hist_genes <- \(x) gg_stat_hist(x, lty=3) + xlab('Number of genes') + ylab('Count') 
 
-# Just Okinawa plots
-p10 <- orthoBlocks$Oki_Osa |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Osa: synteny block size distribution")
-p11 <- orthoBlocks$Oki_Bar |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Bar: synteny block size distribution")
-p12 <- orthoBlocks$Oki_Aom |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Aom: synteny block size distribution")
-p13 <- orthoBlocks$Oki_Nor |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Nor: synteny block size distribution")
-p14 <- orthoBlocks$Oki_Kum |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Kum: synteny block size distribution")
-
-(p10 + p11 + p12 + p13 + p14)
 ```
 
-```{r synteny_block_histograms_2, fig.width=8, fig.height=6, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+```{r synteny_block_histograms, fig.width=10, fig.height=10, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+# Close
+p1 <- orthoBlocks$Oki_Kum |> gg_stat_hist_genes() + ggtitle("Oki-Kum: synteny block size distribution")
+p2 <- orthoBlocks$Osa_Aom |> gg_stat_hist_genes() + ggtitle("Osa-Aom: synteny block size distribution")
+p3 <- orthoBlocks$Bar_Nor |> gg_stat_hist_genes() + ggtitle("Bar-Nor: synteny block size distribution")
+# Intermediate
+p4 <- orthoBlocks$Osa_Bar |> gg_stat_hist_genes() + ggtitle("Osa-Bar: synteny block size distribution")
+p5 <- orthoBlocks$Osa_Nor |> gg_stat_hist_genes() + ggtitle("Osa-Nor: synteny block size distribution")
+p6 <- orthoBlocks$Bar_Aom |> gg_stat_hist_genes() + ggtitle("Bar-Aom: synteny block size distribution")
+# Distant
+p7 <- orthoBlocks$Oki_Osa |> gg_stat_hist_genes() + ggtitle("Oki-Osa: synteny block size distribution")
+p8 <- orthoBlocks$Oki_Bar |> gg_stat_hist_genes() + ggtitle("Oki-Bar: synteny block size distribution")
+p9 <- orthoBlocks$Osa_Kum |> gg_stat_hist_genes() + ggtitle("Osa-Kum: synteny block size distribution")
+
+(p1 + p2 + p3) /
+(p4 + p5 + p6) /
+(p7 + p8 + p9) 
+```
+
+```{r synteny_block_histograms_2, fig.width=10, fig.height=10, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 # Transformed on X axis to simplify things.
 # Close
-p1 <- orthoBlocks$Oki_Kum |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Kum: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
-p2 <- orthoBlocks$Osa_Aom |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Aom: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
-p3 <- orthoBlocks$Bar_Nor |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Bar-Nor: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p1 <- orthoBlocks$Oki_Kum |> gg_stat_hist_genes() + ggtitle("Oki-Kum: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p2 <- orthoBlocks$Osa_Aom |> gg_stat_hist_genes() + ggtitle("Osa-Aom: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p3 <- orthoBlocks$Bar_Nor |> gg_stat_hist_genes() + ggtitle("Bar-Nor: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
 # Intermediate
-p4 <- orthoBlocks$Osa_Bar |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Bar: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
-p5 <- orthoBlocks$Osa_Nor |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Nor: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
-p6 <- orthoBlocks$Bar_Aom |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Bar-Aom: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p4 <- orthoBlocks$Osa_Bar |> gg_stat_hist_genes() + ggtitle("Osa-Bar: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p5 <- orthoBlocks$Osa_Nor |> gg_stat_hist_genes() + ggtitle("Osa-Nor: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p6 <- orthoBlocks$Bar_Aom |> gg_stat_hist_genes() + ggtitle("Bar-Aom: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
 # Distant
-p7 <- orthoBlocks$Oki_Osa |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Osa: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
-p8 <- orthoBlocks$Oki_Bar |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Oki-Bar: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
-p9 <- orthoBlocks$Osa_Kum |> as.data.frame() |> gg_stat_hist(plot.what="geneNumber", lty=3) + xlab('Number of genes') + ylab('Count') + ggtitle("Osa-Kum: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p7 <- orthoBlocks$Oki_Osa |> gg_stat_hist_genes() + ggtitle("Oki-Osa: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p8 <- orthoBlocks$Oki_Bar |> gg_stat_hist_genes() + ggtitle("Oki-Bar: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
+p9 <- orthoBlocks$Osa_Kum |> gg_stat_hist_genes() + ggtitle("Osa-Kum: synteny block size distribution") + scale_x_continuous(trans="log10", limits=c(NA, 1000))
 
-
-p1
-p2
-p3
-p4
-p5
-p6
-p7
-p8
-p9
-(p1 + p2 + p3) # Only close
-(p4 + p5 + p6) # Only intermediate
-(p7 + p8 + p9) # Only distant
-(p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9) # All plots
-(p7 + p4 + p2) # By increasing phylogenetic distance from Osaka
+(p1 + p2 + p3) /
+(p4 + p5 + p6) /
+(p7 + p8 + p9)
 ```
 
 That's all well and good. Unfortunately, none of these are very beautiful. How about binning the synteny blocks into a nice barplot instead?
