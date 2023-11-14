@@ -13,6 +13,17 @@ editor_options:
 knitr::opts_knit$set(cache = TRUE)
 ```
 
+# Introduction
+
+Gene-centric synteny analyses.
+
+Figure 2 panel A and Supplemental figure 2 were partially generated in this
+vignette.
+
+The vignette also contains extra material that is not entirely relevant to
+the manuscript, but that can not be moved elsewhere because it needs the
+orthogroup `GBreaks` object generated at the beginning at the top.
+
 Load packages and data
 ======================
 
@@ -195,16 +206,27 @@ Versus Oki
 ----------
 
 ```{r orthopair_plot_Oki_Bar}
-(p4 <- orthoPairs$Bar_Oki |> removeUnplacedContigs() |>
+p4 <- orthoPairs$Bar_Oki |> removeUnplacedContigs() |>
    makeOxfordPlots(type='point', diag = F) + theme_bw() + theme(legend.position='none') +
-   scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL))
+   scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL)
 ```
 
-```{r orthopair_plot_Oki_Kum, fig.height=8, fig.width=8,  dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
-(p5 <- orthoPairs$Oki_Kum |> swap() |> scaffoldByFlipAndMerge(scafs$Kum_Oki, drop = TRUE) |>
+```{r orthopair_plot_Oki_Kum}
+p5 <- orthoPairs$Oki_Kum |> swap() |> scaffoldByFlipAndMerge(scafs$Kum_Oki, drop = TRUE) |>
     removeUnplacedContigs() |> 
     makeOxfordPlots(type='point', diag=T) + theme_bw() + theme(legend.position='none') +
-   scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL))
+   scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL)
+```
+
+```{r orthopair_plot_Bar_Nor}
+p6 <- orthoPairs$Bar_Nor |>
+    removeUnplacedContigs(query = FALSE) |> 
+    makeOxfordPlots(type='point', diag=T) + theme_bw() + theme(legend.position='none') +
+   scale_color_manual(values = c("#E78AC3", "#A6D854", "#FFD92F", "#8DA0CB", "#66C2A5")) + ggtitle(NULL)
+```
+
+```{r orthopair_plots_suppl, fig.height=8, fig.width=8,  dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+(p4 + p5 + p6)
 ```
 
 Collinear regions
