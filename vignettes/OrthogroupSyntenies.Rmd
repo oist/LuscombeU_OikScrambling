@@ -441,66 +441,6 @@ sum(width(valid))
 Question: what does interrupt the colinearity of nucleotide regions in gene-centric
 colinear regions ?
 
-XSR plot
-========
-
-Ugly...
-
-```{r XSR_plot}
-XSR_HOGs <- sapply(orthoPairs_one2oneInOiks, \(gb) {
-  gb <- gb[seqnames(gb) == "XSR"]
-  # Keep biggest match only
-  chrQ <- tapply(width(gb$query), seqnames(gb$query), sum) |> sort() |> tail(1) |> names()
-  gb <- gb[seqnames(gb$query) == chrQ]
-  seqlevels(gb) <- seqlevelsInUse(gb)
-  seqlevels(gb$query) <- seqlevelsInUse(gb$query)
-  gb
-})
-
-removeSeqInfoGR <- function(gr) 
-  GRanges(seqnames = seqnames(gr), ranges = ranges(gr), strand = strand(gr))
-
-removeSeqInfoGB <- function(gb)
-  GBreaks(target = removeSeqInfoGR(gb), query = removeSeqInfoGR(gb$query))
-
-XSR_toPlot <- sapply(XSR_HOGs, removeSeqInfoGB)
-XSR_toPlot <- as(XSR_toPlot, "GRangesList")
-seqlevels(XSR_toPlot$Oki_Osa)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Osa$query) <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Oki_Bar)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Bar$query) <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Oki_Kum)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Kum$query) <- "XSR_02_Kum"
-seqlevels(XSR_toPlot$Oki_Aom)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Aom$query) <- "XSR_04_Aom"
-seqlevels(XSR_toPlot$Oki_Nor)       <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Oki_Nor$query) <- "XSR_06_Nor"
-
-seqlevels(XSR_toPlot$Osa_Oki)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Oki$query) <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Osa_Bar)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Bar$query) <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Osa_Kum)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Kum$query) <- "XSR_02_Kum"
-seqlevels(XSR_toPlot$Osa_Aom)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Aom$query) <- "XSR_04_Aom"
-seqlevels(XSR_toPlot$Osa_Nor)       <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Osa_Nor$query) <- "XSR_06_Nor"
-
-seqlevels(XSR_toPlot$Bar_Osa)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Osa$query) <- "XSR_03_Osa"
-seqlevels(XSR_toPlot$Bar_Oki)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Oki$query) <- "XSR_01_Oki"
-seqlevels(XSR_toPlot$Bar_Kum)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Kum$query) <- "XSR_02_Kum"
-seqlevels(XSR_toPlot$Bar_Aom)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Aom$query) <- "XSR_04_Aom"
-seqlevels(XSR_toPlot$Bar_Nor)       <- "XSR_06_Bar"
-seqlevels(XSR_toPlot$Bar_Nor$query) <- "XSR_06_Nor"
-
-makeOxfordPlots(unlist(XSR_toPlot))
-```
-
 # HOX genes
 
 ## Hox 4
