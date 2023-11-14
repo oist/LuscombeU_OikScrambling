@@ -277,6 +277,8 @@ coalOrtho <- function(gb) {
   coal$geneNames <- CharacterList(split(names(gb)[subjectHits(ov)], queryHits(ov))) |> unname()
   # We can use the `ov` object for query ranges as well because of the way `coal` was constructed.
   coal$query$geneNames <- CharacterList(split(names(gb$query)[subjectHits(ov)], queryHits(ov))) |> unname()
+  # HOG names
+  coal$HOGs <- CharacterList(split(gb$HOG[subjectHits(ov)], queryHits(ov))) |> unname()
   
   # Extract dNdS values
   coal$dNdS_GUIDANCE2  <- NumericList(split(gb$dNdS_GUIDANCE2 [subjectHits(ov)], queryHits(ov)))
@@ -534,8 +536,7 @@ an Oki-Osa orthoblock.
 
 ```{r}
 reIndex <- \(gb) {names(gb) <- seq_along(gb) ; gb}
-barBreaks <- sapply(orthoBlocks_one2oneInOiks, get_bps, direction = "mid") |> SimpleList()
-
+midBreaks <- sapply(orthoBlocks_one2oneInOiks, get_bps, direction = "mid") |> SimpleList()
 
 ROIs <- SimpleList()
 findROIs <- function(g1, g2, g3) {
@@ -543,7 +544,7 @@ findROIs <- function(g1, g2, g3) {
   pair1_3 <- paste(g1, sep = '_', g3)
   gb <- orthoBlocks_one2oneInOiks[[pair1_2]] |>
     reIndex() |>
-    subsetByOverlaps(barBreaks[[pair1_3]]) |>
+    subsetByOverlaps(midBreaks[[pair1_3]]) |>
     subset(geneNumber > 2)
   # Drop columns to ease browsing on single lines.
   NULL -> gb$dNdS_GUIDANCE2 -> gb$dNdS_HmmCleaner -> gb$dNdS_PRANK
@@ -612,8 +613,20 @@ pairwiseAlignment(type ="global", BP1_Oki_Osa $query, BP1_Bar  |> plyranges::mut
 oP_one2oneInOiks_bridges$Oki_Osa |> subsetByOverlaps(GRanges("chr1", (4577337 + 4577995)/2))
 ```
 
-I can also search for orthologs that are marked "Col" in Oki_Osa and "Tra"
-in Osa_Bar.
+I can not search for orthologs that are marked "Col" in Oki_Osa and "Tra"
+in Osa_Bar, because the transposition flagging does not work on strandless ranges.
+
+```{r}
+a <- orthoBlocks$Oki_Osa$HOGs |> Filter(f = \(x) length(x) > 1)
+b <- orthoBlocks$Oki_Bar$HOGs |> Filter(f = \(x) length(x) > 1)
+
+makePairs.vector <- function(v) {
+  L <- GenomicBreaks::zipWithNext(x) |> as("List")
+  L <- L[1:(length(L) -1)]
+  l <- lapply(L, \(x) paste(first(x), second(x)))
+  unlist(l)
+}
+```
 
 # Session information
 

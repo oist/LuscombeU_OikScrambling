@@ -120,3 +120,65 @@ smallTransObjs <- SimpleList(
 cbind( trans_summary
      , smallTransObjs |> sapply(sapply, \(gb) sum(gb$midSmaller)))
 ```
+
+# Inter-arm translocations
+
+```{r interArmTranslocations}
+coa$Oki_Osa |> flagTranslocations(both = FALSE) |> showTranslocations()
+
+addNormalisedArmNames <- function(gb) {
+  # Better would be to flag query arms in the main objects, but I do not want
+  # to push a rebuild now...
+  genomeQ <- unique(genome(gb$query))
+  gb   $   armNames       <- paste(seqnames(gb),       gb$Arm                                     ) |> tolower()
+  gb$query$armNames <- paste(seqnames(gb$query), flagLongShort(gb$query, longShort[[genomeQ]])$Arm) |> tolower()
+  gb
+}
+
+interArmTranslocations <- function(gb) {
+  translocations <- gb |> addNormalisedArmNames() |> flagTranslocations(both = FALSE) |> showTranslocations()
+  translocations[translocations$armNames != translocations$query$armNames]
+}
+
+interChrTranslocations <- function(gb) {
+  translocations <- gb |> flagTranslocations(both = FALSE) |> showTranslocations()
+  translocations[as.character(tolower(seqnames(translocations))) != as.character(tolower(seqnames(translocations$query)))]
+}
+
+interChrTra <- sapply(coa[1:15], interChrTranslocations) |> SimpleList()
+
+# Need to improve subsetByOverlaps_GBreaks to allow ignoring queries when needed
+(interChrTra$Oki_Osa)|> as("GRanges") |> subsetByOverlaps(coa$Oki_Bar, type = "within", ignore.strand = TRUE) |> as("GBreaks")
+(interChrTra$Oki_Bar)|> as("GRanges") |> subsetByOverlaps(coa$Oki_Osa, type = "within") |> as("GBreaks")
+
+(interChrTra$Oki_Bar)|> as("GRanges") |> subsetByOverlaps(coa$Oki_Nor, type = "within") |> as("GBreaks")
+
+(interChrTra$Osa_Bar)|> as("GRanges") |> subsetByOverlaps(coa$Osa_Oki, type = "within") |> as("GBreaks")
+
+(interChrTra$Oki_Osa)|> as("GRanges") |> subsetByOverlaps(cleanGaps(interChrTra$Oki_Bar), type = "within", ignore.strand = TRUE) |> as("GBreaks")
+
+interChrTra$Oki_Osa |> as("GRanges") |> subsetByOverlaps(cleanGaps(interChrTra$Oki_Bar), type = "within", ignore.strand = TRUE) |> subsetByOverlaps(gbs$Oki_Bar, ignore.strand = T) |> as("GBreaks")
+
+findSpecificTra <- function(pair1, pair2) {
+  Tra1 <- interChrTra[[pair1]]
+  Tra2 <- interChrTra[[pair2]]
+  # First, Tra1 must not overlap with Tra1
+  # Strand is ignored because it can vary locally due to inversions.
+  Tra1_ov_Tra2 <- findOverlaps(Tra1, Tra2, ignore.strand = TRUE)
+  Tra1_not_in_Tra2 <- Tra1[! seq_along(Tra1) %in% unique(queryHits(Tra1_ov_Tra2))]
+  # Selected ranges must not overlap with unmapped ranges inpair2
+  Tra1_ov_unmap_pair2 <- findOverlaps(Tra1, unmap[[pair2]], ignore.strand = TRUE)
+  Tra1[! seq_along(Tra1) %in% queryHits(Tra1_ov_unmap_pair2)]
+  
+  # Tra1 is not in Tra2 if it is covered by a gap region of Tra2.
+  # Strand is ignored because it can vary locally due to inversions.
+  # Tra1_not_in_Tra2 <- findOverlaps(cleanGaps(Tra2), Tra1, type = "within", ignore.strand = TRUE)
+  # Tra1[unique(subjectHits(Tra1_not_in_Tra2))]
+}
+# findSpecificTra <- function(pair1, pair2) {
+#   Tra1 <- interChrTra[[pair1]]
+#   Tra2 <- interChrTra[[pair2]]
+#   Tra1_not_in_pair2 <- findOverlaps(coa[[pair2]], Tra1 + 1000, type = "within", ignore.strand = TRUE)
+#   Tra1[unique(subjectHits(Tra1_not_in_pair2))]
+# }
+```
