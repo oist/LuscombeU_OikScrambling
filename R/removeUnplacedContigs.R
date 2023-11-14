@@ -9,7 +9,7 @@
 #'
 #' @export
 
-removeUplacedCongits <- function (gb, target = TRUE, query = TRUE) {
+removeUnplacedContigs <- function (gb, target = TRUE, query = TRUE) {
   chromosomeScaleScaffolds <- c('chr1', 'Chr1', 'chr2', 'Chr2', 'PAR', 'XSR', 'YSR')
   if (isTRUE(target))
     gb <- plyranges::filter(gb, seqnames %in% chromosomeScaleScaffolds)
