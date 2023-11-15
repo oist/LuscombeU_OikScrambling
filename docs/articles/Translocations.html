@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">OikScrambling</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">5.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">5.1.0</span>
       </span>
     </div>
 
@@ -53,22 +53,25 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/OxfordPlots.html">Figure 1A DNA line plots</a>
+      <a href="../articles/OxfordPlots.html">Figure 1B DNA line plots</a>
     </li>
     <li>
-      <a href="../articles/ParallelPlots.html">Figure 1B chromosome parallel plots</a>
+      <a href="../articles/ParallelPlots.html">Figure 1C chromosome parallel plots</a>
     </li>
     <li>
-      <a href="../articles/DistanceMeasures.html">Table 1 scrambling index</a>
+      <a href="../articles/DistanceMeasures.html">Figure 1D scrambling index</a>
+    </li>
+    <li>
+      <a href="../articles/OrthogroupSyntenies.html">Figure 2A orthogroup dot plots and synteny block histograms</a>
     </li>
     <li>
       <a href="../articles/ChromosomePlots.html">Figure 5 genome-wide feature patterns</a>
     </li>
     <li>
-      <a href="../articles/SquareWindowPlots.html">Figure 7 DNA line plots</a>
+      <a href="../articles/SquareWindowPlots.html">Figure 7A–D DNA line plots</a>
     </li>
     <li>
-      <a href="../articles/ScalingBreakpoints.html">Figure 7 breakpoint number barplots</a>
+      <a href="../articles/ScalingBreakpoints.html">Figure 7E breakpoint number barplots</a>
     </li>
   </ul>
 </li>
@@ -80,6 +83,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/AomScaffolding.html">Scaffolding of the AOM-5 genome</a>
+    </li>
+    <li>
+      <a href="../articles/BergenScaffolding.html">Scaffolding of the OdB3 genome</a>
+    </li>
+    <li>
       <a href="../articles/CNEs.html">Conserved non-coding elements</a>
     </li>
     <li>
@@ -102,6 +111,9 @@
     </li>
     <li>
       <a href="../articles/Inversions.html">Inversions</a>
+    </li>
+    <li>
+      <a href="../articles/KumeScaffolding.html">Scaffolding of the KUM-M3 genome</a>
     </li>
     <li>
       <a href="../articles/LoadGenomicBreaks.html">Load genomic break data</a>
@@ -184,7 +196,7 @@
                         <h4 data-toc-skip class="author">Charles
 Plessy</h4>
             
-            <h4 data-toc-skip class="date">13 October, 2023</h4>
+            <h4 data-toc-skip class="date">15 November, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/oist/LuscombeU_OikScrambling/blob/HEAD/vignettes/Translocations.Rmd" class="external-link"><code>vignettes/Translocations.Rmd</code></a></small>
       <div class="hidden name"><code>Translocations.Rmd</code></div>
@@ -230,14 +242,14 @@ and <code><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocat
 neighbors, but not colinearly. The span of unaligned regions between
 them varies greatly.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/showTranslocations.html" class="external-link">showTranslocations</a></span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">x</span></span>
-<span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/swap.html" class="external-link">swap</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">showTranslocations</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Kum</span> <span class="op">|&gt;</span> <span class="fu">flagTranslocations</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">x</span></span>
+<span><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu">swap</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span>i<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Translocations_files/figure-html/show_some_translocations-1.png" width="700"></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Translocations_files/figure-html/show_some_translocations-2.png" width="700"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/plotApairOfChrs.html" class="external-link">plotApairOfChrs</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">plotApairOfChrs</span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Translocations_files/figure-html/show_some_translocations-3.png" width="700"></p>
 </div>
 <div class="section level2">
@@ -253,21 +265,21 @@ searches the <em>target</em> genome.</p></li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trans_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  align  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  mapped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  tra_rm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span></span>
+<span>  align  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">flagTranslocations</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  mapped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>,  <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">flagTranslocations</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  tra_rm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">flagTranslocations</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span><span class="op">$</span><span class="va">tra</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>  <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">class</span>     <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistClass.html">compDistClass</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">genus</span>     <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compGenus.html">compGenus</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">target</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">pairname</span>  <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistance.html">compDistance</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">class</span>     <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compDistClass.html">compDistClass</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">genus</span>     <span class="op">&lt;-</span> <span class="fu">OikScrambling</span><span class="fu">:::</span><span class="fu"><a href="../reference/compGenus.html">compGenus</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">trans_summary</span><span class="op">$</span><span class="va">target</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trans_summary</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">trans_summary</span> <span class="op">|&gt;</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"align"</span>, <span class="st">"mapped"</span>, <span class="st">"tra_rm"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">name</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>col <span class="op">=</span> <span class="va">class</span>, pch <span class="op">=</span> <span class="va">target</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span> <span class="op">(</span><span class="st">"Number of translocations found after different post-processings"</span>,</span>
+<span>  <span class="fu">ggtitle</span> <span class="op">(</span><span class="st">"Number of translocations found after different post-processings"</span>,</span>
 <span>           subtitle <span class="op">=</span> <span class="st">"align: raw, mapped: collapsed, tra_rm: translocated repeats removed."</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">genus</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">genus</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: The shape palette can deal with a maximum of 6 discrete values because</span></span>
 <span><span class="co">## more than 6 becomes difficult to discriminate; you have 8. Consider</span></span>
 <span><span class="co">## specifying shapes manually if you must have them.</span></span></code></pre>
@@ -325,22 +337,22 @@ longer.</p>
 comparison they seem to associate strongly with repeats.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">flagSmallTranslocations</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://oist.github.io/GenomicBreaks/reference/flagTranslocations.html" class="external-link">flagTranslocations</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
-<span>  <span class="va">a</span><span class="op">$</span><span class="va">w0</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/start.html" class="external-link">width</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
+<span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">flagTranslocations</span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
+<span>  <span class="va">a</span><span class="op">$</span><span class="va">w0</span>  <span class="op">&lt;-</span> <span class="fu">width</span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
 <span>  <span class="va">a</span><span class="op">$</span><span class="va">w1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">a</span><span class="op">$</span><span class="va">w0</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="cn">NA</span><span class="op">)</span></span>
 <span>  <span class="va">a</span><span class="op">$</span><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">a</span><span class="op">$</span><span class="va">w0</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span></span>
 <span>  <span class="va">a</span><span class="op">$</span><span class="va">midSmaller</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">a</span><span class="op">$</span><span class="va">w0</span> <span class="op">+</span> <span class="va">a</span><span class="op">$</span><span class="va">w2</span> <span class="op">&gt;</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">a</span><span class="op">$</span><span class="va">w1</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">a</span><span class="op">$</span><span class="va">tra</span></span>
 <span>  <span class="va">a</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">smallTransObjs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/SimpleList-class.html" class="external-link">SimpleList</a></span><span class="op">(</span></span>
-<span>  align_s  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">flagSmallTranslocations</span><span class="op">)</span>,</span>
-<span>  mapped_s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">flagSmallTranslocations</span><span class="op">)</span>,</span>
-<span>  tra_rm_s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">flagSmallTranslocations</span><span class="op">)</span></span>
+<span><span class="va">smallTransObjs</span> <span class="op">&lt;-</span> <span class="fu">SimpleList</span><span class="op">(</span></span>
+<span>  align_s  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">gbs</span>, <span class="va">flagSmallTranslocations</span><span class="op">)</span>,</span>
+<span>  mapped_s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span>, <span class="va">flagSmallTranslocations</span><span class="op">)</span>,</span>
+<span>  tra_rm_s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa2</span>, <span class="va">flagSmallTranslocations</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> <span class="va">trans_summary</span></span>
-<span>     , <span class="va">smallTransObjs</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">sapply</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">midSmaller</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span> <span class="va">trans_summary</span></span>
+<span>     , <span class="va">smallTransObjs</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">sapply</span>, \<span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">midSmaller</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         align mapped tra_rm      pairname           class          genus target</span></span>
 <span><span class="co">## Oki_Osa   428    513    276   Oki – North         distant     Oikopleura    Oki</span></span>
 <span><span class="co">## Oki_Bar   389    461    252   Oki – North         distant     Oikopleura    Oki</span></span>
@@ -409,6 +421,363 @@ comparison they seem to associate strongly with repeats.</p>
 <span><span class="co">## Cbr_Cni    1933     2473     1328</span></span>
 <span><span class="co">## Cbr_Cre     145      369      322</span></span>
 <span><span class="co">## Cbr_Cel     125      366      318</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="inter-arm-translocations">Inter-arm translocations<a class="anchor" aria-label="anchor" href="#inter-arm-translocations"></a>
+</h2>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span> <span class="op">|&gt;</span> <span class="fu">flagTranslocations</span><span class="op">(</span>both <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">showTranslocations</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GBreaks object with 1393 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##        seqnames            ranges strand |                query     score</span></span>
+<span><span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;GRanges&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##     13     chr1     589935-590156      + | Chr1:1311169-1311381       222</span></span>
+<span><span class="co">##     14     chr1     590893-591123      - | Chr1:1312994-1313215       231</span></span>
+<span><span class="co">##     15     chr1     591276-591419      + | Chr1:1312192-1312317       144</span></span>
+<span><span class="co">##     35     chr1     736824-738412      + | Chr1:2033491-2036651      1589</span></span>
+<span><span class="co">##     36     chr1     738882-741671      + | Chr1:2155668-2159253      2790</span></span>
+<span><span class="co">##    ...      ...               ...    ... .                  ...       ...</span></span>
+<span><span class="co">##   8757      XSR 12687471-12687866      - | Chr2:3863401-3863796       396</span></span>
+<span><span class="co">##   8758      XSR 12688329-12690311      + |  XSR:6432840-6434525      1983</span></span>
+<span><span class="co">##   8785      YSR     235526-282265      - | Chr2:1577776-1589273     46740</span></span>
+<span><span class="co">##   8786      YSR     283713-284365      + | Chr2:1601786-1609586       653</span></span>
+<span><span class="co">##   8787      YSR     287448-292843      - | Chr2:1568654-1571126      5396</span></span>
+<span><span class="co">##             Arm                   rep   repOvlp         transcripts        flag</span></span>
+<span><span class="co">##        &lt;factor&gt;       &lt;CharacterList&gt; &lt;integer&gt;               &lt;Rle&gt; &lt;character&gt;</span></span>
+<span><span class="co">##     13    short                  &lt;NA&gt;         0                &lt;NA&gt;         Tra</span></span>
+<span><span class="co">##     14    short                  &lt;NA&gt;         0                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##     15    short                  &lt;NA&gt;         0                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##     35    short                   rnd        98                &lt;NA&gt;         Tra</span></span>
+<span><span class="co">##     36    short                  &lt;NA&gt;         0             g106.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    ...      ...                   ...       ...                 ...         ...</span></span>
+<span><span class="co">##   8757      XSR                  &lt;NA&gt;         0                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   8758      XSR  tandem,LowComplexity        74 g17003.t1;g17003.t2        &lt;NA&gt;</span></span>
+<span><span class="co">##   8785      YSR unknown,ltr-1,rnd,...      8342                &lt;NA&gt;         Tra</span></span>
+<span><span class="co">##   8786      YSR          ltr-1,tandem        49                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   8787      YSR unknown,rnd,ltr-1,...      1742                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##           nonCoa   tra</span></span>
+<span><span class="co">##        &lt;logical&gt; &lt;Rle&gt;</span></span>
+<span><span class="co">##     13      TRUE  TRUE</span></span>
+<span><span class="co">##     14      TRUE FALSE</span></span>
+<span><span class="co">##     15      TRUE FALSE</span></span>
+<span><span class="co">##     35     FALSE  TRUE</span></span>
+<span><span class="co">##     36     FALSE FALSE</span></span>
+<span><span class="co">##    ...       ...   ...</span></span>
+<span><span class="co">##   8757      TRUE FALSE</span></span>
+<span><span class="co">##   8758      TRUE FALSE</span></span>
+<span><span class="co">##   8785     FALSE  TRUE</span></span>
+<span><span class="co">##   8786     FALSE FALSE</span></span>
+<span><span class="co">##   8787     FALSE FALSE</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></span></code></pre>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">addNormalisedArmNames</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Better would be to flag query arms in the main objects, but I do not want</span></span>
+<span>  <span class="co"># to push a rebuild now...</span></span>
+<span>  <span class="va">genomeQ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">genome</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">gb</span>   <span class="op">$</span>   <span class="va">armNames</span>       <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span>,       <span class="va">gb</span><span class="op">$</span><span class="va">Arm</span>                                     <span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">$</span><span class="va">armNames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span><span class="op">)</span>, <span class="fu">flagLongShort</span><span class="op">(</span><span class="va">gb</span><span class="op">$</span><span class="va">query</span>, <span class="va">longShort</span><span class="op">[[</span><span class="va">genomeQ</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="va">Arm</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">gb</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">interArmTranslocations</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">translocations</span> <span class="op">&lt;-</span> <span class="va">gb</span> <span class="op">|&gt;</span> <span class="fu">addNormalisedArmNames</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">flagTranslocations</span><span class="op">(</span>both <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">showTranslocations</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">translocations</span><span class="op">[</span><span class="va">translocations</span><span class="op">$</span><span class="va">armNames</span> <span class="op">!=</span> <span class="va">translocations</span><span class="op">$</span><span class="va">query</span><span class="op">$</span><span class="va">armNames</span><span class="op">]</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">interChrTranslocations</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">gb</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">translocations</span> <span class="op">&lt;-</span> <span class="va">gb</span> <span class="op">|&gt;</span> <span class="fu">flagTranslocations</span><span class="op">(</span>both <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">showTranslocations</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">translocations</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">translocations</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">!=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="fu">seqnames</span><span class="op">(</span><span class="va">translocations</span><span class="op">$</span><span class="va">query</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">interChrTra</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">coa</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>, <span class="va">interChrTranslocations</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">SimpleList</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Need to improve subsetByOverlaps_GBreaks to allow ignoring queries when needed</span></span>
+<span><span class="op">(</span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GRanges"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Bar</span>, type <span class="op">=</span> <span class="st">"within"</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GBreaks"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GBreaks object with 99 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##        seqnames            ranges strand |                  query     score</span></span>
+<span><span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##    392     chr1   2218139-2218793      - | Chr2:10616806-10617403       655</span></span>
+<span><span class="co">##    633     chr1   3020827-3021941      - |    PAR:1287529-1288984      1115</span></span>
+<span><span class="co">##    634     chr1   3021988-3026296      + |  PAR:15424385-15427922      4309</span></span>
+<span><span class="co">##    743     chr1   3438590-3440682      + |    PAR:2539758-2541854      2093</span></span>
+<span><span class="co">##    862     chr1   3931646-3932405      - |   Chr2:2383635-2384403       760</span></span>
+<span><span class="co">##    ...      ...               ...    ... .                    ...       ...</span></span>
+<span><span class="co">##   8626      XSR 11725261-11725823      + |    PAR:2530103-2530772       563</span></span>
+<span><span class="co">##   8757      XSR 12687471-12687866      - |   Chr2:3863401-3863796       396</span></span>
+<span><span class="co">##   8785      YSR     235526-282265      - |   Chr2:1577776-1589273     46740</span></span>
+<span><span class="co">##   8786      YSR     283713-284365      + |   Chr2:1601786-1609586       653</span></span>
+<span><span class="co">##   8787      YSR     287448-292843      - |   Chr2:1568654-1571126      5396</span></span>
+<span><span class="co">##             Arm                   rep   repOvlp transcripts        flag</span></span>
+<span><span class="co">##        &lt;factor&gt;       &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt;</span></span>
+<span><span class="co">##    392    short                  &lt;NA&gt;         0     g539.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    633    short                  &lt;NA&gt;         0     g772.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    634    short            rnd,tandem       163        &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##    743    short                  &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##    862    short                  &lt;NA&gt;         0    g1034.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    ...      ...                   ...       ...         ...         ...</span></span>
+<span><span class="co">##   8626      XSR                  &lt;NA&gt;         0   g16782.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##   8757      XSR                  &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   8785      YSR unknown,ltr-1,rnd,...      8342        &lt;NA&gt;         Tra</span></span>
+<span><span class="co">##   8786      YSR          ltr-1,tandem        49        &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   8787      YSR unknown,rnd,ltr-1,...      1742        &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##           nonCoa   tra</span></span>
+<span><span class="co">##        &lt;logical&gt; &lt;Rle&gt;</span></span>
+<span><span class="co">##    392      TRUE FALSE</span></span>
+<span><span class="co">##    633     FALSE FALSE</span></span>
+<span><span class="co">##    634     FALSE FALSE</span></span>
+<span><span class="co">##    743      TRUE FALSE</span></span>
+<span><span class="co">##    862      TRUE FALSE</span></span>
+<span><span class="co">##    ...       ...   ...</span></span>
+<span><span class="co">##   8626      TRUE FALSE</span></span>
+<span><span class="co">##   8757      TRUE FALSE</span></span>
+<span><span class="co">##   8785     FALSE  TRUE</span></span>
+<span><span class="co">##   8786     FALSE FALSE</span></span>
+<span><span class="co">##   8787     FALSE FALSE</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></span></code></pre>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="op">(</span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GRanges"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Osa</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GBreaks"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GBreaks object with 48 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##        seqnames            ranges strand |                  query     score</span></span>
+<span><span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##    618     chr1   3006415-3008370      + |     Chr2:747804-749281      1956</span></span>
+<span><span class="co">##    625     chr1   3032334-3036522      - |    PAR:6665593-6669046      4189</span></span>
+<span><span class="co">##    627     chr1   3037442-3038334      - |    PAR:6664130-6665096       893</span></span>
+<span><span class="co">##    755     chr1   3551783-3551945      + |  PAR:12990472-12990634       163</span></span>
+<span><span class="co">##    855     chr1   3904642-3905709      + |    PAR:3806639-3807330      1068</span></span>
+<span><span class="co">##    ...      ...               ...    ... .                    ...       ...</span></span>
+<span><span class="co">##   6976      PAR 14357639-14359817      - | Chr2:10976243-10978419      2179</span></span>
+<span><span class="co">##   7133      PAR 15755978-15756608      + |    XSR:8253159-8253790       631</span></span>
+<span><span class="co">##   7166      PAR 16388704-16389029      - |  XSR:12028506-12028831       326</span></span>
+<span><span class="co">##   7644      XSR   4161326-4167846      - | Chr2:10163843-10170307      6521</span></span>
+<span><span class="co">##   7975      XSR   7350475-7351370      - |     Chr2:655237-656179       896</span></span>
+<span><span class="co">##             Arm             rep   repOvlp            transcripts        flag</span></span>
+<span><span class="co">##        &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;                  &lt;Rle&gt; &lt;character&gt;</span></span>
+<span><span class="co">##    618    short            &lt;NA&gt;         0                g769.t1         Tra</span></span>
+<span><span class="co">##    625    short      tandem,rnd         0 g777.t4;g777.t3;g777..         Tra</span></span>
+<span><span class="co">##    627    short            &lt;NA&gt;         0 g777.t3;g777.t2;g777..        &lt;NA&gt;</span></span>
+<span><span class="co">##    755    short            &lt;NA&gt;         0                   &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##    855    short         unknown       246               g1027.t1         Tra</span></span>
+<span><span class="co">##    ...      ...             ...       ...                    ...         ...</span></span>
+<span><span class="co">##   6976     long             rnd        73                   &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   7133     long            &lt;NA&gt;         0                   &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   7166     long            &lt;NA&gt;         0              g13106.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##   7644     XSR           tandem         0              g14457.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##   7975     XSR             &lt;NA&gt;         0                   &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##           nonCoa   tra</span></span>
+<span><span class="co">##        &lt;logical&gt; &lt;Rle&gt;</span></span>
+<span><span class="co">##    618     FALSE  TRUE</span></span>
+<span><span class="co">##    625     FALSE  TRUE</span></span>
+<span><span class="co">##    627      TRUE FALSE</span></span>
+<span><span class="co">##    755      TRUE FALSE</span></span>
+<span><span class="co">##    855     FALSE  TRUE</span></span>
+<span><span class="co">##    ...       ...   ...</span></span>
+<span><span class="co">##   6976      TRUE FALSE</span></span>
+<span><span class="co">##   7133      TRUE FALSE</span></span>
+<span><span class="co">##   7166      TRUE FALSE</span></span>
+<span><span class="co">##   7644      TRUE FALSE</span></span>
+<span><span class="co">##   7975      TRUE FALSE</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></span></code></pre>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="op">(</span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span><span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GRanges"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Oki_Nor</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GBreaks"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GBreaks object with 66 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##        seqnames            ranges strand |                  query     score</span></span>
+<span><span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##    560     chr1   2786840-2787602      + | Chr2:11272657-11273221       763</span></span>
+<span><span class="co">##    618     chr1   3006415-3008370      + |     Chr2:747804-749281      1956</span></span>
+<span><span class="co">##    620     chr1   3010918-3020672      + |     Chr2:749349-752515      9755</span></span>
+<span><span class="co">##    820     chr1   3790582-3790767      - |   Chr2:3874473-3874658       186</span></span>
+<span><span class="co">##    853     chr1   3889113-3890233      - |    XSR:5219411-5220619      1121</span></span>
+<span><span class="co">##    ...      ...               ...    ... .                    ...       ...</span></span>
+<span><span class="co">##   7924      XSR   6158215-6160212      - |   Chr2:1638589-1640592      1998</span></span>
+<span><span class="co">##   8006      XSR   8015454-8024003      - | Chr2:10589955-10597296      8550</span></span>
+<span><span class="co">##   8026      XSR   8326231-8326659      + |  PAR:12179993-12180400       429</span></span>
+<span><span class="co">##   8186      XSR 10606421-10607002      + |   Chr1:7772519-7773124       582</span></span>
+<span><span class="co">##   8288      XSR 11491875-11493771      - |   Chr2:3515449-3517293      1897</span></span>
+<span><span class="co">##             Arm             rep   repOvlp         transcripts        flag</span></span>
+<span><span class="co">##        &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;               &lt;Rle&gt; &lt;character&gt;</span></span>
+<span><span class="co">##    560    short            &lt;NA&gt;         0             g685.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    618    short            &lt;NA&gt;         0             g769.t1         Tra</span></span>
+<span><span class="co">##    620    short           ltr-1       510                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##    820    short            &lt;NA&gt;         0             g988.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    853    short            &lt;NA&gt;         0            g1021.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    ...      ...             ...       ...                 ...         ...</span></span>
+<span><span class="co">##   7924      XSR            &lt;NA&gt;         0                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   8006      XSR       rnd,ltr-1       452 g15646.t1;g15647.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##   8026      XSR            &lt;NA&gt;         0                &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   8186      XSR            &lt;NA&gt;         0           g16465.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##   8288      XSR            &lt;NA&gt;         0           g16719.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##           nonCoa   tra</span></span>
+<span><span class="co">##        &lt;logical&gt; &lt;Rle&gt;</span></span>
+<span><span class="co">##    560     FALSE FALSE</span></span>
+<span><span class="co">##    618     FALSE  TRUE</span></span>
+<span><span class="co">##    620     FALSE FALSE</span></span>
+<span><span class="co">##    820      TRUE FALSE</span></span>
+<span><span class="co">##    853      TRUE FALSE</span></span>
+<span><span class="co">##    ...       ...   ...</span></span>
+<span><span class="co">##   7924      TRUE FALSE</span></span>
+<span><span class="co">##   8006     FALSE FALSE</span></span>
+<span><span class="co">##   8026      TRUE FALSE</span></span>
+<span><span class="co">##   8186      TRUE FALSE</span></span>
+<span><span class="co">##   8288      TRUE FALSE</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></span></code></pre>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="op">(</span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Osa_Bar</span><span class="op">)</span><span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GRanges"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">coa</span><span class="op">$</span><span class="va">Osa_Oki</span>, type <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GBreaks"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GBreaks object with 42 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##        seqnames            ranges strand |                  query     score</span></span>
+<span><span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##     19     Chr1     102613-105089      - | Chr2:11272161-11273579      2477</span></span>
+<span><span class="co">##     76     Chr1     446061-446186      - |   Chr2:1762439-1762563       126</span></span>
+<span><span class="co">##    378     Chr1   2360831-2370002      + |  XSR:11990727-12000901      9172</span></span>
+<span><span class="co">##    523     Chr1   3093634-3093871      + |    YSR:1095082-1095309       238</span></span>
+<span><span class="co">##    652     Chr1   3907400-3907935      + | Chr2:12914421-12914880       536</span></span>
+<span><span class="co">##    ...      ...               ...    ... .                    ...       ...</span></span>
+<span><span class="co">##   3617      XSR   9134655-9134746      + |   Chr2:9342645-9342736        92</span></span>
+<span><span class="co">##   3652      XSR   9668252-9668390      - |   Chr2:1638459-1638569       139</span></span>
+<span><span class="co">##   3714      XSR 10394962-10395341      - |     Chr2:455161-455540       380</span></span>
+<span><span class="co">##   3778      XSR 11180724-11180835      + |    YSR:1969047-1969146       112</span></span>
+<span><span class="co">##   3902      YSR     805902-806197      - |   Chr1:2376560-2376859       296</span></span>
+<span><span class="co">##             Arm                       rep   repOvlp   transcripts        flag</span></span>
+<span><span class="co">##        &lt;factor&gt;           &lt;CharacterList&gt; &lt;integer&gt;         &lt;Rle&gt; &lt;character&gt;</span></span>
+<span><span class="co">##     19    short                       rnd        68 g26.t1;g26.t2        &lt;NA&gt;</span></span>
+<span><span class="co">##     76    short                       rnd       126       g107.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    378    short rnd,unknown,LowComplexity      3021       g528.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##    523    short                      &lt;NA&gt;         0          &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##    652    short                       rnd         0          &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##    ...      ...                       ...       ...           ...         ...</span></span>
+<span><span class="co">##   3617      XSR                      &lt;NA&gt;         0          &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   3652      XSR                      &lt;NA&gt;         0     g14406.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##   3714      XSR                       rnd         0          &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##   3778      XSR                      &lt;NA&gt;         0     g14817.t1        &lt;NA&gt;</span></span>
+<span><span class="co">##   3902      YSR                       rnd       293          &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">##           nonCoa   tra</span></span>
+<span><span class="co">##        &lt;logical&gt; &lt;Rle&gt;</span></span>
+<span><span class="co">##     19     FALSE FALSE</span></span>
+<span><span class="co">##     76      TRUE FALSE</span></span>
+<span><span class="co">##    378     FALSE FALSE</span></span>
+<span><span class="co">##    523      TRUE FALSE</span></span>
+<span><span class="co">##    652      TRUE FALSE</span></span>
+<span><span class="co">##    ...       ...   ...</span></span>
+<span><span class="co">##   3617      TRUE FALSE</span></span>
+<span><span class="co">##   3652      TRUE FALSE</span></span>
+<span><span class="co">##   3714      TRUE FALSE</span></span>
+<span><span class="co">##   3778      TRUE FALSE</span></span>
+<span><span class="co">##   3902      TRUE FALSE</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 483 sequences from OSKA2016v1.9 genome</span></span></code></pre>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="op">(</span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Oki_Osa</span><span class="op">)</span><span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GRanges"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="fu">cleanGaps</span><span class="op">(</span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"within"</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GBreaks"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GBreaks object with 77 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##        seqnames            ranges strand |                  query     score</span></span>
+<span><span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##    392     chr1   2218139-2218793      - | Chr2:10616806-10617403       655</span></span>
+<span><span class="co">##    572     chr1   2804891-2806071      + |    YSR:1253745-1254981      1181</span></span>
+<span><span class="co">##    605     chr1   2918232-2919567      - | Chr2:10559416-10560341      1336</span></span>
+<span><span class="co">##    634     chr1   3021988-3026296      + |  PAR:15424385-15427922      4309</span></span>
+<span><span class="co">##    743     chr1   3438590-3440682      + |    PAR:2539758-2541854      2093</span></span>
+<span><span class="co">##    ...      ...               ...    ... .                    ...       ...</span></span>
+<span><span class="co">##   8232      XSR   7236144-7236655      + |    PAR:4358158-4358668       512</span></span>
+<span><span class="co">##   8236      XSR   7355890-7357438      - |   Chr2:3684734-3686177      1549</span></span>
+<span><span class="co">##   8238      XSR   7439674-7441392      - |    PAR:5237440-5239089      1719</span></span>
+<span><span class="co">##   8368      XSR   9229608-9229906      + |      YSR:358047-358349       299</span></span>
+<span><span class="co">##   8546      XSR 11090022-11090574      - |   Chr1:7962513-7963091       553</span></span>
+<span><span class="co">##             Arm             rep   repOvlp transcripts        flag    nonCoa</span></span>
+<span><span class="co">##        &lt;factor&gt; &lt;CharacterList&gt; &lt;integer&gt;       &lt;Rle&gt; &lt;character&gt; &lt;logical&gt;</span></span>
+<span><span class="co">##    392    short            &lt;NA&gt;         0     g539.t1        &lt;NA&gt;      TRUE</span></span>
+<span><span class="co">##    572    short             rnd         1        &lt;NA&gt;        &lt;NA&gt;      TRUE</span></span>
+<span><span class="co">##    605    short          tandem         0        &lt;NA&gt;        &lt;NA&gt;     FALSE</span></span>
+<span><span class="co">##    634    short      rnd,tandem       163        &lt;NA&gt;        &lt;NA&gt;     FALSE</span></span>
+<span><span class="co">##    743    short            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span></span>
+<span><span class="co">##    ...      ...             ...       ...         ...         ...       ...</span></span>
+<span><span class="co">##   8232      XSR            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span></span>
+<span><span class="co">##   8236      XSR            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span></span>
+<span><span class="co">##   8238      XSR            &lt;NA&gt;         0   g15473.t1        &lt;NA&gt;     FALSE</span></span>
+<span><span class="co">##   8368      XSR             rnd         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span></span>
+<span><span class="co">##   8546      XSR            &lt;NA&gt;         0        &lt;NA&gt;        &lt;NA&gt;      TRUE</span></span>
+<span><span class="co">##          tra</span></span>
+<span><span class="co">##        &lt;Rle&gt;</span></span>
+<span><span class="co">##    392 FALSE</span></span>
+<span><span class="co">##    572 FALSE</span></span>
+<span><span class="co">##    605 FALSE</span></span>
+<span><span class="co">##    634 FALSE</span></span>
+<span><span class="co">##    743 FALSE</span></span>
+<span><span class="co">##    ...   ...</span></span>
+<span><span class="co">##   8232 FALSE</span></span>
+<span><span class="co">##   8236 FALSE</span></span>
+<span><span class="co">##   8238 FALSE</span></span>
+<span><span class="co">##   8368 FALSE</span></span>
+<span><span class="co">##   8546 FALSE</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></span></code></pre>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Oki_Osa</span> <span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GRanges"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="fu">cleanGaps</span><span class="op">(</span><span class="va">interChrTra</span><span class="op">$</span><span class="va">Oki_Bar</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"within"</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subsetByOverlaps</span><span class="op">(</span><span class="va">gbs</span><span class="op">$</span><span class="va">Oki_Bar</span>, ignore.strand <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">as</span><span class="op">(</span><span class="st">"GBreaks"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## GBreaks object with 34 ranges and 9 metadata columns:</span></span>
+<span><span class="co">##        seqnames            ranges strand |                  query     score</span></span>
+<span><span class="co">##           &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |              &lt;GRanges&gt; &lt;integer&gt;</span></span>
+<span><span class="co">##    605     chr1   2918232-2919567      - | Chr2:10559416-10560341      1336</span></span>
+<span><span class="co">##    634     chr1   3021988-3026296      + |  PAR:15424385-15427922      4309</span></span>
+<span><span class="co">##    862     chr1   3931646-3932405      - |   Chr2:2383635-2384403       760</span></span>
+<span><span class="co">##    954     chr1   4306180-4309907      - | Chr2:11892246-11895803      3728</span></span>
+<span><span class="co">##   1425     chr1   7584062-7667431      - | Chr2:13302398-13374732     83370</span></span>
+<span><span class="co">##    ...      ...               ...    ... .                    ...       ...</span></span>
+<span><span class="co">##   6965      PAR 11801780-11802877      - |    XSR:1771745-1772855      1098</span></span>
+<span><span class="co">##   7429      PAR 15998120-16007542      - |   Chr1:2494108-2501994      9423</span></span>
+<span><span class="co">##   7973      XSR   4742322-4743280      - |  PAR:12886116-12887043       959</span></span>
+<span><span class="co">##   8109      XSR   5505287-5506181      + |     Chr2:137635-138385       895</span></span>
+<span><span class="co">##   8238      XSR   7439674-7441392      - |    PAR:5237440-5239089      1719</span></span>
+<span><span class="co">##             Arm                    rep   repOvlp            transcripts</span></span>
+<span><span class="co">##        &lt;factor&gt;        &lt;CharacterList&gt; &lt;integer&gt;                  &lt;Rle&gt;</span></span>
+<span><span class="co">##    605    short                 tandem         0                   &lt;NA&gt;</span></span>
+<span><span class="co">##    634    short             rnd,tandem       163                   &lt;NA&gt;</span></span>
+<span><span class="co">##    862    short                   &lt;NA&gt;         0               g1034.t1</span></span>
+<span><span class="co">##    954    short                   &lt;NA&gt;         0      g1141.t1;g1141.t2</span></span>
+<span><span class="co">##   1425    long  rnd,tandem,unknown,...      3183 g2015.t1;g2017.t1;g2..</span></span>
+<span><span class="co">##    ...      ...                    ...       ...                    ...</span></span>
+<span><span class="co">##   6965     long                   &lt;NA&gt;         0              g11839.t1</span></span>
+<span><span class="co">##   7429     long                  ltr-1      9265              g13014.t1</span></span>
+<span><span class="co">##   7973     XSR                    &lt;NA&gt;         0                   &lt;NA&gt;</span></span>
+<span><span class="co">##   8109     XSR                    &lt;NA&gt;         0              g14850.t1</span></span>
+<span><span class="co">##   8238     XSR                    &lt;NA&gt;         0              g15473.t1</span></span>
+<span><span class="co">##               flag    nonCoa   tra</span></span>
+<span><span class="co">##        &lt;character&gt; &lt;logical&gt; &lt;Rle&gt;</span></span>
+<span><span class="co">##    605        &lt;NA&gt;     FALSE FALSE</span></span>
+<span><span class="co">##    634        &lt;NA&gt;     FALSE FALSE</span></span>
+<span><span class="co">##    862        &lt;NA&gt;      TRUE FALSE</span></span>
+<span><span class="co">##    954        &lt;NA&gt;      TRUE FALSE</span></span>
+<span><span class="co">##   1425         Tra     FALSE  TRUE</span></span>
+<span><span class="co">##    ...         ...       ...   ...</span></span>
+<span><span class="co">##   6965        &lt;NA&gt;      TRUE FALSE</span></span>
+<span><span class="co">##   7429        &lt;NA&gt;     FALSE FALSE</span></span>
+<span><span class="co">##   7973        &lt;NA&gt;      TRUE FALSE</span></span>
+<span><span class="co">##   8109        &lt;NA&gt;      TRUE FALSE</span></span>
+<span><span class="co">##   8238        &lt;NA&gt;     FALSE FALSE</span></span>
+<span><span class="co">##   -------</span></span>
+<span><span class="co">##   seqinfo: 19 sequences from OKI2018.I69 genome</span></span></code></pre>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">findSpecificTra</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pair1</span>, <span class="va">pair2</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">Tra1</span> <span class="op">&lt;-</span> <span class="va">interChrTra</span><span class="op">[[</span><span class="va">pair1</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">Tra2</span> <span class="op">&lt;-</span> <span class="va">interChrTra</span><span class="op">[[</span><span class="va">pair2</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="co"># First, Tra1 must not overlap with Tra1</span></span>
+<span>  <span class="co"># Strand is ignored because it can vary locally due to inversions.</span></span>
+<span>  <span class="va">Tra1_ov_Tra2</span> <span class="op">&lt;-</span> <span class="fu">findOverlaps</span><span class="op">(</span><span class="va">Tra1</span>, <span class="va">Tra2</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">Tra1_not_in_Tra2</span> <span class="op">&lt;-</span> <span class="va">Tra1</span><span class="op">[</span><span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">Tra1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">queryHits</span><span class="op">(</span><span class="va">Tra1_ov_Tra2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="co"># Selected ranges must not overlap with unmapped ranges inpair2</span></span>
+<span>  <span class="va">Tra1_ov_unmap_pair2</span> <span class="op">&lt;-</span> <span class="fu">findOverlaps</span><span class="op">(</span><span class="va">Tra1</span>, <span class="va">unmap</span><span class="op">[[</span><span class="va">pair2</span><span class="op">]</span><span class="op">]</span>, ignore.strand <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">Tra1</span><span class="op">[</span><span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">Tra1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu">queryHits</span><span class="op">(</span><span class="va">Tra1_ov_unmap_pair2</span><span class="op">)</span><span class="op">]</span></span>
+<span>  </span>
+<span>  <span class="co"># Tra1 is not in Tra2 if it is covered by a gap region of Tra2.</span></span>
+<span>  <span class="co"># Strand is ignored because it can vary locally due to inversions.</span></span>
+<span>  <span class="co"># Tra1_not_in_Tra2 &lt;- findOverlaps(cleanGaps(Tra2), Tra1, type = "within", ignore.strand = TRUE)</span></span>
+<span>  <span class="co"># Tra1[unique(subjectHits(Tra1_not_in_Tra2))]</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co"># findSpecificTra &lt;- function(pair1, pair2) {</span></span>
+<span><span class="co">#   Tra1 &lt;- interChrTra[[pair1]]</span></span>
+<span><span class="co">#   Tra2 &lt;- interChrTra[[pair2]]</span></span>
+<span><span class="co">#   Tra1_not_in_pair2 &lt;- findOverlaps(coa[[pair2]], Tra1 + 1000, type = "within", ignore.strand = TRUE)</span></span>
+<span><span class="co">#   Tra1[unique(subjectHits(Tra1_not_in_pair2))]</span></span>
+<span><span class="co"># }</span></span></code></pre></div>
 </div>
   </div>
 
