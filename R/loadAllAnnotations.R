@@ -15,6 +15,7 @@ loadAllAnnotations <- function() {
     tx <- rtracklayer::import.gff(file)
     tx <- tx[seqnames(tx) %in% seqnames(genome)]
     tx <- GRanges(tx, seqinfo = seqinfo(genome))
+    tx[tx$type == "stop_codon"]$phase <- NA
     tx <- GenomicFeatures::makeTxDbFromGRanges(tx)
   }
 
@@ -24,6 +25,7 @@ loadAllAnnotations <- function() {
     tx <- tx[!is.na(tx$mRNA)]
     # Remove "scaffoldA" objects in the OdB3 annotation
     tx <- tx[seqnames(tx) %in% seqnames(genome)]
+    seqlevels(tx) <- seqlevelsInUse(tx)
     # Prepare gene entries
     tx$ID <- tx$mRNA
     tx$Parent <- ""
