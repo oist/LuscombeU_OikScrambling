@@ -13,8 +13,22 @@ editor_options:
   chunk_output_type: console
 ---
 
-Load packages and data
-======================
+Introduction
+============
+
+Breakpoint feature analyses.
+
+**Figure 3 panel C is produced by this vignette.**
+
+It also computes operons as we need their boundaries in the figure panel.
+
+** Figure 4 panel C is produced by this vignette**
+
+The vignette also contains extra material that is not entirely relevant to
+the manuscript, but that can not be moved elsewhere because it needs the
+orthogroup `GBreaks` object generated at the beginning at the top.
+
+## Load packages and data
 
 See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllTranscriptsGR`,
 and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
@@ -37,50 +51,10 @@ ces <- readRDS("CEs.Rds")
 tfbs <- readRDS("pwmMatchesOki_12_95.Rds")
 ```
 
-# Gene feature coverage around aligned and unaligned genomic regions.
+## Compute operons
 
-## Model operon areas
-
-### Notes about operons
-
-The operon of [Ganot et al., 2004](https://journals.asm.org/doi/10.1128/MCB.24.17.7795-7805.2004)
-appears to be conserved in OKI and OSA (near `OSKA2016v1.9::PAR:10984831-10995276`).
-In the annotation visible in ZENBU and NCBI:
-
- - `Oidioi.mRNA.OKI2018_I69.PAR.g12978` is the most likely start of the Ganot operon as
-   it starts downstream of a CAGE TSS peak and has no trans-splicing site.  It is
-   homologous to `g10133 (PAR:10985271..10985910+)` in OSKA2016v1.9 which also has a
-   transcription start site and no trans-splicing site.  Best Norwegian hit is `CBY19033`.
-   Gene name is unclear but weaker blast hits suggest _centrosomal POC5 isoform X1_.
- - IQ domain-containing protein K isoform X2 is `Oidioi.mRNA.OKI2018_I69.PAR.g12977`
-   and is `g10134` in OSKA2016.  It has a bona fide trans-splicing site in both genomes.
-   It is `CBY19034` in Norway. (Not reported in Ganot et al., 2004).
- - Exportin 7 is `Oidioi.mRNA.OKI2018_I69.PAR.g12976`. (First member
-   of the operon of Ganot et al., 2004, which calls it Ran-binding protein 16).  In the current annotation of the OSKA2016v1.9
-   genome, `g10135` matches well but misses the N-terminal part. Nevertheless a blastx
-   search in region `PAR:10986742..10988032+` finds it.  In line with this, there is
-   a trans-splicing site upstream the unannotated area.
- - Dynein light chain is `Oidioi.mRNA.OKI2018_I69.PAR.g12975`.
- - Delta tubulin is `Oidioi.mRNA.OKI2018_I69.PAR.g12974`.
- - _MBF_ is `Oidioi.mRNA.OKI2018_I69.PAR.g12973`.  Also called _enthelial differenciation-related factor 1_ in other species.
- - CycD is `Oidioi.mRNA.OKI2018_I69.PAR.g12972` and `g10138` in OSKA. Polyadenylation signal conserved.
- 
-(Note that the transcripts IDs here differ from the public ones.)
-
-Ganot et al., 2004 reported very small (<30) intercistronic regions and Denoeud
-et al., 2010 stated: “_The operons were predicted as co-oriented genes
-separated by 60 nucleotides at most : 1761 operons containing 4997 genes were
-predicted on the reference assembly_”.  However, in our annotation, we do not
-have the UTRs, but only the distances between translation stops and starts, so
-we need a broader window.  The example below shows that a window of 400 would
-break the Ganot 2004 operon, so let's use 500 instead.
-
-```{r ganot_operon}
-transcripts(annots$Oki) |> subsetByOverlaps(GRanges("PAR:15956430-15967745"))
-transcripts(annots$Oki) |> subsetByOverlaps(GRanges("PAR:15956430-15967745")) |> cleanGaps() |> width()
-```
-
-### Compute operons
+See the `vignette("OperonDetection",
+package = "OikScrambling")` for details.
 
 ```{r guess_operons}
 operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
@@ -89,12 +63,7 @@ sapply(operons, length)
 sapply(operons, \(o) {table(o$n)})
 ```
 
-With the OdB3 genome, the results are apparently close to those of Denoeud et
-al., 2010 (see above for why the difference).  We have a few more (1844 instead
-of 1761), they contain more genes (5814 instead of 4997), mostly because our
-computation outputs 50 operons longer than 9 genes (617 genes in total).
-Nevertheless, the proportion of operons of length 2, 3 and 4 are visually
-similar in both cases.
+# Gene feature coverage around aligned and unaligned genomic regions.
 
 ## Accessory functions
 
@@ -266,12 +235,12 @@ Most of the narrow-width aligned regions did not coalesce.  We use this
 as a classifier instead of an arbitrary width cutoff.  See
 `vignette("RegionWidths", package = "OikScrambling")` for details.
 
-#### Simplified version
+# Figure 3C panel
 
-With only 2 panels, for unmapped–aligned and bridge–aligned, we display
+,With only 2 panels, for unmapped–aligned and bridge–aligned, we display
 almost all the information present in the 5-panel version above.
 
-```{r genomic_features_byType_2, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+```{r prepare_functions_for_figure_plot}
 computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE=NULL, tfbs=NULL, operons=NULL, direction="left", withGenes = c("yes", "no", "only")) {
   withGenes <- match.arg(withGenes)
   pair <- paste(target, query, sep = "_")
@@ -288,10 +257,6 @@ computePlotData_simplified <- function(target, query, annots=NULL, reps=NULL, CE
   hmList
 }
 
-hmList_to_plot_noncoding    <- computePlotData_simplified("Oki", "Osa", reps = reps, CE = ces$ce__50__48, direction = "right")
-hmList_to_plot_genesoperons <- computePlotData_simplified("Oki", "Osa", annots = annots, operons = operons, direction = "right", withGenes = "only")
-hmList_to_plot_exonintron   <- computePlotData_simplified("Oki", "Osa", annots = annots, direction = "right", withGenes = "no")
-
 list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
   tib <-rbind(
     hmList_to_plot$brk         |> prepareGGFreqPlot("01_break"),
@@ -301,19 +266,101 @@ list_of_heatmaps_to_long_tibble <- function(hmList_to_plot, desc = NULL) {
   tib
 }
 
-rbind(
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_noncoding,    "noncoding"),
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_genesoperons, "genes and operons"),
-  list_of_heatmaps_to_long_tibble(hmList_to_plot_exonintron,   "exons and introns")
+twoBySixFigure <- function(noncod, genesop, exonintron)
+  rbind(
+  list_of_heatmaps_to_long_tibble(noncod,    "noncoding"),
+  list_of_heatmaps_to_long_tibble(genesop, "genes and operons"),
+  list_of_heatmaps_to_long_tibble(exonintron,   "exons and introns")
 ) |> ggplot() +
   aes(pos, freq, col = what) +
   geom_line() +
   facet_wrap(~desc2 + desc, nrow = 3) +
-  theme_bw() +
-  ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
+  theme_bw() 
 ```
 
-### Bridge regions classified by width.
+## Okinawa–Osaka
+
+```{r genomic_features_byType_2, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOkiOsa <- twoBySixFigure(
+  computePlotData_simplified("Oki", "Osa", reps = reps, CE = ces$ce__50__48, direction = "right"),
+  computePlotData_simplified("Oki", "Osa", annots = annots, operons = operons, direction = "right", withGenes = "only"),
+  computePlotData_simplified("Oki", "Osa", annots = annots, direction = "right", withGenes = "no")
+) +
+  ggtitle("Okinawa - Osaka")
+
+pOkiOsa + ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
+```
+
+## Okinawa–Barcelona
+
+```{r genomic_features_byType_Oki_Bar, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOkiBar <- twoBySixFigure(
+  computePlotData_simplified("Oki", "Bar", reps = reps, CE = ces$ce__50__48, direction = "right"),
+  computePlotData_simplified("Oki", "Bar", annots = annots, operons = operons, direction = "right", withGenes = "only"),
+  computePlotData_simplified("Oki", "Bar", annots = annots, direction = "right", withGenes = "no")
+) +
+  ggtitle("Okinawa - Barcelona")
+```
+
+## Okinawa–Kume
+
+```{r genomic_features_byType_Oki_Kum, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOkiKum <- twoBySixFigure(
+  computePlotData_simplified("Oki", "Kum", reps = reps, CE = ces$ce__50__48, direction = "right"),
+  computePlotData_simplified("Oki", "Kum", annots = annots, operons = operons, direction = "right", withGenes = "only"),
+  computePlotData_simplified("Oki", "Kum", annots = annots, direction = "right", withGenes = "no")
+) +
+  ggtitle("Okinawa - Kum")
+```
+
+## Okinawa plots
+
+```{r genomic_features_byType_Oki, fig.width=15, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOkiOsa + pOkiBar + pOkiKum + plot_layout(guides = 'collect')
+```
+
+## Osaka–Okinawa
+
+```{r genomic_features_byType_Osa_Oki, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOsaOki <- twoBySixFigure(
+  computePlotData_simplified("Osa", "Oki", reps = reps, CE = ces$ce__50__48, direction = "right"),
+  computePlotData_simplified("Osa", "Oki", annots = annots, operons = operons, direction = "right", withGenes = "only"),
+  computePlotData_simplified("Osa", "Oki", annots = annots, direction = "right", withGenes = "no")
+) +
+  ggtitle("Osaka - Okinawa")
+```
+
+## Osaka–Barcelona
+
+```{r genomic_features_byType_Osa_bar, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOsaBar <- twoBySixFigure(
+  computePlotData_simplified("Osa", "Bar", reps = reps, CE = ces$ce__50__48, direction = "right"),
+  computePlotData_simplified("Osa", "Bar", annots = annots, operons = operons, direction = "right", withGenes = "only"),
+  computePlotData_simplified("Osa", "Bar", annots = annots, direction = "right", withGenes = "no")
+) +
+  ggtitle("Osaka - Barcelona")
+```
+
+## Osaka–Aomori
+
+```{r genomic_features_byType_Osa_Aom, fig.width=6, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOsaAom <- twoBySixFigure(
+  computePlotData_simplified("Osa", "Aom", reps = reps, CE = ces$ce__50__48, direction = "right"),
+  computePlotData_simplified("Osa", "Aom", annots = annots, operons = operons, direction = "right", withGenes = "only"),
+  computePlotData_simplified("Osa", "Aom", annots = annots, direction = "right", withGenes = "no")
+) +
+  ggtitle("Osaka - Aomori")
+```
+
+## Osaka plots
+
+```{r genomic_features_byType_Osa, fig.width=15, fig.height=8, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
+pOsaOki + pOsaBar + pOsaAom + plot_layout(guides = 'collect')
+```
+
+# Extra genomic feature coverage plots.
+
+## Bridge regions classified by width.
 
 Short bridge regions contain small introns.  Long bridge regions contain repeats,
 which may be in introns.
@@ -361,7 +408,7 @@ rbind(
   ggtitle("Aligned on regions left boundary. CNE is 50/48.  Okinawa - Osaka")
 ```
 
-### Aligning on center instead of border.
+## Aligning on center instead of border.
 
 ```{r genomic_features_byType.centered, fig.width=15, fig.height=5, dev=c("svg", "pdf", "png"), fig.ext=c("svg", "pdf", "png")}
 hmList_to_plot.centered <- computePlotData("Oki", "Osa", annots = annots, CE = ces$ce__50__48, tfbs =  tfbs, operons = operons, direction = "mid")
@@ -381,7 +428,7 @@ hmList_to_plot.centered <- computePlotData("Oki", "Osa", annots = annots, CE = c
   ggtitle("Aligned on center of regions. CNE is 50/48.  Okinawa - Osaka"))
 ```
 
-### Splice junctions
+## Splice junctions
 
 ```{r splice_junctions}
 rbind(
@@ -396,7 +443,7 @@ rbind(
 ) |> ggplot() + aes(pos, freq, col = desc) + geom_line()
 ```
 
-### PWM
+## PWM
 
 The PWM motif, which is rare in comparison to the other features, follows
 a profile that bears resemblance to the repeat profile.
@@ -415,12 +462,6 @@ pwmHits <- matchPWM(pwm = rGADEM::getPWM(pwm), genomes$OKI2018.I69) |> suppressW
 # plotHeatmapMeta(list(feature_coverage(current_GB_wide,   pwmHits, win = 1e3, lab = "wide",    direction = "left")))
 # plotHeatmapMeta(list(feature_coverage(current_GB_narrow, pwmHits, win = 1e3, lab = "narrow",  direction = "left")))
 ```
-
-### Question
-
-in `vignette("ColinearityInterruptors", package = "OikScrambling")`, we saw
-that some uncoalesced regions map uniquely and are well conserved across
-genomes.  What are they... enhancers ?
 
 ## Gene feature coverage around PWM hits
 
@@ -674,164 +715,6 @@ Oki_Osa_scr_ratio_short_arm <- c(
 mean(Oki_Osa_scr_ratio_short_arm)
 
 t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
-```
-
-# Operon summary plots for Figure 3
-
-```{r operon_summary_stats_plots, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
-# Add an index for matching to scrambled set
-operons$Oki$index <- 1:length(operons$Oki)
-operons$Oki$scrambled <- 'no_breakpoint_region'
-operons$Oki$scrambled[operons$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
-
-operons$Osa$index <- 1:length(operons$Osa)
-operons$Osa$scrambled <- 'no_breakpoint_region'
-operons$Osa$scrambled[operons$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
-
-operons$Bar$index <- 1:length(operons$Bar)
-operons$Bar$scrambled <- 'no_breakpoint_region'
-operons$Bar$scrambled[operons$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
-
-tb1 <- operons$Oki
-# Note that the operon objects do not have unique names, which makes as.data.frame() complain.
-names(tb1) <- NULL
-p1 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, nrow=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
-p1
-
-tb2 <- operons$Osa
-names(tb2) <- NULL
-p2 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, nrow=2) + ggtitle("Osaka operons") + scale_y_discrete(drop=F)
-p2
-
-rbind(
-  operons$Oki |> as.data.frame() |> dplyr::mutate(species="Okinawa"),
-  operons$Osa |> as.data.frame() |> dplyr::mutate(species="Osaka"),
-  operons$Bar |> as.data.frame() |> dplyr::mutate(species="Barcelona")
-) |> ggplot() +
-  aes(y=factor(n)) +
-  geom_bar() +
-  facet_wrap(~scrambled + species) +
-  geom_text(stat='count', aes(label=..count.., hjust=-0.2)) +
-  theme_bw() +
-  scale_x_continuous("Number operons", limits = c(0,1200)) +
-  scale_y_discrete("Number of genes in operon")
-  
-p3 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
-p3
-
-p4 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Osaka operons") + scale_y_discrete(drop=F)
-p4
-
-( p3 / p4 )
-
-tb1$sp <- "Oki"
-tb2$sp <- "Osa"
-tb3 <- rbind(as.data.frame(tb1), as.data.frame(tb2))
-ggplot(tb3) + aes(x=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar(position='dodge', aes(fill=paste0(sp, "_", scrambled))) + scale_x_discrete(drop=F)
-```
-
-```{r operon_summary_stats_plots_2, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
-genes$Oki$scrambled <- 'no_breakpoint_region'
-genes$Oki$scrambled[genes$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
-genes$Oki$scrambled |> table()
-
-genes$Osa$scrambled <- 'no_breakpoint_region'
-genes$Osa$scrambled[genes$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
-genes$Osa$scrambled |> table()
-
-genes$Bar$scrambled <- 'no_breakpoint_region'
-genes$Bar$scrambled[genes$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
-genes$Bar$scrambled |> table()
-
-exons <- sapply(annots, function(a) sort(exons(a))) |> SimpleList()
-exons <- sapply(exons, function(e) {
-  names(e) <- e$exon_id
-  e
-}) |> SimpleList()
-
-exons$Oki$scrambled <- 'no_breakpoint_region'
-exons$Oki$scrambled[exons$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
-exons$Oki$scrambled |> table()
-
-exons$Osa$scrambled <- 'no_breakpoint_region'
-exons$Osa$scrambled[exons$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
-exons$Osa$scrambled |> table()
-
-exons$Bar$scrambled <- 'no_breakpoint_region'
-exons$Bar$scrambled[exons$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
-exons$Bar$scrambled |> table()
-
-oki_feat_bp_ovl <- rbind(
-  operons$Oki$scrambled |> table(),
-  genes$Oki$scrambled |> table(),
-  exons$Oki$scrambled |> table()
-) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
-oki_feat_bp_ovl$pct <- oki_feat_bp_ovl[,2]/(oki_feat_bp_ovl[,1]+oki_feat_bp_ovl[,2])*100
-oki_feat_bp_ovl$type <- rownames(oki_feat_bp_ovl)
-oki_feat_bp_ovl$species <- "Okinawa"
-
-osa_feat_bp_ovl <- rbind(
-  operons$Osa$scrambled |> table(),
-  genes$Osa$scrambled |> table(),
-  exons$Osa$scrambled |> table()
-) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
-osa_feat_bp_ovl$pct <- osa_feat_bp_ovl[,2]/(osa_feat_bp_ovl[,1]+osa_feat_bp_ovl[,2])*100
-osa_feat_bp_ovl$type <- rownames(osa_feat_bp_ovl)
-osa_feat_bp_ovl$species <- "Osaka"
-
-bar_feat_bp_ovl <- rbind(
-  operons$Bar$scrambled |> table(),
-  genes$Bar$scrambled |> table(),
-  exons$Bar$scrambled |> table()
-) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
-bar_feat_bp_ovl$pct <- bar_feat_bp_ovl[,2]/(bar_feat_bp_ovl[,1]+bar_feat_bp_ovl[,2])*100
-bar_feat_bp_ovl$type <- rownames(bar_feat_bp_ovl)
-bar_feat_bp_ovl$species <- "Barcelona"
-
-df <- operons$Oki
-names(df) <- NULL
-oki_feat_bp_ovl_join <- rbind(
-  as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(genes$Oki) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(exons$Oki) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
-) |> dplyr::mutate(species='Oki')
-
-df <- operons$Osa
-names(df) <- NULL
-osa_feat_bp_ovl_join <- rbind(
-  as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(genes$Osa) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
-  as.data.frame(exons$Osa) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
-) |> dplyr::mutate(species='Osa')
-
-p1 <- ggplot(oki_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Okinawa feature plot') + ylim(c(0, 50)) + theme_bw()
-
-p2 <- ggplot(osa_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Osaka feature plot') + ylim(c(0, 50)) + theme_bw()
-
-p3 <- ggplot(bar_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Barcelona feature plot') + ylim(c(0, 50)) + theme_bw()
-
-( p1 | p2 | p3)
-```
-
-```{r operon_overlap_stats_plot, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
-rbind(oki_feat_bp_ovl, osa_feat_bp_ovl, bar_feat_bp_ovl) |>
-  ggplot() +
-  aes(type, pct, fill = species) +
-  geom_bar(stat = "identity", position="dodge")  +
-  scale_y_continuous("Percent features overlaping breakpoint regions") +
-  scale_x_discrete("Feature type") +
-  theme_bw()
-```
-
-# Coverage
-
-_Needs coverage information to be recomputed_
-
-Another characteristic of alignment stops that we can examine is the coverage depth over said alignment stops. By aligning raw reads to assembled genomes, we can obtain per-base coverage depth for target or query genome. Low coverage directly on and surrounding an alignment stop may suggest unreliability in it being a true breakpoint. The function `bp_coverage` returns a GRanges object of the bps, with associated averaged and point converage in the metadatacolumns. 
-
-```{r coverage}
-# cov_gr_O_Oki <- bp_coverage(gr_ob = q_Oki, cov_gr = Oki_cov_pb, win = 50)
-# cov_gr_O_Oki
 ```
 
 # Session information

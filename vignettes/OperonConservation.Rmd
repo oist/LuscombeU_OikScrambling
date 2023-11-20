@@ -42,7 +42,9 @@ This vignette provides some details about the method we use to
 
 ## Compute operons
 
-The following function generates sets of collinear genes separated by at most `window` base pairs on either side. We the 
+The following function generates sets of collinear genes separated by at most
+`window` base pairs on either side.  See the `vignette("OperonDetection",
+package = "OikScrambling")` for details.
 
 ```{r compute_operons}
 operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()

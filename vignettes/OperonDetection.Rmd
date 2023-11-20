@@ -1,0 +1,376 @@
+---
+title: "Operon detection and counting"
+author: 
+ - "Michael Mansfield"
+ - "Charles Plessy"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Operon detection and counting}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+Introduction
+============
+
+Computes operons as we need their boundaries in the figure panel.
+
+** Figure 4 panels B and C are produced by this vignette**
+
+Load packages and data
+======================
+
+See `?OikScrambling:::loadAllGenomes`, `?OikScrambling:::loadAllTranscriptsGR`,
+and `vignette("LoadGenomicBreaks", package = "OikScrambling")` for how the
+different objects are prepared.
+
+```{r load_packages_and_data}
+library('OikScrambling')   |> suppressPackageStartupMessages()
+library('GenomicFeatures') |> suppressPackageStartupMessages()
+library('heatmaps')        |> suppressPackageStartupMessages()
+library('patchwork')       |> suppressPackageStartupMessages()
+genomes     <- OikScrambling:::loadAllGenomes(compat = F)
+# Cannot use Knitr cache as long as "annot" objects are used.
+annots      <- OikScrambling:::loadAllAnnotations()   |> suppressWarnings()
+reps        <- OikScrambling:::loadAllRepeats(compat = F)
+genes       <- sapply(annots, function(a) sort(genes(a))) |> SimpleList()
+load("BreakPoints.Rdata")
+requireNamespace("rGADEM")    |> suppressPackageStartupMessages()
+requireNamespace("ggseqlogo") |> suppressPackageStartupMessages()
+ces <- readRDS("CEs.Rds")
+tfbs <- readRDS("pwmMatchesOki_12_95.Rds")
+```
+
+# Model operon areas
+
+We need operon boundaries in the plots generated later.
+
+## Notes about operons
+
+The operon of [Ganot et al., 2004](https://journals.asm.org/doi/10.1128/MCB.24.17.7795-7805.2004)
+appears to be conserved in OKI and OSA (near `OSKA2016v1.9::PAR:10984831-10995276`).
+In the annotation visible in ZENBU and NCBI:
+
+ - `Oidioi.mRNA.OKI2018_I69.PAR.g12978` is the most likely start of the Ganot operon as
+   it starts downstream of a CAGE TSS peak and has no trans-splicing site.  It is
+   homologous to `g10133 (PAR:10985271..10985910+)` in OSKA2016v1.9 which also has a
+   transcription start site and no trans-splicing site.  Best Norwegian hit is `CBY19033`.
+   Gene name is unclear but weaker blast hits suggest _centrosomal POC5 isoform X1_.
+ - IQ domain-containing protein K isoform X2 is `Oidioi.mRNA.OKI2018_I69.PAR.g12977`
+   and is `g10134` in OSKA2016.  It has a bona fide trans-splicing site in both genomes.
+   It is `CBY19034` in Norway. (Not reported in Ganot et al., 2004).
+ - Exportin 7 is `Oidioi.mRNA.OKI2018_I69.PAR.g12976`. (First member
+   of the operon of Ganot et al., 2004, which calls it Ran-binding protein 16).  In the current annotation of the OSKA2016v1.9
+   genome, `g10135` matches well but misses the N-terminal part. Nevertheless a blastx
+   search in region `PAR:10986742..10988032+` finds it.  In line with this, there is
+   a trans-splicing site upstream the unannotated area.
+ - Dynein light chain is `Oidioi.mRNA.OKI2018_I69.PAR.g12975`.
+ - Delta tubulin is `Oidioi.mRNA.OKI2018_I69.PAR.g12974`.
+ - _MBF_ is `Oidioi.mRNA.OKI2018_I69.PAR.g12973`.  Also called _enthelial differenciation-related factor 1_ in other species.
+ - CycD is `Oidioi.mRNA.OKI2018_I69.PAR.g12972` and `g10138` in OSKA. Polyadenylation signal conserved.
+ 
+(Note that the transcripts IDs here differ from the public ones.)
+
+Ganot et al., 2004 reported very small (<30) intercistronic regions and Denoeud
+et al., 2010 stated: “_The operons were predicted as co-oriented genes
+separated by 60 nucleotides at most : 1761 operons containing 4997 genes were
+predicted on the reference assembly_”.  However, in our annotation, we do not
+have the UTRs, but only the distances between translation stops and starts, so
+we need a broader window.  The example below shows that a window of 400 would
+break the Ganot 2004 operon, so let's use 500 instead.
+
+```{r ganot_operon}
+transcripts(annots$Oki) |> subsetByOverlaps(GRanges("PAR:15956430-15967745"))
+transcripts(annots$Oki) |> subsetByOverlaps(GRanges("PAR:15956430-15967745")) |> cleanGaps() |> width()
+```
+
+## Compute operons
+
+This function is reused (cut-and-paste) in other vignettes.
+
+```{r guess_operons}
+operons <- lapply(annots, \(a) {a |> genes() |> OikScrambling:::calcOperons(window = 500) }) |> SimpleList() |> suppressWarnings()
+operons$Nor <- OikScrambling:::calcOperons(window = 500, transcripts(annots$Nor) |> reduce()) |> suppressWarnings()
+sapply(operons, length)
+sapply(operons, \(o) {table(o$n)})
+```
+
+With the OdB3 genome, the results are apparently close to those of Denoeud et
+al., 2010 (see above for why the difference).  We have a few more (1844 instead
+of 1761), they contain more genes (5814 instead of 4997), mostly because our
+computation outputs 50 operons longer than 9 genes (617 genes in total).
+Nevertheless, the proportion of operons of length 2, 3 and 4 are visually
+similar in both cases.
+
+# Operons and genes
+
+Do alignments often cross gene or operon boundaries ?
+
+## Operon conservation
+
+```{r operon_conservation}
+# Distribution of operon lengths
+operons$Oki$n |> table()
+
+# An operon is scrambled if it overlaps with an unaligned noncoalesced (= unmapped) region
+scrambled_operons     <- subsetByOverlaps(operons$Oki, unal$Oki_Osa[unal$Oki_Osa$nonCoa])
+not_scrambled_operons <- operons$Oki[! operons$Oki %in% scrambled_operons ]
+
+# Distribution of operon lengths (scrambled)
+scrambled_operons$n     |> table()
+not_scrambled_operons$n |> table()
+
+# Example of long scrambled operons
+scrambled_operons[scrambled_operons$n > 5]
+```
+
+In comparison: genes
+
+```{r gene_conservation_Oki_Osa}
+all_genes <- genes(annots$Oki)
+scrambled_genes <- (subsetByOverlaps(all_genes, unal$Oki_Osa[unal$Oki_Osa$nonCoa])) |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+not_scrambled_genes <- all_genes[! all_genes %in% scrambled_genes]                  |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+
+length(scrambled_genes)
+length(all_genes)
+
+scr_g_tbl <- table(paste(seqnames(    scrambled_genes), scrambled_genes$Arm))
+nsc_g_tbl <- table(paste(seqnames(not_scrambled_genes), not_scrambled_genes$Arm))
+
+Oki_Osa_scr_ratio_long_arm <- c(
+  scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
+  scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
+  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+)
+mean(Oki_Osa_scr_ratio_long_arm)
+Oki_Osa_scr_ratio_short_arm <- c(
+  scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
+  scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
+  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+)
+mean(Oki_Osa_scr_ratio_short_arm)
+
+t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
+```
+
+Replicate on an independent pair of genomes.
+
+```{r gene_conservation_Bar_Kum}
+all_genes <- genes(annots$Bar)
+scrambled_genes <- (subsetByOverlaps(all_genes, unal$Bar_Kum[unal$Bar_Kum$nonCoa])) |> sort(i=F) |> flagLongShort(longShort$Bar2.p4)
+not_scrambled_genes <- all_genes[! all_genes %in% scrambled_genes]                  |> sort(i=F) |> flagLongShort(longShort$Bar2.p4)
+
+length(scrambled_genes)
+length(all_genes)
+
+scr_g_tbl <- table(paste(seqnames(    scrambled_genes), scrambled_genes$Arm))
+nsc_g_tbl <- table(paste(seqnames(not_scrambled_genes), not_scrambled_genes$Arm))
+
+Bar_Kum_scr_ratio_long_arm <- c(
+  scr_g_tbl[["Chr1 long"]] / ( scr_g_tbl[["Chr1 long"]] + nsc_g_tbl[["Chr1 long"]]),
+  scr_g_tbl[["Chr2 long"]] / ( scr_g_tbl[["Chr2 long"]] + nsc_g_tbl[["Chr2 long"]]),
+  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+)
+Bar_Kum_scr_ratio_short_arm <- c(
+  scr_g_tbl[["Chr1 short"]] / ( scr_g_tbl[["Chr1 short"]] + nsc_g_tbl[["Chr1 short"]]),
+  scr_g_tbl[["Chr2 short"]] / ( scr_g_tbl[["Chr2 short"]] + nsc_g_tbl[["Chr2 short"]]),
+  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+)
+
+t.test(Bar_Kum_scr_ratio_long_arm, Bar_Kum_scr_ratio_short_arm, paired = TRUE)
+```
+
+```{r gene_conservation_all}
+mean(c(Oki_Osa_scr_ratio_long_arm, Bar_Kum_scr_ratio_long_arm))
+mean(c(Oki_Osa_scr_ratio_short_arm, Bar_Kum_scr_ratio_short_arm))
+t.test(
+  c(Oki_Osa_scr_ratio_long_arm, Bar_Kum_scr_ratio_long_arm),
+  c(Oki_Osa_scr_ratio_short_arm, Bar_Kum_scr_ratio_short_arm),
+  paired = TRUE
+)
+```
+
+How about exons ?
+
+```{r exon_conservation}
+all_exons <- exonicParts(annots$Oki)
+scrambled_exons <- (subsetByOverlaps(all_exons, unal$Oki_Osa[unal$Oki_Osa$nonCoa])) |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+not_scrambled_exons <- all_exons[! all_exons %in% scrambled_exons]                  |> sort(i=F) |> flagLongShort(longShort$OKI2018.I69)
+
+length(scrambled_exons)
+length(all_exons)
+
+scr_g_tbl <- table(paste(seqnames(    scrambled_exons), scrambled_exons$Arm))
+nsc_g_tbl <- table(paste(seqnames(not_scrambled_exons), not_scrambled_exons$Arm))
+
+Oki_Osa_scr_ratio_long_arm <- c(
+  scr_g_tbl[["chr1 long"]] / ( scr_g_tbl[["chr1 long"]] + nsc_g_tbl[["chr1 long"]]),
+  scr_g_tbl[["chr2 long"]] / ( scr_g_tbl[["chr2 long"]] + nsc_g_tbl[["chr2 long"]]),
+  scr_g_tbl[["PAR long"]]  / ( scr_g_tbl[["PAR long"]]  + nsc_g_tbl[["PAR long"]])
+)
+mean(Oki_Osa_scr_ratio_long_arm)
+Oki_Osa_scr_ratio_short_arm <- c(
+  scr_g_tbl[["chr1 short"]] / ( scr_g_tbl[["chr1 short"]] + nsc_g_tbl[["chr1 short"]]),
+  scr_g_tbl[["chr2 short"]] / ( scr_g_tbl[["chr2 short"]] + nsc_g_tbl[["chr2 short"]]),
+  scr_g_tbl[["PAR short"]]  / ( scr_g_tbl[["PAR short"]]  + nsc_g_tbl[["PAR short"]])
+)
+mean(Oki_Osa_scr_ratio_short_arm)
+
+t.test(Oki_Osa_scr_ratio_long_arm, Oki_Osa_scr_ratio_short_arm, paired = T)
+```
+
+# Operon summary plots for Figure 3
+
+```{r operon_summary_stats_plots, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+# Add an index for matching to scrambled set
+operons$Oki$index <- 1:length(operons$Oki)
+operons$Oki$scrambled <- 'no_breakpoint_region'
+operons$Oki$scrambled[operons$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
+
+operons$Osa$index <- 1:length(operons$Osa)
+operons$Osa$scrambled <- 'no_breakpoint_region'
+operons$Osa$scrambled[operons$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
+
+operons$Bar$index <- 1:length(operons$Bar)
+operons$Bar$scrambled <- 'no_breakpoint_region'
+operons$Bar$scrambled[operons$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
+
+tb1 <- operons$Oki
+# Note that the operon objects do not have unique names, which makes as.data.frame() complain.
+names(tb1) <- NULL
+p1 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, nrow=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
+p1
+
+tb2 <- operons$Osa
+names(tb2) <- NULL
+p2 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, nrow=2) + ggtitle("Osaka operons") + scale_y_discrete(drop=F)
+p2
+
+rbind(
+  operons$Oki |> as.data.frame() |> dplyr::mutate(species="Okinawa"),
+  operons$Osa |> as.data.frame() |> dplyr::mutate(species="Osaka"),
+  operons$Bar |> as.data.frame() |> dplyr::mutate(species="Barcelona")
+) |> ggplot() +
+  aes(y=factor(n)) +
+  geom_bar() +
+  facet_wrap(~scrambled + species) +
+  geom_text(stat='count', aes(label=..count.., hjust=-0.2)) +
+  theme_bw() +
+  scale_x_continuous("Number operons", limits = c(0,1200)) +
+  scale_y_discrete("Number of genes in operon")
+  
+p3 <- ggplot(as.data.frame(tb1)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Okinawa operons") + scale_y_discrete(drop=F)
+p3
+
+p4 <- ggplot(as.data.frame(tb2)) + aes(y=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar() + geom_text(stat='count', aes(label=..count.., hjust=-0.2)) + expand_limits(x=c(0,750)) + ylab("number of genes in operon") + xlab("Count") + facet_wrap(~scrambled, ncol=2) + ggtitle("Osaka operons") + scale_y_discrete(drop=F)
+p4
+
+( p3 / p4 )
+
+tb1$sp <- "Oki"
+tb2$sp <- "Osa"
+tb3 <- rbind(as.data.frame(tb1), as.data.frame(tb2))
+ggplot(tb3) + aes(x=factor(n, levels = 2:max(operons$Oki$n, operons$Osa$n))) + geom_bar(position='dodge', aes(fill=paste0(sp, "_", scrambled))) + scale_x_discrete(drop=F)
+```
+
+```{r operon_summary_stats_plots_2, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, dev=c("svg", "png")}
+genes$Oki$scrambled <- 'no_breakpoint_region'
+genes$Oki$scrambled[genes$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
+genes$Oki$scrambled |> table()
+
+genes$Osa$scrambled <- 'no_breakpoint_region'
+genes$Osa$scrambled[genes$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
+genes$Osa$scrambled |> table()
+
+genes$Bar$scrambled <- 'no_breakpoint_region'
+genes$Bar$scrambled[genes$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
+genes$Bar$scrambled |> table()
+
+exons <- sapply(annots, function(a) sort(exons(a))) |> SimpleList()
+exons <- sapply(exons, function(e) {
+  names(e) <- e$exon_id
+  e
+}) |> SimpleList()
+
+exons$Oki$scrambled <- 'no_breakpoint_region'
+exons$Oki$scrambled[exons$Oki %over% unal$Oki_Osa[unal$Oki_Osa$nonCoa]] <- 'overlaps_breakpoint_region'
+exons$Oki$scrambled |> table()
+
+exons$Osa$scrambled <- 'no_breakpoint_region'
+exons$Osa$scrambled[exons$Osa %over% unal$Osa_Oki[unal$Osa_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
+exons$Osa$scrambled |> table()
+
+exons$Bar$scrambled <- 'no_breakpoint_region'
+exons$Bar$scrambled[exons$Bar %over% unal$Bar_Oki[unal$Bar_Oki$nonCoa]] <- 'overlaps_breakpoint_region'
+exons$Bar$scrambled |> table()
+
+oki_feat_bp_ovl <- rbind(
+  operons$Oki$scrambled |> table(),
+  genes$Oki$scrambled |> table(),
+  exons$Oki$scrambled |> table()
+) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
+oki_feat_bp_ovl$pct <- oki_feat_bp_ovl[,2]/(oki_feat_bp_ovl[,1]+oki_feat_bp_ovl[,2])*100
+oki_feat_bp_ovl$type <- rownames(oki_feat_bp_ovl)
+oki_feat_bp_ovl$species <- "Okinawa"
+
+osa_feat_bp_ovl <- rbind(
+  operons$Osa$scrambled |> table(),
+  genes$Osa$scrambled |> table(),
+  exons$Osa$scrambled |> table()
+) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
+osa_feat_bp_ovl$pct <- osa_feat_bp_ovl[,2]/(osa_feat_bp_ovl[,1]+osa_feat_bp_ovl[,2])*100
+osa_feat_bp_ovl$type <- rownames(osa_feat_bp_ovl)
+osa_feat_bp_ovl$species <- "Osaka"
+
+bar_feat_bp_ovl <- rbind(
+  operons$Bar$scrambled |> table(),
+  genes$Bar$scrambled |> table(),
+  exons$Bar$scrambled |> table()
+) |> as.data.frame(row.names = c('operons', 'genes', 'exons'))
+bar_feat_bp_ovl$pct <- bar_feat_bp_ovl[,2]/(bar_feat_bp_ovl[,1]+bar_feat_bp_ovl[,2])*100
+bar_feat_bp_ovl$type <- rownames(bar_feat_bp_ovl)
+bar_feat_bp_ovl$species <- "Barcelona"
+
+df <- operons$Oki
+names(df) <- NULL
+oki_feat_bp_ovl_join <- rbind(
+  as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
+  as.data.frame(genes$Oki) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
+  as.data.frame(exons$Oki) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
+) |> dplyr::mutate(species='Oki')
+
+df <- operons$Osa
+names(df) <- NULL
+osa_feat_bp_ovl_join <- rbind(
+  as.data.frame(df)        |> dplyr::mutate(type='operon') |> dplyr::select(seqnames, start, end, scrambled, type),
+  as.data.frame(genes$Osa) |> dplyr::mutate(type='gene')   |> dplyr::select(seqnames, start, end, scrambled, type),
+  as.data.frame(exons$Osa) |> dplyr::mutate(type='exon')   |> dplyr::select(seqnames, start, end, scrambled, type)
+) |> dplyr::mutate(species='Osa')
+
+p1 <- ggplot(oki_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Okinawa feature plot') + ylim(c(0, 50)) + theme_bw()
+
+p2 <- ggplot(osa_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Osaka feature plot') + ylim(c(0, 50)) + theme_bw()
+
+p3 <- ggplot(bar_feat_bp_ovl) + aes(x=type, y=pct, fill=type) + geom_bar(stat='identity') + ylab('percent overlapping breakpoint region') + ggtitle('Barcelona feature plot') + ylim(c(0, 50)) + theme_bw()
+
+( p1 | p2 | p3)
+```
+
+```{r operon_overlap_stats_plot, dev=c("svg", "png", "pdf"), fig.ext=c("svg", "png", "pdf")}
+rbind(oki_feat_bp_ovl, osa_feat_bp_ovl, bar_feat_bp_ovl) |>
+  ggplot() +
+  aes(type, pct, fill = species) +
+  geom_bar(stat = "identity", position="dodge")  +
+  scale_y_continuous("Percent features overlaping breakpoint regions") +
+  scale_x_discrete("Feature type") +
+  theme_bw()
+```
+
+# Session information
+
+```{r sessioninfo}
+sessionInfo()
+```
